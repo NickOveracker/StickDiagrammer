@@ -176,10 +176,11 @@ function refreshCanvas() {
     // Draw labels on the canvas above those four cells: "A", "B", "C", and "D"
     ctx.font = "bold 18px Arial";
     ctx.fillStyle = darkMode ? "#ffffff" : "#000000";
-    ctx.fillText("A", cellWidth*4 + cellWidth/2, cellHeight*10 + cellHeight/2);
-    ctx.fillText("B", cellWidth*4 + cellWidth/2, cellHeight*14 + cellHeight/2);
-    ctx.fillText("C", cellWidth*4 + cellWidth/2, cellHeight*18 + cellHeight/2);
-    ctx.fillText("D", cellWidth*4 + cellWidth/2, cellHeight*22 + cellHeight/2);
+    // Draw white backgrounds behind the labels below
+    ctx.fillText("A", cellWidth*4.25, cellHeight*10.75);
+    ctx.fillText("B", cellWidth*4.25, cellHeight*14.75);
+    ctx.fillText("C", cellWidth*4.25, cellHeight*18.75);
+    ctx.fillText("D", cellWidth*4.25, cellHeight*22.75);
 
     drawGrid(gridsize); // Not sure why but gotta draw this twice.
 }
