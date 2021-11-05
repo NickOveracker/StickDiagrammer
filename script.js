@@ -180,7 +180,7 @@ function undo() {
             ctx.drawImage(img, 0, 0);
         }
 
-        console.log('Undo to state ' + saveState);
+        refreshCanvas();
     }
 }
 
@@ -195,7 +195,7 @@ function redo() {
             ctx.drawImage(img, 0, 0);
         }
 
-        console.log('Redo to state ' + saveState);
+        refreshCanvas();
     }
 }
 
@@ -258,66 +258,6 @@ window.onload = function() {
     ctx = canvas.getContext("2d");
     layeredGrid = makeLayeredGrid(gridsize, gridsize, layers);
     refreshCanvas();
-
-    // When the user left-clicks on a cell in the canvas,
-    // set the appropriate member of the layeredGrid to true (the layer is the same as the cursor color)
-    /*window.addEventListener("click", function(event) {
-        if(dragging) {
-            dragging = false;
-            return;
-        }
-        if (event.button == 0) {
-            colorCell(event.clientX, event.clientY, true, false);
-        }
-    });*/
-
-    /*// Start dragging on mouse down
-    window.addEventListener("mousedown", function(event) {
-        if (event.button == 0 && !dragging) {
-            dragging = true;
-            colorCell(event.clientX, event.clientY, true, false);
-        }
-    });
-
-    // Turn on dragging on mousemove within the canvas if the user is holding down the left mouse button.
-    window.addEventListener("mousemove", function(event) {
-        if (event.buttons == 1) {
-            if(!dragging) {
-                dragging = true;
-                saveCurrentState();
-            }
-            // Ignore if not inside the canvas
-            if (event.clientX > canvas.offsetLeft + cellWidth &&
-                event.clientX < canvas.offsetLeft + canvas.width - cellWidth &&
-                event.clientY > canvas.offsetTop + cellHeight &&
-                event.clientY < canvas.offsetTop + canvas.height - cellHeight)
-            {
-                let x = Math.floor((event.clientX - canvas.offsetLeft - cellWidth) / cellWidth);
-                let y = Math.floor((event.clientY - canvas.offsetTop - cellHeight) / cellHeight);
-                let startX = x;
-                let startY = y;
-                let endX = x;
-                let endY = y;
-
-                // If the user is dragging horizontally, set the endX to the rightmost cell.
-                if (event.movementX > 0) {
-                    endX = Math.floor((event.clientX - canvas.offsetLeft - cellWidth) / cellWidth);
-                }
-                // If the user is dragging vertically, set the endY to the bottommost cell.
-                else if (event.movementY > 0) {
-                    endY = Math.floor((event.clientY - canvas.offsetTop - cellHeight) / cellHeight);
-                }
-
-                // Fill the line of cells from the start to the end.
-                for (let i = startX; i <= endX; i++) {
-                    for (let j = startY; j <= endY; j++) {
-                        layeredGrid[i][j][cursorColorIndex] = true;
-                    }
-                }
-                refreshCanvas();
-            }
-        }
-    });*/
 
     // Note the grid coordinates when the left mouse button is pressed.
     // Store the m in startX and startY.
@@ -462,13 +402,11 @@ window.onload = function() {
         // Undo by pressing CTRL + Z
         if (event.ctrlKey && event.keyCode == 90) {
             undo();
-            refreshCanvas();
         }
 
         // Redo by pressing CTRL + Y
         if (event.ctrlKey && event.keyCode == 89) {
             redo();
-            refreshCanvas();
         }
 
         // Toggle dark mode by pressing space
