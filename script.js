@@ -28,27 +28,40 @@ let cursorColorIndex = METAL1;
 let darkModeGridColor = '#cccccc';
 let lightModeGridColor = '#999999';
 
+// Draw the outer border of the canvas.
+function drawBorder() {
+    ctx.strokeStyle = cursorColor;
+    ctx.lineWidth = cellWidth;
+    ctx.strokeRect(cellWidth/2, cellWidth/2, canvas.width - cellWidth, canvas.height - cellWidth);
+
+    // Draw a thick border on the edge of the border drawn above.
+    ctx.lineWidth = cellWidth/4;
+    ctx.strokeStyle = darkMode ? "#ffffff" : "#000000";
+    ctx.strokeRect(1 + cellWidth   - ctx.lineWidth/2,
+                   1 + cellHeight  - ctx.lineWidth/2,
+                   canvas.width  - 2*cellWidth  + ctx.lineWidth/2,
+                   canvas.height - 2*cellHeight + ctx.lineWidth/2
+    );
+
+    // For the middle 11 cells of the upper border, fill with the grid color.
+    ctx.fillStyle = darkMode ? "#ffffff" : "#000000";
+    let startCell = Math.floor(gridsize/2) - 4;
+    ctx.fillRect(startCell*cellWidth, 0, cellWidth*11, cellHeight);
+
+    // Write the cursor color name in the middle of the upper border of the canvas.
+    ctx.fillStyle = darkMode ? '#000000' : '#ffffff';
+    ctx.font = '20px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(cursorNames[cursorColorIndex], canvas.width / 2, cellHeight * 3 / 4);
+}
+
 // Define a function to change the cursor color.
 function changeCursorColor() {
     cursorColorIndex = (cursorColorIndex + 1) % cursorColors.length;
     cursorColor = cursorColors[cursorColorIndex];
 
     // set the outer border of the canvas to the new cursor color
-    ctx.strokeStyle = cursorColor;
-    ctx.lineWidth = cellWidth;
-    ctx.strokeRect(0, 0, canvas.width, canvas.height);
-
-    // For the middle 11 cells of the upper border, fill with the grid color.
-    ctx.fillStyle = darkMode ? darkModeGridColor : lightModeGridColor;
-    for (let i = Math.floor(gridsize/2) - 5; i <= Math.floor(gridsize/2) + 5; i++) {
-        ctx.fillRect(i * cellWidth, 0, cellWidth, cellHeight);
-    }
-
-    // Write the cursor color name in the middle of the upper border of the canvas.
-    ctx.fillStyle = darkMode ? '#000000' : '#ffffff';
-    ctx.font = '20px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText(cursorNames[cursorColorIndex], canvas.width / 2, cellHeight / 2);
+    drawBorder();
 }
 
 function makeLayeredGrid(width, height, layers) {
@@ -87,8 +100,8 @@ function drawGrid(size) {
 
     // Place gridCanvas behind the canvas.
     // Same size as the canvas.
-    gridCanvas.width = canvas.width;
-    gridCanvas.height = canvas.height;
+    gridCanvas.width = canvas.width - 1;
+    gridCanvas.height = canvas.height - 1;
     gridCanvas.style.position = 'absolute';
     gridCanvas.style.left = canvas.offsetLeft + 'px';
     gridCanvas.style.top = canvas.offsetTop + 'px';
@@ -96,8 +109,8 @@ function drawGrid(size) {
 
     // Set the gridCanvas context.
     let gridCtx = gridCanvas.getContext('2d');
-    cellWidth = gridCanvas.width / (size + 2);
-    cellHeight = gridCanvas.height / (size + 2);
+    cellWidth = canvas.width / (size + 2);
+    cellHeight = canvas.height / (size + 2);
     
     // Clear the grid canvas.
     gridCanvas.getContext('2d').clearRect(0, 0, gridCanvas.width, gridCanvas.height);
@@ -148,13 +161,11 @@ function refreshCanvas() {
     layeredGrid[26][14][METAL1] = true;
 
     // Draw each layer in order.
-    for (let i = 1; i < gridsize + 1; i++) {
-        for (let j = 1; j < gridsize + 1; j++) {
-            drawCell(i, j, METAL1, false);
-            drawCell(i, j, PDIFF, false);
-            drawCell(i, j, NDIFF, false);
-            drawCell(i, j, POLY, false);
-            drawCell(i, j, CONTACT, false);
+    for(let layer = 0; layer < layers; layer++) {
+        for (let i = 1; i <= gridsize; i++) {
+            for (let j = 1; j <= gridsize; j++) {
+                drawCell(i, j, layer, false);
+            }
         }
     }
     
@@ -165,32 +176,18 @@ function refreshCanvas() {
         document.body.style.backgroundColor = 'white';
     }
 
-    // Now do the outer border of the canvas (cells at row 0, column 0 and row gridsize+1, column gridsize+1)
-    for (let i = 0; i < gridsize+2; i++) {
-        drawCell(i, 0, cursorColorIndex, true);
-        drawCell(i, gridsize+1, cursorColorIndex, true);
-        drawCell(0, i, cursorColorIndex, true);
-        drawCell(gridsize+1, i, cursorColorIndex, true);
-    }
-
-    // Draw a thick border on the edge of the border drawn above.
-    ctx.lineWidth = cellWidth/4;
-    ctx.strokeStyle = darkMode ? darkModeGridColor : lightModeGridColor;
-    ctx.strokeRect(1 + cellWidth   - ctx.lineWidth/2,
-                   1 + cellHeight  - ctx.lineWidth/2,
-                   canvas.width  - 2*cellWidth  + ctx.lineWidth/2,
-                   canvas.height - 2*cellHeight + ctx.lineWidth/2
-                  );
+    // set the outer border of the canvas to the cursor color
+    drawBorder();
 
     // Draw labels on the canvas above those four cells: "A", "B", "C", and "D"
     ctx.font = "bold 18px Arial";
     ctx.fillStyle = darkMode ? "#ffffff" : "#000000";
     // Draw white backgrounds behind the labels below
-    ctx.fillText("A", cellWidth*3.25, cellHeight*8.75);
-    ctx.fillText("B", cellWidth*3.25, cellHeight*12.75);
-    ctx.fillText("C", cellWidth*3.25, cellHeight*16.75);
-    ctx.fillText("D", cellWidth*3.25, cellHeight*20.75);
-    ctx.fillText("Y", cellWidth*27.25, cellHeight*14.75);
+    ctx.fillText("A", cellWidth*3.5, cellHeight*8.75);
+    ctx.fillText("B", cellWidth*3.5, cellHeight*12.75);
+    ctx.fillText("C", cellWidth*3.5, cellHeight*16.75);
+    ctx.fillText("D", cellWidth*3.5, cellHeight*20.75);
+    ctx.fillText("Y", cellWidth*27.5, cellHeight*14.75);
 
     drawGrid(gridsize); // Not sure why but gotta draw this twice.
 }
