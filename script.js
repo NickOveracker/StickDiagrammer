@@ -18,8 +18,9 @@ let METAL1 = 0;
 let PDIFF = 1;
 let NDIFF = 2;
 let POLY = 3;
-let BRIDGE = 4;
-let cursorColors = ['#00FFFF', '#9400D3', '#32CD32', '#ff0000', '#0000ff'];
+let CONTACT = 4;
+let cursorColors = ['#00FFFF', '#9400D3', '#32CD32', '#ff0000', '#cccccc'];
+let cursorNames = ['metal', 'pdiff', 'ndiff', 'poly', 'contact'];
 let cursorColor = cursorColors[METAL1];
 let cursorColorIndex = METAL1;
 
@@ -27,21 +28,27 @@ let cursorColorIndex = METAL1;
 let darkModeGridColor = '#cccccc';
 let lightModeGridColor = '#999999';
 
-// Button color
-let darkModeButtonTextColor = '#ffffff';
-let lightModeButtonTextColor = '#000000';
-let darkModeButtonColor = '#cccccc';
-let lightModeButtonColor = '#999999';
-
 // Define a function to change the cursor color.
 function changeCursorColor() {
     cursorColorIndex = (cursorColorIndex + 1) % cursorColors.length;
     cursorColor = cursorColors[cursorColorIndex];
 
-    // set the outer 15 pixel border of the canvas to the new cursor color
+    // set the outer border of the canvas to the new cursor color
     ctx.strokeStyle = cursorColor;
     ctx.lineWidth = 15;
     ctx.strokeRect(0, 0, canvas.width, canvas.height);
+
+    // For the middle 11 cells of the upper border, fill with the grid color.
+    ctx.fillStyle = darkMode ? darkModeGridColor : lightModeGridColor;
+    for (let i = gridsize%2 - 5; i <= gridsize%2 + 5; i++) {
+        ctx.fillRect(i * cellWidth, 0, cellWidth, cellHeight);
+    }
+
+    // Write the cursor color name in the middle of the upper border of the canvas.
+    ctx.fillStyle = darkMode ? '#000000' : '#ffffff';
+    ctx.font = '20px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(cursorNames[cursorColorIndex], canvas.width / 2, cellHeight / 2);
 }
 
 function makeLayeredGrid(width, height, layers) {
