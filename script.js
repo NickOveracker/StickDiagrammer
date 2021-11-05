@@ -132,6 +132,7 @@ function refreshCanvas() {
 
     counter = 0
     // Draw each layer in order.
+    console.log("DRAWING!");
     for (let i = 1; i < gridsize + 1; i++) {
         for (let j = 1; j < gridsize + 1; j++) {
             drawCell(i, j, METAL1, false);
@@ -165,6 +166,8 @@ function refreshCanvas() {
                    canvas.width  - 2*cellWidth  + ctx.lineWidth/2,
                    canvas.height - 2*cellHeight + ctx.lineWidth/2
                   );
+
+    drawGrid(gridsize); // Again I guess for testing
 }
 
 // Save function to save the current state of the grid and the canvas.
