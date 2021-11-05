@@ -132,6 +132,12 @@ function refreshCanvas() {
         }
     }
 
+    // Draw METAL1 at (3,10), (3,14), (3, 18), (3, 22)
+    layeredGrid[3][10][METAL1] = true;
+    layeredGrid[3][14][METAL1] = true;
+    layeredGrid[3][18][METAL1] = true;
+    layeredGrid[3][22][METAL1] = true;
+    
     // Draw each layer in order.
     for (let i = 1; i < gridsize + 1; i++) {
         for (let j = 1; j < gridsize + 1; j++) {
@@ -166,12 +172,6 @@ function refreshCanvas() {
                    canvas.width  - 2*cellWidth  + ctx.lineWidth/2,
                    canvas.height - 2*cellHeight + ctx.lineWidth/2
                   );
-
-    // Draw METAL1 at (3,10), (3,14), (3, 18), (3, 22)
-    layeredGrid[3][10][METAL1] = true;
-    layeredGrid[3][14][METAL1] = true;
-    layeredGrid[3][18][METAL1] = true;
-    layeredGrid[3][22][METAL1] = true;
 
     // Draw labels on the canvas above those four cells: "A", "B", "C", and "D"
     ctx.font = "bold 24px Arial";
