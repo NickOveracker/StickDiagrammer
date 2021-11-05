@@ -13,7 +13,7 @@ let startX;
 let startY;
 let gridCanvas;
 
-// Cycle through the following cursor colors by pressing space: METAL1, PDIFF, NDIFF, POLY, BRIDGE
+// Cycle through the following cursor colors by pressing space: METAL1, PDIFF, NDIFF, POLY, CONTACT
 let METAL1 = 0;
 let PDIFF = 1;
 let NDIFF = 2;
@@ -154,7 +154,7 @@ function refreshCanvas() {
             drawCell(i, j, PDIFF, false);
             drawCell(i, j, NDIFF, false);
             drawCell(i, j, POLY, false);
-            drawCell(i, j, BRIDGE, false);
+            drawCell(i, j, CONTACT, false);
         }
     }
     
