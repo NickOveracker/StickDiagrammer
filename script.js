@@ -11,6 +11,7 @@ let maxSaveState = 0;
 let dragging = false;
 let startX;
 let startY;
+let gridCanvas;
 
 // Cycle through the following cursor colors by pressing space: METAL1, PDIFF, NDIFF, POLY, BRIDGE
 let METAL1 = 0;
@@ -71,11 +72,27 @@ function resizeCanvas() {
 // Draw a faint grid on the canvas.
 // Add an extra 2 units to the width and height for a border.
 function drawGrid(size) {
-    let width = canvas.width;
-    let height = canvas.height;
+    // Check if gridCanvas is defined.
+    if (gridCanvas == undefined) {
+        gridCanvas = document.createElement('canvas');
+        document.body.appendChild(gridCanvas);
+    }
+
+    gridCanvas.width = canvas.width + 2;
+    gridCanvas.height = canvas.height + 2;
+    gridCanvas.style.position = 'absolute';
+    gridCanvas.style.left = '0px';
+    gridCanvas.style.top = '0px';
+    gridCanvas.style.zIndex = '-1';
+
+    let width = gridCanvas.width;
+    let height = gridCanvas.height;
     cellWidth = width / (size + 2);
     cellHeight = height / (size + 2);
     
+    // Clear the grid canvas.
+    gridCanvas.getContext('2d').clearRect(0, 0, width, height);
+
     // Set stroke color depending on whether the dark mode is on or off.
     // Should be faintly visible in both modes.
     if (darkMode) {
@@ -127,8 +144,6 @@ function refreshCanvas() {
         document.body.style.backgroundColor = 'white';
     }
 
-    drawGrid(gridsize);
-
     // Now do the outer border of the canvas (cells at row 0, column 0 and row gridsize+1, column gridsize+1)
     for (let i = 0; i < gridsize+2; i++) {
         drawCell(i, 0, cursorColorIndex, true);
@@ -145,6 +160,9 @@ function refreshCanvas() {
                    canvas.width  - 2*cellWidth  + ctx.lineWidth/2,
                    canvas.height - 2*cellHeight + ctx.lineWidth/2
                   );
+
+    // Draw the grid.
+    drawGrid(gridsize);
 }
 
 // Save function to save the current state of the grid and the canvas.
@@ -262,6 +280,11 @@ window.onload = function() {
     // Note the grid coordinates when the left mouse button is pressed.
     // Store the m in startX and startY.
     window.addEventListener("mousedown", function(event) {
+        // Return if touch
+        if (event.targetTouches) {
+            return;
+        }
+
         if (event.button == 0) {
 
             // Return if not between cells 1 and gridsize - 1
@@ -280,6 +303,11 @@ window.onload = function() {
     // Note the grid coordinates when the left mouse button is released.
     // Use the start and end coordinates to make either a horizontal or vertical line.
     window.addEventListener("mouseup", function(event) {
+        // Return if touch
+        if (event.targetTouches) {
+            return;
+        }
+
         if (event.button == 0) {
             // If not between cells 1 and gridsize - 1, undo and return.
             if (event.clientX > canvas.offsetLeft + cellWidth &&
@@ -291,18 +319,6 @@ window.onload = function() {
                     dragging = false;
                     let endX = Math.floor((event.clientX - canvas.offsetLeft - cellWidth) / cellWidth);
                     let endY = Math.floor((event.clientY - canvas.offsetTop - cellHeight) / cellHeight);
-
-                    // Reverse the order of the start and end coordinates if necessary.
-                    /*if (endX < startX) {
-                        let temp = startX;
-                        startX = endX;
-                        endX = temp;
-                    }
-                    if (endY < startY) {
-                        let temp = startY;
-                        startY = endY;
-                        endY = temp;
-                    }*/
 
                     // If the mouse moved more horizontally than vertically,
                     // draw a horizontal line.
@@ -335,6 +351,11 @@ window.onload = function() {
 
     // Show a preview line when the user is draggin the mouse.
     window.addEventListener("mousemove", function(event) {
+        // Return if touch
+        if (event.targetTouches) {
+            return;
+        }
+
         if (event.buttons == 1) {
             // Ignore if not inside the canvas
             if (event.clientX > canvas.offsetLeft + cellWidth &&
@@ -382,6 +403,11 @@ window.onload = function() {
     // When the user right-clicks on a cell in the canvas, erase it.
     // When clicking anywhere else, cycle through cursor colors.
     window.addEventListener("contextmenu", function(event) {
+        // Return if touch
+        if (event.targetTouches) {
+            return;
+        }
+
         if (event.button == 2) {
             // Don't show a context menu.
             event.preventDefault();
@@ -399,6 +425,11 @@ window.onload = function() {
 
     // Keypress listeners
     window.addEventListener("keydown", function(event) {
+        // Return if touch
+        if (event.targetTouches) {
+            return;
+        }
+
         // Undo by pressing CTRL + Z
         if (event.ctrlKey && event.keyCode == 90) {
             undo();
