@@ -293,7 +293,7 @@ window.onload = function() {
                     let endY = Math.floor((event.clientY - canvas.offsetTop - cellHeight) / cellHeight);
 
                     // Reverse the order of the start and end coordinates if necessary.
-                    if (endX < startX) {
+                    /*if (endX < startX) {
                         let temp = startX;
                         startX = endX;
                         endX = temp;
@@ -302,20 +302,20 @@ window.onload = function() {
                         let temp = startY;
                         startY = endY;
                         endY = temp;
-                    }
+                    }*/
 
                     // If the mouse moved more horizontally than vertically,
                     // draw a horizontal line.
-                    if (endX - startX > endY - startY) {
-                        for (let i = startX; i <= endX; i++) {
+                    if (Math.abs(endX - startX) > Math.abs(endY - startY)) {
+                        for (let i = Math.min(startX, endX); i <= Math.max(startX, endX); i++) {
                             layeredGrid[i][startY][cursorColorIndex] = true;
                         }
                     }
                     // If the mouse moved more vertically than horizontally,
                     // draw a vertical line.
                     else {
-                        for (let j = startY; j <= endY; j++) {
-                            layeredGrid[startX][j][cursorColorIndex] = true;
+                        for (let i = Math.min(startY, endY); i <= Math.max(startY, endY); i++) {
+                            layeredGrid[startX][i][cursorColorIndex] = true;
                         }
                     }
                 }
