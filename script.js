@@ -119,6 +119,9 @@ function drawGrid(size) {
 function refreshCanvas() {
     resizeCanvas();
 
+    // Draw the grid.
+    drawGrid(gridsize);
+
     // Check the layers of the grid, and draw cells as needed.
     function drawCell(i, j, layer, isBorder) {
         if (isBorder || layeredGrid[i-1][j-1][layer]) {
@@ -162,9 +165,6 @@ function refreshCanvas() {
                    canvas.width  - 2*cellWidth  + ctx.lineWidth/2,
                    canvas.height - 2*cellHeight + ctx.lineWidth/2
                   );
-
-    // Draw the grid.
-    drawGrid(gridsize);
 }
 
 // Save function to save the current state of the grid and the canvas.
@@ -185,8 +185,6 @@ function saveCurrentState() {
 
     // Update the max save state.
     maxSaveState = saveState;
-
-    console.log('Saved state ' + saveState);
 }
 
 // Undo by going back to the previous save state (if there is one) and redrawing the canvas.
@@ -341,7 +339,7 @@ window.onload = function() {
         }
     });
 
-    // Show a preview line when the user is draggin the mouse.
+    // Show a preview line when the user is dragging the mouse.
     window.addEventListener("mousemove", function(event) {
         if (event.buttons == 1) {
             // Ignore if not inside the canvas
