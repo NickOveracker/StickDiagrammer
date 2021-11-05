@@ -13,16 +13,24 @@ let startX;
 let startY;
 let gridCanvas;
 
-// Cycle through the following cursor colors by pressing space: METAL1, PDIFF, NDIFF, POLY, CONTACT
-let METAL1 = 0;
-let PDIFF = 1;
-let NDIFF = 2;
-let POLY = 3;
+// Cycle through the following cursor colors by pressing space: PDIFF, NDIFF, POLY, METAL1, CONTACT
+let PDIFF = 0;
+let NDIFF = 1;
+let POLY = 2;
+let METAL1 = 3;
 let CONTACT = 4;
-let cursorColors = ['#00FFFF', '#9400D3', '#32CD32', '#ff0000', '#cccccc'];
-let cursorNames = ['metal', 'pdiff', 'ndiff', 'poly', 'contact'];
-let cursorColor = cursorColors[METAL1];
-let cursorColorIndex = METAL1;
+let cursorColors = ['#9400D3', '#32CD32', '#ff0000', '#00FFFF', '#cccccc'];
+let cursorNames = ['pdiff', 'ndiff', 'poly', 'metal', 'contact'];
+let cursorColor = cursorColors[PDIFF];
+let cursorColorIndex = PDIFF;
+
+// Objects to represent the coordinates of the four inputs (A, B, C, D)
+// and the output (Y).
+let A = {x: 2, y: 8};
+let B = {x: 2, y: 12};
+let C = {x: 2, y: 16};
+let D = {x: 2, y: 20};
+let Y = {x: 26, y: 14};
 
 // Grid color
 let darkModeGridColor = '#cccccc';
@@ -152,19 +160,34 @@ function refreshCanvas() {
         }
     }
 
-    // Draw METAL1 at (2,10), (2,14), (2, 18), (2, 22), (26, 16)
-    // for A, B, C, D, Y
-    layeredGrid[2][8][METAL1] = true;
-    layeredGrid[2][12][METAL1] = true;
-    layeredGrid[2][16][METAL1] = true;
-    layeredGrid[2][20][METAL1] = true;
-    layeredGrid[26][14][METAL1] = true;
+    // Draw CONTACT at the coordinates of the four inputs
+    // and at the output.
+    drawCell(A.x, A.y, CONTACT, true);
+    drawCell(B.x, B.y, CONTACT, true);
+    drawCell(C.x, C.y, CONTACT, true);
+    drawCell(D.x, D.y, CONTACT, true);
+    drawCell(Y.x, Y.y, CONTACT, true);
 
     // Draw each layer in order.
     for(let layer = 0; layer < layers; layer++) {
         for (let i = 1; i <= gridsize; i++) {
             for (let j = 1; j <= gridsize; j++) {
                 drawCell(i, j, layer, false);
+
+                // For the last layer, fill each filled cell with a cross.
+                if (layer == layers - 1) {
+                    if (layeredGrid[i-1][j-1][layer]) {
+                        ctx.fillStyle = "#000000";
+                        ctx.beginPath();
+                        ctx.moveTo(i * cellWidth + cellWidth + 2, j * cellHeight - 1);
+                        ctx.lineTo(i * cellWidth, j * cellHeight + cellHeight + 1);
+                        ctx.stroke();
+                        ctx.beginPath();
+                        ctx.moveTo(i * cellWidth + cellWidth + 2, j * cellHeight + cellHeight + 1);
+                        ctx.lineTo(i * cellWidth, j * cellHeight - 2);
+                        ctx.stroke();
+                    }
+                }
             }
         }
     }
@@ -179,15 +202,15 @@ function refreshCanvas() {
     // set the outer border of the canvas to the cursor color
     drawBorder();
 
-    // Draw labels on the canvas above those four cells: "A", "B", "C", and "D"
+    // Draw labels on the canvas above the four inputs
     ctx.font = "bold 18px Arial";
     ctx.fillStyle = darkMode ? "#ffffff" : "#000000";
     // Draw white backgrounds behind the labels below
-    ctx.fillText("A", cellWidth*3.5, cellHeight*8.75);
-    ctx.fillText("B", cellWidth*3.5, cellHeight*12.75);
-    ctx.fillText("C", cellWidth*3.5, cellHeight*16.75);
-    ctx.fillText("D", cellWidth*3.5, cellHeight*20.75);
-    ctx.fillText("Y", cellWidth*27.5, cellHeight*14.75);
+    ctx.fillText("A", cellWidth * (A.x + 1.5), cellHeight * (A.y + 0.75));
+    ctx.fillText("B", cellWidth * (B.x + 1.5), cellHeight * (B.y + 0.75));
+    ctx.fillText("C", cellWidth * (C.x + 1.5), cellHeight * (C.y + 0.75));
+    ctx.fillText("D", cellWidth * (D.x + 1.5), cellHeight * (D.y + 0.75));
+    ctx.fillText("Y", cellWidth * (Y.x + 1.5), cellHeight * (Y.y + 0.75));
 
     drawGrid(gridsize); // Not sure why but gotta draw this twice.
 }
@@ -284,7 +307,24 @@ function colorCell(clientX, clientY, noDelete, noAdd) {
     return false;
 }
 
+function getCell(clientX, clientY) {
+    // Ignore if not inside the canvas
+    if (clientX > canvas.offsetLeft + cellWidth &&
+        clientX < canvas.offsetLeft + canvas.width - cellWidth &&
+        clientY > canvas.offsetTop + cellHeight &&
+        clientY < canvas.offsetTop + canvas.height - cellHeight)
+    {
+        let x = Math.floor((clientX - canvas.offsetLeft - cellWidth) / cellWidth);
+        let y = Math.floor((clientY - canvas.offsetTop - cellHeight) / cellHeight);
+        return {x: x, y: y};
+    }
+    return null;
+}
+
 window.onload = function() {
+    // Clear local storage
+    localStorage.clear();
+
     gridsize = 29;
     layers = 5;
 
@@ -352,6 +392,7 @@ window.onload = function() {
                 }
                 // Just fill in the cell at the start coordinates.
                 else {
+                    saveCurrentState();
                     layeredGrid[startX][startY][cursorColorIndex] = true;
                 }
             }
@@ -359,10 +400,9 @@ window.onload = function() {
             else if(dragging){
                 undo();
             }
-
-            refreshCanvas();
         }
 
+        refreshCanvas();
         dragging = false;
     });
 
@@ -446,6 +486,61 @@ window.onload = function() {
         if (event.keyCode == 32) {
             darkMode = !darkMode;
             refreshCanvas();
+        }
+
+        // If the user presses the "A" key,
+        // move the coordinates for A to the cell under the cursor.
+        if (event.keyCode == 65) {
+            let cell = getCell(event.clientX, event.clientY);
+            if (cell != null) {
+                A.x = cell.x;
+                A.y = cell.y;
+                refreshCanvas();
+            }
+        }
+
+        // If the user presses the "B" key,
+        // move the coordinates for B to the cell under the cursor.
+        if (event.keyCode == 66) {
+            let cell = getCell(event.clientX, event.clientY);
+            if (cell != null) {
+                B.x = cell.x;
+                B.y = cell.y;
+                refreshCanvas();
+            }
+        }
+
+        // If the user presses the "C" key,
+        // move the coordinates for C to the cell under the cursor.
+        if (event.keyCode == 67) {
+            let cell = getCell(event.clientX, event.clientY);
+            if (cell != null) {
+                C.x = cell.x;
+                C.y = cell.y;
+                refreshCanvas();
+            }
+        }
+
+        // If the user presses the "D" key,
+        // move the coordinates for D to the cell under the cursor.
+        if (event.keyCode == 68) {
+            let cell = getCell(event.clientX, event.clientY);
+            if (cell != null) {
+                D.x = cell.x;
+                D.y = cell.y;
+                refreshCanvas();
+            }
+        }
+
+        // If the user presses the "Y" key,
+        // move the coordinates for Y to the cell under the cursor.
+        if (event.keyCode == 89) {
+            let cell = getCell(event.clientX, event.clientY);
+            if (cell != null) {
+                Y.x = cell.x;
+                Y.y = cell.y;
+                refreshCanvas();
+            }
         }
     });
 }
