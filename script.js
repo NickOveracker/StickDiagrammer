@@ -128,7 +128,7 @@ function refreshCanvas() {
     function drawCell(i, j, layer, isBorder) {
         if (isBorder || layeredGrid[i-1][j-1][layer]) {
             ctx.fillStyle = cursorColors[layer];
-            ctx.fillRect(i * cellWidth, j * cellHeight, cellWidth, cellHeight);
+            ctx.fillRect(i * cellWidth, j * cellHeight, cellWidth + 1, cellHeight + 1);
         }
     }
 
