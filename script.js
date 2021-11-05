@@ -120,8 +120,10 @@ function refreshCanvas() {
     resizeCanvas();
 
     // Draw the grid.
-    drawGrid(gridsize);
-
+    // Run once at the beginning just to define some stuff.
+    if(cellWidth === undefined) {
+        drawGrid(gridsize);
+    }
     // Check the layers of the grid, and draw cells as needed.
     function drawCell(i, j, layer, isBorder) {
         if (isBorder || layeredGrid[i-1][j-1][layer]) {
@@ -132,7 +134,6 @@ function refreshCanvas() {
 
     counter = 0
     // Draw each layer in order.
-    console.log("DRAWING!");
     for (let i = 1; i < gridsize + 1; i++) {
         for (let j = 1; j < gridsize + 1; j++) {
             drawCell(i, j, METAL1, false);
@@ -167,7 +168,7 @@ function refreshCanvas() {
                    canvas.height - 2*cellHeight + ctx.lineWidth/2
                   );
 
-    drawGrid(gridsize); // Again I guess for testing
+    drawGrid(gridsize); // Not sure why but gotta draw this twice.
 }
 
 // Save function to save the current state of the grid and the canvas.
