@@ -78,38 +78,40 @@ function drawGrid(size) {
         document.body.appendChild(gridCanvas);
     }
 
-    gridCanvas.width = canvas.width + 2;
-    gridCanvas.height = canvas.height + 2;
+    // Place gridCanvas behind the canvas.
+    // Same size as the canvas.
+    gridCanvas.width = canvas.width;
+    gridCanvas.height = canvas.height;
     gridCanvas.style.position = 'absolute';
-    gridCanvas.style.left = '0px';
-    gridCanvas.style.top = '0px';
-    gridCanvas.style.zIndex = '-1';
+    gridCanvas.style.left = canvas.offsetLeft + 'px';
+    gridCanvas.style.top = canvas.offsetTop + 'px';
+    gridCanvas.style.zIndex = -1;
 
-    let width = gridCanvas.width;
-    let height = gridCanvas.height;
-    cellWidth = width / (size + 2);
-    cellHeight = height / (size + 2);
+    // Set the gridCanvas context.
+    let gridCtx = gridCanvas.getContext('2d');
+    cellWidth = gridCanvas.width / (size + 2);
+    cellHeight = gridCanvas.height / (size + 2);
     
     // Clear the grid canvas.
-    gridCanvas.getContext('2d').clearRect(0, 0, width, height);
+    gridCanvas.getContext('2d').clearRect(0, 0, gridCanvas.width, gridCanvas.height);
 
     // Set stroke color depending on whether the dark mode is on or off.
     // Should be faintly visible in both modes.
     if (darkMode) {
-        ctx.strokeStyle = darkModeGridColor;
+        gridCtx.strokeStyle = darkModeGridColor;
     } else {
-        ctx.strokeStyle = lightModeGridColor;
+        gridCtx.strokeStyle = lightModeGridColor;
     }
 
     for (let i = 0; i < size + 2; i++) {
-        ctx.beginPath();
-        ctx.moveTo(i * cellWidth, 0);
-        ctx.lineTo(i * cellWidth, height);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(0, i * cellHeight);
-        ctx.lineTo(width, i * cellHeight);
-        ctx.stroke();
+        gridCtx.beginPath();
+        gridCtx.moveTo(i * cellWidth, 0);
+        gridCtx.lineTo(i * cellWidth, gridCanvas.height);
+        gridCtx.stroke();
+        gridCtx.beginPath();
+        gridCtx.moveTo(0, i * cellHeight);
+        gridCtx.lineTo(gridCanvas.width, i * cellHeight);
+        gridCtx.stroke();
     }
 }
 
