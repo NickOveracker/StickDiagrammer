@@ -282,11 +282,6 @@ window.onload = function() {
     // Note the grid coordinates when the left mouse button is pressed.
     // Store the m in startX and startY.
     window.addEventListener("mousedown", function(event) {
-        // Return if touch
-        if (event.targetTouches) {
-            return;
-        }
-
         if (event.button == 0) {
 
             // Return if not between cells 1 and gridsize - 1
@@ -305,11 +300,6 @@ window.onload = function() {
     // Note the grid coordinates when the left mouse button is released.
     // Use the start and end coordinates to make either a horizontal or vertical line.
     window.addEventListener("mouseup", function(event) {
-        // Return if touch
-        if (event.targetTouches) {
-            return;
-        }
-
         if (event.button == 0) {
             // If not between cells 1 and gridsize - 1, undo and return.
             if (event.clientX > canvas.offsetLeft + cellWidth &&
@@ -353,11 +343,6 @@ window.onload = function() {
 
     // Show a preview line when the user is draggin the mouse.
     window.addEventListener("mousemove", function(event) {
-        // Return if touch
-        if (event.targetTouches) {
-            return;
-        }
-
         if (event.buttons == 1) {
             // Ignore if not inside the canvas
             if (event.clientX > canvas.offsetLeft + cellWidth &&
@@ -405,11 +390,6 @@ window.onload = function() {
     // When the user right-clicks on a cell in the canvas, erase it.
     // When clicking anywhere else, cycle through cursor colors.
     window.addEventListener("contextmenu", function(event) {
-        // Return if touch
-        if (event.targetTouches) {
-            return;
-        }
-
         if (event.button == 2) {
             // Don't show a context menu.
             event.preventDefault();
@@ -427,11 +407,6 @@ window.onload = function() {
 
     // Keypress listeners
     window.addEventListener("keydown", function(event) {
-        // Return if touch
-        if (event.targetTouches) {
-            return;
-        }
-
         // Undo by pressing CTRL + Z
         if (event.ctrlKey && event.keyCode == 90) {
             undo();
