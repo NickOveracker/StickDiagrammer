@@ -35,12 +35,12 @@ function changeCursorColor() {
 
     // set the outer border of the canvas to the new cursor color
     ctx.strokeStyle = cursorColor;
-    ctx.lineWidth = 15;
+    ctx.lineWidth = cellWidth;
     ctx.strokeRect(0, 0, canvas.width, canvas.height);
 
     // For the middle 11 cells of the upper border, fill with the grid color.
     ctx.fillStyle = darkMode ? darkModeGridColor : lightModeGridColor;
-    for (let i = gridsize%2 - 5; i <= gridsize%2 + 5; i++) {
+    for (let i = Math.floor(gridsize/2) - 5; i <= Math.floor(gridsize/2) + 5; i++) {
         ctx.fillRect(i * cellWidth, 0, cellWidth, cellHeight);
     }
 
