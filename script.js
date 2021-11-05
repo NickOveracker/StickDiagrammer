@@ -12,6 +12,8 @@ let dragging = false;
 let startX;
 let startY;
 let gridCanvas;
+let currentX;
+let currentY;
 
 // Cycle through the following cursor colors by pressing space: PDIFF, NDIFF, POLY, METAL1, CONTACT
 let PDIFF = 0;
@@ -316,8 +318,10 @@ function getCell(clientX, clientY) {
     {
         let x = Math.floor((clientX - canvas.offsetLeft - cellWidth) / cellWidth);
         let y = Math.floor((clientY - canvas.offsetTop - cellHeight) / cellHeight);
+        console.log(x, y);
         return {x: x, y: y};
     }
+    console.log("Out of bounds");
     return null;
 }
 
@@ -408,6 +412,11 @@ window.onload = function() {
 
     // Show a preview line when the user is dragging the mouse.
     window.addEventListener("mousemove", function(event) {
+        // Save the current X and Y coordinates.
+        currentX = event.clientX;
+        currentY = event.clientY;
+        
+        // If the mouse is pressed and the mouse is between cells 1 and gridsize - 1,
         if (event.buttons == 1) {
             // Ignore if not inside the canvas
             if (event.clientX > canvas.offsetLeft + cellWidth &&
@@ -491,7 +500,7 @@ window.onload = function() {
         // If the user presses the "A" key,
         // move the coordinates for A to the cell under the cursor.
         if (event.keyCode == 65) {
-            let cell = getCell(event.clientX, event.clientY);
+            let cell = getCell(currentX, currentY);
             if (cell != null) {
                 // First, unset the CONTACT layer at the old coordinates.
                 layeredGrid[A.x][A.y][CONTACT] = false;
@@ -505,7 +514,7 @@ window.onload = function() {
         // If the user presses the "B" key,
         // move the coordinates for B to the cell under the cursor.
         if (event.keyCode == 66) {
-            let cell = getCell(event.clientX, event.clientY);
+            let cell = getCell(currentX, currentY);
             if (cell != null) {
                 // First, unset the CONTACT layer at the old coordinates.
                 layeredGrid[B.x][B.y][CONTACT] = false;
@@ -519,7 +528,7 @@ window.onload = function() {
         // If the user presses the "C" key,
         // move the coordinates for C to the cell under the cursor.
         if (event.keyCode == 67) {
-            let cell = getCell(event.clientX, event.clientY);
+            let cell = getCell(currentX, currentY);
             if (cell != null) {
                 // First, unset the CONTACT layer at the old coordinates.
                 layeredGrid[C.x][C.y][CONTACT] = false;
@@ -533,7 +542,7 @@ window.onload = function() {
         // If the user presses the "D" key,
         // move the coordinates for D to the cell under the cursor.
         if (event.keyCode == 68) {
-            let cell = getCell(event.clientX, event.clientY);
+            let cell = getCell(currentX, currentY);
             if (cell != null) {
                 // First, unset the CONTACT layer at the old coordinates.
                 layeredGrid[D.x][D.y][CONTACT] = false;
@@ -547,7 +556,7 @@ window.onload = function() {
         // If the user presses the "Y" key,
         // move the coordinates for Y to the cell under the cursor.
         if (event.keyCode == 89) {
-            let cell = getCell(event.clientX, event.clientY);
+            let cell = getCell(currentX, currentY);
             if (cell != null) {
                 // First, unset the CONTACT layer at the old coordinates.
                 layeredGrid[Y.x][Y.y][CONTACT] = false;
