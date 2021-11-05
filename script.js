@@ -264,7 +264,7 @@ function colorCell(clientX, clientY, noDelete, noAdd) {
 }
 
 window.onload = function() {
-    gridsize = 30;
+    gridsize = 29;
     layers = 5;
 
     // Set to dark mode if it is night time
@@ -275,7 +275,7 @@ window.onload = function() {
         darkMode = false;
     }
 
-    // Initialize with a gridsize of 30 and 5 layers
+    // Initialize with a gridsize of 29 and 5 layers
     canvas = document.getElementById("canvas");
     ctx = canvas.getContext("2d");
     layeredGrid = makeLayeredGrid(gridsize, gridsize, layers);
