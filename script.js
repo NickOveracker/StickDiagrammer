@@ -306,7 +306,6 @@ window.onload = function() {
                 event.clientY < canvas.offsetTop + canvas.height - cellHeight)
             {
                 if(dragging) {
-                    dragging = false;
                     let endX = Math.floor((event.clientX - canvas.offsetLeft - cellWidth) / cellWidth);
                     let endY = Math.floor((event.clientY - canvas.offsetTop - cellHeight) / cellHeight);
 
@@ -337,6 +336,8 @@ window.onload = function() {
 
             refreshCanvas();
         }
+
+        dragging = false;
     });
 
     // Show a preview line when the user is dragging the mouse.
