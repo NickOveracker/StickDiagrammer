@@ -132,11 +132,13 @@ function refreshCanvas() {
         }
     }
 
-    // Draw METAL1 at (2,10), (2,14), (2, 18), (2, 22)
+    // Draw METAL1 at (2,10), (2,14), (2, 18), (2, 22), (26, 16)
+    // for A, B, C, D, Y
     layeredGrid[2][8][METAL1] = true;
     layeredGrid[2][12][METAL1] = true;
     layeredGrid[2][16][METAL1] = true;
     layeredGrid[2][20][METAL1] = true;
+    layeredGrid[26][16][METAL1] = true;
 
     // Draw each layer in order.
     for (let i = 1; i < gridsize + 1; i++) {
@@ -181,6 +183,7 @@ function refreshCanvas() {
     ctx.fillText("B", cellWidth*3.25, cellHeight*12.75);
     ctx.fillText("C", cellWidth*3.25, cellHeight*16.75);
     ctx.fillText("D", cellWidth*3.25, cellHeight*20.75);
+    ctx.fillText("Y", cellWidth*27.25, cellHeight*16.75);
 
     drawGrid(gridsize); // Not sure why but gotta draw this twice.
 }
