@@ -331,7 +331,7 @@ window.onload = function() {
                 }
             }
             // If the mouse was released outside the canvas, undo and return.
-            else {
+            else if(dragging){
                 undo();
             }
 
