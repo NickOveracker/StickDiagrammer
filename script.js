@@ -138,7 +138,7 @@ function refreshCanvas() {
     layeredGrid[2][12][METAL1] = true;
     layeredGrid[2][16][METAL1] = true;
     layeredGrid[2][20][METAL1] = true;
-    layeredGrid[26][16][METAL1] = true;
+    layeredGrid[26][14][METAL1] = true;
 
     // Draw each layer in order.
     for (let i = 1; i < gridsize + 1; i++) {
@@ -183,7 +183,7 @@ function refreshCanvas() {
     ctx.fillText("B", cellWidth*3.25, cellHeight*12.75);
     ctx.fillText("C", cellWidth*3.25, cellHeight*16.75);
     ctx.fillText("D", cellWidth*3.25, cellHeight*20.75);
-    ctx.fillText("Y", cellWidth*27.25, cellHeight*16.75);
+    ctx.fillText("Y", cellWidth*27.25, cellHeight*14.75);
 
     drawGrid(gridsize); // Not sure why but gotta draw this twice.
 }
