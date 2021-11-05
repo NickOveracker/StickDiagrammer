@@ -162,11 +162,11 @@ function refreshCanvas() {
 
     // Draw CONTACT at the coordinates of the four inputs
     // and at the output.
-    drawCell(A.x, A.y, CONTACT, true);
-    drawCell(B.x, B.y, CONTACT, true);
-    drawCell(C.x, C.y, CONTACT, true);
-    drawCell(D.x, D.y, CONTACT, true);
-    drawCell(Y.x, Y.y, CONTACT, true);
+    layeredGrid[A.x][A.y][CONTACT] = true;
+    layeredGrid[B.x][B.y][CONTACT] = true;
+    layeredGrid[C.x][C.y][CONTACT] = true;
+    layeredGrid[D.x][D.y][CONTACT] = true;
+    layeredGrid[Y.x][Y.y][CONTACT] = true;
 
     // Draw each layer in order.
     for(let layer = 0; layer < layers; layer++) {
@@ -493,6 +493,9 @@ window.onload = function() {
         if (event.keyCode == 65) {
             let cell = getCell(event.clientX, event.clientY);
             if (cell != null) {
+                // First, unset the CONTACT layer at the old coordinates.
+                layeredGrid[A.x][A.y][CONTACT] = false;
+                // Then, set the new coordinates.
                 A.x = cell.x;
                 A.y = cell.y;
                 refreshCanvas();
@@ -504,6 +507,9 @@ window.onload = function() {
         if (event.keyCode == 66) {
             let cell = getCell(event.clientX, event.clientY);
             if (cell != null) {
+                // First, unset the CONTACT layer at the old coordinates.
+                layeredGrid[B.x][B.y][CONTACT] = false;
+                // Then, set the new coordinates.
                 B.x = cell.x;
                 B.y = cell.y;
                 refreshCanvas();
@@ -515,6 +521,9 @@ window.onload = function() {
         if (event.keyCode == 67) {
             let cell = getCell(event.clientX, event.clientY);
             if (cell != null) {
+                // First, unset the CONTACT layer at the old coordinates.
+                layeredGrid[C.x][C.y][CONTACT] = false;
+                // Then, set the new coordinates.
                 C.x = cell.x;
                 C.y = cell.y;
                 refreshCanvas();
@@ -526,6 +535,9 @@ window.onload = function() {
         if (event.keyCode == 68) {
             let cell = getCell(event.clientX, event.clientY);
             if (cell != null) {
+                // First, unset the CONTACT layer at the old coordinates.
+                layeredGrid[D.x][D.y][CONTACT] = false;
+                // Then, set the new coordinates.
                 D.x = cell.x;
                 D.y = cell.y;
                 refreshCanvas();
@@ -537,6 +549,9 @@ window.onload = function() {
         if (event.keyCode == 89) {
             let cell = getCell(event.clientX, event.clientY);
             if (cell != null) {
+                // First, unset the CONTACT layer at the old coordinates.
+                layeredGrid[Y.x][Y.y][CONTACT] = false;
+                // Then, set the new coordinates.
                 Y.x = cell.x;
                 Y.y = cell.y;
                 refreshCanvas();
