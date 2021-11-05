@@ -132,7 +132,6 @@ function refreshCanvas() {
         }
     }
 
-    counter = 0
     // Draw each layer in order.
     for (let i = 1; i < gridsize + 1; i++) {
         for (let j = 1; j < gridsize + 1; j++) {
@@ -167,6 +166,20 @@ function refreshCanvas() {
                    canvas.width  - 2*cellWidth  + ctx.lineWidth/2,
                    canvas.height - 2*cellHeight + ctx.lineWidth/2
                   );
+
+    // Draw METAL1 at (3,10), (3,14), (3, 18), (3, 22)
+    layeredGrid[3][10][METAL1] = true;
+    layeredGrid[3][14][METAL1] = true;
+    layeredGrid[3][18][METAL1] = true;
+    layeredGrid[3][22][METAL1] = true;
+
+    // Draw labels on the canvas above those four cells: "A", "B", "C", and "D"
+    ctx.font = "bold 12px Arial";
+    ctx.fillStyle = darkMode ? "#ffffff" : "#000000";
+    ctx.fillText("A", canvas.offsetLeft + cellWidth*3 + cellWidth/2, canvas.offsetTop + cellHeight*10 + cellHeight/2);
+    ctx.fillText("B", canvas.offsetLeft + cellWidth*3 + cellWidth/2, canvas.offsetTop + cellHeight*14 + cellHeight/2);
+    ctx.fillText("C", canvas.offsetLeft + cellWidth*3 + cellWidth/2, canvas.offsetTop + cellHeight*18 + cellHeight/2);
+    ctx.fillText("D", canvas.offsetLeft + cellWidth*3 + cellWidth/2, canvas.offsetTop + cellHeight*22 + cellHeight/2);
 
     drawGrid(gridsize); // Not sure why but gotta draw this twice.
 }
@@ -279,6 +292,7 @@ window.onload = function() {
     canvas = document.getElementById("canvas");
     ctx = canvas.getContext("2d");
     layeredGrid = makeLayeredGrid(gridsize, gridsize, layers);
+
     refreshCanvas();
 
     // Note the grid coordinates when the left mouse button is pressed.
