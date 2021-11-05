@@ -132,11 +132,11 @@ function refreshCanvas() {
         }
     }
 
-    // Draw METAL1 at (3,10), (3,14), (3, 18), (3, 22)
-    layeredGrid[3][10][METAL1] = true;
-    layeredGrid[3][14][METAL1] = true;
-    layeredGrid[3][18][METAL1] = true;
-    layeredGrid[3][22][METAL1] = true;
+    // Draw METAL1 at (2,10), (2,14), (2, 18), (2, 22)
+    layeredGrid[2][8][METAL1] = true;
+    layeredGrid[2][12][METAL1] = true;
+    layeredGrid[2][16][METAL1] = true;
+    layeredGrid[2][20][METAL1] = true;
 
     // Draw each layer in order.
     for (let i = 1; i < gridsize + 1; i++) {
@@ -177,10 +177,10 @@ function refreshCanvas() {
     ctx.font = "bold 18px Arial";
     ctx.fillStyle = darkMode ? "#ffffff" : "#000000";
     // Draw white backgrounds behind the labels below
-    ctx.fillText("A", cellWidth*4.25, cellHeight*10.75);
-    ctx.fillText("B", cellWidth*4.25, cellHeight*14.75);
-    ctx.fillText("C", cellWidth*4.25, cellHeight*18.75);
-    ctx.fillText("D", cellWidth*4.25, cellHeight*22.75);
+    ctx.fillText("A", cellWidth*3.25, cellHeight*8.75);
+    ctx.fillText("B", cellWidth*3.25, cellHeight*12.75);
+    ctx.fillText("C", cellWidth*3.25, cellHeight*16.75);
+    ctx.fillText("D", cellWidth*3.25, cellHeight*20.75);
 
     drawGrid(gridsize); // Not sure why but gotta draw this twice.
 }
