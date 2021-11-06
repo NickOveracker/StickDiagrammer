@@ -415,22 +415,6 @@ window.onload = function() {
 
     refreshCanvas();
 
-    // Show Nagano's weather under the canvas
-    // First create a div to put it in
-    let weatherDiv = document.createElement("div");
-    weatherDiv.id = "weather";
-    document.body.appendChild(weatherDiv);
-
-    // Now get the weather, and insert it as a child of the div
-    let weather = document.createElement("iframe");
-    weather.src = "https://www.accuweather.com/en/jp/nagano/221020/weather-forecast/221020";
-    weather.frameBorder = "0";
-    weather.scrolling = "no";
-    weather.width = "300";
-    weather.height = "150";
-    weatherDiv.appendChild(weather);
-
-
     // Note the grid coordinates when the left mouse button is pressed.
     // Store the m in startX and startY.
     window.addEventListener("mousedown", function(event) {
