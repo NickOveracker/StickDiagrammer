@@ -28,6 +28,9 @@ let cursorColorIndex = PDIFF;
 
 // Objects to represent the coordinates of the four inputs (A, B, C, D)
 // and the output (Y).
+let numInputs = 4;
+let numOutputs = 1;
+
 let A = {x: 2, y: 8};
 let B = {x: 2, y: 12};
 let C = {x: 2, y: 16};
@@ -37,7 +40,8 @@ let Y = {x: 26, y: 14};
 // Netlist is a list of nets.
 // Each net is a Set of cells.
 let netlist;
-let transistors;
+let pmos;
+let nmos
 
 // VDD and GND are the two terminals of the grid.
 // The terminals are always at the top and bottom of the grid.
@@ -159,16 +163,122 @@ function drawGrid(size) {
 
 // Set the nets.
 function setNets() {
-    // CLear the netlist.
+    // Clear the netlist.
     netlist = [];
-    transistors = new Set();
+    nmos = new Set();
+    pmos = new Set();
 
     function setRecursively(cell, net) {
+        // Return if this cell is in pmos or nmos already.
+        if (nmos.has(cell) || pmos.has(cell)) {
+            return;
+        }
+
         // If the layer is NDIFF or PDIFF and there is also a POLY at the same location,
         // add the cell to transistors.
-        if (cell.layer === NDIFF || cell.layer === PDIFF) {
+        if (cell.layer === NDIFF) {
             if (layeredGrid[cell.x][cell.y][POLY].isSet) {
-                transistors.add(cell);
+                nmos.add(cell);
+                // Set the gate to the poly cell.
+                cell.gate = layeredGrid[cell.x][cell.y][POLY];
+
+                // Check adjacent cells for NDIFF.
+                // Set term1 to the first one found.
+                // Set term2 to the second one found.
+                cell.term1 = undefined;
+                cell.term2 = undefined;
+                // Check the cell to the right.
+                if (cell.x < gridsize - 1) {
+                    if (layeredGrid[cell.x + 1][cell.y][NDIFF].isSet) {
+                        cell.term1 = layeredGrid[cell.x + 1][cell.y][NDIFF];
+                    }
+                }
+                // Check the cell to the left.
+                if (cell.x > 0) {
+                    if (layeredGrid[cell.x - 1][cell.y][NDIFF].isSet) {
+                        // If term1 is already set, set term2 to the cell to the left.
+                        if (cell.term1 !== undefined) {
+                            cell.term2 = layeredGrid[cell.x - 1][cell.y][NDIFF];
+                        } else {
+                            cell.term1 = layeredGrid[cell.x - 1][cell.y][NDIFF];
+                        }
+                    }
+                }
+                // Check the cell above.
+                if (cell.y > 0 && cell.term2 === undefined) {
+                    if (layeredGrid[cell.x][cell.y - 1][NDIFF].isSet) {
+                        // If term1 is already set, set term2 to the cell above.
+                        if (cell.term1 !== undefined) {
+                            cell.term2 = layeredGrid[cell.x][cell.y - 1][NDIFF];
+                        } else {
+                            cell.term1 = layeredGrid[cell.x][cell.y - 1][NDIFF];
+                        }
+                    }
+                }
+                // Check the cell below.
+                if (cell.y < gridsize - 1 && cell.term2 === undefined) {
+                    if (layeredGrid[cell.x][cell.y + 1][NDIFF].isSet) {
+                        // If term1 is already set, set term2 to the cell below.
+                        if (cell.term1 !== undefined) {
+                            cell.term2 = layeredGrid[cell.x][cell.y + 1][NDIFF];
+                        } else {
+                            cell.term1 = layeredGrid[cell.x][cell.y + 1][NDIFF];
+                        }
+                    }
+                }
+                return;
+            }
+        }
+        if (cell.layer === PDIFF) {
+            if (layeredGrid[cell.x][cell.y][POLY].isSet) {
+                pmos.add(cell);
+                // Set the gate to the poly cell.
+                cell.gate = layeredGrid[cell.x][cell.y][POLY];
+
+                // Check adjacent cells for PDIFF.
+                // Set term1 to the first one found.
+                // Set term2 to the second one found.
+                cell.term1 = undefined;
+                cell.term2 = undefined;
+                // Check the cell to the right.
+                if (cell.x < gridsize - 1) {
+                    if (layeredGrid[cell.x + 1][cell.y][PDIFF].isSet) {
+                        cell.term1 = layeredGrid[cell.x + 1][cell.y][PDIFF];
+                    }
+                }
+                // Check the cell to the left.
+                if (cell.x > 0) {
+                    if (layeredGrid[cell.x - 1][cell.y][PDIFF].isSet) {
+                        // If term1 is already set, set term2 to the cell to the left.
+                        if (cell.term1 !== undefined) {
+                            cell.term2 = layeredGrid[cell.x - 1][cell.y][PDIFF];
+                        } else {
+                            cell.term1 = layeredGrid[cell.x - 1][cell.y][PDIFF];
+                        }
+                    }
+                }
+                // Check the cell above.
+                if (cell.y > 0 && cell.term2 === undefined) {
+                    if (layeredGrid[cell.x][cell.y - 1][PDIFF].isSet) {
+                        // If term1 is already set, set term2 to the cell above.
+                        if (cell.term1 !== undefined) {
+                            cell.term2 = layeredGrid[cell.x][cell.y - 1][PDIFF];
+                        } else {
+                            cell.term1 = layeredGrid[cell.x][cell.y - 1][PDIFF];
+                        }
+                    }
+                }
+                // Check the cell below.
+                if (cell.y < gridsize - 1 && cell.term2 === undefined) {
+                    if (layeredGrid[cell.x][cell.y + 1][PDIFF].isSet) {
+                        // If term1 is already set, set term2 to the cell below.
+                        if (cell.term1 !== undefined) {
+                            cell.term2 = layeredGrid[cell.x][cell.y + 1][PDIFF];
+                        } else {
+                            cell.term1 = layeredGrid[cell.x][cell.y + 1][PDIFF];
+                        }
+                    }
+                }
                 return;
             }
         }
@@ -253,22 +363,100 @@ function setNets() {
     netlist.push(netD);
     netlist.push(netY);
 
-    // Loop through each cell in each net.
-    // If adjacent cells in the same layer are not already in the net, add them.
-    for (let ii = 0; ii < netlist.length; ii++) {
-        let net = netlist[ii];
-        for (let cell of net) {
-            // Don't do this for the top layer (contact)
-            for (let jj = 0; jj < layers - 1; jj++) {
-                if (jj != cell.layer) {
-                    let cellAbove = layeredGrid[cell.x][cell.y][jj];
-                    if (cellAbove.isSet && !net.has(cellAbove)) {
-                        net.add(cellAbove);
-                    }
+    let nmosIterator = nmos.values();
+
+    // Each nmos and pmos represents a relation between term1 and term2.
+    // If term1 is not in any of the nets,
+    // then create a new net and add term1 to it.
+    // Loop through nmos first.
+    for (let ii = 0; ii < nmos.size; ii++) {
+        // nmosCell is the ii'th element of the Set nmos.
+        let nmosCell = nmosIterator.next().value;
+        let net1 = new Set();
+        let net2 = new Set();
+
+        if(nmosCell.term1 !== undefined) {
+            let isInNet = false;
+            for (let jj = 0; jj < netlist.length; jj++) {
+                if(netlist[jj].has(nmosCell.term1)) {
+                    isInNet = true;
+                    break;
                 }
             }
+            if(!isInNet) {
+                net1.add(nmosCell.term1);
+            }
+        }
+        if(nmosCell.term2 !== undefined) {
+            let isInNet = false;
+            for (let jj = 0; jj < netlist.length; jj++) {
+                if(netlist[jj].has(nmosCell.term2)) {
+                    isInNet = true;
+                    break;
+                }
+            }
+            if(!isInNet) {
+                net2.add(nmosCell.term2);
+            }
+        }
+        
+        // Add the nets if they are not empty.
+        if(net1.size > 0) {
+            setRecursively(nmosCell.term1, net1);
+            netlist.push(net1);
+        }
+        if(net2.size > 0) {
+            setRecursively(nmosCell.term2, net2);
+            netlist.push(net2);
         }
     }
+
+    // Loop through pmos now.
+    let pmosIterator = pmos.values();
+
+    for (let ii = 0; ii < pmos.size; ii++) {
+        let pmosCell = pmosIterator.next().value;
+        let net1 = new Set();
+        let net2 = new Set();
+
+        if(pmosCell.term1 !== undefined) {
+            let isInNet = false;
+            for (let jj = 0; jj < netlist.length; jj++) {
+                if(netlist[jj].has(pmosCell.term1)) {
+                    isInNet = true;
+                    break;
+                }
+            }
+            if(!isInNet) {
+                net1.add(pmosCell.term1);
+            }
+        }
+
+        if(pmosCell.term2 !== undefined) {
+            let isInNet = false;
+            for (let jj = 0; jj < netlist.length; jj++) {
+                if(netlist[jj].has(pmosCell.term2)) {
+                    isInNet = true;
+                    break;
+                }
+            }
+            if(!isInNet) {
+                net2.add(pmosCell.term2);
+            }
+        }
+
+        // Add the nets if they are not empty.
+        if(net1.size > 0) {
+            setRecursively(pmosCell.term1, net1);
+            netlist.push(net1);
+        }
+        if(net2.size > 0) {
+            setRecursively(pmosCell.term2, net2);
+            netlist.push(net2);
+        }
+    }
+
+    // TIME FOR EQUATIONS???!!
 
     // Print a grid with in all cells that are in a given net.
     function printGrid(net, name) {
@@ -282,7 +470,7 @@ function setNets() {
                     if(layeredGrid[ii][jj][kk].isSet && net.has(layeredGrid[ii][jj][kk])) {
                         grid[ii][jj] = name;
                     }
-                    else if(transistors.has(layeredGrid[ii][jj][kk])) {
+                    else if(pmos.has(layeredGrid[ii][jj][kk]) || nmos.has(layeredGrid[ii][jj][kk])) {
                         grid[ii][jj] = "T";
                     }
                 }
@@ -315,6 +503,10 @@ function setNets() {
     printGrid(netVDD, "+");
     // Print the grid for netGND.
     printGrid(netGND, "-");
+
+    for(ii = 7; ii < netlist.length; ii++) {
+        printGrid(netlist[ii], String.fromCharCode(62 + ii));
+    }
 }
 
 // Initialize everything
@@ -366,6 +558,15 @@ function refreshCanvas() {
                         ctx.stroke();
                     }
                 }
+
+                // Set the terminals of the cell to null.
+                layeredGrid[i-1][j-1][NDIFF].term1 = null;
+                layeredGrid[i-1][j-1][NDIFF].term2 = null;
+                layeredGrid[i-1][j-1][NDIFF].gate  = null;
+
+                layeredGrid[i-1][j-1][PDIFF].term1 = null;
+                layeredGrid[i-1][j-1][PDIFF].term2 = null;
+                layeredGrid[i-1][j-1][PDIFF].gate  = null;
             }
         }
     }
