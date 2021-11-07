@@ -249,7 +249,7 @@ function refreshCanvas() {
     layeredGrid[Y.x][Y.y][CONTACT] = true;
 
     // Draw METAL1 across the grid at VDD_y and GND_y.
-    for (let i = 1; i <= gridsize; i++) {
+    for (let i = 1; i < gridsize - 1; i++) {
         layeredGrid[i][VDD_y][METAL1] = true;
         layeredGrid[i][GND_y][METAL1] = true;
     }
