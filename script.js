@@ -34,6 +34,15 @@ let C = {x: 2, y: 16};
 let D = {x: 2, y: 20};
 let Y = {x: 26, y: 14};
 
+// Netlist is a list of nets.
+// Each net is a Set of cells.
+let netlist = [];
+
+// VDD and GND are the two terminals of the grid.
+// The terminals are always at the top and bottom of the grid.
+let VDD_y = 1;
+let GND_y = gridsize - 2;
+
 // Grid color
 let darkModeGridColor = '#cccccc';
 let lightModeGridColor = '#999999';
@@ -75,15 +84,15 @@ function changeCursorColor() {
 }
 
 function makeLayeredGrid(width, height, layers) {
-    // Each cell has several layers with nets.
-    // Initialize every element to null.
+    // Each cell has several layers with set to true or false.
+    // Initialize every element to false.
     let grid = new Array(width);
     for (let i = 0; i < width; i++) {
         grid[i] = new Array(height);
         for (let j = 0; j < height; j++) {
             grid[i][j] = new Array(layers);
             for (let k = 0; k < layers; k++) {
-                grid[i][j][k] = null;
+                grid[i][j][k] = false;
             }
         }
     }
@@ -145,15 +154,16 @@ function drawGrid(size) {
     }
 }
 
+/*
 // Set the nets.
 function setNetsFrom(cell) {
     function recurseBack(cell) {
         // Set nets for current cell.
-        // If there is a CONTACT, merge the nets of all non-null layers without duplicates.
+        // If there is a CONTACT, merge the nets of all non-empty layers without duplicates.
         net = new Set();
-        if(layeredGrid[cell.x][cell.y][CONTACT] !== null) {
+        if(layeredGrid[cell.x][cell.y][CONTACT]) {
             for (let ii = 0; ii < layers; ii++) {
-                if (layeredGrid[cell.x][cell.y][ii] !== null) {
+                if (layeredGrid[cell.x][cell.y][ii]) {
                     // Add the nets of the non-null layers to the set.
                     layeredGrid[cell.x][cell.y][ii];
                 }
@@ -164,8 +174,8 @@ function setNetsFrom(cell) {
         for(let ii = 0; ii < layers; ii++) {
             // Recurse left
             if(_cell.x > 0
-                && layeredGrid[_cell.x][_cell.y][ii] !== null
-                && layeredGrid[_cell.x-1][_cell.y][ii] !== null) {
+                && layeredGrid[_cell.x][_cell.y][ii]
+                && layeredGrid[_cell.x-1][_cell.y][ii]) {
                 // Merge the sets of the two cells.
                 net = new Set([...net, ...layeredGrid[_cell.x][_cell.y][ii], ...layeredGrid[_cell.x-1][_cell.y][ii]]);
                 layeredGrid[_cell.x-1][_cell.y][ii] = layeredGrid[_cell.x][_cell.y][ii];
@@ -173,8 +183,8 @@ function setNetsFrom(cell) {
             }
             // Recurse up
             if(_cell.y > 0
-                && layeredGrid[_cell.x][_cell.y][ii] !== null
-                && layeredGrid[_cell.x][_cell.y-1][ii] !== null) {
+                && layeredGrid[_cell.x][_cell.y][ii]
+                && layeredGrid[_cell.x][_cell.y-1][ii]) {
                 // Set the nets in the cell above to match the nets in the current cell.
                 layeredGrid[_cell.x][_cell.y-1][ii] = layeredGrid[_cell.x][_cell.y][ii];
                 recurseBack({x: _cell.x, y: _cell.y-1});
@@ -184,16 +194,16 @@ function setNetsFrom(cell) {
         function recurseForward(cell) {
             // Recurse right
             if(_cell.x < gridsize - 1
-                && layeredGrid[_cell.x][_cell.y][ii] !== null
-                && layeredGrid[_cell.x+1][_cell.y][ii] !== null) {
+                && layeredGrid[_cell.x][_cell.y][ii]
+                && layeredGrid[_cell.x+1][_cell.y][ii]) {
                 // Set the nets in the cell to the right to match the nets in the current cell.
                 layeredGrid[_cell.x+1][_cell.y][ii] = layeredGrid[_cell.x][_cell.y][ii];
                 recurseForward({x: _cell.x+1, y: _cell.y});
             }
             // Recurse down
             if(_cell.y < gridsize - 1
-                && layeredGrid[_cell.x][_cell.y][ii] !== null
-                && layeredGrid[_cell.x][_cell.y+1][ii] !== null) {
+                && layeredGrid[_cell.x][_cell.y][ii]
+                && layeredGrid[_cell.x][_cell.y+1][ii]) {
                 // Set the nets in the cell below to match the nets in the current cell.
                 layeredGrid[_cell.x][_cell.y+1][ii] = layeredGrid[_cell.x][_cell.y][ii];
                 recurseForward({x: _cell.x, y: _cell.y+1});
@@ -205,13 +215,13 @@ function setNetsFrom(cell) {
     for (let ii = 0; ii < grid.length; ii++) {
         for (let j = 0; j < grid[ii].length; j++) {
             for (let k = 0; k < grid[ii][j].length; k++) {
-                if (grid[ii][j][k] != null) {
+                if (grid[ii][j][k]) {
                     grid[ii][j][k] = 'A';
                 }
             }
         }
     }
-}
+}*/
 
 // Initialize everything
 function refreshCanvas() {
@@ -224,7 +234,7 @@ function refreshCanvas() {
     }
     // Check the layers of the grid, and draw cells as needed.
     function drawCell(i, j, layer, isBorder) {
-        if (isBorder || layeredGrid[i-1][j-1][layer] !== null) {
+        if (isBorder || layeredGrid[i-1][j-1][layer]) {
             ctx.fillStyle = cursorColors[layer];
             ctx.fillRect(i * cellWidth, j * cellHeight-1, cellWidth + 2, cellHeight + 2);
         }
@@ -232,11 +242,17 @@ function refreshCanvas() {
 
     // Draw CONTACT at the coordinates of the four inputs
     // and at the output.
-    layeredGrid[A.x][A.y][CONTACT] = [new Set("A")];
-    layeredGrid[B.x][B.y][CONTACT] = [new Set("B")];
-    layeredGrid[C.x][C.y][CONTACT] = [new Set("C")];
-    layeredGrid[D.x][D.y][CONTACT] = [new Set("D")];
-    layeredGrid[Y.x][Y.y][CONTACT] = [new Set("Y")];
+    layeredGrid[A.x][A.y][CONTACT] = true;
+    layeredGrid[B.x][B.y][CONTACT] = true;
+    layeredGrid[C.x][C.y][CONTACT] = true;
+    layeredGrid[D.x][D.y][CONTACT] = true;
+    layeredGrid[Y.x][Y.y][CONTACT] = true;
+
+    // Draw METAL1 across the grid at VDD_y and GND_y.
+    for (let i = 0; i < gridsize; i++) {
+        layeredGrid[i][VDD_y][METAL1] = true;
+        layeredGrid[i][GND_y][METAL1] = true;
+    }
 
     // Draw each layer in order.
     for(let layer = 0; layer < layers; layer++) {
@@ -246,7 +262,7 @@ function refreshCanvas() {
 
                 // For the last layer, fill each filled cell with a cross.
                 if (layer == layers - 1) {
-                    if (layeredGrid[i-1][j-1][layer] !== null) {
+                    if (layeredGrid[i-1][j-1][layer]) {
                         ctx.fillStyle = "#000000";
                         ctx.beginPath();
                         ctx.moveTo(i * cellWidth + cellWidth + 2, j * cellHeight - 1);
@@ -354,7 +370,7 @@ function colorCell(clientX, clientY, noDelete, noAdd) {
         }
 
         if(noDelete || anyLayerSet) {
-            let isSet = layeredGrid[x][y][cursorColorIndex] !== null;
+            let isSet = layeredGrid[x][y][cursorColorIndex];
             let toDelete = !noDelete && isSet || noAdd && anyLayerSet;
 
             if(toDelete || !noAdd) {
@@ -363,10 +379,10 @@ function colorCell(clientX, clientY, noDelete, noAdd) {
                 if (toDelete) {
                     // Erase all layers of the cell.
                     for (let i = 0; i < layers; i++) {
-                        layeredGrid[x][y][i] = null;
+                        layeredGrid[x][y][i] = false;
                     }
                 } else {
-                    layeredGrid[x][y][cursorColorIndex] = new Set();
+                    layeredGrid[x][y][cursorColorIndex] = true;
                 }
 
                 refreshCanvas();
@@ -451,21 +467,21 @@ window.onload = function() {
                     // draw a horizontal line.
                     if (Math.abs(endX - startX) > Math.abs(endY - startY)) {
                         for (let i = Math.min(startX, endX); i <= Math.max(startX, endX); i++) {
-                            layeredGrid[i][startY][cursorColorIndex] = new Set();
+                            layeredGrid[i][startY][cursorColorIndex] = true;
                         }
                     }
                     // If the mouse moved more vertically than horizontally,
                     // draw a vertical line.
                     else {
                         for (let i = Math.min(startY, endY); i <= Math.max(startY, endY); i++) {
-                            layeredGrid[startX][i][cursorColorIndex] = new Set();
+                            layeredGrid[startX][i][cursorColorIndex] = true;
                         }
                     }
                 }
                 // Just fill in the cell at the start coordinates.
                 else {
                     saveCurrentState();
-                    layeredGrid[startX][startY][cursorColorIndex] = new Set();
+                    layeredGrid[startX][startY][cursorColorIndex] = true;
                 }
             }
             // If the mouse was released outside the canvas, undo and return.
@@ -513,14 +529,14 @@ window.onload = function() {
                 // draw a horizontal line.
                 if (rightX - leftX > bottomY - topY) {
                     for (let i = leftX; i <= rightX; i++) {
-                        layeredGrid[i][startY][cursorColorIndex] = new Set();
+                        layeredGrid[i][startY][cursorColorIndex] = true;
                     }
                 }
                 // If the mouse moved more vertically than horizontally,
                 // draw a vertical line.
                 else {
                     for (let j = topY; j <= bottomY; j++) {
-                        layeredGrid[startX][j][cursorColorIndex] = new Set();
+                        layeredGrid[startX][j][cursorColorIndex] = true;
                     }
                 }
 
@@ -571,7 +587,7 @@ window.onload = function() {
             let cell = getCell(currentX, currentY);
             if (cell != null) {
                 // First, unset the CONTACT layer at the old coordinates.
-                layeredGrid[A.x][A.y][CONTACT] = null;
+                layeredGrid[A.x][A.y][CONTACT] = false;
                 // Then, set the new coordinates.
                 A.x = cell.x;
                 A.y = cell.y;
@@ -585,7 +601,7 @@ window.onload = function() {
             let cell = getCell(currentX, currentY);
             if (cell != null) {
                 // First, unset the CONTACT layer at the old coordinates.
-                layeredGrid[B.x][B.y][CONTACT] = null;
+                layeredGrid[B.x][B.y][CONTACT] = false;
                 // Then, set the new coordinates.
                 B.x = cell.x;
                 B.y = cell.y;
@@ -599,7 +615,7 @@ window.onload = function() {
             let cell = getCell(currentX, currentY);
             if (cell != null) {
                 // First, unset the CONTACT layer at the old coordinates.
-                layeredGrid[C.x][C.y][CONTACT] = null;
+                layeredGrid[C.x][C.y][CONTACT] = false;
                 // Then, set the new coordinates.
                 C.x = cell.x;
                 C.y = cell.y;
@@ -613,7 +629,7 @@ window.onload = function() {
             let cell = getCell(currentX, currentY);
             if (cell != null) {
                 // First, unset the CONTACT layer at the old coordinates.
-                layeredGrid[D.x][D.y][CONTACT] = null;
+                layeredGrid[D.x][D.y][CONTACT] = false;
                 // Then, set the new coordinates.
                 D.x = cell.x;
                 D.y = cell.y;
@@ -627,7 +643,7 @@ window.onload = function() {
             let cell = getCell(currentX, currentY);
             if (cell != null) {
                 // First, unset the CONTACT layer at the old coordinates.
-                layeredGrid[Y.x][Y.y][CONTACT] = null;
+                layeredGrid[Y.x][Y.y][CONTACT] = false;
                 // Then, set the new coordinates.
                 Y.x = cell.x;
                 Y.y = cell.y;
