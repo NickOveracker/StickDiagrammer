@@ -652,5 +652,5 @@ window.onload = function() {
             darkMode = !darkMode;
             refreshCanvas();
         }
-    }
+    });
 }
