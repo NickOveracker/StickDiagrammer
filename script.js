@@ -4,8 +4,8 @@ let ctx;
 let darkMode;
 let cellHeight;
 let cellWidth;
-let gridsize;
-let layers;
+let gridsize = 29;
+let layers = 5;
 let saveState = 0;
 let maxSaveState = 0;
 let dragging = false;
@@ -412,9 +412,6 @@ function getCell(clientX, clientY) {
 window.onload = function() {
     // Clear local storage
     localStorage.clear();
-
-    gridsize = 29;
-    layers = 5;
 
     // Set to dark mode if it is night time
     if (new Date().getHours() > 19 || new Date().getHours() < 7) {
