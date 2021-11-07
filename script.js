@@ -36,7 +36,8 @@ let Y = {x: 26, y: 14};
 
 // Netlist is a list of nets.
 // Each net is a Set of cells.
-let netlist = [];
+let netlist;
+let transistors;
 
 // VDD and GND are the two terminals of the grid.
 // The terminals are always at the top and bottom of the grid.
@@ -160,14 +161,18 @@ function drawGrid(size) {
 function setNets() {
     // CLear the netlist.
     netlist = [];
+    transistors = new Set();
 
     function setRecursively(cell, net) {
-        // Stop here if the layer is NDIFF or PDIFF and there is also a POLY at the same location.
+        // If the layer is NDIFF or PDIFF and there is also a POLY at the same location,
+        // add the cell to transistors.
         if (cell.layer === NDIFF || cell.layer === PDIFF) {
             if (layeredGrid[cell.x][cell.y][POLY].isSet) {
+                transistors.add(cell);
                 return;
             }
         }
+
         // Add the cell to the net.
         net.add(cell);
 
@@ -225,20 +230,20 @@ function setNets() {
     let netY = new Set();
     
     for(let ii = 0; ii < layers; ii++) {
-        if(layer[A.x][A.y][ii].isSet) {
-            setRecursively(layer[A.x][A.y][ii], netA);
+        if(layeredGrid[A.x][A.y][ii].isSet) {
+            setRecursively(layeredGrid[A.x][A.y][ii], netA);
         }
-        if(layer[B.x][B.y][ii].isSet) {
-            setRecursively(layer[B.x][B.y][ii], netB);
+        if(layeredGrid[B.x][B.y][ii].isSet) {
+            setRecursively(layeredGrid[B.x][B.y][ii], netB);
         }
-        if(layer[C.x][C.y][ii].isSet) {
-            setRecursively(layer[C.x][C.y][ii], netC);
+        if(layeredGrid[C.x][C.y][ii].isSet) {
+            setRecursively(layeredGrid[C.x][C.y][ii], netC);
         }
-        if(layer[D.x][D.y][ii].isSet) {
-            setRecursively(layer[D.x][D.y][ii], netD);
+        if(layeredGrid[D.x][D.y][ii].isSet) {
+            setRecursively(layeredGrid[D.x][D.y][ii], netD);
         }
-        if(layer[Y.x][Y.y][ii].isSet) {
-            setRecursively(layer[Y.x][Y.y][ii], netY);
+        if(layeredGrid[Y.x][Y.y][ii].isSet) {
+            setRecursively(layeredGrid[Y.x][Y.y][ii], netY);
         }
     }
 
@@ -268,27 +273,32 @@ function setNets() {
     // Print a grid with in all cells that are in a given net.
     function printGrid(net, name) {
         let grid = [];
-        for(let ii = 1; ii < gridsize - 1; ii++) {
-            grid[ii - 1] = [];
-            for(let jj = 1; jj < gridsize - 1; jj++) {
-                grid[ii - 1][jj - 1] = " ";
+        for(let ii = 0; ii < gridsize; ii++) {
+            grid[ii] = [];
+            for(let jj = 0; jj < gridsize; jj++) {
+                grid[ii][jj] = "o";
                 // If any of the layers are in netA, set the cell to "A".
                 for(let kk = 0; kk < layers; kk++) {
                     if(layeredGrid[ii][jj][kk].isSet && net.has(layeredGrid[ii][jj][kk])) {
-                        grid[ii - 1][jj - 1] = name;
+                        grid[ii][jj] = name;
+                    }
+                    else if(transistors.has(layeredGrid[ii][jj][kk])) {
+                        grid[ii][jj] = "T";
                     }
                 }
             }
         }
 
-        // Print to the console.
-        for(let ii = 0; ii < gridsize - 2; ii++) {
-            let line = "";
-            for(let jj = 0; jj < gridsize - 2; jj++) {
-                line += grid[ii][jj];
+        // Print to the console, rotated 90 degrees.
+        str = ""
+        for(let ii = 0; ii < grid.length; ii++) {
+            let row = "";
+            for(let jj = 0; jj < grid[ii].length; jj++) {
+                row += grid[jj][ii];
             }
-            console.log(line);
+            str += row + "\n";
         }
+        console.log(str);
     }
 
     // Print the grid for netA.
