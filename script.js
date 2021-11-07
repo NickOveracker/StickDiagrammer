@@ -94,7 +94,7 @@ function makeLayeredGrid(width, height, layers) {
         for (let jj = 0; jj < height; jj++) {
             grid[ii][jj] = new Array(layers);
             for (let kk = 0; kk < layers; kk++) {
-                grid[ii][jj][kk] = {isSet: false, x = ii, y = jj, layer = kk};
+                grid[ii][jj][kk] = {isSet: false, x: ii, y: jj, layer: kk};
             }
         }
     }
