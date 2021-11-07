@@ -324,16 +324,16 @@ function refreshCanvas() {
 
     // Draw CONTACT at the coordinates of the four inputs
     // and at the output.
-    layeredGrid[A.x][A.y][CONTACT] = {isSet: true};
-    layeredGrid[B.x][B.y][CONTACT] = {isSet: true};
-    layeredGrid[C.x][C.y][CONTACT] = {isSet: true};
-    layeredGrid[D.x][D.y][CONTACT] = {isSet: true};
-    layeredGrid[Y.x][Y.y][CONTACT] = {isSet: true};
+    layeredGrid[A.x][A.y][CONTACT].isSet = true;
+    layeredGrid[B.x][B.y][CONTACT].isSet = true;
+    layeredGrid[C.x][C.y][CONTACT].isSet = true;
+    layeredGrid[D.x][D.y][CONTACT].isSet = true;
+    layeredGrid[Y.x][Y.y][CONTACT].isSet = true;
 
     // Draw METAL1 across the grid at VDD_y and GND_y.
     for (let i = railStartX; i < railEndX; i++) {
-        layeredGrid[i][VDD_y][METAL1] = {isSet: true};
-        layeredGrid[i][GND_y][METAL1] = {isSet: true};
+        layeredGrid[i][VDD_y][METAL1].isSet = true;
+        layeredGrid[i][GND_y][METAL1].isSet = true;
     }
 
     // Draw each layer in order.
