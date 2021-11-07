@@ -228,10 +228,8 @@ function refreshCanvas() {
     resizeCanvas();
 
     // Draw the grid.
-    // Run once at the beginning just to define some stuff.
-    if(cellWidth === undefined) {
-        drawGrid(gridsize);
-    }
+    drawGrid(gridsize);
+
     // Check the layers of the grid, and draw cells as needed.
     function drawCell(i, j, layer, isBorder) {
         if (isBorder || layeredGrid[i-1][j-1][layer]) {
@@ -577,12 +575,6 @@ window.onload = function() {
             redo();
         }
 
-        // Toggle dark mode by pressing space
-        if (event.keyCode == 32) {
-            darkMode = !darkMode;
-            refreshCanvas();
-        }
-
         // If the user presses the "A" key,
         // move the coordinates for A to the cell under the cursor.
         if (event.keyCode == 65) {
@@ -653,4 +645,12 @@ window.onload = function() {
             }
         }
     });
+
+    window.addEventListener("keyup", function(event) {
+        // Toggle dark mode by pressing space
+        if (event.keyCode == 32) {
+            darkMode = !darkMode;
+            refreshCanvas();
+        }
+    }
 }
