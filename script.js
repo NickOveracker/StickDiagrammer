@@ -288,15 +288,20 @@ function refreshCanvas() {
     // set the outer border of the canvas to the cursor color
     drawBorder();
 
-    // Draw labels on the canvas above the four inputs
+    // Draw labels on the canvas above the four inputs and output
     ctx.font = "bold 18px Arial";
     ctx.fillStyle = darkMode ? "#ffffff" : "#000000";
-    // Draw white backgrounds behind the labels below
     ctx.fillText("A", cellWidth * (A.x + 1.5), cellHeight * (A.y + 0.75));
     ctx.fillText("B", cellWidth * (B.x + 1.5), cellHeight * (B.y + 0.75));
     ctx.fillText("C", cellWidth * (C.x + 1.5), cellHeight * (C.y + 0.75));
     ctx.fillText("D", cellWidth * (D.x + 1.5), cellHeight * (D.y + 0.75));
     ctx.fillText("Y", cellWidth * (Y.x + 1.5), cellHeight * (Y.y + 0.75));
+
+    // Draw a label on top of the VDD and GND rails.
+    ctx.font = "bold 18px Arial";
+    ctx.fillStyle = "#000000";
+    ctx.fillText("VDD", cellWidth * 3, cellHeight * (VDD_y + 1.75));
+    ctx.fillText("GND", cellWidth * 3, cellHeight * (GND_y + 1.75));
 
     drawGrid(gridsize); // Not sure why but gotta draw this twice.
 }
