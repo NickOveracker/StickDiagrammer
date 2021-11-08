@@ -1109,10 +1109,6 @@ function refreshCanvas() {
     ctx.fillText("GND", cellWidth * 3, cellHeight * (GND_y + 1.75));
 
     drawGrid(gridsize); // Not sure why but gotta draw this twice.
-
-    setNets();
-    let table = buildTruthTable();
-    refreshTruthTable(table);
 }
 
 // Save function to save the current state of the grid and the canvas.
@@ -1256,6 +1252,8 @@ function refreshTruthTable(table) {
     tableElement.setAttribute("cellspacing", "0");
     tableElement.setAttribute("cellpadding", "0");
     tableElement.setAttribute("style", "border-collapse: collapse;");
+    // 100% width
+    tableElement.setAttribute("width", "100%");
 
     let header = tableElement.createTHead();
     let headerRow = header.insertRow(0);
@@ -1533,4 +1531,9 @@ window.onload = function() {
             refreshCanvas();
         }
     });
+
+    setInterval(function() {
+        setNets();
+        refreshTruthTable(buildTruthTable());
+    }, 1000);
 }
