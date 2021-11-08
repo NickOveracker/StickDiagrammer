@@ -206,6 +206,7 @@ function buildTruthTable() {
     // Merge input and output into one table (input on the left, output on the right.)
     let table = [];
     table[0] = header;
+    table[0][header.length] = "Y";
     for(let ii = 0; ii < inputVals.length; ii++) {
         // Reverse the input row.
         let inputRow = [];
