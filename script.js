@@ -1242,9 +1242,9 @@ function refreshTruthTable(table) {
     let tableDiv = document.getElementById("truthTable");
     let done = false;
 
-    // If there is no table yet, create one.
+    // If there is no table yet, create one (include tbody)
     if (tableDiv.innerHTML == "") {
-        tableDiv.innerHTML = "<table id='truthTable'></table>";
+        tableDiv.innerHTML = "<table id='truthTable'><tbody>";
         // Set the number of columns and rows.
         // The first row is the header.
         let numCols = table[0].length;
@@ -1267,6 +1267,7 @@ function refreshTruthTable(table) {
             tableDiv.innerHTML += row;
         }
 
+        tableDiv.innerHTML += "</tbody></table>";
         done = true;
     }
     
