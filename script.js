@@ -37,6 +37,12 @@ let C = {x: 2, y: 16};
 let D = {x: 2, y: 20};
 let Y = {x: 26, y: 14};
 
+let aNeT;
+let bNet;
+let cNet;
+let dNet;
+let yNet;
+
 // Netlist is a list of nets.
 // Each net is a Set of cells.
 let netlist;
@@ -181,8 +187,18 @@ class Node {
             return 'vdd';
         } else if(this === gndNode) {
             return 'gnd';
+        } else if(this.cell.gate === aNet) {
+            return "A";
+        } else if(this.cell.gate === bNet) {
+            return "B";
+        } else if(this.cell.gate === cNet) {
+            return "C";
+        } else if(this.cell.gate === dNet) {
+            return "D";
+        } else if(this === outputNodes[0]) {
+            return "Y";
         } else {
-            return this.cell.gate;
+            return "?";
         }
     }
 }
@@ -569,18 +585,26 @@ function setNets() {
         let net2 = new Set();
 
         if(nmosCell.term1 !== undefined) {
-            net1.add(nmosCell.term1);
+            if(!getNet(nmosCell.term1)) {
+                net1.add(nmosCell.term1);
+            } else {
+                net1 = getNet(nmosCell.term1);
+            }
         }
         if(nmosCell.term2 !== undefined) {
-            net2.add(nmosCell.term2);
+            if(!getNet(nmosCell.term2)) {
+                net2.add(nmosCell.term2);
+            } else {
+                net2 = getNet(nmosCell.term2);
+            }
         }
         
         // Add the nets if they are not empty.
-        if(net1.size > 0) {
+        if(net1.size > 0 && !getNet(nmosCell.term1)) {
             setRecursively(nmosCell.term1, net1);
             netlist.push(net1);
         }
-        if(net2.size > 0) {
+        if(net2.size > 0 && !getNet(nmosCell.term2)) {
             setRecursively(nmosCell.term2, net2);
             netlist.push(net2);
         }
@@ -595,21 +619,67 @@ function setNets() {
         let net2 = new Set();
 
         if(pmosCell.term1 !== undefined) {
-            net1.add(pmosCell.term1);
+            if(!getNet(pmosCell.term1)) {
+                net1.add(pmosCell.term1);
+            } else {
+                net1 = getNet(pmosCell.term1);
+            }
         }
-
         if(pmosCell.term2 !== undefined) {
-            net2.add(pmosCell.term2);
+            if(!getNet(pmosCell.term2)) {
+                net2.add(pmosCell.term2);
+            } else {
+                net2 = getNet(pmosCell.term2);
+            }
         }
 
         // Add the nets if they are not empty.
-        if(net1.size > 0) {
+        if(net1.size > 0 && !getNet(pmosCell.term1)) {
             setRecursively(pmosCell.term1, net1);
             netlist.push(net1);
         }
-        if(net2.size > 0) {
+        if(net2.size > 0 && !getNet(pmosCell.term2)) {
             setRecursively(pmosCell.term2, net2);
             netlist.push(net2);
+        }
+    }
+
+    // Now, loop through nmos and pmos again.
+    // Set each term to getNet(term).
+    // Set each gate to getNet(gate).
+    nmosIterator = nmos.values();
+    for (let ii = 0; ii < nmos.size; ii++) {
+        let nmosCell = nmosIterator.next().value;
+        let net1 = getNet(nmosCell.term1);
+        let net2 = getNet(nmosCell.term2);
+        let gate = getNet(nmosCell.gate);
+
+        if(net1 !== undefined) {
+            nmosCell.term1 = net1;
+        }
+        if(net2 !== undefined) {
+            nmosCell.term2 = net2;
+        }
+        if(gate !== undefined) {
+            nmosCell.gate = gate;
+        }
+    }
+
+    pmosIterator = pmos.values();
+    for (let ii = 0; ii < pmos.size; ii++) {
+        let pmosCell = pmosIterator.next().value;
+        let net1 = getNet(pmosCell.term1);
+        let net2 = getNet(pmosCell.term2);
+        let gate = getNet(pmosCell.gate);
+
+        if(net1 !== undefined) {
+            pmosCell.term1 = net1;
+        }
+        if(net2 !== undefined) {
+            pmosCell.term2 = net2;
+        }
+        if(gate !== undefined) {
+            pmosCell.gate = gate;
         }
     }
 
@@ -659,23 +729,24 @@ function setNets() {
     // Print the grid for netGND.
     printGrid(netGND, "-");
 
+    aNet = netA;
+    bNet = netB;
+    cNet = netC;
+    dNet = netD;
+    yNet = netY;
+
     for(ii = numInputs + numOutputs + 2; ii < netlist.length; ii++) {
         printGrid(netlist[ii], String.fromCharCode(65 + ii));
     }
 
-    graph.print();
-
     // Loop through pmos/nmos and find every pmos/nmos that shares a net (on term1 or term2).
     let pmosIterator1 = pmos.values();
-    let pmosIterator2 = pmos.values();
-    let nmosIterator1 = nmos.values();
-    let nmosIterator2 = nmos.values();
-
     for(let ii = 0; ii < pmos.size; ii++) {
+        console.log("PMOS: " + ii);
         let pmosCell = pmosIterator1.next().value;
         let pmosNode = graph.getNode(pmosCell);
-        let net1 = getNet(pmosCell.term1);
-        let net2 = getNet(pmosCell.term2);
+        let net1 = pmosCell.term1;
+        let net2 = pmosCell.term2;
 
         // If either net is netVDD, add an edge to vddNode.
         if(net1 === netVDD || net2 === netVDD) {
@@ -686,8 +757,15 @@ function setNets() {
             graph.addEdge(gndNode, pmosNode);
         }
 
+        // Same for output.
+        if(net1 === netY || net2 === netY) {
+            graph.addEdge(outputNodes[0], pmosNode);
+        }
+
         // Loop through pmosIterator2 to find all other pmos cells that share a net.
+        let pmosIterator2 = pmos.values();
         for(let jj = 0; jj < pmos.size; jj++) {
+            console.log(jj);
             let pmosCell2 = pmosIterator2.next().value;
             let pmosNode2 = graph.getNode(pmosCell2);
 
@@ -696,29 +774,30 @@ function setNets() {
             }
 
             if(pmosCell2.term1 !== undefined) {
-                if(net1.has(pmosCell2.term1) || net2.has(pmosCell2.term1)) {
+                if(net1 === pmosCell2.term1 || net2 === pmosCell2.term1) {
                     graph.addEdge(pmosNode, pmosNode2);
                 }
             }
             if(pmosCell2.term2 !== undefined) {
-                if(net1.has(pmosCell2.term2) || net2.has(pmosCell2.term2)) {
+                if(net1 === pmosCell2.term2 || net2 === pmosCell2.term2) {
                     graph.addEdge(pmosNode, pmosNode2);
                 }
             }
         }
 
         // Now do the same for nmos.
+        let nmosIterator2 = nmos.values();
         for(let jj = 0; jj < nmos.size; jj++) {
             let nmosCell2 = nmosIterator2.next().value;
             let nmosNode2 = graph.getNode(nmosCell2);
 
             if(nmosCell2.term1 !== undefined) {
-                if(net1.has(nmosCell2.term1) || net2.has(nmosCell2.term1)) {
+                if(net1 === nmosCell2.term1 || net2 === nmosCell2.term1) {
                     graph.addEdge(pmosNode, nmosNode2);
                 }
             }
             if(nmosCell2.term2 !== undefined) {
-                if(net1.has(nmosCell2.term2) || net2.has(nmosCell2.term2)) {
+                if(net1 === nmosCell2.term2 || net2 === nmosCell2.term2) {
                     graph.addEdge(pmosNode, nmosNode2);
                 }
             }
@@ -726,23 +805,29 @@ function setNets() {
     }
 
     // Reset the iterators and do the same for nmos.
-    pmosIterator1 = pmos.values();
-    pmosIterator2 = pmos.values();
     nmosIterator1 = nmos.values();
-    nmosIterator2 = nmos.values();
-
     for(let ii = 0; ii < nmos.size; ii++) {
         let nmosCell = nmosIterator1.next().value;
         let nmosNode = graph.getNode(nmosCell);
-        let net1 = getNet(nmosCell.term1);
-        let net2 = getNet(nmosCell.term2);
+        let net1 = nmosCell.term1;
+        let net2 = nmosCell.term2;
 
         // If either net is netVDD, add an edge to vddNode.
         if(net1 === netVDD || net2 === netVDD) {
             graph.addEdge(vddNode, nmosNode);
         }
+        // If either net is netGND, add an edge to gndNode.
+        if(net1 === netGND || net2 === netGND) {
+            graph.addEdge(gndNode, nmosNode);
+        }
+
+        // Same for output.
+        if(net1 === netY || net2 === netY) {
+            graph.addEdge(outputNodes[0], nmosNode);
+        }
 
         // Loop through nmosIterator2 to find all other nmos cells that share a net.
+        nmosIterator2 = nmos.values();
         for(let jj = 0; jj < nmos.size; jj++) {
             let nmosCell2 = nmosIterator2.next().value;
             let nmosNode2 = graph.getNode(nmosCell2);
@@ -752,18 +837,19 @@ function setNets() {
             }
 
             if(nmosCell2.term1 !== undefined) {
-                if(net1.has(nmosCell2.term1) || net2.has(nmosCell2.term1)) {
+                if(net1 === nmosCell2.term1 || net2 === nmosCell2.term1) {
                     graph.addEdge(nmosNode, nmosNode2);
                 }
             }
             if(nmosCell2.term2 !== undefined) {
-                if(net1.has(nmosCell2.term2) || net2.has(nmosCell2.term2)) {
+                if(net1 === nmosCell2.term2 || net2 === nmosCell2.term2) {
                     graph.addEdge(nmosNode, nmosNode2);
                 }
             }
         }
 
         // Now do the same for pmos.
+        pmosIterator2 = pmos.values();
         for(let jj = 0; jj < pmos.size; jj++) {
             let pmosCell2 = pmosIterator2.next().value;
             let pmosNode2 = graph.getNode(pmosCell2);
@@ -780,6 +866,8 @@ function setNets() {
             }
         }
     }
+
+    graph.print();
 }
 
 // Initialize everything
