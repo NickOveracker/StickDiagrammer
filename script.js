@@ -66,7 +66,7 @@ let lightModeGridColor = '#999999';
 // Each node is an input or output.
 // Each edge is a connection between two nodes (a transistor).
 // The graph is directed.
-class graph {
+class Graph {
     constructor() {
         this.nodes = [];
         this.edges = [];
