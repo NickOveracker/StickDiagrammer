@@ -7,7 +7,8 @@ let cellWidth;
 let gridsize = 29;
 let layers = 5;
 let saveState = 0;
-let maxSaveState = 0;
+let lastSaveState = 0;
+let maxSaveState = 10;
 let dragging = false;
 let startX;
 let startY;
@@ -67,6 +68,151 @@ let outputNodes;
 // Grid color
 let darkModeGridColor = '#cccccc';
 let lightModeGridColor = '#999999';
+
+function computeOutput(inputVals, outputNode) {
+    let visited;
+    let pmosOut;
+    let nmosOut;
+    let out;
+    let firstLevel;
+    let passWhenPos;
+
+    function computeOutputRecursive(node) {
+        // We found it?
+        if(node === outputNode) {
+            return true;
+        }
+
+        // Avoid infinite loops.
+        if(visited[node.getCell().x + "," + node.getCell().y]) {
+            return false;
+        }
+        visited[node.getCell().x + "," + node.getCell().y] = true;
+
+        // Only proceed if the input is activated.
+        if((node !== vddNode) && (node !== gndNode)) {
+            // Convert node.getName() to a number.
+            let inputNum = node.getName().charCodeAt(0) - 65;
+            let evalInput = !!((inputVals >> inputNum) & 1);
+            if(evalInput !== passWhenPos) {
+                return false;
+            }
+        }
+
+        // Return if this is not the first level and the node is vddNode or gndNode.
+        // The rail nodes won't play nice with the rest of this.
+        if(!firstLevel && ((node === vddNode) || (node === gndNode))) {
+            return false;
+        }
+
+        firstLevel = false;
+
+        // Recurse on all edges.
+        let edges = node.getEdges();
+        for(let ii = 0; ii < edges.length; ii++) {
+            if(computeOutputRecursive(edges[ii].getOtherNode(node))) {
+                return true;
+            }
+        }
+
+        // No findy :(
+        return false;
+    }
+
+    // Get pmos output.
+    visited = {};
+    firstLevel = true;
+    passWhenPos = false;
+    pmosOut = computeOutputRecursive(vddNode) ? 1 : "Z";
+
+    // Get nmos output.
+    visited = {};
+    firstLevel = true;
+    passWhenPos = true;
+    nmosOut = computeOutputRecursive(gndNode) ? 0 : "Z";
+
+    // Reconcile.
+    if(pmosOut === "Z") {
+        out = nmosOut;
+    } else if(nmosOut === "Z") {
+        out = pmosOut;
+    } else {
+        out = "X";
+    }
+
+    return out;
+}
+
+// Generate an output table.
+// Each row evaluates to 1, 0, Z, or X
+// 1 is VDD, 0 is GND.
+// Z is high impedance, X is error (VDD and GND contradiction.)
+function buildTruthTable() {
+    let header = [];
+    let inputVals = [];
+    let outputVals = [];
+
+    // Each loop iteration is a combination of input values.
+    // I.e., one row of the output table.
+    for(let ii = 0; ii < Math.pow(2, numInputs); ii++) {
+        let tableInputRow = [];
+        let tableOutputRow = [];
+
+        // Compute each output.
+        for(let jj = 0; jj < numOutputs; jj++) {
+            tableOutputRow[jj] = computeOutput(ii, outputNodes[jj]);
+        }
+
+        outputVals[ii] = tableOutputRow;
+
+        for(let jj = 0; jj < numInputs; jj++) {
+            tableInputRow[jj] = (ii >> jj) & 1;
+        }
+
+        inputVals[ii] = tableInputRow;
+    }
+
+    let outstr = "";
+
+    // Header
+    for(let jj = inputVals[0].length - 1; jj >= 0; jj--) {
+        outstr += String.fromCharCode(65 + jj) + " ";
+        header[inputVals[0].length - 1 - jj] = String.fromCharCode(65 + jj);
+    }
+    outstr += " |";
+    for(let jj = 0; jj < outputVals[0].length; jj++) {
+        outstr += " " + String.fromCharCode(89 - jj);
+    }
+    outstr += "\n";
+    for(let jj = 0; jj <= inputVals[0].length + outputVals[0].length; jj++) {
+        outstr += "--";
+    }
+    outstr += "\n";
+
+    // Contents
+    for(let ii = 0; ii < inputVals.length; ii++) {
+        for(let jj = inputVals[ii].length - 1; jj >= 0; jj--) {
+            outstr += inputVals[ii][jj] + " ";
+        }
+        outstr += " |";
+        for(let jj = 0; jj < outputVals[ii].length; jj++) {
+            outstr += " " + outputVals[ii][jj];
+        }
+        outstr += "\n";
+    }
+
+    console.log(outstr);
+    
+    // Merge input and output into one table (input on the left, output on the right.)
+    let table = [];
+    table[0] = header;
+    for(let ii = 0; ii < inputVals.length; ii++) {
+        table[ii+1] = inputVals[ii].concat(outputVals[ii]);
+    }
+
+    return table;
+}
+
 
 // graph class to represent CMOS circuitry as a graph.
 // Each node is an input or output.
@@ -958,11 +1104,16 @@ function refreshCanvas() {
     ctx.fillText("GND", cellWidth * 3, cellHeight * (GND_y + 1.75));
 
     drawGrid(gridsize); // Not sure why but gotta draw this twice.
+
+    setNets();
+    let table = buildTruthTable();
+    refreshTruthTable(table);
 }
 
 // Save function to save the current state of the grid and the canvas.
 // Increment save state so we can maintain an undo buffer.
 function saveCurrentState() {    
+    return;
     // Save both the grid and the drawing.
     localStorage.setItem('layeredGrid' + saveState, JSON.stringify(layeredGrid));
     localStorage.setItem('canvas' + saveState, canvas.toDataURL());
@@ -971,17 +1122,34 @@ function saveCurrentState() {
     saveState++;
 
     // Delete all save states after the current one.
-    for (let i = saveState; i < maxSaveState; i++) {
+    for (let i = saveState; i < lastSaveState; i++) {
         localStorage.removeItem('layeredGrid' + i);
         localStorage.removeItem('canvas' + i);
     }
 
     // Update the max save state.
-    maxSaveState = saveState;
+    lastSaveState = saveState;
+
+    // If we've reached the max save state, delete the oldest one.
+    if (maxSaveState == saveState) {
+        localStorage.removeItem('layeredGrid0');
+        localStorage.removeItem('canvas0');
+        lastSaveState--;
+
+        // Rename all the save states.
+        for (let i = 0; i < maxSaveState - 1; i++) {
+            localStorage.setItem('layeredGrid' + i, localStorage.getItem('layeredGrid' + (i + 1)));
+            localStorage.setItem('canvas' + i, localStorage.getItem('canvas' + (i + 1)));
+        }
+
+        // Delete the last save state.
+        localStorage.removeItem('layeredGrid' + (maxSaveState - 1));
+    }
 }
 
 // Undo by going back to the previous save state (if there is one) and redrawing the canvas.
 function undo() {
+    return;
     if (saveState > 0) {
         saveState--;
         layeredGrid = JSON.parse(localStorage.getItem('layeredGrid' + saveState));
@@ -997,7 +1165,8 @@ function undo() {
 
 // Redo by going forward to the next save state (if there is one) and redrawing the canvas.
 function redo() {
-    if (saveState < maxSaveState) {
+    return;
+    if (saveState < lastSaveState) {
         saveState++;
         layeredGrid = JSON.parse(localStorage.getItem('layeredGrid' + saveState));
         let img = new Image();
@@ -1068,6 +1237,60 @@ function getCell(clientX, clientY) {
     return null;
 }
 
+// Table is a 2D array of single character strings.
+function refreshTruthTable(table) {
+    let tableDiv = document.getElementById("truthTable");
+    let done = false;
+
+    // If there is no table yet, create one.
+    if (tableDiv.innerHTML == "") {
+        tableDiv.innerHTML = "<table id='truthTable'></table>";
+        // Set the number of columns and rows.
+        // The first row is the header.
+        let numCols = table[0].length;
+        let numRows = table.length;
+        // Create the header.
+        let header = "<tr>";
+        for (let i = 0; i < numCols; i++) {
+            header += "<th>" + table[0][i] + "</th>";
+        }
+        header += "</tr>";
+        tableDiv.innerHTML += header;
+        
+        // Create the rest of the table.
+        for (let i = 1; i < numRows; i++) {
+            let row = "<tr>";
+            for (let j = 0; j < numCols; j++) {
+                row += "<td>" + table[i][j] + "</td>";
+            }
+            row += "</tr>";
+            tableDiv.innerHTML += row;
+        }
+
+        done = true;
+    }
+    
+    // Otherwise, just update the contents.
+    if (!done) {
+        let numCols = table[0].length;
+        let numRows = table.length;
+        let tableBody = document.getElementById("truthTable").getElementsByTagName("tbody")[0];
+        // Update the header.
+        let header = tableBody.getElementsByTagName("tr")[0];
+        for (let i = 0; i < numCols; i++) {
+            header.getElementsByTagName("th")[i].innerHTML = table[0][i];
+        }
+        // Update the rest of the table.
+        for (let i = 1; i < numRows; i++) {
+            let row = tableBody.getElementsByTagName("tr")[i];
+            for (let j = 0; j < numCols; j++) {
+                row.getElementsByTagName("td")[j].innerHTML = table[i][j];
+            }
+        }
+    }
+
+}
+
 window.onload = function() {
     // Clear local storage
     localStorage.clear();
@@ -1084,6 +1307,11 @@ window.onload = function() {
     canvas = document.getElementById("canvas");
     ctx = canvas.getContext("2d");
     layeredGrid = makeLayeredGrid(gridsize, gridsize, layers);
+
+    // Add a div to one side to add the truth table.
+    let truthTableDiv = document.createElement("div");
+    truthTableDiv.id = "truthTable";
+    document.body.appendChild(truthTableDiv);
 
     refreshCanvas();
 
