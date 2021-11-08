@@ -207,7 +207,12 @@ function buildTruthTable() {
     let table = [];
     table[0] = header;
     for(let ii = 0; ii < inputVals.length; ii++) {
-        table[ii+1] = inputVals[ii].concat(outputVals[ii]);
+        // Reverse the input row.
+        let inputRow = [];
+        for(let jj = 0; jj < inputVals[ii].length; jj++) {
+            inputRow[jj] = inputVals[ii][inputVals[ii].length - 1 - jj];
+        }
+        table[ii+1] = inputRow.concat(outputVals[ii]);
     }
 
     return table;
@@ -1240,56 +1245,35 @@ function getCell(clientX, clientY) {
 // Table is a 2D array of single character strings.
 function refreshTruthTable(table) {
     let tableDiv = document.getElementById("truthTable");
-    let done = false;
+    tableDiv.innerHTML = "";
 
-    // If there is no table yet, create one (include tbody)
-    if (tableDiv.innerHTML == "") {
-        tableDiv.innerHTML = "<table id='truthTable'><tbody>";
-        // Set the number of columns and rows.
-        // The first row is the header.
-        let numCols = table[0].length;
-        let numRows = table.length;
-        // Create the header.
-        let header = "<tr>";
-        for (let i = 0; i < numCols; i++) {
-            header += "<th>" + table[0][i] + "</th>";
-        }
-        header += "</tr>";
-        tableDiv.innerHTML += header;
-        
-        // Create the rest of the table.
-        for (let i = 1; i < numRows; i++) {
-            let row = "<tr>";
-            for (let j = 0; j < numCols; j++) {
-                row += "<td>" + table[i][j] + "</td>";
-            }
-            row += "</tr>";
-            tableDiv.innerHTML += row;
-        }
+    // Create a table with the correct number of rows and columns.
+    // The first row should be a header.
+    let tableElement = document.createElement("table");
+    tableElement.setAttribute("class", "truthTable");
+    tableElement.setAttribute("id", "truthTable");
+    tableElement.setAttribute("border", "1");
+    tableElement.setAttribute("cellspacing", "0");
+    tableElement.setAttribute("cellpadding", "0");
+    tableElement.setAttribute("style", "border-collapse: collapse;");
 
-        tableDiv.innerHTML += "</tbody></table>";
-        done = true;
+    let header = tableElement.createTHead();
+    let headerRow = header.insertRow(0);
+    for (let i = 0; i < table[0].length; i++) {
+        let cell = headerRow.insertCell(i);
+        cell.innerHTML = table[0][i];
     }
-    
-    // Otherwise, just update the contents.
-    if (!done) {
-        let numCols = table[0].length;
-        let numRows = table.length;
-        let tableBody = document.getElementById("truthTable").getElementsByTagName("tbody")[0];
-        // Update the header.
-        let header = tableBody.getElementsByTagName("tr")[0];
-        for (let i = 0; i < numCols; i++) {
-            header.getElementsByTagName("th")[i].innerHTML = table[0][i];
-        }
-        // Update the rest of the table.
-        for (let i = 1; i < numRows; i++) {
-            let row = tableBody.getElementsByTagName("tr")[i];
-            for (let j = 0; j < numCols; j++) {
-                row.getElementsByTagName("td")[j].innerHTML = table[i][j];
-            }
+
+    // Create the rest of the table.
+    for (let i = 1; i < table.length; i++) {
+        let row = tableElement.insertRow(i);
+        for (let j = 0; j < table[i].length; j++) {
+            let cell = row.insertCell(j);
+            cell.innerHTML = table[i][j];
         }
     }
 
+    tableDiv.appendChild(tableElement);
 }
 
 window.onload = function() {
@@ -1313,6 +1297,16 @@ window.onload = function() {
     let truthTableDiv = document.createElement("div");
     truthTableDiv.id = "truthTable";
     document.body.appendChild(truthTableDiv);
+    // Fix the size and position of the truth table div.
+    truthTableDiv.style.width = "300px";
+    truthTableDiv.style.height = "100%";
+    truthTableDiv.style.position = "absolute";
+    truthTableDiv.style.top = "0";
+    truthTableDiv.style.right = "0";
+    truthTableDiv.style.backgroundColor = darkMode ? "#333" : "#eee";
+    truthTableDiv.style.overflow = "auto";
+    // Set the font color in the table.
+    truthTableDiv.style.color = darkMode ? "#eee" : "#333";
 
     refreshCanvas();
 
