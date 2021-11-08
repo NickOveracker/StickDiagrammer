@@ -1254,8 +1254,6 @@ function refreshTruthTable(table) {
     tableElement.setAttribute("style", "border-collapse: collapse;");
     // 100% width
     tableElement.setAttribute("width", "100%");
-    // text-align: center;
-    tableElement.setAttribute("align", "center");
 
     let header = tableElement.createTHead();
     let headerRow = header.insertRow(0);
@@ -1307,6 +1305,8 @@ window.onload = function() {
     truthTableDiv.style.overflow = "auto";
     // Set the font color in the table.
     truthTableDiv.style.color = darkMode ? "#eee" : "#333";
+    // Center text alignment
+    truthTableDiv.style.textAlign = "center";
 
     refreshCanvas();
 
