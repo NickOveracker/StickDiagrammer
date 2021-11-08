@@ -28,7 +28,7 @@ let cursorColorIndex = PDIFF;
 
 // Objects to represent the coordinates of the four inputs (A, B, C, D)
 // and the output (Y).
-let numInputs = 6; // Includes VDD and GND.
+let numInputs = 4; // Doesn't include VDD and GND.
 let numOutputs = 1;
 
 let A = {x: 2, y: 8};
@@ -41,7 +41,9 @@ let Y = {x: 26, y: 14};
 // Each net is a Set of cells.
 let netlist;
 let pmos;
-let nmos
+let nmos;
+let output;
+let graph;
 
 // VDD and GND are the two terminals of the grid.
 // The terminals are always at the top and bottom of the grid.
@@ -50,15 +52,21 @@ let GND_y = gridsize - 2;
 let railStartX = 1;
 let railEndX = gridsize - 1;
 
+// Nodes
+let vddNode;
+let gndNode;
+let inputNodes;
+let outputNodes;
+
 // Grid color
 let darkModeGridColor = '#cccccc';
 let lightModeGridColor = '#999999';
 
-// Digraph class to represent CMOS circuitry as a graph.
+// graph class to represent CMOS circuitry as a graph.
 // Each node is an input or output.
 // Each edge is a connection between two nodes (a transistor).
 // The graph is directed.
-class Digraph {
+class graph {
     constructor() {
         this.nodes = [];
         this.edges = [];
@@ -68,7 +76,7 @@ class Digraph {
     isConnected(node1, node2) {
         let edges = node1.getEdges();
         for (let i = 0; i < edges.length; i++) {
-            if (edges[i].getNode2() == node2) {
+            if (edges[i].getNode2() == node2 || edges[i].getNode1() == node2) {
                 return true;
             }
         }
@@ -76,8 +84,8 @@ class Digraph {
     }
 
     // Add a node to the graph.
-    addNode(name, isInput, isOutput, net) {
-        let node = new Node(name, isInput, isOutput, net);
+    addNode(cell) {
+        let node = new Node(cell);
         this.nodes.push(node);
         return node;
     }
@@ -90,10 +98,10 @@ class Digraph {
         }
     }
 
-    // Return the node with the given name.
-    getNode(name) {
+    // Return the node with the given cell.
+    getNode(cell) {
         for (let node of this.nodes) {
-            if (node.getName() == name) {
+            if (node.getCell() === cell) {
                 return node;
             }
         }
@@ -120,24 +128,23 @@ class Digraph {
         return this.edges.length;
     }
 
-    // Get a node given a net.
-    getNodeByNet(net) {
-        for (let node of this.nodes) {
-            if (node.getNet() == net) {
-                return node;
+    getIndexByCell(cell) {
+        for (let i = 0; i < this.nodes.length; i++) {
+            if (this.nodes[i].getCell() === cell) {
+                return i;
             }
         }
-        return null;
+        return -1;
     }
 
-    // Represent the graph visually as a digraph in the console.
+    // Represent the graph visually as a graph in the console.
     print() {
-        console.log('digraph G {');
+        console.log('graph G {');
         for (let node of this.nodes) {
             console.log(node.getName() + ';');
         }
         for (let edge of this.edges) {
-            console.log(edge.getNode1().getName() + ' -> ' + edge.getNode2().getName() + ';');
+            console.log(edge.getNode1().getName() + ' <-> ' + edge.getNode2().getName() + ';');
         }
         console.log('}');
     }
@@ -145,12 +152,9 @@ class Digraph {
 
 // Define node and edge classes.
 class Node {
-    constructor(name, isInput, isOutput, net) {
-        this.name = name;
+    constructor(cell) {
+        this.cell = cell;
         this.edges = [];
-        this.isInput = isInput;
-        this.isOutput = isOutput;
-        this.net = net;
     }
 
     addEdge(edge) {
@@ -168,20 +172,18 @@ class Node {
         return this.edges;
     }
 
+    getCell() {
+        return this.cell;
+    }
+
     getName() {
-        return this.name;
-    }
-
-    isInput() {
-        return this.isInput;
-    }
-
-    isOutput() {
-        return this.isOutput;
-    }
-
-    getNet() {
-        return this.net;
+        if(this === vddNode) {
+            return 'vdd';
+        } else if(this === gndNode) {
+            return 'gnd';
+        } else {
+            return this.cell.gate;
+        }
     }
 }
 
@@ -322,6 +324,9 @@ function drawGrid(size) {
 
 // Set the nets.
 function setNets() {
+    // Create a graph object.
+    graph = new Graph();
+
     // Clear the netlist.
     netlist = [];
     nmos = new Set();
@@ -358,6 +363,7 @@ function setNets() {
         if (cell.layer === NDIFF) {
             if (layeredGrid[cell.x][cell.y][POLY].isSet) {
                 nmos.add(cell);
+                graph.addNode(cell);
                 // Set the gate to the poly cell.
                 cell.gate = layeredGrid[cell.x][cell.y][POLY];
 
@@ -411,6 +417,7 @@ function setNets() {
         if (cell.layer === PDIFF) {
             if (layeredGrid[cell.x][cell.y][POLY].isSet) {
                 pmos.add(cell);
+                graph.addNode(cell);
                 // Set the gate to the poly cell.
                 cell.gate = layeredGrid[cell.x][cell.y][POLY];
 
@@ -431,10 +438,6 @@ function setNets() {
                         // If term1 is already set, set term2 to the cell to the left.
                         if (cell.term1 !== undefined) {
                             cell.term2 = layeredGrid[cell.x - 1][cell.y][PDIFF];
-                            console.log("term2 set");
-                            console.log(cell.term2);
-                            console.log(cell.term2.x);
-                            console.log(cell.term2.y);
                         } else {
                             cell.term1 = layeredGrid[cell.x - 1][cell.y][PDIFF];
                         }
@@ -546,14 +549,13 @@ function setNets() {
     netlist.push(netD);
     netlist.push(netY);
 
-    // Create a Digraph object.
-    let digraph = new Digraph();
-    // Add rail and output nodes to the digraph.
-    for(let ii = 0; ii < numOutputs; ii++) {
-        digraph.addNode(String.fromCharCode(89 - ii), false, true, netlist[ii + numInputs]);
-    }
-    digraph.addNode('VDD', true, false, netVDD);
-    digraph.addNode('GND', true, false, netGND);
+    // Add rail nodes to the graph.
+    vddNode = graph.addNode(layeredGrid[railStartX][VDD_y][METAL1]);
+    gndNode = graph.addNode(layeredGrid[railStartX][GND_y][METAL1]);
+
+    // Add output nodes to the graph.
+    outputNodes = [];
+    outputNodes[0] = graph.addNode(layeredGrid[Y.x][Y.y][METAL1]);
 
     // Each nmos and pmos represents a relation between term1 and term2.
     // If term1 is not in any of the nets,
@@ -582,36 +584,6 @@ function setNets() {
             setRecursively(nmosCell.term2, net2);
             netlist.push(net2);
         }
-
-        // Add nodes and edges as needed.
-        let node1 = digraph.getNodeByNet(getNet(nmosCell.term1));
-        let node2 = digraph.getNodeByNet(getNet(nmosCell.term2));
-
-        // If either is null, create a new node.
-        // Safe to assume that the other exists.
-        let gateName = String.fromCharCode(65 + getNetIndex(nmosCell.gate) - 2);
-        if(node1 === null) {
-            node1 = digraph.addNode(gateName + ii + "+", false, false, getNet(nmosCell.term1));
-            digraph.addEdge(node2, node1);
-        }
-        else if(node2 === null) {
-            node2 = digraph.addNode(gateName + ii + "+", false, false, getNet(nmosCell.term2));
-            digraph.addEdge(node1, node2);
-        }
-        else {
-            // If one of the nodes is an input, set it as the first node in an edge.
-            if(node1.isInput || node2.isOutput) {
-                digraph.addEdge(node1, node2);
-            }
-            else if(node2.isInput || node1.isOutput) {
-                digraph.addEdge(node2, node1);
-            }
-            else {
-                console.log("Error: Directionality unclear.")
-                digraph.addEdge(node1, node2);
-                digraph.addEdge(node2, node1);
-            }
-        }
     }
 
     // Loop through pmos now.
@@ -630,13 +602,6 @@ function setNets() {
             net2.add(pmosCell.term2);
         }
 
-        console.log("PMOS: " + ii);
-        console.log(pmosCell.x, pmosCell.y);
-        console.log(net1);
-        console.log(net2);
-        console.log(pmosCell.term1);
-        console.log(pmosCell.term2);
-
         // Add the nets if they are not empty.
         if(net1.size > 0) {
             setRecursively(pmosCell.term1, net1);
@@ -645,36 +610,6 @@ function setNets() {
         if(net2.size > 0) {
             setRecursively(pmosCell.term2, net2);
             netlist.push(net2);
-        }
-
-        // Add nodes and edges as needed.
-        let node1 = digraph.getNodeByNet(getNet(pmosCell.term1));
-        let node2 = digraph.getNodeByNet(getNet(pmosCell.term2));
-
-        // If either is null, create a new node.
-        // Safe to assume that the other exists.
-        let gateName = String.fromCharCode(65 + getNetIndex(pmosCell.gate) - 2);
-        if(node1 === null) {
-            node1 = digraph.addNode(gateName + ii + "-", false, false, getNet(pmosCell.term1));
-            digraph.addEdge(node2, node1);
-        }
-        else if(node2 === null) {
-            node2 = digraph.addNode(gateName + ii + "-", false, false, getNet(pmosCell.term2));
-            digraph.addEdge(node1, node2);
-        }
-        else {
-            // If one of the nodes is an input, set it as the first node in an edge.
-            if(node1.isInput || node2.isOutput) {
-                digraph.addEdge(node1, node2);
-            }
-            else if(node2.isInput || node1.isOutput) {
-                digraph.addEdge(node2, node1);
-            }
-            else {
-                console.log("Error: Directionality unclear.")
-                digraph.addEdge(node1, node2);
-                digraph.addEdge(node2, node1);
-            }
         }
     }
 
@@ -724,11 +659,127 @@ function setNets() {
     // Print the grid for netGND.
     printGrid(netGND, "-");
 
-    for(ii = numInputs + numOutputs; ii < netlist.length; ii++) {
+    for(ii = numInputs + numOutputs + 2; ii < netlist.length; ii++) {
         printGrid(netlist[ii], String.fromCharCode(65 + ii));
     }
 
-    digraph.print();
+    graph.print();
+
+    // Loop through pmos/nmos and find every pmos/nmos that shares a net (on term1 or term2).
+    let pmosIterator1 = pmos.values();
+    let pmosIterator2 = pmos.values();
+    let nmosIterator1 = nmos.values();
+    let nmosIterator2 = nmos.values();
+
+    for(let ii = 0; ii < pmos.size; ii++) {
+        let pmosCell = pmosIterator1.next().value;
+        let pmosNode = graph.getNode(pmosCell);
+        let net1 = getNet(pmosCell.term1);
+        let net2 = getNet(pmosCell.term2);
+
+        // If either net is netVDD, add an edge to vddNode.
+        if(net1 === netVDD || net2 === netVDD) {
+            graph.addEdge(vddNode, pmosNode);
+        }
+        // If either net is netGND, add an edge to gndNode.
+        if(net1 === netGND || net2 === netGND) {
+            graph.addEdge(gndNode, pmosNode);
+        }
+
+        // Loop through pmosIterator2 to find all other pmos cells that share a net.
+        for(let jj = 0; jj < pmos.size; jj++) {
+            let pmosCell2 = pmosIterator2.next().value;
+            let pmosNode2 = graph.getNode(pmosCell2);
+
+            if(pmosCell2 === pmosCell) {
+                continue;
+            }
+
+            if(pmosCell2.term1 !== undefined) {
+                if(net1.has(pmosCell2.term1) || net2.has(pmosCell2.term1)) {
+                    graph.addEdge(pmosNode, pmosNode2);
+                }
+            }
+            if(pmosCell2.term2 !== undefined) {
+                if(net1.has(pmosCell2.term2) || net2.has(pmosCell2.term2)) {
+                    graph.addEdge(pmosNode, pmosNode2);
+                }
+            }
+        }
+
+        // Now do the same for nmos.
+        for(let jj = 0; jj < nmos.size; jj++) {
+            let nmosCell2 = nmosIterator2.next().value;
+            let nmosNode2 = graph.getNode(nmosCell2);
+
+            if(nmosCell2.term1 !== undefined) {
+                if(net1.has(nmosCell2.term1) || net2.has(nmosCell2.term1)) {
+                    graph.addEdge(pmosNode, nmosNode2);
+                }
+            }
+            if(nmosCell2.term2 !== undefined) {
+                if(net1.has(nmosCell2.term2) || net2.has(nmosCell2.term2)) {
+                    graph.addEdge(pmosNode, nmosNode2);
+                }
+            }
+        }
+    }
+
+    // Reset the iterators and do the same for nmos.
+    pmosIterator1 = pmos.values();
+    pmosIterator2 = pmos.values();
+    nmosIterator1 = nmos.values();
+    nmosIterator2 = nmos.values();
+
+    for(let ii = 0; ii < nmos.size; ii++) {
+        let nmosCell = nmosIterator1.next().value;
+        let nmosNode = graph.getNode(nmosCell);
+        let net1 = getNet(nmosCell.term1);
+        let net2 = getNet(nmosCell.term2);
+
+        // If either net is netVDD, add an edge to vddNode.
+        if(net1 === netVDD || net2 === netVDD) {
+            graph.addEdge(vddNode, nmosNode);
+        }
+
+        // Loop through nmosIterator2 to find all other nmos cells that share a net.
+        for(let jj = 0; jj < nmos.size; jj++) {
+            let nmosCell2 = nmosIterator2.next().value;
+            let nmosNode2 = graph.getNode(nmosCell2);
+
+            if(nmosCell2 === nmosCell) {
+                continue;
+            }
+
+            if(nmosCell2.term1 !== undefined) {
+                if(net1.has(nmosCell2.term1) || net2.has(nmosCell2.term1)) {
+                    graph.addEdge(nmosNode, nmosNode2);
+                }
+            }
+            if(nmosCell2.term2 !== undefined) {
+                if(net1.has(nmosCell2.term2) || net2.has(nmosCell2.term2)) {
+                    graph.addEdge(nmosNode, nmosNode2);
+                }
+            }
+        }
+
+        // Now do the same for pmos.
+        for(let jj = 0; jj < pmos.size; jj++) {
+            let pmosCell2 = pmosIterator2.next().value;
+            let pmosNode2 = graph.getNode(pmosCell2);
+
+            if(pmosCell2.term1 !== undefined) {
+                if(net1.has(pmosCell2.term1) || net2.has(pmosCell2.term1)) {
+                    graph.addEdge(nmosNode, pmosNode2);
+                }
+            }
+            if(pmosCell2.term2 !== undefined) {
+                if(net1.has(pmosCell2.term2) || net2.has(pmosCell2.term2)) {
+                    graph.addEdge(nmosNode, pmosNode2);
+                }
+            }
+        }
+    }
 }
 
 // Initialize everything

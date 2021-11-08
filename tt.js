@@ -1,18 +1,35 @@
-function getOutput(inputVals, outputNode) {
+function computeOutput(inputVals, outputNode) {
     let visited;
     let pmosOut;
     let nmosOut;
     let out;
+    let firstLevel;
 
-    function getOutputRecursive(node) {
+    function computeOutputRecursive(node) {
         let edges = node.getEdges;
 
-        // Only proceed if the input is activated.
         // Avoid infinite loops.
-        if(visited[node.number] || !((inputVals >> node.number) & 1)) {
+        if(visited[node.number]) {
             return false;
         }
         visited[node.number] = true;
+
+        // Only proceed if the input is activated.
+        if((node !== vddNode) && (node !== gndNode)) {
+            // Convert node.getName() to a number.
+            let inputNum = node.getName().charCodeAt(0) - 65;
+            if(!((inputVals >> inputNum) & 1)) {
+                return false;
+            }
+        }
+
+        // Return if this is not the first level and the node is vddNode or gndNode.
+        // The rail nodes won't play nice with the rest of this.
+        if(!firstLevel && ((node === vddNode) || (node === gndNode))) {
+            return false;
+        }
+
+        firstLevel = false;
 
         // We found it?
         if(node === outputNode) {
@@ -21,7 +38,7 @@ function getOutput(inputVals, outputNode) {
 
         // Recurse on all edges.
         for(let ii = 0; ii < edges.length; ii++) {
-            if(getOutputRecursive(node)) {
+            if(computeOutputRecursive(node)) {
                 return true;
             }
         }
@@ -32,11 +49,13 @@ function getOutput(inputVals, outputNode) {
 
     // Get pmos output.
     visited = [];
-    pmosOut = getOutputRecursive(vddNode) ? 1 : "Z";
+    firstLevel = true;
+    pmosOut = computeOutputRecursive(vddNode) ? 1 : "Z";
 
     // Get nmos output.
     visited = [];
-    nmosOut = getOutputRecursive(gndNode) ? 0 : "Z";
+    firstLevel = true;
+    nmosOut = computeOutputRecursive(gndNode) ? 0 : "Z";
 
     // Reconcile.
     if(pmosOut === "Z") {
@@ -60,13 +79,13 @@ function buildTruthTable() {
 
     // Each loop iteration is a combination of input values.
     // I.e., one row of the output table.
-    for(let ii = 0; ii < Math.pow(2, numInputs - 2); ii++; {
+    for(let ii = 0; ii < Math.pow(2, numInputs - 2); ii++) {
         let tableInputRow = [];
         let tableOutputRow = [];
 
         // Compute each output.
         for(let jj = 0; jj < numOutputs; jj++) {
-            tableOutputRow[jj] = getOutput(ii, outputNodes[jj]);
+            tableOutputRow[jj] = computeOutput(ii, outputNodes[jj]);
         }
 
         outputVals[ii] = tableOutputRow;
