@@ -1254,6 +1254,8 @@ function refreshTruthTable(table) {
     tableElement.setAttribute("style", "border-collapse: collapse;");
     // 100% width
     tableElement.setAttribute("width", "100%");
+    // text-align: center;
+    tableElement.setAttribute("align", "center");
 
     let header = tableElement.createTHead();
     let headerRow = header.insertRow(0);
