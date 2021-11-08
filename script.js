@@ -327,23 +327,21 @@ function setNets() {
     nmos = new Set();
     pmos = new Set();
 
-    // Create a Digraph object.
-    let digraph = new Digraph();
-    // Add nodes to the digraph.
-    for(let ii = 0; ii < numInputs - 2; ii++) {
-        digraph.addNode(String.fromCharCode(65 + ii), true, false, netlist[ii + 2]);
-    }
-    for(let ii = 0; ii < numOutputs; ii++) {
-        digraph.addNode(String.fromCharCode(89 - ii), false, true, netlist[ii + numInputs]);
-    }
-    digraph.addNode('VDD', true, false, netVDD);
-    digraph.addNode('GND', true, false, netGND);
-
     // Function to get the net from the netlist that contains a given cell.
     function getNet(cell) {
         for (let ii = 0; ii < netlist.length; ii++) {
             if (netlist[ii].has(cell)) {
                 return netlist[ii];
+            }
+        }
+        return null;
+    }
+
+    // Function to get the index of the net in the netlist that contains a given cell.
+    function getNetIndex(cell) {
+        for (let ii = 0; ii < netlist.length; ii++) {
+            if (netlist[ii].has(cell)) {
+                return ii;
             }
         }
         return null;
@@ -433,6 +431,10 @@ function setNets() {
                         // If term1 is already set, set term2 to the cell to the left.
                         if (cell.term1 !== undefined) {
                             cell.term2 = layeredGrid[cell.x - 1][cell.y][PDIFF];
+                            console.log("term2 set");
+                            console.log(cell.term2);
+                            console.log(cell.term2.x);
+                            console.log(cell.term2.y);
                         } else {
                             cell.term1 = layeredGrid[cell.x - 1][cell.y][PDIFF];
                         }
@@ -544,6 +546,15 @@ function setNets() {
     netlist.push(netD);
     netlist.push(netY);
 
+    // Create a Digraph object.
+    let digraph = new Digraph();
+    // Add rail and output nodes to the digraph.
+    for(let ii = 0; ii < numOutputs; ii++) {
+        digraph.addNode(String.fromCharCode(89 - ii), false, true, netlist[ii + numInputs]);
+    }
+    digraph.addNode('VDD', true, false, netVDD);
+    digraph.addNode('GND', true, false, netGND);
+
     // Each nmos and pmos represents a relation between term1 and term2.
     // If term1 is not in any of the nets,
     // then create a new net and add term1 to it.
@@ -556,14 +567,10 @@ function setNets() {
         let net2 = new Set();
 
         if(nmosCell.term1 !== undefined) {
-            if(getNet(nmosCell.term1) !== null) {
-                net1.add(nmosCell.term1);
-            }
+            net1.add(nmosCell.term1);
         }
         if(nmosCell.term2 !== undefined) {
-            if(getNet(nmosCell.term2) !== null) {
-                net2.add(nmosCell.term2);
-            }
+            net2.add(nmosCell.term2);
         }
         
         // Add the nets if they are not empty.
@@ -577,19 +584,18 @@ function setNets() {
         }
 
         // Add nodes and edges as needed.
-        let node1 = getNodeByNet(getNet(nmosCell.term1));
-        let node2 = getNodeByNet(getNet(nmosCell.term2));
+        let node1 = digraph.getNodeByNet(getNet(nmosCell.term1));
+        let node2 = digraph.getNodeByNet(getNet(nmosCell.term2));
 
         // If either is null, create a new node.
         // Safe to assume that the other exists.
+        let gateName = String.fromCharCode(65 + getNetIndex(nmosCell.gate) - 2);
         if(node1 === null) {
-            node1 = digraph.addNode("t" + ii + "_1", false, false, getNet(nmosCell.term1));
-            nodes.push(node1);
+            node1 = digraph.addNode(gateName + ii + "+", false, false, getNet(nmosCell.term1));
             digraph.addEdge(node2, node1);
         }
         else if(node2 === null) {
-            node2 = digraph.addNode("t" + ii + "_2", false, false, getNet(nmosCell.term2));
-            nodes.push(node2);
+            node2 = digraph.addNode(gateName + ii + "+", false, false, getNet(nmosCell.term2));
             digraph.addEdge(node1, node2);
         }
         else {
@@ -617,16 +623,19 @@ function setNets() {
         let net2 = new Set();
 
         if(pmosCell.term1 !== undefined) {
-            if(getNet(pmosCell.term1) !== null) {
-                net1.add(pmosCell.term1);
-            }
+            net1.add(pmosCell.term1);
         }
 
         if(pmosCell.term2 !== undefined) {
-            if(getNet(pmosCell.term2) !== null) {
-                net2.add(pmosCell.term2);
-            }
+            net2.add(pmosCell.term2);
         }
+
+        console.log("PMOS: " + ii);
+        console.log(pmosCell.x, pmosCell.y);
+        console.log(net1);
+        console.log(net2);
+        console.log(pmosCell.term1);
+        console.log(pmosCell.term2);
 
         // Add the nets if they are not empty.
         if(net1.size > 0) {
@@ -639,19 +648,18 @@ function setNets() {
         }
 
         // Add nodes and edges as needed.
-        let node1 = getNodeByNet(getNet(pmosCell.term1));
-        let node2 = getNodeByNet(getNet(pmosCell.term2));
+        let node1 = digraph.getNodeByNet(getNet(pmosCell.term1));
+        let node2 = digraph.getNodeByNet(getNet(pmosCell.term2));
 
         // If either is null, create a new node.
         // Safe to assume that the other exists.
+        let gateName = String.fromCharCode(65 + getNetIndex(pmosCell.gate) - 2);
         if(node1 === null) {
-            node1 = digraph.addNode("t" + ii + "_1", false, false, getNet(pmosCell.term1));
-            nodes.push(node1);
+            node1 = digraph.addNode(gateName + ii + "-", false, false, getNet(pmosCell.term1));
             digraph.addEdge(node2, node1);
         }
         else if(node2 === null) {
-            node2 = digraph.addNode("t" + ii + "_2", false, false, getNet(pmosCell.term2));
-            nodes.push(node2);
+            node2 = digraph.addNode(gateName + ii + "-", false, false, getNet(pmosCell.term2));
             digraph.addEdge(node1, node2);
         }
         else {
