@@ -1138,6 +1138,7 @@ function saveCurrentState() {
         localStorage.removeItem('canvas' + firstSaveState);
 
         firstSaveState++;
+        maxSaveState++;
     }
 }
 
