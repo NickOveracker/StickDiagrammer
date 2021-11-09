@@ -1511,8 +1511,9 @@ window.onload = function() {
         // If the user presses the "Y" key,
         // move the coordinates for Y to the cell under the cursor.
         if (event.keyCode == 89) {
+            // Skip if CTRL is pressed.
             let cell = getCell(currentX, currentY);
-            if (cell != null) {
+            if (cell != null && !event.ctrlKey) {
                 // First, unset the CONTACT layer at the old coordinates.
                 layeredGrid[Y.x][Y.y][CONTACT].isSet = false;
                 // Then, set the new coordinates.
