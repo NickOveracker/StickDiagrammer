@@ -49,8 +49,6 @@ let netD = new Set();
 let netY = new Set();
 let nmos = new Set();
 let pmos = new Set();
-let net1 = new Set();
-let net2 = new Set();
 
 // Netlist is a list of nets.
 // Each net is a Set of cells.
@@ -69,7 +67,7 @@ let railEndX = gridsize - 1;
 let vddNode;
 let gndNode;
 let inputNodes;
-let outputNodes;
+let outputNodes = [];
 
 // Grid color
 let darkModeGridColor = '#cccccc';
@@ -207,7 +205,7 @@ function buildTruthTable() {
         outstr += "\n";
     }
 
-    console.log(outstr);
+    //console.log(outstr);
     
     // Merge input and output into one table (input on the left, output on the right.)
     let table = [];
@@ -545,14 +543,6 @@ function setNets() {
     netD.clear();
     netY.clear();
 
-    // Define net1 and net2 as new sets if null.
-    if(net1 == null) {
-        net1 = new Set();
-    }
-    if(net2 == null) {
-        net2 = new Set();
-    }
-
     // Add the VDD and GND nets.
     // Loop through every VDD cell and add to the VDD net.
     setRecursively(layeredGrid[railStartX][VDD_y][METAL1], netVDD);
@@ -582,7 +572,7 @@ function setNets() {
     gndNode = graph.addNode(layeredGrid[railStartX][GND_y][METAL1]);
 
     // Add output nodes to the graph.
-    outputNodes = [];
+    outputNodes.length = 0;
     outputNodes[0] = graph.addNode(layeredGrid[Y.x][Y.y][METAL1]);
 
     // Each nmos and pmos represents a relation between term1 and term2.
@@ -593,8 +583,8 @@ function setNets() {
     for (let ii = 0; ii < nmos.size; ii++) {
         // nmosCell is the ii'th element of the Set nmos.
         let nmosCell = nmosIterator.next().value;
-        net1.clear();
-        net2.clear();
+        let net1 = new Set();
+        let net2 = new Set();
 
         if(nmosCell.term1 !== undefined) {
             if(!getNet(nmosCell.term1)) {
@@ -627,8 +617,8 @@ function setNets() {
 
     for (let ii = 0; ii < pmos.size; ii++) {
         let pmosCell = pmosIterator.next().value;
-        net1.clear();
-        net2.clear();
+        let net1 = new Set();
+        let net2 = new Set();
 
         if(pmosCell.term1 !== undefined) {
             if(!getNet(pmosCell.term1)) {
@@ -662,8 +652,8 @@ function setNets() {
     nmosIterator = nmos.values();
     for (let ii = 0; ii < nmos.size; ii++) {
         let nmosCell = nmosIterator.next().value;
-        net1 = getNet(nmosCell.term1);
-        net2 = getNet(nmosCell.term2);
+        let net1 = getNet(nmosCell.term1);
+        let net2 = getNet(nmosCell.term2);
         let gate = getNet(nmosCell.gate);
 
         if(net1 !== undefined) {
@@ -680,8 +670,8 @@ function setNets() {
     pmosIterator = pmos.values();
     for (let ii = 0; ii < pmos.size; ii++) {
         let pmosCell = pmosIterator.next().value;
-        net1 = getNet(pmosCell.term1);
-        net2 = getNet(pmosCell.term2);
+        let net1 = getNet(pmosCell.term1);
+        let net2 = getNet(pmosCell.term2);
         let gate = getNet(pmosCell.gate);
 
         if(net1 !== undefined) {
@@ -704,8 +694,8 @@ function setNets() {
     for(let ii = 0; ii < pmos.size; ii++) {
         let pmosCell = pmosIterator1.next().value;
         let pmosNode = graph.getNode(pmosCell);
-        net1 = pmosCell.term1;
-        net2 = pmosCell.term2;
+        let net1 = pmosCell.term1;
+        let net2 = pmosCell.term2;
 
         // If either net is netVDD, add an edge to vddNode.
         if(net1 === netVDD || net2 === netVDD) {
@@ -766,8 +756,8 @@ function setNets() {
     for(let ii = 0; ii < nmos.size; ii++) {
         let nmosCell = nmosIterator1.next().value;
         let nmosNode = graph.getNode(nmosCell);
-        net1 = nmosCell.term1;
-        net2 = nmosCell.term2;
+        let net1 = nmosCell.term1;
+        let net2 = nmosCell.term2;
 
         // If either net is netVDD, add an edge to vddNode.
         if(net1 === netVDD || net2 === netVDD) {
@@ -810,8 +800,8 @@ function setNets() {
         for(let jj = 0; jj < pmos.size; jj++) {
             let pmosCell2 = pmosIterator2.next().value;
             let pmosNode2 = graph.getNode(pmosCell2);
-            net1 = pmosCell2.term1;
-            net2 = pmosCell2.term2;
+            let net1 = pmosCell2.term1;
+            let net2 = pmosCell2.term2;
 
             if(pmosCell2.term1 !== undefined) {
                 if(net1.has(pmosCell2.term1) || net2.has(pmosCell2.term1)) {
@@ -1001,7 +991,9 @@ function setRecursively(cell, net) {
     // If CONTACT is set, add add all layers to the net.
     if(layeredGrid[cell.x][cell.y][CONTACT].isSet) {
         for (let ii = 0; ii < layers; ii++) {
-            net.add(layeredGrid[cell.x][cell.y][ii]);
+            if(layeredGrid[cell.x][cell.y][ii].isSet) {
+                net.add(layeredGrid[cell.x][cell.y][ii]);
+            }
         }
     }
 
