@@ -6,9 +6,10 @@ let cellHeight;
 let cellWidth;
 let gridsize = 29;
 let layers = 5;
+let firstSaveState = 0;
 let saveState = 0;
 let lastSaveState = 0;
-let maxSaveState = 10;
+let maxSaveState = 15;
 let dragging = false;
 let startX;
 let startY;
@@ -1115,7 +1116,6 @@ function refreshCanvas() {
 // Save function to save the current state of the grid and the canvas.
 // Increment save state so we can maintain an undo buffer.
 function saveCurrentState() {    
-    return;
     // Save both the grid and the drawing.
     localStorage.setItem('layeredGrid' + saveState, JSON.stringify(layeredGrid));
     localStorage.setItem('canvas' + saveState, canvas.toDataURL());
@@ -1134,25 +1134,16 @@ function saveCurrentState() {
 
     // If we've reached the max save state, delete the oldest one.
     if (maxSaveState == saveState) {
-        localStorage.removeItem('layeredGrid0');
-        localStorage.removeItem('canvas0');
-        lastSaveState--;
+        localStorage.removeItem('layeredGrid' + firstSaveState);
+        localStorage.removeItem('canvas' + firstSaveState);
 
-        // Rename all the save states.
-        for (let i = 0; i < maxSaveState - 1; i++) {
-            localStorage.setItem('layeredGrid' + i, localStorage.getItem('layeredGrid' + (i + 1)));
-            localStorage.setItem('canvas' + i, localStorage.getItem('canvas' + (i + 1)));
-        }
-
-        // Delete the last save state.
-        localStorage.removeItem('layeredGrid' + (maxSaveState - 1));
+        firstSaveState++;
     }
 }
 
 // Undo by going back to the previous save state (if there is one) and redrawing the canvas.
 function undo() {
-    return;
-    if (saveState > 0) {
+    if (saveState > firstSaveState) {
         saveState--;
         layeredGrid = JSON.parse(localStorage.getItem('layeredGrid' + saveState));
         let img = new Image();
@@ -1167,7 +1158,6 @@ function undo() {
 
 // Redo by going forward to the next save state (if there is one) and redrawing the canvas.
 function redo() {
-    return;
     if (saveState < lastSaveState) {
         saveState++;
         layeredGrid = JSON.parse(localStorage.getItem('layeredGrid' + saveState));
@@ -1270,6 +1260,12 @@ function refreshTruthTable(table) {
             let cell = row.insertCell(j);
             cell.innerHTML = table[i][j];
         }
+    }
+
+    // Style the th
+    let ths = tableElement.getElementsByTagName("th");
+    for (let i = 0; i < ths.length; i++) {
+        ths[i].setAttribute("style", "border: 1px solid black; padding: 5px;");
     }
 
     tableDiv.appendChild(tableElement);
