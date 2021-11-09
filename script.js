@@ -40,16 +40,6 @@ let C = {x: 2, y: 16};
 let D = {x: 2, y: 20};
 let Y = {x: 26, y: 14};
 
-let netVDD = new Set();
-let netGND = new Set();
-let netA = new Set();
-let netB = new Set();
-let netC = new Set();
-let netD = new Set();
-let netY = new Set();
-let nmos = new Set();
-let pmos = new Set();
-
 // Netlist is a list of nets.
 // Each net is a Set of cells.
 let netlist = [];
@@ -69,9 +59,101 @@ let gndNode;
 let inputNodes;
 let outputNodes = [];
 
+let nmos = new Set();
+let pmos = new Set();
+
 // Grid color
 let darkModeGridColor = '#cccccc';
 let lightModeGridColor = '#999999';
+
+class Net {
+    constructor(name, isSupply, isInput, isOutput) {
+        this.name = name;
+        this.cells = new Set();
+        this.nodes = new Set();
+        this.isInput = isInput;
+        this.isOutput = isOutput;
+    }
+
+    addNode(node) {
+        this.nodes.add(node);
+    }
+
+    removeNode(node) {
+        this.nodes.delete(node);
+    }
+
+    containsNode(node) {
+        return this.nodes.has(node);
+    }
+
+    getNodes() {
+        return this.nodes;
+    }
+
+    clear() {
+        this.cells.clear();
+        this.nodes.clear();
+    }
+
+    addCell(cell) {
+        this.cells.add(cell);
+    }
+
+    // Alias for now.
+    add(cell) {
+        this.addCell(cell);
+    }
+
+    removeCell(cell) {
+        this.cells.delete(cell);
+    }
+
+    containsCell(cell) {
+        return this.cells.has(cell);
+    }
+
+    // Alias for now.
+    has(cell) {
+        return this.containsCell(cell);
+    }
+
+    getCells() {
+        return this.cells;
+    }
+
+    getName() {
+        return this.name;
+    }
+
+    setName(name) {
+        this.name = name;
+    }
+
+    size() {
+        return this.cells.size;
+    }
+
+    isSupply() {
+        return this.isSupply;
+    }
+
+    isInput() {
+        return this.isInput;
+    }
+
+    isOutput() {
+        return this.isOutput;
+    }
+}
+
+let netVDD = new Net("VDD", true, false, false;);
+let netGND = new Net("GND", true, false, false);
+let netA = new Net("A", false, true, false);
+let netB = new Net("B", false, true, false);
+let netC = new Net("C", false, true, false);
+let netD = new Net("D", false, true, false);
+let netY = new Net("Y", false, false, true);
 
 function computeOutput(inputVals, outputNode) {
     let visited;
@@ -79,26 +161,23 @@ function computeOutput(inputVals, outputNode) {
     let nmosOut;
     let out;
     let firstLevel;
-    let passWhenPos;
 
-    function computeOutputRecursive(node) {
+    function computeOutputRecursive(node, visitMap, targetNode) {
         // We found it?
-        if(node === outputNode) {
+        if(node === targetNode) {
             return true;
         }
 
         // Avoid infinite loops.
-        if(visited[node.getCell().x + "," + node.getCell().y]) {
+        if(visitMap[node.getCell().x + "," + node.getCell().y]) {
             return false;
         }
-        visited[node.getCell().x + "," + node.getCell().y] = true;
+        visitMap[node.getCell().x + "," + node.getCell().y] = true;
 
         // Only proceed if the input is activated.
-        if((node !== vddNode) && (node !== gndNode)) {
+        if(!node.getCell().gate.isSupply()) {
             // Convert node.getName() to a number.
-            let inputNum = node.getName().charCodeAt(0) - 65;
-            let evalInput = !!((inputVals >> inputNum) & 1);
-            if(evalInput !== passWhenPos) {
+            if(!evaluate(node, inputVals)) {
                 return false;
             }
         }
@@ -114,7 +193,7 @@ function computeOutput(inputVals, outputNode) {
         // Recurse on all edges.
         let edges = node.getEdges();
         for(let ii = 0; ii < edges.length; ii++) {
-            if(computeOutputRecursive(edges[ii].getOtherNode(node))) {
+            if(computeOutputRecursive(edges[ii].getOtherNode(node), visitMap, targetNode)) {
                 return true;
             }
         }
@@ -123,17 +202,40 @@ function computeOutput(inputVals, outputNode) {
         return false;
     }
 
+    function evaluate(node, inputVals) {
+        let gateNet = getNet(node.getCell().gate);
+    
+        if(gateNet.isInput()) {
+            let inputNum = node.getName().charCodeAt(0) - 65;
+            let evalInput = !!((inputVals >> inputNum) & 1);
+            // Pass-through positive for NMOS.
+            return evalInput === node.isNmos();
+        }
+    
+        // Otherwise, recurse and see if this is active.
+        let gateNodeIterator = gateNet.getNodes().values();
+
+        for(let ii = 0; ii < gateNet.size(); ii++) {
+            let gateNode = gateNodeIterator.next().value;
+            if(computeOutputRecursive(gateNode, {}, vddNode)) {
+                return true;
+            } else if(computeOutputRecursive(gateNode, {}, gndNode)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     // Get pmos output.
     visited = {};
     firstLevel = true;
-    passWhenPos = false;
-    pmosOut = computeOutputRecursive(vddNode) ? 1 : "Z";
+    pmosOut = computeOutputRecursive(vddNode, visited, outputNode) ? 1 : "Z";
 
     // Get nmos output.
     visited = {};
     firstLevel = true;
-    passWhenPos = true;
-    nmosOut = computeOutputRecursive(gndNode) ? 0 : "Z";
+    nmosOut = computeOutputRecursive(gndNode, visited, outputNode) ? 0 : "Z";
 
     // Reconcile.
     if(pmosOut === "Z") {
@@ -335,6 +437,21 @@ class Node {
     constructor(cell) {
         this.cell = cell;
         this.edges = [];
+        this.isPmos = layeredGrid[cell.x][cell.y][PDIFF].isSet;
+        this.isNmos = layeredGrid[cell.x][cell.y][NDIFF].isSet;
+        this.isSupply = !this.isPmos && !this.isNmos;
+    }
+
+    isPmos() {
+        return this.isPmos;
+    }
+
+    isNmos() {
+        return !this.isPmos;
+    }
+
+    isSupply() {
+        return this.isSupply;
     }
 
     // Destructor
@@ -363,23 +480,7 @@ class Node {
     }
 
     getName() {
-        if(this === vddNode) {
-            return 'vdd';
-        } else if(this === gndNode) {
-            return 'gnd';
-        } else if(this.cell.gate === netA) {
-            return "A";
-        } else if(this.cell.gate === netB) {
-            return "B";
-        } else if(this.cell.gate === netC) {
-            return "C";
-        } else if(this.cell.gate === netD) {
-            return "D";
-        } else if(this === outputNodes[0]) {
-            return "Y";
-        } else {
-            return "?";
-        }
+        return this.cell.gate.getName();
     }
 }
 
@@ -571,9 +672,13 @@ function setNets() {
     vddNode = graph.addNode(layeredGrid[railStartX][VDD_y][METAL1]);
     gndNode = graph.addNode(layeredGrid[railStartX][GND_y][METAL1]);
 
+    vddNet.addNode(vddNode);
+    gndNet.addNode(gndNode);
+
     // Add output nodes to the graph.
     outputNodes.length = 0;
     outputNodes[0] = graph.addNode(layeredGrid[Y.x][Y.y][METAL1]);
+    netY.addNode(outputNodes[0]);
 
     // Each nmos and pmos represents a relation between term1 and term2.
     // If term1 is not in any of the nets,
@@ -583,13 +688,14 @@ function setNets() {
     for (let ii = 0; ii < nmos.size; ii++) {
         // nmosCell is the ii'th element of the Set nmos.
         let nmosCell = nmosIterator.next().value;
-        let net1 = new Set();
-        let net2 = new Set();
+        let net1 = new Net("?", false, false, false);
+        let net2 = new Net("?", false, false, false);
 
         if(nmosCell.term1 !== undefined) {
             if(!getNet(nmosCell.term1)) {
                 net1.add(nmosCell.term1);
             } else {
+                net1.clear();
                 net1 = getNet(nmosCell.term1);
             }
         }
@@ -597,6 +703,7 @@ function setNets() {
             if(!getNet(nmosCell.term2)) {
                 net2.add(nmosCell.term2);
             } else {
+                net2.clear();
                 net2 = getNet(nmosCell.term2);
             }
         }
@@ -605,10 +712,12 @@ function setNets() {
         if(net1.size > 0 && !getNet(nmosCell.term1)) {
             setRecursively(nmosCell.term1, net1);
             netlist.push(net1);
+            net1.addNode(graph.getNode(nmosCell));
         }
         if(net2.size > 0 && !getNet(nmosCell.term2)) {
             setRecursively(nmosCell.term2, net2);
             netlist.push(net2);
+            net2.addNode(graph.getNode(nmosCell));
         }
     }
 
@@ -617,13 +726,14 @@ function setNets() {
 
     for (let ii = 0; ii < pmos.size; ii++) {
         let pmosCell = pmosIterator.next().value;
-        let net1 = new Set();
-        let net2 = new Set();
+        let net1 = new Net("?", false, false, false);
+        let net2 = new Net("?", false, false, false);
 
         if(pmosCell.term1 !== undefined) {
             if(!getNet(pmosCell.term1)) {
                 net1.add(pmosCell.term1);
             } else {
+                net1.clear();
                 net1 = getNet(pmosCell.term1);
             }
         }
@@ -631,6 +741,7 @@ function setNets() {
             if(!getNet(pmosCell.term2)) {
                 net2.add(pmosCell.term2);
             } else {
+                net2.clear();
                 net2 = getNet(pmosCell.term2);
             }
         }
@@ -639,10 +750,12 @@ function setNets() {
         if(net1.size > 0 && !getNet(pmosCell.term1)) {
             setRecursively(pmosCell.term1, net1);
             netlist.push(net1);
+            net1.addNode(graph.getNode(pmosCell));
         }
         if(net2.size > 0 && !getNet(pmosCell.term2)) {
             setRecursively(pmosCell.term2, net2);
             netlist.push(net2);
+            net2.addNode(graph.getNode(pmosCell));
         }
     }
 
@@ -683,10 +796,6 @@ function setNets() {
         if(gate !== undefined) {
             pmosCell.gate = gate;
         }
-    }
-
-    for(ii = numInputs + numOutputs + 2; ii < netlist.length; ii++) {
-        printGrid(netlist[ii], String.fromCharCode(65 + ii));
     }
 
     // Loop through pmos/nmos and find every pmos/nmos that shares a net (on term1 or term2).
@@ -853,16 +962,6 @@ function getNet(cell) {
     for (let ii = 0; ii < netlist.length; ii++) {
         if (netlist[ii].has(cell)) {
             return netlist[ii];
-        }
-    }
-    return null;
-}
-
-// Function to get the index of the net in the netlist that contains a given cell.
-function getNetIndex(cell) {
-    for (let ii = 0; ii < netlist.length; ii++) {
-        if (netlist[ii].has(cell)) {
-            return ii;
         }
     }
     return null;
