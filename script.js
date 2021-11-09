@@ -134,18 +134,6 @@ class Net {
     size() {
         return this.cells.size;
     }
-
-    isSupply() {
-        return this.isSupply;
-    }
-
-    isInput() {
-        return this.isInput;
-    }
-
-    isOutput() {
-        return this.isOutput;
-    }
 }
 
 let netVDD = new Net("VDD", true, false, false);
@@ -176,7 +164,7 @@ function computeOutput(inputVals, outputNode) {
         visitMap[node.getCell().x + "," + node.getCell().y] = true;
 
         // Only proceed if the input is activated.
-        if(!node.isSupply()) {
+        if(!node.isSupply) {
             // Convert node.getName() to a number.
             if(!evaluate(node, inputVals)) {
                 return false;
@@ -204,13 +192,13 @@ function computeOutput(inputVals, outputNode) {
     }
 
     function evaluate(node, inputVals) {
-        let gateNet = getNet(node.getCell().gate);
+        let gateNet = node.getCell().gate;
     
-        if(gateNet.isInput()) {
+        if(gateNet.isInput) {
             let inputNum = node.getName().charCodeAt(0) - 65;
             let evalInput = !!((inputVals >> inputNum) & 1);
             // Pass-through positive for NMOS.
-            return evalInput === node.isNmos();
+            return evalInput === node.isNmos;
         }
     
         // Otherwise, recurse and see if this is active.
@@ -441,18 +429,6 @@ class Node {
         this.isPmos = layeredGrid[cell.x][cell.y][PDIFF].isSet;
         this.isNmos = layeredGrid[cell.x][cell.y][NDIFF].isSet;
         this.isSupply = !this.isPmos && !this.isNmos;
-    }
-
-    isPmos() {
-        return this.isPmos;
-    }
-
-    isNmos() {
-        return !this.isPmos;
-    }
-
-    isSupply() {
-        return this.isSupply;
     }
 
     // Destructor
@@ -692,6 +668,7 @@ function setNets() {
         let net1 = new Net("?", false, false, false);
         let net2 = new Net("?", false, false, false);
 
+
         if(nmosCell.term1 !== undefined) {
             if(!getNet(nmosCell.term1)) {
                 net1.add(nmosCell.term1);
@@ -770,6 +747,27 @@ function setNets() {
         let net2 = getNet(nmosCell.term2);
         let gate = getNet(nmosCell.gate);
 
+        if(gate === null) {
+            gate = new Net("?", false, false, false);
+            setRecursively(nmosCell.gate, gate);
+            netlist.push(gate);
+            graph.addNode(layeredGrid[nmosCell.x][nmosCell.y][POLY]);
+        }
+
+        if(net1 === null) {
+            net1 = new Net("?", false, false, false);
+            setRecursively(nmosCell.term1, net1);
+            netlist.push(net1);
+            graph.addNode(layeredGrid[nmosCell.term1.x][nmosCell.term1.y][nmosCell.term1.layer]);
+        }
+
+        if(net2 === null) {
+            net2 = new Net("?", false, false, false);
+            setRecursively(nmosCell.term2, net2);
+            netlist.push(net2);
+            graph.addNode(layeredGrid[nmosCell.term2.x][nmosCell.term2.y][nmosCell.term2.layer]);
+        }
+
         if(net1 !== undefined) {
             nmosCell.term1 = net1;
         }
@@ -787,6 +785,27 @@ function setNets() {
         let net1 = getNet(pmosCell.term1);
         let net2 = getNet(pmosCell.term2);
         let gate = getNet(pmosCell.gate);
+
+        if(gate === null) {
+            gate = new Net("?", false, false, false);
+            setRecursively(nmosCell.gate, gate);
+            netlist.push(gate);
+            graph.addNode(layeredGrid[pmosCell.x][pmosCell.y][POLY]);
+        }
+
+        if(net1 === null) {
+            net1 = new Net("?", false, false, false);
+            setRecursively(nmosCell.term1, net1);
+            netlist.push(net1);
+            graph.addNode(layeredGrid[pmosCell.term1.x][pmosCell.term1.y][pmosCell.term1.layer]);
+        }
+
+        if(net2 === null) {
+            net2 = new Net("?", false, false, false);
+            setRecursively(nmosCell.term2, net2);
+            netlist.push(net2);
+            graph.addNode(layeredGrid[pmosCell.term2.x][pmosCell.term2.y][pmosCell.term2.layer]);
+        }
 
         if(net1 !== undefined) {
             pmosCell.term1 = net1;
