@@ -147,7 +147,7 @@ class Net {
     }
 }
 
-let netVDD = new Net("VDD", true, false, false;);
+let netVDD = new Net("VDD", true, false, false);
 let netGND = new Net("GND", true, false, false);
 let netA = new Net("A", false, true, false);
 let netB = new Net("B", false, true, false);
