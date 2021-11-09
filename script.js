@@ -39,15 +39,15 @@ let C = {x: 2, y: 16};
 let D = {x: 2, y: 20};
 let Y = {x: 26, y: 14};
 
-let aNeT;
-let bNet;
-let cNet;
-let dNet;
-let yNet;
+let netA;
+let netB;
+let netC;
+let netD;
+let netY;
 
 // Netlist is a list of nets.
 // Each net is a Set of cells.
-let netlist;
+let netlist = [];
 let pmos;
 let nmos;
 let output;
@@ -231,6 +231,22 @@ class Graph {
         this.edges = [];
     }
 
+    // Clear the graph.
+    clear() {
+        // Destroy all nodes.
+        for(let ii = 0; ii < this.nodes.length; ii++) {
+            this.nodes[ii].destroy();
+        }
+
+        // Destroy all edges.
+        for(let ii = 0; ii < this.edges.length; ii++) {
+            this.edges[ii].destroy();
+        }
+
+        this.nodes.length = 0;
+        this.edges.length = 0;
+    }
+
     // Check if two nodes are connected.
     isConnected(node1, node2) {
         let edges = node1.getEdges();
@@ -309,11 +325,19 @@ class Graph {
     }
 }
 
+graph = new Graph()
+
 // Define node and edge classes.
 class Node {
     constructor(cell) {
         this.cell = cell;
         this.edges = [];
+    }
+
+    // Destructor
+    destroy() {
+        this.cell = null;
+        this.edges = null;
     }
 
     addEdge(edge) {
@@ -340,13 +364,13 @@ class Node {
             return 'vdd';
         } else if(this === gndNode) {
             return 'gnd';
-        } else if(this.cell.gate === aNet) {
+        } else if(this.cell.gate === netA) {
             return "A";
-        } else if(this.cell.gate === bNet) {
+        } else if(this.cell.gate === netB) {
             return "B";
-        } else if(this.cell.gate === cNet) {
+        } else if(this.cell.gate === netC) {
             return "C";
-        } else if(this.cell.gate === dNet) {
+        } else if(this.cell.gate === netD) {
             return "D";
         } else if(this === outputNodes[0]) {
             return "Y";
@@ -363,6 +387,12 @@ class Edge {
         // Add the edge to the nodes.
         node1.addEdge(this);
         node2.addEdge(this);
+    }
+
+    // Destructor
+    destroy() {
+        this.node1 = null;
+        this.node2 = null;
     }
 
     getNode1() {
@@ -688,11 +718,11 @@ function setNets() {
 
     // Create a netlist for A, B, C, D, and Y.
     // Add every layer of each of these to their respective net.
-    let netA = new Set();
-    let netB = new Set();
-    let netC = new Set();
-    let netD = new Set();
-    let netY = new Set();
+    netA = new Set();
+    netB = new Set();
+    netC = new Set();
+    netD = new Set();
+    netY = new Set();
     
     for(let ii = 0; ii < layers; ii++) {
         if(layeredGrid[A.x][A.y][ii].isSet) {
@@ -881,12 +911,6 @@ function setNets() {
     printGrid(netVDD, "+");
     // Print the grid for netGND.
     printGrid(netGND, "-");
-
-    aNet = netA;
-    bNet = netB;
-    cNet = netC;
-    dNet = netD;
-    yNet = netY;
 
     for(ii = numInputs + numOutputs + 2; ii < netlist.length; ii++) {
         printGrid(netlist[ii], String.fromCharCode(65 + ii));
