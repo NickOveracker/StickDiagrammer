@@ -1144,6 +1144,10 @@ function saveCurrentState() {
 
 // Undo by going back to the previous save state (if there is one) and redrawing the canvas.
 function undo() {
+    if(saveState === lastSaveState) {
+        saveCurrentState();
+        saveState--;
+    }
     if (saveState > firstSaveState) {
         saveState--;
         layeredGrid = JSON.parse(localStorage.getItem('layeredGrid' + saveState));
@@ -1159,7 +1163,7 @@ function undo() {
 
 // Redo by going forward to the next save state (if there is one) and redrawing the canvas.
 function redo() {
-    if (saveState < lastSaveState) {
+    if (saveState < lastSaveState - 1) {
         saveState++;
         layeredGrid = JSON.parse(localStorage.getItem('layeredGrid' + saveState));
         let img = new Image();
