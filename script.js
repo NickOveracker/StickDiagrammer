@@ -71,6 +71,7 @@ class Net {
         this.name = name;
         this.cells = new Set();
         this.nodes = new Set();
+        this.isSupply = isSupply;
         this.isInput = isInput;
         this.isOutput = isOutput;
     }
@@ -175,7 +176,7 @@ function computeOutput(inputVals, outputNode) {
         visitMap[node.getCell().x + "," + node.getCell().y] = true;
 
         // Only proceed if the input is activated.
-        if(!node.getCell().gate.isSupply()) {
+        if(!node.isSupply()) {
             // Convert node.getName() to a number.
             if(!evaluate(node, inputVals)) {
                 return false;
