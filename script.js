@@ -544,6 +544,14 @@ function setNets() {
     netD.clear();
     netY.clear();
 
+    // Define net1 and net2 as new sets if null.
+    if(net1 == null) {
+        net1 = new Set();
+    }
+    if(net2 == null) {
+        net2 = new Set();
+    }
+
     // Add the VDD and GND nets.
     // Loop through every VDD cell and add to the VDD net.
     setRecursively(layeredGrid[railStartX][VDD_y][METAL1], netVDD);
@@ -587,18 +595,23 @@ function setNets() {
         net1.clear();
         net2.clear();
 
+        console.log("nmosCell: " + nmosCell);
         if(nmosCell.term1 !== undefined) {
             if(!getNet(nmosCell.term1)) {
                 net1.add(nmosCell.term1);
+                console.log("no net -- net1: " + net1);
             } else {
                 net1 = getNet(nmosCell.term1);
+                console.log("has net -- net1: " + net1);
             }
         }
         if(nmosCell.term2 !== undefined) {
             if(!getNet(nmosCell.term2)) {
                 net2.add(nmosCell.term2);
+                console.log("no net -- net2: " + net2);
             } else {
                 net2 = getNet(nmosCell.term2);
+                console.log("has net -- net2: " + net2);
             }
         }
         
@@ -621,18 +634,23 @@ function setNets() {
         net1.clear();
         net2.clear();
 
+        console.log("pmosCell: " + pmosCell);
         if(pmosCell.term1 !== undefined) {
             if(!getNet(pmosCell.term1)) {
                 net1.add(pmosCell.term1);
+                console.log("no net -- net1: " + net1);
             } else {
                 net1 = getNet(pmosCell.term1);
+                console.log("has net -- net1: " + net1);
             }
         }
         if(pmosCell.term2 !== undefined) {
             if(!getNet(pmosCell.term2)) {
                 net2.add(pmosCell.term2);
+                console.log("no net -- net2: " + net2);
             } else {
                 net2 = getNet(pmosCell.term2);
+                console.log("has net -- net2: " + net2);
             }
         }
 
@@ -716,9 +734,13 @@ function setNets() {
         // Loop through pmosIterator2 to find all other pmos cells that share a net.
         let pmosIterator2 = pmos.values();
         for(let jj = 0; jj < pmos.size; jj++) {
-            console.log(jj);
             let pmosCell2 = pmosIterator2.next().value;
             let pmosNode2 = graph.getNode(pmosCell2);
+
+            console.log("PMOS2: " + jj);
+            console.log("PMOS: " + pmosCell);
+            console.log("PMOS2: " + pmosCell2);
+            console.log("PMOS NODE 2 " + pmosNode2);
 
             if(pmosCell2 === pmosCell) {
                 continue;
@@ -804,6 +826,8 @@ function setNets() {
         for(let jj = 0; jj < pmos.size; jj++) {
             let pmosCell2 = pmosIterator2.next().value;
             let pmosNode2 = graph.getNode(pmosCell2);
+            net1 = pmosCell2.term1;
+            net2 = pmosCell2.term2;
 
             if(pmosCell2.term1 !== undefined) {
                 if(net1.has(pmosCell2.term1) || net2.has(pmosCell2.term1)) {
@@ -895,40 +919,46 @@ function setRecursively(cell, net) {
                 if (layeredGrid[cell.x + 1][cell.y][NDIFF].isSet) {
                     cell.term1 = layeredGrid[cell.x + 1][cell.y][NDIFF];
                 }
-            }
+            } else console.log("No NDIFF to the right of " + cell.x + "," + cell.y);
             // Check the cell to the left.
             if (cell.x > 0) {
                 if (layeredGrid[cell.x - 1][cell.y][NDIFF].isSet) {
                     // If term1 is already set, set term2 to the cell to the left.
                     if (cell.term1 !== undefined) {
+                        console.log("Found NDIFF to the left of " + cell.x + "," + cell.y);
                         cell.term2 = layeredGrid[cell.x - 1][cell.y][NDIFF];
                     } else {
+                        console.log("Found NDIFF to the left of " + cell.x + "," + cell.y);
                         cell.term1 = layeredGrid[cell.x - 1][cell.y][NDIFF];
                     }
                 }
-            }
+            } else console.log("No NDIFF to the left of " + cell.x + "," + cell.y);
             // Check the cell above.
             if (cell.y > 0 && cell.term2 === undefined) {
                 if (layeredGrid[cell.x][cell.y - 1][NDIFF].isSet) {
                     // If term1 is already set, set term2 to the cell above.
                     if (cell.term1 !== undefined) {
+                        console.log("Found NDIFF above " + cell.x + "," + cell.y);
                         cell.term2 = layeredGrid[cell.x][cell.y - 1][NDIFF];
                     } else {
+                        console.log("Found NDIFF above " + cell.x + "," + cell.y);
                         cell.term1 = layeredGrid[cell.x][cell.y - 1][NDIFF];
                     }
                 }
-            }
+            } else console.log("No NDIFF above " + cell.x + "," + cell.y);
             // Check the cell below.
             if (cell.y < gridsize - 1 && cell.term2 === undefined) {
                 if (layeredGrid[cell.x][cell.y + 1][NDIFF].isSet) {
                     // If term1 is already set, set term2 to the cell below.
                     if (cell.term1 !== undefined) {
                         cell.term2 = layeredGrid[cell.x][cell.y + 1][NDIFF];
+                        console.log("Found NDIFF below " + cell.x + "," + cell.y);
                     } else {
                         cell.term1 = layeredGrid[cell.x][cell.y + 1][NDIFF];
+                        console.log("Found NDIFF below " + cell.x + "," + cell.y);
                     }
                 }
-            }
+            } else console.log("No NDIFF below " + cell.x + "," + cell.y);
             return;
         }
     }
@@ -947,42 +977,49 @@ function setRecursively(cell, net) {
             // Check the cell to the right.
             if (cell.x < gridsize - 1) {
                 if (layeredGrid[cell.x + 1][cell.y][PDIFF].isSet) {
+                    console.log("Found PDIFF to the right of " + cell.x + " " + cell.y);
                     cell.term1 = layeredGrid[cell.x + 1][cell.y][PDIFF];
                 }
-            }
+            } else console.log("No PDIFF to the right of " + cell.x + " " + cell.y);
             // Check the cell to the left.
             if (cell.x > 0) {
                 if (layeredGrid[cell.x - 1][cell.y][PDIFF].isSet) {
                     // If term1 is already set, set term2 to the cell to the left.
                     if (cell.term1 !== undefined) {
+                        console.log("Found PDIFF to the left of " + cell.x + " " + cell.y);
                         cell.term2 = layeredGrid[cell.x - 1][cell.y][PDIFF];
                     } else {
+                        console.log("Found PDIFF to the left of " + cell.x + " " + cell.y);
                         cell.term1 = layeredGrid[cell.x - 1][cell.y][PDIFF];
                     }
                 }
-            }
+            } else console.log("Found PDIFF to the left of " + cell.x + " " + cell.y);
             // Check the cell above.
             if (cell.y > 0 && cell.term2 === undefined) {
                 if (layeredGrid[cell.x][cell.y - 1][PDIFF].isSet) {
                     // If term1 is already set, set term2 to the cell above.
                     if (cell.term1 !== undefined) {
+                        console.log("Found PDIFF above of " + cell.x + " " + cell.y);
                         cell.term2 = layeredGrid[cell.x][cell.y - 1][PDIFF];
                     } else {
+                        console.log("Found PDIFF above of " + cell.x + " " + cell.y);
                         cell.term1 = layeredGrid[cell.x][cell.y - 1][PDIFF];
                     }
                 }
-            }
+            } else console.log("No PDIFF above of " + cell.x + " " + cell.y);
             // Check the cell below.
             if (cell.y < gridsize - 1 && cell.term2 === undefined) {
                 if (layeredGrid[cell.x][cell.y + 1][PDIFF].isSet) {
                     // If term1 is already set, set term2 to the cell below.
                     if (cell.term1 !== undefined) {
+                        console.log("Found PDIFF below of " + cell.x + " " + cell.y);
                         cell.term2 = layeredGrid[cell.x][cell.y + 1][PDIFF];
                     } else {
+                        console.log("Found PDIFF below of " + cell.x + " " + cell.y);
                         cell.term1 = layeredGrid[cell.x][cell.y + 1][PDIFF];
                     }
                 }
-            }
+            } else console.log("No PDIFF below of " + cell.x + " " + cell.y);
             return;
         }
     }
@@ -1538,8 +1575,12 @@ window.onload = function() {
         }
     });
 
-    setInterval(function() {
+    // Add a button in the table div to call setNets() and refreshTruthTable(buildTruthTable())
+    let button = document.createElement("button");
+    button.innerHTML = "Set Nets";
+    button.onclick = function() {
         setNets();
         refreshTruthTable(buildTruthTable());
-    }, 1000);
+    };
+    document.getElementById("truthTable").appendChild(button);
 }
