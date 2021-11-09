@@ -16,6 +16,7 @@ let startY;
 let gridCanvas;
 let currentX;
 let currentY;
+let button;
 
 // Cycle through the following cursor colors by pressing space: PDIFF, NDIFF, POLY, METAL1, CONTACT
 let PDIFF = 0;
@@ -1311,6 +1312,8 @@ function refreshTruthTable(table) {
         ths[i].setAttribute("style", "border: 1px solid black; padding: 5px;");
     }
 
+    document.getElementById("truthTable").appendChild(button);
+
     tableDiv.appendChild(tableElement);
 }
 
@@ -1576,7 +1579,7 @@ window.onload = function() {
     });
 
     // Add a button in the table div to call setNets() and refreshTruthTable(buildTruthTable())
-    let button = document.createElement("button");
+    button = document.createElement("button");
     button.innerHTML = "Set Nets";
     button.onclick = function() {
         setNets();
