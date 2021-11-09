@@ -672,8 +672,8 @@ function setNets() {
     vddNode = graph.addNode(layeredGrid[railStartX][VDD_y][METAL1]);
     gndNode = graph.addNode(layeredGrid[railStartX][GND_y][METAL1]);
 
-    vddNet.addNode(vddNode);
-    gndNet.addNode(gndNode);
+    netVDD.addNode(vddNode);
+    netGND.addNode(gndNode);
 
     // Add output nodes to the graph.
     outputNodes.length = 0;
