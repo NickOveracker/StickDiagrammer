@@ -206,9 +206,12 @@ function computeOutput(inputVals, outputNode) {
 
         for(let ii = 0; ii < gateNet.size(); ii++) {
             let gateNode = gateNodeIterator.next().value;
-            if(computeOutputRecursive(gateNode, {}, vddNode)) {
+            let visitMap = {};
+            visitMap[node.getCell().x + "," + node.getCell().y] = true;
+
+            if(computeOutputRecursive(gateNode, visitMap, vddNode)) {
                 return true;
-            } else if(computeOutputRecursive(gateNode, {}, gndNode)) {
+            } else if(computeOutputRecursive(gateNode, visitMap, gndNode)) {
                 return true;
             }
         }
@@ -670,20 +673,18 @@ function setNets() {
 
 
         if(nmosCell.term1 !== undefined) {
-            if(!getNet(nmosCell.term1)) {
-                net1.add(nmosCell.term1);
-            } else {
+            if(getNet(nmosCell.term1)) {
                 net1.clear();
                 net1 = getNet(nmosCell.term1);
             }
+            net1.add(nmosCell.term1);
         }
         if(nmosCell.term2 !== undefined) {
-            if(!getNet(nmosCell.term2)) {
-                net2.add(nmosCell.term2);
-            } else {
+            if(getNet(nmosCell.term2)) {
                 net2.clear();
                 net2 = getNet(nmosCell.term2);
             }
+            net2.add(nmosCell.term2);
         }
         
         // Add the nets if they are not empty.
@@ -708,20 +709,18 @@ function setNets() {
         let net2 = new Net("?", false, false, false);
 
         if(pmosCell.term1 !== undefined) {
-            if(!getNet(pmosCell.term1)) {
-                net1.add(pmosCell.term1);
-            } else {
+            if(getNet(pmosCell.term1)) {
                 net1.clear();
                 net1 = getNet(pmosCell.term1);
             }
+            net1.add(pmosCell.term1);
         }
         if(pmosCell.term2 !== undefined) {
-            if(!getNet(pmosCell.term2)) {
-                net2.add(pmosCell.term2);
-            } else {
-                net2.clear();
-                net2 = getNet(pmosCell.term2);
+            if(getNet(pmosCell.term2)) {
+                net1.clear();
+                net1 = getNet(pmosCell.term2);
             }
+            net1.add(pmosCell.term2);
         }
 
         // Add the nets if they are not empty.
@@ -751,28 +750,27 @@ function setNets() {
             gate = new Net("?", false, false, false);
             setRecursively(nmosCell.gate, gate);
             netlist.push(gate);
-            graph.addNode(layeredGrid[nmosCell.x][nmosCell.y][POLY]);
         }
 
         if(net1 === null) {
             net1 = new Net("?", false, false, false);
             setRecursively(nmosCell.term1, net1);
             netlist.push(net1);
-            graph.addNode(layeredGrid[nmosCell.term1.x][nmosCell.term1.y][nmosCell.term1.layer]);
         }
 
         if(net2 === null) {
             net2 = new Net("?", false, false, false);
             setRecursively(nmosCell.term2, net2);
             netlist.push(net2);
-            graph.addNode(layeredGrid[nmosCell.term2.x][nmosCell.term2.y][nmosCell.term2.layer]);
         }
 
         if(net1 !== undefined) {
             nmosCell.term1 = net1;
+            net1.addNode(graph.getNode(nmosCell));
         }
         if(net2 !== undefined) {
             nmosCell.term2 = net2;
+            net2.addNode(graph.getNode(nmosCell));
         }
         if(gate !== undefined) {
             nmosCell.gate = gate;
@@ -790,28 +788,27 @@ function setNets() {
             gate = new Net("?", false, false, false);
             setRecursively(nmosCell.gate, gate);
             netlist.push(gate);
-            graph.addNode(layeredGrid[pmosCell.x][pmosCell.y][POLY]);
         }
 
         if(net1 === null) {
             net1 = new Net("?", false, false, false);
             setRecursively(nmosCell.term1, net1);
             netlist.push(net1);
-            graph.addNode(layeredGrid[pmosCell.term1.x][pmosCell.term1.y][pmosCell.term1.layer]);
         }
 
         if(net2 === null) {
             net2 = new Net("?", false, false, false);
             setRecursively(nmosCell.term2, net2);
             netlist.push(net2);
-            graph.addNode(layeredGrid[pmosCell.term2.x][pmosCell.term2.y][pmosCell.term2.layer]);
         }
 
         if(net1 !== undefined) {
             pmosCell.term1 = net1;
+            net1.addNode(graph.getNode(pmosCell));
         }
         if(net2 !== undefined) {
             pmosCell.term2 = net2;
+            net2.addNode(graph.getNode(pmosCell));
         }
         if(gate !== undefined) {
             pmosCell.gate = gate;
