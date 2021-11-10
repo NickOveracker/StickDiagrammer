@@ -967,7 +967,7 @@ function printGrid(net, name) {
     for(let ii = 0; ii < gridsize; ii++) {
         grid[ii] = [];
         for(let jj = 0; jj < gridsize; jj++) {
-            grid[ii][jj] = "o";
+            grid[ii][jj] = "_";
             // If any of the layers are in netA, set the cell to "A".
             for(let kk = 0; kk < layers; kk++) {
                 if(layeredGrid[ii][jj][kk].isSet && net.has(layeredGrid[ii][jj][kk])) {
