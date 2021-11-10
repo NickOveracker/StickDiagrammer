@@ -219,7 +219,7 @@ function computeOutput(inputVals, outputNode) {
             } else {
                 let visitMap = {};
                 visitMap[node.getCell().x + "," + node.getCell().y] = true;
-                
+
                 if(computeOutputRecursive(gateNode, visitMap, vddNode) && node.isNmos) {
 				    return true;
                 }
@@ -737,7 +737,7 @@ function setNets() {
                 net2.clear();
                 net2 = getNet(pmosCell.term2);
             }
-            net1.add(pmosCell.term2);
+            net2.add(pmosCell.term2);
         }
 
         // Add the nets if they are not empty.
