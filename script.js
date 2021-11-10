@@ -152,6 +152,13 @@ function computeOutput(inputVals, outputNode) {
     let firstLevel;
 
     function computeOutputRecursive(node, visitMap, targetNode) {
+
+        console.log(node);
+        console.log(targetNode);
+        console.log(node.getCell().x, node.getCell().y);
+        console.log(targetNode.getCell().x, targetNode.getCell().y);
+        console.log(targetNode === node);
+        console.log(targetNode == node);
         // We found it?
         if(node === targetNode) {
             return true;
@@ -435,13 +442,17 @@ class Node {
         this.edges = [];
         this.isPmos = layeredGrid[cell.x][cell.y][PDIFF].isSet;
         this.isNmos = layeredGrid[cell.x][cell.y][NDIFF].isSet;
-        this.isSupply = !this.isPmos && !this.isNmos;
+        this.isSupply = false;
     }
 
     // Destructor
     destroy() {
         this.cell = null;
         this.edges = null;
+    }
+
+    setAsSupply() {
+        this.isSupply = true;
     }
 
     addEdge(edge) {
@@ -655,6 +666,8 @@ function setNets() {
     // Add rail nodes to the graph.
     vddNode = graph.addNode(layeredGrid[railStartX][VDD_y][METAL1]);
     gndNode = graph.addNode(layeredGrid[railStartX][GND_y][METAL1]);
+    vddNode.setAsSupply();
+    gndNode.setAsSupply();
 
     netVDD.addNode(vddNode);
     netGND.addNode(gndNode);
