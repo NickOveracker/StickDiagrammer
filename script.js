@@ -152,13 +152,6 @@ function computeOutput(inputVals, outputNode) {
     let firstLevel;
 
     function computeOutputRecursive(node, visitMap, targetNode) {
-
-        console.log(node);
-        console.log(targetNode);
-        console.log(node.getCell().x, node.getCell().y);
-        console.log(targetNode.getCell().x, targetNode.getCell().y);
-        console.log(targetNode === node);
-        console.log(targetNode == node);
         // We found it?
         if(node === targetNode) {
             return true;
@@ -180,7 +173,7 @@ function computeOutput(inputVals, outputNode) {
 
         // Return if this is not the first level and the node is vddNode or gndNode.
         // The rail nodes won't play nice with the rest of this.
-        if(!firstLevel && ((node === vddNode) || (node === gndNode))) {
+        if(!firstLevel && node.isSupply) {
             return false;
         }
 
@@ -205,7 +198,12 @@ function computeOutput(inputVals, outputNode) {
             let inputNum = node.getName().charCodeAt(0) - 65;
             let evalInput = !!((inputVals >> inputNum) & 1);
             // Pass-through positive for NMOS.
-            return evalInput === node.isNmos;
+            if(node.isNmos) {
+                return evalInput;
+            }
+            else {
+                return !evalInput;
+            }
         }
     
         // Otherwise, recurse and see if this is active.
@@ -216,10 +214,15 @@ function computeOutput(inputVals, outputNode) {
             let visitMap = {};
             visitMap[node.getCell().x + "," + node.getCell().y] = true;
 
-            if(computeOutputRecursive(gateNode, visitMap, vddNode)) {
+            if(computeOutputRecursive(gateNode, visitMap, gndNode) && node.isPmos) {
                 return true;
-            } else if(computeOutputRecursive(gateNode, visitMap, gndNode)) {
-                return true;
+            } else {
+                let visitMap = {};
+                visitMap[node.getCell().x + "," + node.getCell().y] = true;
+                
+                if(computeOutputRecursive(gateNode, visitMap, vddNode) && node.isNmos) {
+				    return true;
+                }
             }
         }
 
@@ -235,10 +238,6 @@ function computeOutput(inputVals, outputNode) {
     visited = {};
     firstLevel = true;
     nmosOut = computeOutputRecursive(gndNode, visited, outputNode) ? 0 : "Z";
-
-    console.log(inputVals & 1)
-    console.log("PMOS: " + pmosOut);
-    console.log("NMOS: " + nmosOut);
 
     // Reconcile.
     if(pmosOut === "Z") {
@@ -716,7 +715,7 @@ function setNets() {
             net2.addNode(graph.getNode(nmosCell));
         }
     }
-
+    
     // Loop through pmos now.
     let pmosIterator = pmos.values();
 
@@ -732,10 +731,11 @@ function setNets() {
             }
             net1.add(pmosCell.term1);
         }
+
         if(pmosCell.term2 !== undefined) {
             if(getNet(pmosCell.term2)) {
-                net1.clear();
-                net1 = getNet(pmosCell.term2);
+                net2.clear();
+                net2 = getNet(pmosCell.term2);
             }
             net1.add(pmosCell.term2);
         }
@@ -746,6 +746,7 @@ function setNets() {
             netlist.push(net1);
             net1.addNode(graph.getNode(pmosCell));
         }
+
         if(net2.size > 0 && !getNet(pmosCell.term2)) {
             setRecursively(pmosCell.term2, net2);
             netlist.push(net2);
@@ -1004,6 +1005,7 @@ function getNet(cell) {
 function setRecursively(cell, net) {
     // Return if this cell is in pmos or nmos already.
     if (nmos.has(cell) || pmos.has(cell)) {
+        net.addNode(graph.getNode(cell));
         return;
     }
 
