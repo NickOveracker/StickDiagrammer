@@ -790,19 +790,19 @@ function setNets() {
 
         if(gate === null) {
             gate = new Net("?", false, false, false);
-            setRecursively(nmosCell.gate, gate);
+            setRecursively(pmosCell.gate, gate);
             netlist.push(gate);
         }
 
         if(net1 === null) {
             net1 = new Net("?", false, false, false);
-            setRecursively(nmosCell.term1, net1);
+            setRecursively(pmosCell.term1, net1);
             netlist.push(net1);
         }
 
         if(net2 === null) {
             net2 = new Net("?", false, false, false);
-            setRecursively(nmosCell.term2, net2);
+            setRecursively(pmosCell.term2, net2);
             netlist.push(net2);
         }
 
