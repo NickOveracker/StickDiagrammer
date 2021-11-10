@@ -132,7 +132,7 @@ class Net {
     }
 
     size() {
-        return this.cells.size;
+        return this.nodes.size;
     }
 }
 
@@ -228,6 +228,10 @@ function computeOutput(inputVals, outputNode) {
     visited = {};
     firstLevel = true;
     nmosOut = computeOutputRecursive(gndNode, visited, outputNode) ? 0 : "Z";
+
+    console.log(inputVals & 1)
+    console.log("PMOS: " + pmosOut);
+    console.log("NMOS: " + nmosOut);
 
     // Reconcile.
     if(pmosOut === "Z") {
