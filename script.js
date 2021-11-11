@@ -1009,116 +1009,56 @@ function setRecursively(cell, net) {
         return;
     }
 
-    // If the layer is NDIFF or PDIFF and there is also a POLY at the same location,
-    // add the cell to transistors.
-    if (cell.layer === NDIFF) {
-        if (layeredGrid[cell.x][cell.y][POLY].isSet) {
-            nmos.add(cell);
-            graph.addNode(cell);
-            // Set the gate to the poly cell.
-            cell.gate = layeredGrid[cell.x][cell.y][POLY];
+    // If the cell is NDIFF or PDIFF intersected by POLY, create a transistor.
+    // Exception for CONTACT.
+    function checkTransistor(cell, layer, transistorArray) {
 
-            // Check adjacent cells for NDIFF.
-            // Set term1 to the first one found.
-            // Set term2 to the second one found.
-            cell.term1 = undefined;
-            cell.term2 = undefined;
-            // Check the cell to the right.
-            if (cell.x < gridsize - 1) {
-                if (layeredGrid[cell.x + 1][cell.y][NDIFF].isSet) {
-                    cell.term1 = layeredGrid[cell.x + 1][cell.y][NDIFF];
+        // Helper function to set the terminals of transistors.
+        function setTerminals(x, y, layer) {
+            if (layeredGrid[x][y][layer].isSet) {
+                if (cell.term1 === undefined) {
+                    cell.term1 = layeredGrid[x][y][layer];
+                }
+                else {
+                    cell.term2 = layeredGrid[x][y][layer];
                 }
             }
-            // Check the cell to the left.
-            if (cell.x > 0) {
-                if (layeredGrid[cell.x - 1][cell.y][NDIFF].isSet) {
-                    // If term1 is already set, set term2 to the cell to the left.
-                    if (cell.term1 !== undefined) {
-                        cell.term2 = layeredGrid[cell.x - 1][cell.y][NDIFF];
-                    } else {
-                        cell.term1 = layeredGrid[cell.x - 1][cell.y][NDIFF];
-                    }
-                }
+        }
+
+        // If the layer is NDIFF or PDIFF and there is also a POLY at the same location,
+        // add the cell to transistors.
+        if (cell.layer === layer) {
+            if (layeredGrid[cell.x][cell.y][POLY].isSet
+                && !layeredGrid[cell.x][cell.y][CONTACT].isSet) {
+                    
+                transistorArray.add(cell);
+                graph.addNode(cell);
+                // Set the gate to the poly cell.
+                cell.gate = layeredGrid[cell.x][cell.y][POLY];
+
+                // Check adjacent cells for NDIFF.
+                // Set term1 to the first one found.
+                // Set term2 to the second one found.
+                cell.term1 = undefined;
+                cell.term2 = undefined;
+
+                // TODO: Account for wide poly.
+                // Check the cells above and below.
+                setTerminals(cell.x, cell.y - 1, layer);
+                setTerminals(cell.x, cell.y + 1, layer);
+
+                // Check the cells to the left and right.
+                setTerminals(cell.x - 1, cell.y, layer);
+                setTerminals(cell.x + 1, cell.y, layer);
+
+                return;
             }
-            // Check the cell above.
-            if (cell.y > 0 && cell.term2 === undefined) {
-                if (layeredGrid[cell.x][cell.y - 1][NDIFF].isSet) {
-                    // If term1 is already set, set term2 to the cell above.
-                    if (cell.term1 !== undefined) {
-                        cell.term2 = layeredGrid[cell.x][cell.y - 1][NDIFF];
-                    } else {
-                        cell.term1 = layeredGrid[cell.x][cell.y - 1][NDIFF];
-                    }
-                }
-            }
-            // Check the cell below.
-            if (cell.y < gridsize - 1 && cell.term2 === undefined) {
-                if (layeredGrid[cell.x][cell.y + 1][NDIFF].isSet) {
-                    // If term1 is already set, set term2 to the cell below.
-                    if (cell.term1 !== undefined) {
-                        cell.term2 = layeredGrid[cell.x][cell.y + 1][NDIFF];
-                    } else {
-                        cell.term1 = layeredGrid[cell.x][cell.y + 1][NDIFF];
-                    }
-                }
-            }
-            return;
         }
     }
-    if (cell.layer === PDIFF) {
-        if (layeredGrid[cell.x][cell.y][POLY].isSet) {
-            pmos.add(cell);
-            graph.addNode(cell);
-            // Set the gate to the poly cell.
-            cell.gate = layeredGrid[cell.x][cell.y][POLY];
 
-            // Check adjacent cells for PDIFF.
-            // Set term1 to the first one found.
-            // Set term2 to the second one found.
-            cell.term1 = undefined;
-            cell.term2 = undefined;
-            // Check the cell to the right.
-            if (cell.x < gridsize - 1) {
-                if (layeredGrid[cell.x + 1][cell.y][PDIFF].isSet) {
-                    cell.term1 = layeredGrid[cell.x + 1][cell.y][PDIFF];
-                }
-            }
-            // Check the cell to the left.
-            if (cell.x > 0) {
-                if (layeredGrid[cell.x - 1][cell.y][PDIFF].isSet) {
-                    // If term1 is already set, set term2 to the cell to the left.
-                    if (cell.term1 !== undefined) {
-                        cell.term2 = layeredGrid[cell.x - 1][cell.y][PDIFF];
-                    } else {
-                        cell.term1 = layeredGrid[cell.x - 1][cell.y][PDIFF];
-                    }
-                }
-            }
-            // Check the cell above.
-            if (cell.y > 0 && cell.term2 === undefined) {
-                if (layeredGrid[cell.x][cell.y - 1][PDIFF].isSet) {
-                    // If term1 is already set, set term2 to the cell above.
-                    if (cell.term1 !== undefined) {
-                        cell.term2 = layeredGrid[cell.x][cell.y - 1][PDIFF];
-                    } else {
-                        cell.term1 = layeredGrid[cell.x][cell.y - 1][PDIFF];
-                    }
-                }
-            }
-            // Check the cell below.
-            if (cell.y < gridsize - 1 && cell.term2 === undefined) {
-                if (layeredGrid[cell.x][cell.y + 1][PDIFF].isSet) {
-                    // If term1 is already set, set term2 to the cell below.
-                    if (cell.term1 !== undefined) {
-                        cell.term2 = layeredGrid[cell.x][cell.y + 1][PDIFF];
-                    } else {
-                        cell.term1 = layeredGrid[cell.x][cell.y + 1][PDIFF];
-                    }
-                }
-            }
-            return;
-        }
-    }
+    // Check the cell for a transistor.
+    checkTransistor(cell, NDIFF, nmos);
+    checkTransistor(cell, PDIFF, pmos);
 
     // Add the cell to the net.
     net.add(cell);
@@ -1133,30 +1073,24 @@ function setRecursively(cell, net) {
     }
 
     // For each layer of the cell in the net, recurse with all adjacent cells in the layer.
-    for (let ii = 0; ii < layers; ii++) {
-        if(net.has(layeredGrid[cell.x][cell.y][ii])) {
-            if(cell.x > 0
-                && layeredGrid[cell.x - 1][cell.y][ii].isSet
-                && net.has(layeredGrid[cell.x - 1][cell.y][ii]) === false) {
-                setRecursively(layeredGrid[cell.x - 1][cell.y][ii], net);
-            }
-            if(cell.x < gridsize - 1
-                && layeredGrid[cell.x + 1][cell.y][ii].isSet
-                && net.has(layeredGrid[cell.x + 1][cell.y][ii]) === false) {
-                setRecursively(layeredGrid[cell.x + 1][cell.y][ii], net);
-            }
-            if(cell.y > 0
-                && layeredGrid[cell.x][cell.y - 1][ii].isSet
-                && net.has(layeredGrid[cell.x][cell.y - 1][ii]) === false) {
-                setRecursively(layeredGrid[cell.x][cell.y - 1][ii], net);
-            }
-            if(cell.y < gridsize - 1
-                && layeredGrid[cell.x][cell.y + 1][ii].isSet
-                && net.has(layeredGrid[cell.x][cell.y + 1][ii]) === false) {
-                setRecursively(layeredGrid[cell.x][cell.y + 1][ii], net);
+    // Generic function for the above code.
+    function setAdjacent(x, y) {
+        for(ii = 0; ii < layers; ii++) {
+            if(layeredGrid[x][y][layer].isSet) {
+                if(net.has(layeredGrid[x][y][layer]) === false) {
+                    setRecursively(layeredGrid[x][y][layer], net);
+                }
             }
         }
     }
+
+    // Check the cells above and below.
+    (cell.y - 1 > 0) && setAdjacent(cell.x, cell.y - 1);
+    (cell.y + 1 < gridsize - 1) && setAdjacent(cell.x, cell.y + 1);
+
+    // Check the cells to the left and right.
+    (cell.x - 1 > 0) && setAdjacent(cell.x - 1, cell.y, ii);
+    (cell.x + 1 < gridsize - 1) && setAdjacent(cell.x + 1, cell.y);
 }
 
 // Initialize everything
