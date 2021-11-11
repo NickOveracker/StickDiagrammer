@@ -1085,12 +1085,12 @@ function setRecursively(cell, net) {
     }
 
     // Check the cells above and below.
-    (cell.y - 1 > 0) && setAdjacent(cell.x, cell.y - 1);
-    (cell.y + 1 < gridsize - 1) && setAdjacent(cell.x, cell.y + 1);
+    (cell.y > 0) && setAdjacent(cell.x, cell.y - 1);
+    (cell.y < gridsize - 1) && setAdjacent(cell.x, cell.y + 1);
 
     // Check the cells to the left and right.
-    (cell.x - 1 > 0) && setAdjacent(cell.x - 1, cell.y, ii);
-    (cell.x + 1 < gridsize - 1) && setAdjacent(cell.x + 1, cell.y);
+    (cell.x > 0) && setAdjacent(cell.x - 1, cell.y, ii);
+    (cell.x < gridsize - 1) && setAdjacent(cell.x + 1, cell.y);
 }
 
 // Initialize everything
