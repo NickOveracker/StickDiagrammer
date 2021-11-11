@@ -1030,7 +1030,7 @@ function setRecursively(cell, net) {
         if (cell.layer === layer) {
             if (layeredGrid[cell.x][cell.y][POLY].isSet
                 && !layeredGrid[cell.x][cell.y][CONTACT].isSet) {
-                    
+
                 transistorArray.add(cell);
                 graph.addNode(cell);
                 // Set the gate to the poly cell.
@@ -1076,9 +1076,9 @@ function setRecursively(cell, net) {
     // Generic function for the above code.
     function setAdjacent(x, y) {
         for(ii = 0; ii < layers; ii++) {
-            if(layeredGrid[x][y][layer].isSet) {
-                if(net.has(layeredGrid[x][y][layer]) === false) {
-                    setRecursively(layeredGrid[x][y][layer], net);
+            if(layeredGrid[x][y][ii].isSet) {
+                if(net.has(layeredGrid[x][y][ii]) === false) {
+                    setRecursively(layeredGrid[x][y][ii], net);
                 }
             }
         }
