@@ -1011,6 +1011,7 @@ function setRecursively(cell, net) {
 
     // If the cell is NDIFF or PDIFF intersected by POLY, create a transistor.
     // Exception for CONTACT.
+    // Returns true if the cell is a transistor.
     function checkTransistor(cell, layer, transistorArray) {
 
         // Helper function to set the terminals of transistors.
@@ -1051,14 +1052,16 @@ function setRecursively(cell, net) {
                 setTerminals(cell.x - 1, cell.y, layer);
                 setTerminals(cell.x + 1, cell.y, layer);
 
-                return;
+                return true;
             }
         }
+
+        return false;
     }
 
     // Check the cell for a transistor.
-    checkTransistor(cell, NDIFF, nmos);
-    checkTransistor(cell, PDIFF, pmos);
+    if(checkTransistor(cell, NDIFF, nmos)) return;
+    if(checkTransistor(cell, PDIFF, pmos)) return;
 
     // Add the cell to the net.
     net.add(cell);
