@@ -144,29 +144,53 @@ let netC = new Net("C", false, true, false);
 let netD = new Net("D", false, true, false);
 let netY = new Net("Y", false, false, true);
 
+let nodeNodeMap;
+
+function printNodeNodeMap() {
+    let str = " ";
+    for(let ii = 0; ii < nodeNodeMap.length; ii++) {
+        str += ii + " ";
+    }
+    str += "\n";
+    for(let ii = 0; ii < nodeNodeMap.length; ii++) {
+        str += ii + " ";
+        for(let jj = 0; jj < nodeNodeMap.length; jj++) {
+            str += (nodeNodeMap[ii][jj] ? 1 : " ") + " ";
+        }
+        str += "\n";
+    }
+  
+    console.log(str)
+  }
+
 function computeOutput(inputVals, outputNode) {
-    let visited;
     let pmosOut;
     let nmosOut;
     let out;
     let firstLevel;
+    nodeNodeMap = [];
 
-    function computeOutputRecursive(node, visitMap, targetNode) {
+    for(let ii = 0; ii < graph.getNumNodes(); ii++) {
+        nodeNodeMap[ii] = [];
+        nodeNodeMap[ii][ii] = true;
+    }
+
+    function computeOutputRecursive(node, targetNode) {
         // We found it?
         if(node === targetNode) {
             return true;
         }
 
         // Avoid infinite loops.
-        if(visitMap[node.getCell().x + "," + node.getCell().y]) {
-            return false;
+        if(nodeNodeMap[graph.getIndexByNode(node)][graph.getIndexByNode(targetNode)] !== undefined) {
+            return nodeNodeMap[graph.getIndexByNode(node)][graph.getIndexByNode(targetNode)];
         }
-        visitMap[node.getCell().x + "," + node.getCell().y] = true;
 
         // Only proceed if the input is activated.
         if(!node.isSupply) {
-            // Convert node.getName() to a number.
-            if(!evaluate(node, inputVals)) {
+            if(!evaluate(node)) {
+                nodeNodeMap[graph.getIndexByNode(node)][graph.getIndexByNode(targetNode)] = false;
+                nodeNodeMap[graph.getIndexByNode(targetNode)][graph.getIndexByNode(node)] = false;
                 return false;
             }
         }
@@ -182,16 +206,27 @@ function computeOutput(inputVals, outputNode) {
         // Recurse on all edges.
         let edges = node.getEdges();
         for(let ii = 0; ii < edges.length; ii++) {
-            if(computeOutputRecursive(edges[ii].getOtherNode(node), visitMap, targetNode)) {
+            if(nodeNodeMap[graph.getIndexByNode(edges[ii].getOtherNode(node))][graph.getIndexByNode(targetNode)]) {
+                nodeNodeMap[graph.getIndexByNode(node)][graph.getIndexByNode(edges[ii].getOtherNode(node))] = true;
+                nodeNodeMap[graph.getIndexByNode(edges[ii].getOtherNode(node))][graph.getIndexByNode(node)] = true;
+                return true;
+            }
+            if(computeOutputRecursive(edges[ii].getOtherNode(node), targetNode)) {
+                nodeNodeMap[graph.getIndexByNode(node)][graph.getIndexByNode(edges[ii].getOtherNode(node))] = true;
+                nodeNodeMap[graph.getIndexByNode(edges[ii].getOtherNode(node))][graph.getIndexByNode(node)] = true;
+                nodeNodeMap[graph.getIndexByNode(edges[ii].getOtherNode(node))][graph.getIndexByNode(targetNode)] = true;
+                nodeNodeMap[graph.getIndexByNode(targetNode)][graph.getIndexByNode(edges[ii].getOtherNode(node))] = true;
                 return true;
             }
         }
 
         // No findy :(
+        nodeNodeMap[graph.getIndexByNode(node)][graph.getIndexByNode(targetNode)] = false;
+        nodeNodeMap[graph.getIndexByNode(targetNode)][graph.getIndexByNode(node)] = false;
         return false;
     }
 
-    function evaluate(node, inputVals) {
+    function evaluate(node) {
         let gateNet = node.getCell().gate;
     
         if(gateNet.isInput) {
@@ -211,17 +246,14 @@ function computeOutput(inputVals, outputNode) {
 
         for(let ii = 0; ii < gateNet.size(); ii++) {
             let gateNode = gateNodeIterator.next().value;
-            let visitMap = {};
-            visitMap[node.getCell().x + "," + node.getCell().y] = true;
 
-            if(computeOutputRecursive(gateNode, visitMap, gndNode) && node.isPmos) {
+            if(node.isPmos && (nodeNodeMap[graph.getIndexByNode(gateNode)][graph.getIndexByNode(gndNode)]
+                || computeOutputRecursive(gateNode, gndNode))) {
                 return true;
             } else {
-                let visitMap = {};
-                visitMap[node.getCell().x + "," + node.getCell().y] = true;
-
-                if(computeOutputRecursive(gateNode, visitMap, vddNode) && node.isNmos) {
-				    return true;
+                if(node.isNmos && (nodeNodeMap[graph.getIndexByNode(gateNode)][graph.getIndexByNode(vddNode)]
+                    || computeOutputRecursive(gateNode, vddNode))) {
+                    return true;
                 }
             }
         }
@@ -230,14 +262,12 @@ function computeOutput(inputVals, outputNode) {
     }
 
     // Get pmos output.
-    visited = {};
     firstLevel = true;
-    pmosOut = computeOutputRecursive(vddNode, visited, outputNode) ? 1 : "Z";
+    pmosOut = computeOutputRecursive(vddNode, outputNode) ? 1 : "Z";
 
     // Get nmos output.
-    visited = {};
     firstLevel = true;
-    nmosOut = computeOutputRecursive(gndNode, visited, outputNode) ? 0 : "Z";
+    nmosOut = computeOutputRecursive(gndNode, outputNode) ? 0 : "Z";
 
     // Reconcile.
     if(pmosOut === "Z") {
@@ -410,9 +440,9 @@ class Graph {
         return this.edges.length;
     }
 
-    getIndexByCell(cell) {
+    getIndexByNode(node) {
         for (let i = 0; i < this.nodes.length; i++) {
-            if (this.nodes[i].getCell() === cell) {
+            if (this.nodes[i] === node) {
                 return i;
             }
         }
