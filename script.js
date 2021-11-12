@@ -1028,7 +1028,7 @@ function setRecursively(cell, net) {
 
         // If the layer is NDIFF or PDIFF and there is also a POLY at the same location,
         // add the cell to transistors.
-        if (cell.layer === layer) {
+        if (cell.layer === layer && cell.isSet) {
             if (layeredGrid[cell.x][cell.y][POLY].isSet
                 && !layeredGrid[cell.x][cell.y][CONTACT].isSet) {
 
