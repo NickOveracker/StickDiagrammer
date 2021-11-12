@@ -144,29 +144,101 @@ let netC = new Net("C", false, true, false);
 let netD = new Net("D", false, true, false);
 let netY = new Net("Y", false, false, true);
 
+let nodeNodeMap;
+
+function printNodeNodeMap() {
+    let str = " ";
+    for(let ii = 0; ii < nodeNodeMap.length; ii++) {
+        str += ii + " ";
+    }
+    str += "\n";
+    for(let ii = 0; ii < nodeNodeMap.length; ii++) {
+        str += ii + " ";
+        for(let jj = 0; jj < nodeNodeMap.length; jj++) {
+            if(nodeNodeMap[ii][jj] === null) {
+                str += "? ";
+            } else if(nodeNodeMap[ii][jj] === undefined) {
+                str += "  ";
+            } else if(nodeNodeMap[ii][jj] === true) {
+                str += "1 ";
+            } else {
+                str += "0 ";
+            }
+        }
+        str += "\n";
+    }
+  
+    console.log(str)
+}
+
 function computeOutput(inputVals, outputNode) {
-    let visited;
     let pmosOut;
     let nmosOut;
     let out;
     let firstLevel;
+    nodeNodeMap = [];
 
-    function computeOutputRecursive(node, visitMap, targetNode) {
+    for(let ii = 0; ii < graph.getNumNodes(); ii++) {
+        nodeNodeMap[ii] = [];
+        nodeNodeMap[ii][ii] = true;
+    }
+
+    function mapNodes(node1, node2, isPath) {
+        if(pathExists(node1, node2) !== undefined && pathExists(node2, node1) !== null) {
+            return;
+        }
+
+        nodeNodeMap[graph.getIndexByNode(node1)][graph.getIndexByNode(node2)] = isPath;
+        nodeNodeMap[graph.getIndexByNode(node2)][graph.getIndexByNode(node1)] = isPath;
+
+        if(isPath === null) return;
+
+        // Map the path to node2 as false for all nodes mapped to node1.
+        for(let ii = 0; ii < nodeNodeMap.length; ii++) {
+            if(nodeNodeMap[ii][graph.getIndexByNode(node1)] === true) {
+                nodeNodeMap[ii][graph.getIndexByNode(node2)] = isPath;
+                nodeNodeMap[graph.getIndexByNode(node2)][ii] = isPath;
+            }
+        }
+        // Now do the inverse.
+        for(let ii = 0; ii < nodeNodeMap.length; ii++) {
+            if(nodeNodeMap[ii][graph.getIndexByNode(node2)] === true) {
+                nodeNodeMap[ii][graph.getIndexByNode(node1)] = isPath;
+                nodeNodeMap[graph.getIndexByNode(node1)][ii] = isPath;
+            }
+        }
+    }
+
+    function pathExists(node1, node2) {
+        return nodeNodeMap[graph.getIndexByNode(node1)][graph.getIndexByNode(node2)];
+    }
+
+    function computeOutputRecursive(node, targetNode) {
         // We found it?
         if(node === targetNode) {
             return true;
         }
 
-        // Avoid infinite loops.
-        if(visitMap[node.getCell().x + "," + node.getCell().y]) {
+        // Prevent too much recursion.
+        // If this is already being checked, it will be null.
+        if(pathExists(node, targetNode) === null) {
             return false;
         }
-        visitMap[node.getCell().x + "," + node.getCell().y] = true;
+
+        // Avoid infinite loops.
+        if(pathExists(node, targetNode) !== undefined) {
+            return pathExists(node, targetNode);
+        }
+
+        // Initialize to null.
+        mapNodes(node, targetNode, null);
 
         // Only proceed if the input is activated.
-        if(!node.isSupply) {
-            // Convert node.getName() to a number.
-            if(!evaluate(node, inputVals)) {
+        // Ignore in case of output or supply, since these don't have
+        // gates to evaluate. Simply arriving at them means they are active.
+        if(node.isTransistor()) {
+            if(!evaluate(node)) {
+                mapNodes(node, targetNode, false);
                 return false;
             }
         }
@@ -182,16 +254,24 @@ function computeOutput(inputVals, outputNode) {
         // Recurse on all edges.
         let edges = node.getEdges();
         for(let ii = 0; ii < edges.length; ii++) {
-            if(computeOutputRecursive(edges[ii].getOtherNode(node), visitMap, targetNode)) {
+            if(pathExists(edges[ii].getOtherNode(node), targetNode)) {
+                mapNodes(node, targetNode, true);
+                mapNodes(node, edges[ii].getOtherNode(node), true);
+                return true;
+            }
+            if(computeOutputRecursive(edges[ii].getOtherNode(node), targetNode)) {
+                mapNodes(node, targetNode, true);
+                mapNodes(node, edges[ii].getOtherNode(node), true);
                 return true;
             }
         }
 
         // No findy :(
+        mapNodes(node, targetNode, false);
         return false;
     }
 
-    function evaluate(node, inputVals) {
+    function evaluate(node) {
         let gateNet = node.getCell().gate;
     
         if(gateNet.isInput) {
@@ -211,17 +291,12 @@ function computeOutput(inputVals, outputNode) {
 
         for(let ii = 0; ii < gateNet.size(); ii++) {
             let gateNode = gateNodeIterator.next().value;
-            let visitMap = {};
-            visitMap[node.getCell().x + "," + node.getCell().y] = true;
 
-            if(computeOutputRecursive(gateNode, visitMap, gndNode) && node.isPmos) {
+            if(node.isPmos && (pathExists(gateNode, gndNode) || computeOutputRecursive(gateNode, gndNode))) {
                 return true;
             } else {
-                let visitMap = {};
-                visitMap[node.getCell().x + "," + node.getCell().y] = true;
-
-                if(computeOutputRecursive(gateNode, visitMap, vddNode) && node.isNmos) {
-				    return true;
+                if(!node.isPmos && (pathExists(gateNode, vddNode) || computeOutputRecursive(gateNode, vddNode))) {
+                    return true;
                 }
             }
         }
@@ -230,14 +305,12 @@ function computeOutput(inputVals, outputNode) {
     }
 
     // Get pmos output.
-    visited = {};
     firstLevel = true;
-    pmosOut = computeOutputRecursive(vddNode, visited, outputNode) ? 1 : "Z";
+    pmosOut = computeOutputRecursive(vddNode, outputNode) ? 1 : "Z";
 
     // Get nmos output.
-    visited = {};
     firstLevel = true;
-    nmosOut = computeOutputRecursive(gndNode, visited, outputNode) ? 0 : "Z";
+    nmosOut = computeOutputRecursive(gndNode, outputNode) ? 0 : "Z";
 
     // Reconcile.
     if(pmosOut === "Z") {
@@ -410,9 +483,9 @@ class Graph {
         return this.edges.length;
     }
 
-    getIndexByCell(cell) {
+    getIndexByNode(node) {
         for (let i = 0; i < this.nodes.length; i++) {
-            if (this.nodes[i].getCell() === cell) {
+            if (this.nodes[i] === node) {
                 return i;
             }
         }
@@ -448,6 +521,10 @@ class Node {
     destroy() {
         this.cell = null;
         this.edges = null;
+    }
+
+    isTransistor() {
+        return this.isPmos || this.isNmos;
     }
 
     setAsSupply() {
@@ -1009,116 +1086,59 @@ function setRecursively(cell, net) {
         return;
     }
 
-    // If the layer is NDIFF or PDIFF and there is also a POLY at the same location,
-    // add the cell to transistors.
-    if (cell.layer === NDIFF) {
-        if (layeredGrid[cell.x][cell.y][POLY].isSet) {
-            nmos.add(cell);
-            graph.addNode(cell);
-            // Set the gate to the poly cell.
-            cell.gate = layeredGrid[cell.x][cell.y][POLY];
+    // If the cell is NDIFF or PDIFF intersected by POLY, create a transistor.
+    // Exception for CONTACT.
+    // Returns true if the cell is a transistor.
+    function checkTransistor(cell, layer, transistorArray) {
 
-            // Check adjacent cells for NDIFF.
-            // Set term1 to the first one found.
-            // Set term2 to the second one found.
-            cell.term1 = undefined;
-            cell.term2 = undefined;
-            // Check the cell to the right.
-            if (cell.x < gridsize - 1) {
-                if (layeredGrid[cell.x + 1][cell.y][NDIFF].isSet) {
-                    cell.term1 = layeredGrid[cell.x + 1][cell.y][NDIFF];
+        // Helper function to set the terminals of transistors.
+        function setTerminals(x, y, layer) {
+            if (layeredGrid[x][y][layer].isSet) {
+                if (cell.term1 === undefined) {
+                    cell.term1 = layeredGrid[x][y][layer];
+                }
+                else {
+                    cell.term2 = layeredGrid[x][y][layer];
                 }
             }
-            // Check the cell to the left.
-            if (cell.x > 0) {
-                if (layeredGrid[cell.x - 1][cell.y][NDIFF].isSet) {
-                    // If term1 is already set, set term2 to the cell to the left.
-                    if (cell.term1 !== undefined) {
-                        cell.term2 = layeredGrid[cell.x - 1][cell.y][NDIFF];
-                    } else {
-                        cell.term1 = layeredGrid[cell.x - 1][cell.y][NDIFF];
-                    }
-                }
-            }
-            // Check the cell above.
-            if (cell.y > 0 && cell.term2 === undefined) {
-                if (layeredGrid[cell.x][cell.y - 1][NDIFF].isSet) {
-                    // If term1 is already set, set term2 to the cell above.
-                    if (cell.term1 !== undefined) {
-                        cell.term2 = layeredGrid[cell.x][cell.y - 1][NDIFF];
-                    } else {
-                        cell.term1 = layeredGrid[cell.x][cell.y - 1][NDIFF];
-                    }
-                }
-            }
-            // Check the cell below.
-            if (cell.y < gridsize - 1 && cell.term2 === undefined) {
-                if (layeredGrid[cell.x][cell.y + 1][NDIFF].isSet) {
-                    // If term1 is already set, set term2 to the cell below.
-                    if (cell.term1 !== undefined) {
-                        cell.term2 = layeredGrid[cell.x][cell.y + 1][NDIFF];
-                    } else {
-                        cell.term1 = layeredGrid[cell.x][cell.y + 1][NDIFF];
-                    }
-                }
-            }
-            return;
         }
-    }
-    if (cell.layer === PDIFF) {
-        if (layeredGrid[cell.x][cell.y][POLY].isSet) {
-            pmos.add(cell);
-            graph.addNode(cell);
-            // Set the gate to the poly cell.
-            cell.gate = layeredGrid[cell.x][cell.y][POLY];
 
-            // Check adjacent cells for PDIFF.
-            // Set term1 to the first one found.
-            // Set term2 to the second one found.
-            cell.term1 = undefined;
-            cell.term2 = undefined;
-            // Check the cell to the right.
-            if (cell.x < gridsize - 1) {
-                if (layeredGrid[cell.x + 1][cell.y][PDIFF].isSet) {
-                    cell.term1 = layeredGrid[cell.x + 1][cell.y][PDIFF];
-                }
+        // If the layer is NDIFF or PDIFF and there is also a POLY at the same location,
+        // add the cell to transistors.
+        if (cell.layer === layer && cell.isSet) {
+            if (layeredGrid[cell.x][cell.y][POLY].isSet
+                && !layeredGrid[cell.x][cell.y][CONTACT].isSet) {
+
+                transistorArray.add(cell);
+                graph.addNode(cell);
+                // Set the gate to the poly cell.
+                cell.gate = layeredGrid[cell.x][cell.y][POLY];
+
+                // Check adjacent cells for NDIFF.
+                // Set term1 to the first one found.
+                // Set term2 to the second one found.
+                cell.term1 = undefined;
+                cell.term2 = undefined;
+
+                // TODO: Account for wide poly.
+                // Check the cells above and below.
+                setTerminals(cell.x, cell.y - 1, layer);
+                setTerminals(cell.x, cell.y + 1, layer);
+
+                // Check the cells to the left and right.
+                setTerminals(cell.x - 1, cell.y, layer);
+                setTerminals(cell.x + 1, cell.y, layer);
+
+                return true;
             }
-            // Check the cell to the left.
-            if (cell.x > 0) {
-                if (layeredGrid[cell.x - 1][cell.y][PDIFF].isSet) {
-                    // If term1 is already set, set term2 to the cell to the left.
-                    if (cell.term1 !== undefined) {
-                        cell.term2 = layeredGrid[cell.x - 1][cell.y][PDIFF];
-                    } else {
-                        cell.term1 = layeredGrid[cell.x - 1][cell.y][PDIFF];
-                    }
-                }
-            }
-            // Check the cell above.
-            if (cell.y > 0 && cell.term2 === undefined) {
-                if (layeredGrid[cell.x][cell.y - 1][PDIFF].isSet) {
-                    // If term1 is already set, set term2 to the cell above.
-                    if (cell.term1 !== undefined) {
-                        cell.term2 = layeredGrid[cell.x][cell.y - 1][PDIFF];
-                    } else {
-                        cell.term1 = layeredGrid[cell.x][cell.y - 1][PDIFF];
-                    }
-                }
-            }
-            // Check the cell below.
-            if (cell.y < gridsize - 1 && cell.term2 === undefined) {
-                if (layeredGrid[cell.x][cell.y + 1][PDIFF].isSet) {
-                    // If term1 is already set, set term2 to the cell below.
-                    if (cell.term1 !== undefined) {
-                        cell.term2 = layeredGrid[cell.x][cell.y + 1][PDIFF];
-                    } else {
-                        cell.term1 = layeredGrid[cell.x][cell.y + 1][PDIFF];
-                    }
-                }
-            }
-            return;
         }
+
+        return false;
     }
+
+    // Check the cell for a transistor.
+    if(checkTransistor(cell, NDIFF, nmos)) return;
+    if(checkTransistor(cell, PDIFF, pmos)) return;
 
     // Add the cell to the net.
     net.add(cell);
@@ -1127,36 +1147,31 @@ function setRecursively(cell, net) {
     if(layeredGrid[cell.x][cell.y][CONTACT].isSet) {
         for (let ii = 0; ii < layers; ii++) {
             if(layeredGrid[cell.x][cell.y][ii].isSet) {
-                net.add(layeredGrid[cell.x][cell.y][ii]);
+                if(net.has(layeredGrid[cell.x][cell.y][ii]) === false) {
+                    net.add(layeredGrid[cell.x][cell.y][ii]);
+                    setRecursively(layeredGrid[cell.x][cell.y][ii], net);
+                }
             }
         }
     }
 
     // For each layer of the cell in the net, recurse with all adjacent cells in the layer.
-    for (let ii = 0; ii < layers; ii++) {
-        if(net.has(layeredGrid[cell.x][cell.y][ii])) {
-            if(cell.x > 0
-                && layeredGrid[cell.x - 1][cell.y][ii].isSet
-                && net.has(layeredGrid[cell.x - 1][cell.y][ii]) === false) {
-                setRecursively(layeredGrid[cell.x - 1][cell.y][ii], net);
-            }
-            if(cell.x < gridsize - 1
-                && layeredGrid[cell.x + 1][cell.y][ii].isSet
-                && net.has(layeredGrid[cell.x + 1][cell.y][ii]) === false) {
-                setRecursively(layeredGrid[cell.x + 1][cell.y][ii], net);
-            }
-            if(cell.y > 0
-                && layeredGrid[cell.x][cell.y - 1][ii].isSet
-                && net.has(layeredGrid[cell.x][cell.y - 1][ii]) === false) {
-                setRecursively(layeredGrid[cell.x][cell.y - 1][ii], net);
-            }
-            if(cell.y < gridsize - 1
-                && layeredGrid[cell.x][cell.y + 1][ii].isSet
-                && net.has(layeredGrid[cell.x][cell.y + 1][ii]) === false) {
-                setRecursively(layeredGrid[cell.x][cell.y + 1][ii], net);
+    // Generic function for the above code.
+    function setAdjacent(deltaX, deltaY) {
+        if(net.has(layeredGrid[cell.x][cell.y][cell.layer]) && layeredGrid[cell.x][cell.y][cell.layer].isSet) {
+            if(net.has(layeredGrid[cell.x + deltaX][cell.y + deltaY][cell.layer]) === false) {
+                setRecursively(layeredGrid[cell.x + deltaX][cell.y + deltaY][cell.layer], net);
             }
         }
     }
+
+    // Check the cells above and below.
+    (cell.y > 0) && setAdjacent(0, -1);
+    (cell.y < gridsize - 1) && setAdjacent(0, 1);
+
+    // Check the cells to the left and right.
+    (cell.x > 0) && setAdjacent(-1, 0);
+    (cell.x < gridsize - 1) && setAdjacent(1, 0);
 }
 
 // Initialize everything
