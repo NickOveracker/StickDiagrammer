@@ -1070,7 +1070,10 @@ function setRecursively(cell, net) {
     if(layeredGrid[cell.x][cell.y][CONTACT].isSet) {
         for (let ii = 0; ii < layers; ii++) {
             if(layeredGrid[cell.x][cell.y][ii].isSet) {
-                net.add(layeredGrid[cell.x][cell.y][ii]);
+                if(net.has(layeredGrid[cell.x][cell.y][ii]) === false) {
+                    net.add(layeredGrid[cell.x][cell.y][ii]);
+                    setRecursively(layeredGrid[cell.x][cell.y][ii], net);
+                }
             }
         }
     }
@@ -1078,11 +1081,9 @@ function setRecursively(cell, net) {
     // For each layer of the cell in the net, recurse with all adjacent cells in the layer.
     // Generic function for the above code.
     function setAdjacent(deltaX, deltaY) {
-        for(ii = 0; ii < layers; ii++) {
-            if(net.has(layeredGrid[cell.x][cell.y][ii]) && layeredGrid[cell.x][cell.y][ii].isSet) {
-                if(net.has(layeredGrid[cell.x + deltaX][cell.y + deltaY][ii]) === false) {
-                    setRecursively(layeredGrid[cell.x + deltaX][cell.y + deltaY][ii], net);
-                }
+        if(net.has(layeredGrid[cell.x][cell.y][cell.layer]) && layeredGrid[cell.x][cell.y][cell.layer].isSet) {
+            if(net.has(layeredGrid[cell.x + deltaX][cell.y + deltaY][cell.layer]) === false) {
+                setRecursively(layeredGrid[cell.x + deltaX][cell.y + deltaY][cell.layer], net);
             }
         }
     }
