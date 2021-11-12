@@ -155,13 +155,21 @@ function printNodeNodeMap() {
     for(let ii = 0; ii < nodeNodeMap.length; ii++) {
         str += ii + " ";
         for(let jj = 0; jj < nodeNodeMap.length; jj++) {
-            str += (nodeNodeMap[ii][jj] ? 1 : " ") + " ";
+            if(nodeNodeMap[ii][jj] === null) {
+                str += "? ";
+            } else if(nodeNodeMap[ii][jj] === undefined) {
+                str += "  ";
+            } else if(nodeNodeMap[ii][jj] === true) {
+                str += "1 ";
+            } else {
+                str += "0 ";
+            }
         }
         str += "\n";
     }
   
     console.log(str)
-  }
+}
 
 function computeOutput(inputVals, outputNode) {
     let pmosOut;
@@ -175,22 +183,62 @@ function computeOutput(inputVals, outputNode) {
         nodeNodeMap[ii][ii] = true;
     }
 
+    function mapNodes(node1, node2, isPath) {
+        if(pathExists(node1, node2) !== undefined && pathExists(node2, node1) !== null) {
+            return;
+        }
+
+        nodeNodeMap[graph.getIndexByNode(node1)][graph.getIndexByNode(node2)] = isPath;
+        nodeNodeMap[graph.getIndexByNode(node2)][graph.getIndexByNode(node1)] = isPath;
+
+        if(isPath === null) return;
+
+        // Map the path to node2 as false for all nodes mapped to node1.
+        for(let ii = 0; ii < nodeNodeMap.length; ii++) {
+            if(nodeNodeMap[ii][graph.getIndexByNode(node1)] === true) {
+                nodeNodeMap[ii][graph.getIndexByNode(node2)] = isPath;
+                nodeNodeMap[graph.getIndexByNode(node2)][ii] = isPath;
+            }
+        }
+        // Now do the inverse.
+        for(let ii = 0; ii < nodeNodeMap.length; ii++) {
+            if(nodeNodeMap[ii][graph.getIndexByNode(node2)] === true) {
+                nodeNodeMap[ii][graph.getIndexByNode(node1)] = isPath;
+                nodeNodeMap[graph.getIndexByNode(node1)][ii] = isPath;
+            }
+        }
+    }
+
+    function pathExists(node1, node2) {
+        return nodeNodeMap[graph.getIndexByNode(node1)][graph.getIndexByNode(node2)];
+    }
+
     function computeOutputRecursive(node, targetNode) {
         // We found it?
         if(node === targetNode) {
             return true;
         }
 
-        // Avoid infinite loops.
-        if(nodeNodeMap[graph.getIndexByNode(node)][graph.getIndexByNode(targetNode)] !== undefined) {
-            return nodeNodeMap[graph.getIndexByNode(node)][graph.getIndexByNode(targetNode)];
+        // Prevent too much recursion.
+        // If this is already being checked, it will be null.
+        if(pathExists(node, targetNode) === null) {
+            return false;
         }
 
+        // Avoid infinite loops.
+        if(pathExists(node, targetNode) !== undefined) {
+            return pathExists(node, targetNode);
+        }
+
+        // Initialize to null.
+        mapNodes(node, targetNode, null);
+
         // Only proceed if the input is activated.
-        if(!node.isSupply) {
+        // Ignore in case of output or supply, since these don't have
+        // gates to evaluate. Simply arriving at them means they are active.
+        if(node.isTransistor()) {
             if(!evaluate(node)) {
-                nodeNodeMap[graph.getIndexByNode(node)][graph.getIndexByNode(targetNode)] = false;
-                nodeNodeMap[graph.getIndexByNode(targetNode)][graph.getIndexByNode(node)] = false;
+                mapNodes(node, targetNode, false);
                 return false;
             }
         }
@@ -206,23 +254,20 @@ function computeOutput(inputVals, outputNode) {
         // Recurse on all edges.
         let edges = node.getEdges();
         for(let ii = 0; ii < edges.length; ii++) {
-            if(nodeNodeMap[graph.getIndexByNode(edges[ii].getOtherNode(node))][graph.getIndexByNode(targetNode)]) {
-                nodeNodeMap[graph.getIndexByNode(node)][graph.getIndexByNode(edges[ii].getOtherNode(node))] = true;
-                nodeNodeMap[graph.getIndexByNode(edges[ii].getOtherNode(node))][graph.getIndexByNode(node)] = true;
+            if(pathExists(edges[ii].getOtherNode(node), targetNode)) {
+                mapNodes(node, targetNode, true);
+                mapNodes(node, edges[ii].getOtherNode(node), true);
                 return true;
             }
             if(computeOutputRecursive(edges[ii].getOtherNode(node), targetNode)) {
-                nodeNodeMap[graph.getIndexByNode(node)][graph.getIndexByNode(edges[ii].getOtherNode(node))] = true;
-                nodeNodeMap[graph.getIndexByNode(edges[ii].getOtherNode(node))][graph.getIndexByNode(node)] = true;
-                nodeNodeMap[graph.getIndexByNode(edges[ii].getOtherNode(node))][graph.getIndexByNode(targetNode)] = true;
-                nodeNodeMap[graph.getIndexByNode(targetNode)][graph.getIndexByNode(edges[ii].getOtherNode(node))] = true;
+                mapNodes(node, targetNode, true);
+                mapNodes(node, edges[ii].getOtherNode(node), true);
                 return true;
             }
         }
 
         // No findy :(
-        nodeNodeMap[graph.getIndexByNode(node)][graph.getIndexByNode(targetNode)] = false;
-        nodeNodeMap[graph.getIndexByNode(targetNode)][graph.getIndexByNode(node)] = false;
+        mapNodes(node, targetNode, false);
         return false;
     }
 
@@ -247,12 +292,10 @@ function computeOutput(inputVals, outputNode) {
         for(let ii = 0; ii < gateNet.size(); ii++) {
             let gateNode = gateNodeIterator.next().value;
 
-            if(node.isPmos && (nodeNodeMap[graph.getIndexByNode(gateNode)][graph.getIndexByNode(gndNode)]
-                || computeOutputRecursive(gateNode, gndNode))) {
+            if(node.isPmos && (pathExists(gateNode, gndNode) || computeOutputRecursive(gateNode, gndNode))) {
                 return true;
             } else {
-                if(node.isNmos && (nodeNodeMap[graph.getIndexByNode(gateNode)][graph.getIndexByNode(vddNode)]
-                    || computeOutputRecursive(gateNode, vddNode))) {
+                if(!node.isPmos && (pathExists(gateNode, vddNode) || computeOutputRecursive(gateNode, vddNode))) {
                     return true;
                 }
             }
@@ -478,6 +521,10 @@ class Node {
     destroy() {
         this.cell = null;
         this.edges = null;
+    }
+
+    isTransistor() {
+        return this.isPmos || this.isNmos;
     }
 
     setAsSupply() {
