@@ -40,6 +40,9 @@ let C = {x: 2, y: 16};
 let D = {x: 2, y: 20};
 let Y = {x: 26, y: 14};
 
+let inputs = [A, B, C, D];
+let outputs  = [Y];
+
 // Netlist is a list of nets.
 // Each net is a Set of cells.
 let netlist = [];
@@ -56,7 +59,6 @@ let railEndX = gridsize - 1;
 // Nodes
 let vddNode;
 let gndNode;
-let inputNodes;
 let outputNodes = [];
 
 let nmos = new Set();
@@ -143,6 +145,9 @@ let netB = new Net("B", false, true, false);
 let netC = new Net("C", false, true, false);
 let netD = new Net("D", false, true, false);
 let netY = new Net("Y", false, false, true);
+
+let inputNets = [netA, netB, netC, netD];
+let outputNets = [netY];
 
 let nodeNodeMap;
 
@@ -709,11 +714,8 @@ function setNets() {
     netGND.clear();
     nmos.clear();
     pmos.clear();
-    netA.clear();
-    netB.clear();
-    netC.clear();
-    netD.clear();
-    netY.clear();
+    for(let ii = 0; ii < inputNets.length; ii++)  { inputNets[ii].clear(); }
+    for(let ii = 0; ii < outputNets.length; ii++) { outputNets[ii].clear(); }
 
     // Add the VDD and GND nets.
     // Loop through every VDD cell and add to the VDD net.
@@ -726,18 +728,23 @@ function setNets() {
     
     // Loop through the terminals and set their respective nets.
     for(let ii = 0; ii < layers; ii++) {
-        if(layeredGrid[A.x][A.y][ii].isSet) { setRecursively(layeredGrid[A.x][A.y][ii], netA); }
-        if(layeredGrid[B.x][B.y][ii].isSet) { setRecursively(layeredGrid[B.x][B.y][ii], netB); }
-        if(layeredGrid[C.x][C.y][ii].isSet) { setRecursively(layeredGrid[C.x][C.y][ii], netC); }
-        if(layeredGrid[D.x][D.y][ii].isSet) { setRecursively(layeredGrid[D.x][D.y][ii], netD); }
-        if(layeredGrid[Y.x][Y.y][ii].isSet) { setRecursively(layeredGrid[Y.x][Y.y][ii], netY); }
+        for(let jj = 0; jj < inputNets.length; jj++) {
+            if(layeredGrid[inputs[jj].x][inputs[jj].y][ii].isSet) { 
+                setRecursively(layeredGrid[inputs[jj].x][inputs[jj].y][ii], inputNets[jj]);
+            }
+        }
+        for(let jj = 0; jj < outputNets.length; jj++) {
+            if(layeredGrid[outputs[jj].x][outputs[jj].y][ii].isSet) {
+                setRecursively(layeredGrid[outputs[jj].x][outputs[jj].y][ii], outputNets[jj]);
+            }
+        }
     }
-
-    netlist.push(netA);
-    netlist.push(netB);
-    netlist.push(netC);
-    netlist.push(netD);
-    netlist.push(netY);
+    for(let ii = 0; ii < inputNets.length; ii++) {
+        netlist.push(inputNets[ii]);
+    }
+    for(let ii = 0; ii < outputNets.length; ii++) {
+        netlist.push(outputNets[ii]);
+    }
 
     // Add rail nodes to the graph.
     vddNode = graph.addNode(layeredGrid[railStartX][VDD_y][METAL1]);
@@ -750,200 +757,115 @@ function setNets() {
 
     // Add output nodes to the graph.
     outputNodes.length = 0;
-    outputNodes[0] = graph.addNode(layeredGrid[Y.x][Y.y][METAL1]);
-    netY.addNode(outputNodes[0]);
+    for(let ii = 0; ii < outputs.length; ii++) {
+        outputNodes[ii] = graph.addNode(layeredGrid[outputs[ii].x][outputs[ii].y][CONTACT]);
+        outputNets[ii].addNode(outputNodes[ii]);
+    }
+
+    // Map a function to every transistor terminal.
+    function loopThroughTransistors(funct) {
+        let terms = ["term1", "term2", "gate"];
+        let transistorLists = [nmos, pmos];
+
+        for(let ii = 0; ii < transistorLists.length; ii++) {
+            let iterator = transistorLists[ii].values();
+
+            for(let transistor = iterator.next(); !transistor.done; transistor = iterator.next()) {
+                let transistorCell = transistor.value;
+                let transistorNode = graph.getNode(transistorCell);
+
+                for(let jj = 0; jj < terms.length; jj++) {
+                    funct(transistorCell, transistorNode, terms[jj]);
+                }
+            }
+        }
+    }
 
     // Each nmos and pmos represents a relation between term1 and term2.
     // If term1 is not in any of the nets,
     // then create a new net and add term1 to it.
     // Loop through nmos first.
-    let terms = ["term1", "term2", "gate"];
-    let transistorLists = [nmos, pmos];
-
     // Loop only through "term1" and "term2" for both transistor types.
-    for(let ii = 0; ii < transistorLists.length; ii++) {
-        let iterator = transistorLists[ii].values();
+    loopThroughTransistors(function(transistor, _, term) {
+        // Skip for the gate terminal.
+        if(term === "gate") return;
 
-        for(let transistor = iterator.next(); !transistor.done; transistor = iterator.next()) {
-            transistor = transistor.value;
-            for(let jj = 0; jj < terms.length - 1; jj++) {
+        let net = new Net("?", false, false, false);
 
-                let net = new Net("?", false, false, false);
+        // If the transistor's term1/term2 is not in any of the nets,
+        // then create a new net and add term1/term2 to it.
+        if(transistor[term] !== undefined) {
+            if(getNet(transistor[term])) {
+                net.clear();
+                net = getNet(transistor[term]);
+            }
+            net.add(transistor[term]);
+        }
 
-                // If the transistor's term1/term2 is not in any of the nets,
-                // then create a new net and add term1/term2 to it.
-                if(transistor[terms[jj]] !== undefined) {
-                    if(getNet(transistor[terms[jj]])) {
-                        net.clear();
-                        net = getNet(transistor[terms[jj]]);
-                    }
-                    net.add(transistor[terms[jj]]);
-                }
-
-                // Add the net if it is not empty.
-                if(net.size > 0 && !getNet(transistor[terms[jj]])) {
-                    setRecursively(transistor[terms[jj]], net);
-                    netlist.push(net);
-                    net.addNode(graph.getNode(transistor));
-                }
-            } // end for (terms)
-        } // end for (transistors)
-    } // end for (transistorLists)
+        // Add the net if it is not empty.
+        if(net.size > 0 && !getNet(transistor[term])) {
+            setRecursively(transistor[term], net);
+            netlist.push(net);
+            net.addNode(graph.getNode(transistor));
+        }
+    });
 
     // Now, loop through nmos and pmos again and change each transistors terminal values from cells to nets.
     // This must be done after the above loop rather than as a part of it, because the loop above will overwrite the nets.
-    for(let ii = 0; ii < transistorLists.length; ii++) {
-        let iterator = transistorLists[ii].values();
+    loopThroughTransistors(function(transistor, _, term) {
+        let net = getNet(transistor[term]);
 
-        for(let transistor = iterator.next(); !transistor.done; transistor = iterator.next()) {
-            transistor = transistor.value;
-            // Set the nets.
-            for(let jj = 0; jj < terms.length; jj++) {
-                let net = getNet(transistor[terms[jj]]);
-
-                if(net === null) {
-                    net = new Net("?", false, false, false);
-                    setRecursively(transistor[terms[jj]], net);
-                    netlist.push(net);
-                }
-
-                if(net !== undefined) {
-                    transistor[terms[jj]] = net;
-                    // Gates aren't nodes.
-                    // The transistors themselves are the nodes, as are VDD, GND, and all outputs.
-                    terms[jj] !== "gate" && net.addNode(graph.getNode(transistor));
-                }
-            }
+        if(net === null) {
+            net = new Net("?", false, false, false);
+            setRecursively(transistor[term], net);
+            netlist.push(net);
         }
-    }
+
+        if(net !== undefined) {
+            transistor[term] = net;
+            // Gates aren't nodes.
+            // The transistors themselves are the nodes, as are VDD, GND, and all outputs.
+            term !== "gate" && net.addNode(graph.getNode(transistor));
+        }
+    });
 
     // Loop through pmos/nmos and find every pmos/nmos that shares a net (on term1 or term2).
-    let pmosIterator1 = pmos.values();
-    for(let ii = 0; ii < pmos.size; ii++) {
-        let pmosCell = pmosIterator1.next().value;
-        let pmosNode = graph.getNode(pmosCell);
-        let net1 = pmosCell.term1;
-        let net2 = pmosCell.term2;
+    loopThroughTransistors(function(_, transistor, termA) {
+        // Skip for the gate terminal.
+        if(termA === "gate") return;
 
-        // If either net is netVDD, add an edge to vddNode.
-        if(net1 === netVDD || net2 === netVDD) {
-            graph.addEdge(vddNode, pmosNode);
-        }
-        // If either net is netGND, add an edge to gndNode.
-        if(net1 === netGND || net2 === netGND) {
-            graph.addEdge(gndNode, pmosNode);
+        let net = transistor.getCell()[termA];
+
+        // If net is netVDD, add an edge to vddNode.
+        if(net === netVDD) {
+            graph.addEdge(transistor, vddNode);
         }
 
-        // Same for output.
-        if(net1 === netY || net2 === netY) {
-            graph.addEdge(outputNodes[0], pmosNode);
-        }
-
-        // Loop through pmosIterator2 to find all other pmos cells that share a net.
-        let pmosIterator2 = pmos.values();
-        for(let jj = 0; jj < pmos.size; jj++) {
-            let pmosCell2 = pmosIterator2.next().value;
-            let pmosNode2 = graph.getNode(pmosCell2);
-            if(pmosCell2 === pmosCell) {
-                continue;
-            }
-
-            if(pmosCell2.term1 !== undefined) {
-                if(net1 === pmosCell2.term1 || net2 === pmosCell2.term1) {
-                    graph.addEdge(pmosNode, pmosNode2);
-                }
-            }
-            if(pmosCell2.term2 !== undefined) {
-                if(net1 === pmosCell2.term2 || net2 === pmosCell2.term2) {
-                    graph.addEdge(pmosNode, pmosNode2);
-                }
-            }
-        }
-
-        // Now do the same for nmos.
-        let nmosIterator2 = nmos.values();
-        for(let jj = 0; jj < nmos.size; jj++) {
-            let nmosCell2 = nmosIterator2.next().value;
-            let nmosNode2 = graph.getNode(nmosCell2);
-
-            if(nmosCell2.term1 !== undefined) {
-                if(net1 === nmosCell2.term1 || net2 === nmosCell2.term1) {
-                    graph.addEdge(pmosNode, nmosNode2);
-                }
-            }
-            if(nmosCell2.term2 !== undefined) {
-                if(net1 === nmosCell2.term2 || net2 === nmosCell2.term2) {
-                    graph.addEdge(pmosNode, nmosNode2);
-                }
-            }
-        }
-    }
-
-    // Reset the iterators and do the same for nmos.
-    nmosIterator1 = nmos.values();
-    for(let ii = 0; ii < nmos.size; ii++) {
-        let nmosCell = nmosIterator1.next().value;
-        let nmosNode = graph.getNode(nmosCell);
-        let net1 = nmosCell.term1;
-        let net2 = nmosCell.term2;
-
-        // If either net is netVDD, add an edge to vddNode.
-        if(net1 === netVDD || net2 === netVDD) {
-            graph.addEdge(vddNode, nmosNode);
-        }
-        // If either net is netGND, add an edge to gndNode.
-        if(net1 === netGND || net2 === netGND) {
-            graph.addEdge(gndNode, nmosNode);
+        // If net is netGND, add an edge to gndNode.
+        if(net === netGND) {
+            graph.addEdge(transistor, gndNode);
         }
 
         // Same for output.
-        if(net1 === netY || net2 === netY) {
-            graph.addEdge(outputNodes[0], nmosNode);
+        if(net === netY) {
+            graph.addEdge(transistor, outputNodes[0]);
         }
 
-        // Loop through nmosIterator2 to find all other nmos cells that share a net.
-        nmosIterator2 = nmos.values();
-        for(let jj = 0; jj < nmos.size; jj++) {
-            let nmosCell2 = nmosIterator2.next().value;
-            let nmosNode2 = graph.getNode(nmosCell2);
+        // Loop through iterator2 to find all other transistors that share a net.
+        loopThroughTransistors(function(_, transistor2, termB) {
+            // Skip for the gate terminal.
+            if(termB === "gate") return;
 
-            if(nmosCell2 === nmosCell) {
-                continue;
-            }
+            if(transistor === transistor2) { return; }
 
-            if(nmosCell2.term1 !== undefined) {
-                if(net1 === nmosCell2.term1 || net2 === nmosCell2.term1) {
-                    graph.addEdge(nmosNode, nmosNode2);
+            if(transistor2.getCell()[termB] !== undefined) {
+                if(transistor.getCell()[termA] === transistor2.getCell()[termB]) {
+                    graph.addEdge(transistor, transistor2);
                 }
             }
-            if(nmosCell2.term2 !== undefined) {
-                if(net1 === nmosCell2.term2 || net2 === nmosCell2.term2) {
-                    graph.addEdge(nmosNode, nmosNode2);
-                }
-            }
-        }
-
-        // Now do the same for pmos.
-        pmosIterator2 = pmos.values();
-        for(let jj = 0; jj < pmos.size; jj++) {
-            let pmosCell2 = pmosIterator2.next().value;
-            let pmosNode2 = graph.getNode(pmosCell2);
-            let net1 = pmosCell2.term1;
-            let net2 = pmosCell2.term2;
-
-            if(pmosCell2.term1 !== undefined) {
-                if(net1.has(pmosCell2.term1) || net2.has(pmosCell2.term1)) {
-                    graph.addEdge(nmosNode, pmosNode2);
-                }
-            }
-            if(pmosCell2.term2 !== undefined) {
-                if(net1.has(pmosCell2.term2) || net2.has(pmosCell2.term2)) {
-                    graph.addEdge(nmosNode, pmosNode2);
-                }
-            }
-        }
-    }
-}
+        });
+    });
+} // end function (setNets)
 
 // Print a grid with in all cells that are in a given net.
 function printGrid(net, name) {
