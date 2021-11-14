@@ -838,24 +838,25 @@ function setNets() {
     let transistorLists = [nmos, pmos];
     for(let ii = 0; ii < 2; ii++) {
         let iterator = transistorLists[ii].values();
+
         for(let jj = 0; jj < transistorLists[ii].size; jj++) {
             let transistor = iterator.next().value;
             
             // Set the nets.
             for(let kk = 0; kk < terms.length; kk++) {
-                let net = getNet(nmosCell[terms[kk]]);
+                let net = getNet(transistor[terms[kk]]);
 
                 if(net === null) {
                     net = new Net("?", false, false, false);
-                    setRecursively(nmosCell[terms[kk]], net);
+                    setRecursively(transistor[terms[kk]], net);
                     netlist.push(net);
                 }
 
                 if(net !== undefined) {
-                    nmosCell[terms[kk]] = net;
+                    transistor[terms[kk]] = net;
                     // Gates aren't nodes.
                     // The transistors themselves are the nodes, as are VDD, GND, and all outputs.
-                    terms[jj] !== "gate" && net.addNode(graph.getNode(nmosCell));
+                    terms[jj] !== "gate" && net.addNode(graph.getNode(transistor));
                 }
             }
         }
