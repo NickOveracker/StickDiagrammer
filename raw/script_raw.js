@@ -836,7 +836,7 @@ function setNets() {
     // Set each gate to getNet(gate).
     let terms = ["term1", "term2", "gate"];
     let transistorLists = [nmos, pmos];
-    for(let ii = 0; ii < 2; ii++) {
+    for(let ii = 0; ii < transistorLists.length; ii++) {
         let iterator = transistorLists[ii].values();
 
         for(let jj = 0; jj < transistorLists[ii].size; jj++) {
@@ -856,7 +856,7 @@ function setNets() {
                     transistor[terms[kk]] = net;
                     // Gates aren't nodes.
                     // The transistors themselves are the nodes, as are VDD, GND, and all outputs.
-                    terms[jj] !== "gate" && net.addNode(graph.getNode(transistor));
+                    terms[kk] !== "gate" && net.addNode(graph.getNode(transistor));
                 }
             }
         }
