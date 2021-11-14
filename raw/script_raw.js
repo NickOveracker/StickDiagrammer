@@ -834,79 +834,30 @@ function setNets() {
     // Now, loop through nmos and pmos again.
     // Set each term to getNet(term).
     // Set each gate to getNet(gate).
-    nmosIterator = nmos.values();
-    for (let ii = 0; ii < nmos.size; ii++) {
-        let nmosCell = nmosIterator.next().value;
-        let net1 = getNet(nmosCell.term1);
-        let net2 = getNet(nmosCell.term2);
-        let gate = getNet(nmosCell.gate);
+    let terms = ["term1", "term2", "gate"];
+    let transistorLists = [nmos, pmos];
+    for(let ii = 0; ii < 2; ii++) {
+        let iterator = transistorLists[ii].values();
+        for(let jj = 0; jj < transistorLists[ii].size; jj++) {
+            let transistor = iterator.next().value;
+            
+            // Set the nets.
+            for(let kk = 0; kk < terms.length; kk++) {
+                let net = getNet(nmosCell[terms[kk]]);
 
-        if(gate === null) {
-            gate = new Net("?", false, false, false);
-            setRecursively(nmosCell.gate, gate);
-            netlist.push(gate);
-        }
+                if(net === null) {
+                    net = new Net("?", false, false, false);
+                    setRecursively(nmosCell[terms[kk]], net);
+                    netlist.push(net);
+                }
 
-        if(net1 === null) {
-            net1 = new Net("?", false, false, false);
-            setRecursively(nmosCell.term1, net1);
-            netlist.push(net1);
-        }
-
-        if(net2 === null) {
-            net2 = new Net("?", false, false, false);
-            setRecursively(nmosCell.term2, net2);
-            netlist.push(net2);
-        }
-
-        if(net1 !== undefined) {
-            nmosCell.term1 = net1;
-            net1.addNode(graph.getNode(nmosCell));
-        }
-        if(net2 !== undefined) {
-            nmosCell.term2 = net2;
-            net2.addNode(graph.getNode(nmosCell));
-        }
-        if(gate !== undefined) {
-            nmosCell.gate = gate;
-        }
-    }
-
-    pmosIterator = pmos.values();
-    for (let ii = 0; ii < pmos.size; ii++) {
-        let pmosCell = pmosIterator.next().value;
-        let net1 = getNet(pmosCell.term1);
-        let net2 = getNet(pmosCell.term2);
-        let gate = getNet(pmosCell.gate);
-
-        if(gate === null) {
-            gate = new Net("?", false, false, false);
-            setRecursively(pmosCell.gate, gate);
-            netlist.push(gate);
-        }
-
-        if(net1 === null) {
-            net1 = new Net("?", false, false, false);
-            setRecursively(pmosCell.term1, net1);
-            netlist.push(net1);
-        }
-
-        if(net2 === null) {
-            net2 = new Net("?", false, false, false);
-            setRecursively(pmosCell.term2, net2);
-            netlist.push(net2);
-        }
-
-        if(net1 !== undefined) {
-            pmosCell.term1 = net1;
-            net1.addNode(graph.getNode(pmosCell));
-        }
-        if(net2 !== undefined) {
-            pmosCell.term2 = net2;
-            net2.addNode(graph.getNode(pmosCell));
-        }
-        if(gate !== undefined) {
-            pmosCell.gate = gate;
+                if(net !== undefined) {
+                    nmosCell[terms[kk]] = net;
+                    // Gates aren't nodes.
+                    // The transistors themselves are the nodes, as are VDD, GND, and all outputs.
+                    terms[jj] !== "gate" && net.addNode(graph.getNode(nmosCell));
+                }
+            }
         }
     }
 
