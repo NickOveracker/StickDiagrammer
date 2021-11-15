@@ -911,13 +911,13 @@ function refreshCanvas() {
         }
     }
 
-    // Draw CONTACT at the coordinates of the four inputs
-    // and at the output.
-    layeredGrid[A.x][A.y][CONTACT].isSet = true;
-    layeredGrid[B.x][B.y][CONTACT].isSet = true;
-    layeredGrid[C.x][C.y][CONTACT].isSet = true;
-    layeredGrid[D.x][D.y][CONTACT].isSet = true;
-    layeredGrid[Y.x][Y.y][CONTACT].isSet = true;
+    // Draw CONTACT at the coordinates of each input and output.
+    for (let ii = 0; ii < inputs.length; ii++) {
+        drawCell(inputs[ii].x, inputs[ii].y, CONTACT, true);
+    }
+    for (let ii = 0; ii < outputs.length; ii++) {
+        drawCell(outputs[ii].x, outputs[ii].y, CONTACT, true);
+    }
 
     // Draw METAL1 across the grid at VDD_y and GND_y.
     for (let i = railStartX; i < railEndX; i++) {
@@ -968,14 +968,19 @@ function refreshCanvas() {
     // set the outer border of the canvas to the cursor color
     drawBorder();
 
-    // Draw labels on the canvas above the four inputs and output
+    // Draw labels on the canvas above each input and output.
     ctx.font = "bold 18px Arial";
     ctx.fillStyle = darkMode ? "#ffffff" : "#000000";
-    ctx.fillText("A", cellWidth * (A.x + 1.5), cellHeight * (A.y + 0.75));
-    ctx.fillText("B", cellWidth * (B.x + 1.5), cellHeight * (B.y + 0.75));
-    ctx.fillText("C", cellWidth * (C.x + 1.5), cellHeight * (C.y + 0.75));
-    ctx.fillText("D", cellWidth * (D.x + 1.5), cellHeight * (D.y + 0.75));
-    ctx.fillText("Y", cellWidth * (Y.x + 1.5), cellHeight * (Y.y + 0.75));
+    for(let ii = 0; ii < inputs.length; ii++) {
+        ctx.fillText(String.fromCharCode(65 + ii),
+            cellWidth * (inputs[ii].x + 1.5),
+            cellHeight * (inputs[ii].y + 0.75));
+    }
+    for(let ii = 0; ii < outputs.length; ii++) {
+        ctx.fillText(String.fromCharCode(89 - ii),
+            cellWidth * (outputs[ii].x + 1.5),
+            cellHeight * (outputs[ii].y + 0.75));
+    }
 
     // Draw a label on top of the VDD and GND rails.
     ctx.font = "bold 18px Arial";
