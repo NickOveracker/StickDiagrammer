@@ -1308,6 +1308,7 @@ window.onload = function() {
 
         dragging = false;
         refreshCanvas();
+        refreshCanvas();
     });
 
     // Show a preview line when the user is dragging the mouse.
@@ -1360,6 +1361,7 @@ window.onload = function() {
                     }
                 }
                 refreshCanvas();
+                refreshCanvas();
             }
         }
     });
@@ -1411,6 +1413,8 @@ window.onload = function() {
                 refreshCanvas();
             }
         }
+
+        refreshCanvas();
     });
 
     // Only change dark/light mode on keyup to avoid seizure-inducing flashes from holding down space.
