@@ -1,72 +1,188 @@
-let layeredGrid;
-let canvas;
-let ctx;
-let darkMode;
-let cellHeight;
-let cellWidth;
-let gridsize = 29;
-let layers = 5;
-let firstSaveState = 0;
-let saveState = 0;
-let lastSaveState = 0;
-let maxSaveState = 15;
-let dragging = false;
-let startX;
-let startY;
-let gridCanvas;
-let currentX;
-let currentY;
-let button;
+// graph class to represent CMOS circuitry as a graph.
+// Each node is an input or output.
+// Each edge is a connection between two nodes (a transistor).
+// The graph is directed.
+class Graph {
+    constructor() {
+        this.nodes = [];
+        this.edges = [];
+    }
 
-// Cycle through the following cursor colors by pressing space: PDIFF, NDIFF, POLY, METAL1, CONTACT
-let PDIFF = 0;
-let NDIFF = 1;
-let POLY = 2;
-let METAL1 = 3;
-let CONTACT = 4;
-let cursorColors = ['#9400D3', '#32CD32', '#ff0000', '#00FFFF', '#cccccc'];
-let cursorNames = ['pdiff', 'ndiff', 'poly', 'metal', 'contact'];
-let cursorColor = cursorColors[PDIFF];
-let cursorColorIndex = PDIFF;
+    // Clear the graph.
+    clear() {
+        // Destroy all nodes.
+        for(let ii = 0; ii < this.nodes.length; ii++) {
+            this.nodes[ii].destroy();
+        }
 
-// Objects to represent the coordinates of the four inputs (A, B, C, D)
-// and the output (Y).
-let numInputs = 4; // Doesn't include VDD and GND.
-let numOutputs = 1;
+        // Destroy all edges.
+        for(let ii = 0; ii < this.edges.length; ii++) {
+            this.edges[ii].destroy();
+        }
 
-let A = {x: 2, y: 8};
-let B = {x: 2, y: 12};
-let C = {x: 2, y: 16};
-let D = {x: 2, y: 20};
-let Y = {x: 26, y: 14};
+        this.nodes.length = 0;
+        this.edges.length = 0;
+    }
 
-let inputs = [A, B, C, D];
-let outputs  = [Y];
+    // Check if two nodes are connected.
+    isConnected(node1, node2) {
+        let edges = node1.getEdges();
+        for (let i = 0; i < edges.length; i++) {
+            if (edges[i].getNode2() == node2 || edges[i].getNode1() == node2) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-// Netlist is a list of nets.
-// Each net is a Set of cells.
-let netlist = [];
-let output;
-let graph;
+    // Add a node to the graph.
+    addNode(cell) {
+        let node = new Node(cell);
+        this.nodes.push(node);
+        return node;
+    }
 
-// VDD and GND are the two terminals of the grid.
-// The terminals are always at the top and bottom of the grid.
-let VDD_y = 1;
-let GND_y = gridsize - 2;
-let railStartX = 1;
-let railEndX = gridsize - 1;
+    // Add an edge to the graph.
+    addEdge(node1, node2) {
+        if(!this.isConnected(node1, node2)) {
+            let edge = new Edge(node1, node2);
+            this.edges.push(edge);
+        }
+    }
 
-// Nodes
-let vddNode;
-let gndNode;
-let outputNodes = [];
+    // Return the node with the given cell.
+    getNode(cell) {
+        for (let node of this.nodes) {
+            if (node.getCell() === cell) {
+                return node;
+            }
+        }
+        return null;
+    }
 
-let nmos = new Set();
-let pmos = new Set();
+    // Return the node with the given index.
+    getNodeByIndex(index) {
+        return this.nodes[index];
+    }
 
-// Grid color
-let darkModeGridColor = '#cccccc';
-let lightModeGridColor = '#999999';
+    // Return the edge with the given index.
+    getEdgeByIndex(index) {
+        return this.edges[index];
+    }
+
+    // Return the number of nodes in the graph.
+    getNumNodes() {
+        return this.nodes.length;
+    }
+
+    // Return the number of edges in the graph.
+    getNumEdges() {
+        return this.edges.length;
+    }
+
+    getIndexByNode(node) {
+        for (let i = 0; i < this.nodes.length; i++) {
+            if (this.nodes[i] === node) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    // Represent the graph visually as a graph in the console.
+    print() {
+        console.log('graph G {');
+        for (let node of this.nodes) {
+            console.log(node.getName() + ';');
+        }
+        for (let edge of this.edges) {
+            console.log(edge.getNode1().getName() + ' <-> ' + edge.getNode2().getName() + ';');
+        }
+        console.log('}');
+    }
+}
+
+// Define node and edge classes.
+class Node {
+    constructor(cell) {
+        this.cell = cell;
+        this.edges = [];
+        this.isPmos = layeredGrid[cell.x][cell.y][PDIFF].isSet;
+        this.isNmos = layeredGrid[cell.x][cell.y][NDIFF].isSet;
+        this.isSupply = false;
+    }
+
+    // Destructor
+    destroy() {
+        this.cell = null;
+        this.edges = null;
+    }
+
+    isTransistor() {
+        return this.isPmos || this.isNmos;
+    }
+
+    setAsSupply() {
+        this.isSupply = true;
+    }
+
+    addEdge(edge) {
+        this.edges.push(edge);
+    }
+
+    removeEdge(edge) {
+        let index = this.edges.indexOf(edge);
+        if (index > -1) {
+            this.edges.splice(index, 1);
+        }
+    }
+
+    getEdges() {
+        return this.edges;
+    }
+
+    getCell() {
+        return this.cell;
+    }
+
+    getName() {
+        return this.cell.gate.getName();
+    }
+}
+
+class Edge {
+    constructor(node1, node2) {
+        this.node1 = node1;
+        this.node2 = node2;
+        // Add the edge to the nodes.
+        node1.addEdge(this);
+        node2.addEdge(this);
+    }
+
+    // Destructor
+    destroy() {
+        this.node1 = null;
+        this.node2 = null;
+    }
+
+    getNode1() {
+        return this.node1;
+    }
+
+    getNode2() {
+        return this.node2;
+    }
+
+    getOtherNode(node) {
+        if (this.node1 == node) {
+            return this.node2;
+        } else if (this.node2 == node) {
+            return this.node1;
+        } else {
+            return null;
+        }
+    }
+}
 
 class Net {
     constructor(name, isSupply, isInput, isOutput) {
@@ -137,6 +253,76 @@ class Net {
         return this.nodes.size;
     }
 }
+
+let layeredGrid;
+let canvas;
+let ctx;
+let darkMode;
+let cellHeight;
+let cellWidth;
+let gridsize = 29;
+let layers = 5;
+let firstSaveState = 0;
+let saveState = 0;
+let lastSaveState = 0;
+let maxSaveState = 15;
+let dragging = false;
+let startX;
+let startY;
+let gridCanvas;
+let currentX;
+let currentY;
+let button;
+
+// Cycle through the following cursor colors by pressing space: PDIFF, NDIFF, POLY, METAL1, CONTACT
+let PDIFF = 0;
+let NDIFF = 1;
+let POLY = 2;
+let METAL1 = 3;
+let CONTACT = 4;
+let cursorColors = ['#9400D3', '#32CD32', '#ff0000', '#00FFFF', '#cccccc'];
+let cursorNames = ['pdiff', 'ndiff', 'poly', 'metal', 'contact'];
+let cursorColor = cursorColors[PDIFF];
+let cursorColorIndex = PDIFF;
+
+// Objects to represent the coordinates of the four inputs (A, B, C, D)
+// and the output (Y).
+let numInputs = 4; // Doesn't include VDD and GND.
+let numOutputs = 1;
+
+let A = {x: 2, y: 8};
+let B = {x: 2, y: 12};
+let C = {x: 2, y: 16};
+let D = {x: 2, y: 20};
+let Y = {x: 26, y: 14};
+
+let inputs = [A, B, C, D];
+let outputs  = [Y];
+
+// Netlist is a list of nets.
+// Each net is a Set of cells.
+let netlist = [];
+let output;
+let graph;
+
+// VDD and GND are the two terminals of the grid.
+// The terminals are always at the top and bottom of the grid.
+let VDD_y = 1;
+let GND_y = gridsize - 2;
+let railStartX = 1;
+let railEndX = gridsize - 1;
+
+// Nodes
+let vddNode;
+let gndNode;
+let outputNodes = [];
+
+let nmos = new Set();
+let pmos = new Set();
+
+// Grid color
+let darkModeGridColor = '#cccccc';
+let lightModeGridColor = '#999999';
 
 let netVDD = new Net("VDD", true, false, false);
 let netGND = new Net("GND", true, false, false);
@@ -405,194 +591,7 @@ function buildTruthTable() {
     return table;
 }
 
-
-// graph class to represent CMOS circuitry as a graph.
-// Each node is an input or output.
-// Each edge is a connection between two nodes (a transistor).
-// The graph is directed.
-class Graph {
-    constructor() {
-        this.nodes = [];
-        this.edges = [];
-    }
-
-    // Clear the graph.
-    clear() {
-        // Destroy all nodes.
-        for(let ii = 0; ii < this.nodes.length; ii++) {
-            this.nodes[ii].destroy();
-        }
-
-        // Destroy all edges.
-        for(let ii = 0; ii < this.edges.length; ii++) {
-            this.edges[ii].destroy();
-        }
-
-        this.nodes.length = 0;
-        this.edges.length = 0;
-    }
-
-    // Check if two nodes are connected.
-    isConnected(node1, node2) {
-        let edges = node1.getEdges();
-        for (let i = 0; i < edges.length; i++) {
-            if (edges[i].getNode2() == node2 || edges[i].getNode1() == node2) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    // Add a node to the graph.
-    addNode(cell) {
-        let node = new Node(cell);
-        this.nodes.push(node);
-        return node;
-    }
-
-    // Add an edge to the graph.
-    addEdge(node1, node2) {
-        if(!this.isConnected(node1, node2)) {
-            let edge = new Edge(node1, node2);
-            this.edges.push(edge);
-        }
-    }
-
-    // Return the node with the given cell.
-    getNode(cell) {
-        for (let node of this.nodes) {
-            if (node.getCell() === cell) {
-                return node;
-            }
-        }
-        return null;
-    }
-
-    // Return the node with the given index.
-    getNodeByIndex(index) {
-        return this.nodes[index];
-    }
-
-    // Return the edge with the given index.
-    getEdgeByIndex(index) {
-        return this.edges[index];
-    }
-
-    // Return the number of nodes in the graph.
-    getNumNodes() {
-        return this.nodes.length;
-    }
-
-    // Return the number of edges in the graph.
-    getNumEdges() {
-        return this.edges.length;
-    }
-
-    getIndexByNode(node) {
-        for (let i = 0; i < this.nodes.length; i++) {
-            if (this.nodes[i] === node) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    // Represent the graph visually as a graph in the console.
-    print() {
-        console.log('graph G {');
-        for (let node of this.nodes) {
-            console.log(node.getName() + ';');
-        }
-        for (let edge of this.edges) {
-            console.log(edge.getNode1().getName() + ' <-> ' + edge.getNode2().getName() + ';');
-        }
-        console.log('}');
-    }
-}
-
 graph = new Graph()
-
-// Define node and edge classes.
-class Node {
-    constructor(cell) {
-        this.cell = cell;
-        this.edges = [];
-        this.isPmos = layeredGrid[cell.x][cell.y][PDIFF].isSet;
-        this.isNmos = layeredGrid[cell.x][cell.y][NDIFF].isSet;
-        this.isSupply = false;
-    }
-
-    // Destructor
-    destroy() {
-        this.cell = null;
-        this.edges = null;
-    }
-
-    isTransistor() {
-        return this.isPmos || this.isNmos;
-    }
-
-    setAsSupply() {
-        this.isSupply = true;
-    }
-
-    addEdge(edge) {
-        this.edges.push(edge);
-    }
-
-    removeEdge(edge) {
-        let index = this.edges.indexOf(edge);
-        if (index > -1) {
-            this.edges.splice(index, 1);
-        }
-    }
-
-    getEdges() {
-        return this.edges;
-    }
-
-    getCell() {
-        return this.cell;
-    }
-
-    getName() {
-        return this.cell.gate.getName();
-    }
-}
-
-class Edge {
-    constructor(node1, node2) {
-        this.node1 = node1;
-        this.node2 = node2;
-        // Add the edge to the nodes.
-        node1.addEdge(this);
-        node2.addEdge(this);
-    }
-
-    // Destructor
-    destroy() {
-        this.node1 = null;
-        this.node2 = null;
-    }
-
-    getNode1() {
-        return this.node1;
-    }
-
-    getNode2() {
-        return this.node2;
-    }
-
-    getOtherNode(node) {
-        if (this.node1 == node) {
-            return this.node2;
-        } else if (this.node2 == node) {
-            return this.node1;
-        } else {
-            return null;
-        }
-    }
-}
 
 // Draw the outer border of the canvas.
 function drawBorder() {
