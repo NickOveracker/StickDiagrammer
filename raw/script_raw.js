@@ -1,6 +1,4 @@
 // Graph class to represent CMOS circuitry.
-// Each node is a transistor, VDD, GND, or an output.
-// Each edge is a connection between two nodes (a transistor).
 class Graph {
     constructor() {
         this.nodes = [];
@@ -72,21 +70,9 @@ class Graph {
         }
         return -1;
     }
-
-    // Represent the graph visually as a graph in the console.
-    print() {
-        console.log('graph G {');
-        for (let node of this.nodes) {
-            console.log(node.getName() + ';');
-        }
-        for (let edge of this.edges) {
-            console.log(edge.getNode1().getName() + ' <-> ' + edge.getNode2().getName() + ';');
-        }
-        console.log('}');
-    }
 }
 
-// Define node and edge classes.
+// Each graph node is a transistor, VDD, GND, or an output.
 class Node {
     constructor(cell) {
         this.cell = cell;
@@ -134,7 +120,7 @@ class Node {
     }
 }
 
-// Edges between nodes in a Graph.
+// Each edge is a connection between two graph nodes.
 class Edge {
     constructor(node1, node2) {
         this.node1 = node1;
@@ -302,33 +288,6 @@ let netY = new Net("Y", false, false, true);
 
 let inputNets = [netA, netB, netC, netD];
 let outputNets = [netY];
-
-let nodeNodeMap;
-
-function printNodeNodeMap() {
-    let str = " ";
-    for(let ii = 0; ii < nodeNodeMap.length; ii++) {
-        str += ii + " ";
-    }
-    str += "\n";
-    for(let ii = 0; ii < nodeNodeMap.length; ii++) {
-        str += ii + " ";
-        for(let jj = 0; jj < nodeNodeMap.length; jj++) {
-            if(nodeNodeMap[ii][jj] === null) {
-                str += "? ";
-            } else if(nodeNodeMap[ii][jj] === undefined) {
-                str += "  ";
-            } else if(nodeNodeMap[ii][jj] === true) {
-                str += "1 ";
-            } else {
-                str += "0 ";
-            }
-        }
-        str += "\n";
-    }
-  
-    console.log(str)
-}
 
 function computeOutput(inputVals, outputNode) {
     let pmosOut;
@@ -541,8 +500,6 @@ function buildTruthTable() {
         outstr += "\n";
     }
 
-    //console.log(outstr);
-    
     // Merge input and output into one table (input on the left, output on the right.)
     let table = [];
     table[0] = header;
@@ -833,37 +790,6 @@ function setNets() {
         });
     });
 } // end function (setNets)
-
-// Print a grid with in all cells that are in a given net.
-function printGrid(net, name) {
-    let grid = [];
-    for(let ii = 0; ii < gridsize; ii++) {
-        grid[ii] = [];
-        for(let jj = 0; jj < gridsize; jj++) {
-            grid[ii][jj] = "_";
-            // If any of the layers are in netA, set the cell to "A".
-            for(let kk = 0; kk < layers; kk++) {
-                if(layeredGrid[ii][jj][kk].isSet && net.containsCell(layeredGrid[ii][jj][kk])) {
-                    grid[ii][jj] = name;
-                }
-                else if(pmos.has(layeredGrid[ii][jj][kk]) || nmos.has(layeredGrid[ii][jj][kk])) {
-                    grid[ii][jj] = "T";
-                }
-            }
-        }
-    }
-
-    // Print to the console, rotated 90 degrees.
-    str = ""
-    for(let ii = 0; ii < grid.length; ii++) {
-        let row = "";
-        for(let jj = 0; jj < grid[ii].length; jj++) {
-            row += grid[jj][ii];
-        }
-        str += row + "\n";
-    }
-    console.log(str);
-}
 
 // Function to get the net from the netlist that contains a given cell.
 function getNet(cell) {
@@ -1174,10 +1100,8 @@ function getCell(clientX, clientY) {
     {
         let x = Math.floor((clientX - canvas.offsetLeft - cellWidth) / cellWidth);
         let y = Math.floor((clientY - canvas.offsetTop - cellHeight) / cellHeight);
-        console.log(x, y);
         return {x: x, y: y};
     }
-    console.log("Out of bounds");
     return null;
 }
 
