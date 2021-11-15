@@ -1336,10 +1336,10 @@ window.onload = function() {
             let cell = getCell(currentX, currentY);
             if (cell != null && !event.ctrlKey) {
                 // First, unset the CONTACT layer at the old coordinates.
-                layeredGrid[inputs[keyCode - 65].x][inputs[keyCode - 65].y][CONTACT].isSet = false;
+                layeredGrid[inputs[event.keyCode - 65].x][inputs[event.keyCode - 65].y][CONTACT].isSet = false;
                 // Then, set the new coordinates.
-                inputs[keyCode - 65].x = cell.x;
-                inputs[keyCode - 65].y = cell.y;
+                inputs[event.keyCode - 65].x = cell.x;
+                inputs[event.keyCode - 65].y = cell.y;
                 refreshCanvas();
             }
         }
@@ -1350,10 +1350,10 @@ window.onload = function() {
             let cell = getCell(currentX, currentY);
             if (cell != null && !event.ctrlKey) {
                 // First, unset the CONTACT layer at the old coordinates.
-                layeredGrid[outputs[89 - keyCode].x][outputs[89 - keyCode].y][CONTACT].isSet = false;
+                layeredGrid[outputs[89 - event.keyCode].x][outputs[89 - event.keyCode].y][CONTACT].isSet = false;
                 // Then, set the new coordinates.
-                outputs[89 - keyCode].x = cell.x;
-                outputs[89 - keyCode].y = cell.y;
+                outputs[89 - event.keyCode].x = cell.x;
+                outputs[89 - event.keyCode].y = cell.y;
                 refreshCanvas();
             }
         }
