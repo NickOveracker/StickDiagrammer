@@ -239,11 +239,8 @@ let cursorNames = ['pdiff', 'ndiff', 'poly', 'metal', 'contact'];
 let cursorColor = cursorColors[PDIFF];
 let cursorColorIndex = PDIFF;
 
-// Objects to represent the coordinates of the four inputs (A, B, C, D)
-// and the output (Y).
-let numInputs = 4; // Doesn't include VDD and GND.
-let numOutputs = 1;
-
+// Objects to represent the coordinates of the inputs (A, B, C, D, ...)
+// and the output (Y, X, W, V, ...).
 let A = {x: 2, y: 8};
 let B = {x: 2, y: 12};
 let C = {x: 2, y: 16};
@@ -453,18 +450,18 @@ function buildTruthTable() {
 
     // Each loop iteration is a combination of input values.
     // I.e., one row of the output table.
-    for(let ii = 0; ii < Math.pow(2, numInputs); ii++) {
+    for(let ii = 0; ii < Math.pow(2, inputs.length); ii++) {
         let tableInputRow = [];
         let tableOutputRow = [];
 
         // Compute each output.
-        for(let jj = 0; jj < numOutputs; jj++) {
+        for(let jj = 0; jj < outputs.length; jj++) {
             tableOutputRow[jj] = computeOutput(ii, outputNodes[jj]);
         }
 
         outputVals[ii] = tableOutputRow;
 
-        for(let jj = 0; jj < numInputs; jj++) {
+        for(let jj = 0; jj < inputs.length; jj++) {
             tableInputRow[jj] = (ii >> jj) & 1;
         }
 
@@ -1334,73 +1331,29 @@ window.onload = function() {
             redo();
         }
 
-        // If the user presses the "A" key,
-        // move the coordinates for A to the cell under the cursor.
-        if (event.keyCode == 65) {
+        // Input terminal key listeners.
+        if ((event.keyCode >= 65) && (event.keyCode < 65 + inputs.length)) {
             let cell = getCell(currentX, currentY);
-            if (cell != null) {
+            if (cell != null && !event.ctrlKey) {
                 // First, unset the CONTACT layer at the old coordinates.
-                layeredGrid[A.x][A.y][CONTACT].isSet = false;
+                layeredGrid[inputs[keyCode - 65].x][inputs[keyCode - 65].y][CONTACT].isSet = false;
                 // Then, set the new coordinates.
-                A.x = cell.x;
-                A.y = cell.y;
+                inputs[keyCode - 65].x = cell.x;
+                inputs[keyCode - 65].y = cell.y;
                 refreshCanvas();
             }
         }
 
-        // If the user presses the "B" key,
-        // move the coordinates for B to the cell under the cursor.
-        if (event.keyCode == 66) {
-            let cell = getCell(currentX, currentY);
-            if (cell != null) {
-                // First, unset the CONTACT layer at the old coordinates.
-                layeredGrid[B.x][B.y][CONTACT].isSet = false;
-                // Then, set the new coordinates.
-                B.x = cell.x;
-                B.y = cell.y;
-                refreshCanvas();
-            }
-        }
-
-        // If the user presses the "C" key,
-        // move the coordinates for C to the cell under the cursor.
-        if (event.keyCode == 67) {
-            let cell = getCell(currentX, currentY);
-            if (cell != null) {
-                // First, unset the CONTACT layer at the old coordinates.
-                layeredGrid[C.x][C.y][CONTACT].isSet = false;
-                // Then, set the new coordinates.
-                C.x = cell.x;
-                C.y = cell.y;
-                refreshCanvas();
-            }
-        }
-
-        // If the user presses the "D" key,
-        // move the coordinates for D to the cell under the cursor.
-        if (event.keyCode == 68) {
-            let cell = getCell(currentX, currentY);
-            if (cell != null) {
-                // First, unset the CONTACT layer at the old coordinates.
-                layeredGrid[D.x][D.y][CONTACT].isSet = false;
-                // Then, set the new coordinates.
-                D.x = cell.x;
-                D.y = cell.y;
-                refreshCanvas();
-            }
-        }
-
-        // If the user presses the "Y" key,
-        // move the coordinates for Y to the cell under the cursor.
-        if (event.keyCode == 89) {
+        // Output terminal key listeners.
+        if ((event.keyCode <= 89) && (event.keyCode > 89 - outputs.length)) {
             // Skip if CTRL is pressed.
             let cell = getCell(currentX, currentY);
             if (cell != null && !event.ctrlKey) {
                 // First, unset the CONTACT layer at the old coordinates.
-                layeredGrid[Y.x][Y.y][CONTACT].isSet = false;
+                layeredGrid[outputs[89 - keyCode].x][outputs[89 - keyCode].y][CONTACT].isSet = false;
                 // Then, set the new coordinates.
-                Y.x = cell.x;
-                Y.y = cell.y;
+                outputs[89 - keyCode].x = cell.x;
+                outputs[89 - keyCode].y = cell.y;
                 refreshCanvas();
             }
         }
