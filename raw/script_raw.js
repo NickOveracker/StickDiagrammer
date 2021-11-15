@@ -240,8 +240,8 @@ let CONTACT = 4;
 let DELETE = numLayers;
 let cursorColors = ['#9400D3', '#32CD32', '#ff0000', '#00FFFF', '#cccccc', '#d0a020'];
 let cursorNames = ['pdiff', 'ndiff', 'poly', 'metal', 'contact'];
-let cursorColor = cursorColors[PDIFF];
 let cursorColorIndex = PDIFF;
+let cursorColor = cursorColors[cursorColorIndex];
 
 // Objects to represent the coordinates of the inputs (A, B, C, D, ...)
 // and the output (Y, X, W, V, ...).
@@ -1335,11 +1335,7 @@ window.onload = function() {
                     for (let ii = leftX; ii <= rightX; ii++) {
                         // If primary clicking, draw a line in the current layer.
                         // If secondary clicking, draw the DELETE line.
-                        if(event.buttons === 1) {
-                            layeredGrid[ii][startY][cursorColorIndex].isSet = true;
-                        } else {
-                            layeredGrid[ii][startY][DELETE].isSet = true;
-                        }
+                        layeredGrid[ii][startY][event.buttons === 1 ? cursorColorIndex : DELETE].isSet = true;
                     }
                 }
                 // If the mouse moved more vertically than horizontally,
@@ -1348,11 +1344,7 @@ window.onload = function() {
                     for (let ii = topY; ii <= bottomY; ii++) {
                         // If primary clicking, draw a line in the current layer.
                         // If secondary clicking, draw the DELETE line.
-                        if(event.buttons === 1) {
-                            layeredGrid[startX][ii][cursorColorIndex].isSet = true;
-                        } else {
-                            layeredGrid[startX][ii][DELETE].isSet = true;
-                        }
+                        layeredGrid[startX][ii][event.buttons === 1 ? cursorColorIndex : DELETE].isSet = true;
                     }
                 }
                 refreshCanvas();
