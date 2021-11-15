@@ -11,22 +11,24 @@ Graph.prototype.print = function() {
 }
 
 function printNodeNodeMap() {
-    let str = " ";
+    let str = "   ";
     for(let ii = 0; ii < nodeNodeMap.length; ii++) {
         str += ii + " ";
+        if(ii < 9) str += " ";
     }
     str += "\n";
     for(let ii = 0; ii < nodeNodeMap.length; ii++) {
         str += ii + " ";
+        if(ii <= 9) str += " ";
         for(let jj = 0; jj < nodeNodeMap.length; jj++) {
             if(nodeNodeMap[ii][jj] === null) {
-                str += "? ";
+                str += "?  ";
             } else if(nodeNodeMap[ii][jj] === undefined) {
-                str += "  ";
+                str += "   ";
             } else if(nodeNodeMap[ii][jj] === true) {
-                str += "1 ";
+                str += "1  ";
             } else {
-                str += "0 ";
+                str += "0  ";
             }
         }
         str += "\n";
@@ -43,7 +45,7 @@ function printGrid(net, name) {
         for(let jj = 0; jj < gridsize; jj++) {
             grid[ii][jj] = "_";
             // If any of the layers are in netA, set the cell to "A".
-            for(let kk = 0; kk < layers; kk++) {
+            for(let kk = 0; kk < numLayers; kk++) {
                 if(layeredGrid[ii][jj][kk].isSet && net.containsCell(layeredGrid[ii][jj][kk])) {
                     grid[ii][jj] = name;
                 }
