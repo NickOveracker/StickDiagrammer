@@ -1,7 +1,6 @@
-// graph class to represent CMOS circuitry as a graph.
-// Each node is an input or output.
+// Graph class to represent CMOS circuitry.
+// Each node is a transistor, VDD, GND, or an output.
 // Each edge is a connection between two nodes (a transistor).
-// The graph is directed.
 class Graph {
     constructor() {
         this.nodes = [];
@@ -60,24 +59,9 @@ class Graph {
         return null;
     }
 
-    // Return the node with the given index.
-    getNodeByIndex(index) {
-        return this.nodes[index];
-    }
-
-    // Return the edge with the given index.
-    getEdgeByIndex(index) {
-        return this.edges[index];
-    }
-
     // Return the number of nodes in the graph.
     getNumNodes() {
         return this.nodes.length;
-    }
-
-    // Return the number of edges in the graph.
-    getNumEdges() {
-        return this.edges.length;
     }
 
     getIndexByNode(node) {
@@ -150,6 +134,7 @@ class Node {
     }
 }
 
+// Edges between nodes in a Graph.
 class Edge {
     constructor(node1, node2) {
         this.node1 = node1;
@@ -184,6 +169,7 @@ class Edge {
     }
 }
 
+// Set of cells that are electrically connected to one another.
 class Net {
     constructor(name, isSupply, isInput, isOutput) {
         this.name = name;
@@ -219,22 +205,8 @@ class Net {
         this.cells.add(cell);
     }
 
-    // Alias for now.
-    add(cell) {
-        this.addCell(cell);
-    }
-
-    removeCell(cell) {
-        this.cells.delete(cell);
-    }
-
     containsCell(cell) {
         return this.cells.has(cell);
-    }
-
-    // Alias for now.
-    has(cell) {
-        return this.containsCell(cell);
     }
 
     getCells() {
@@ -243,10 +215,6 @@ class Net {
 
     getName() {
         return this.name;
-    }
-
-    setName(name) {
-        this.name = name;
     }
 
     size() {
@@ -798,7 +766,7 @@ function setNets() {
                 net.clear();
                 net = getNet(transistor[term]);
             }
-            net.add(transistor[term]);
+            net.addCell(transistor[term]);
         }
 
         // Add the net if it is not empty.
@@ -875,7 +843,7 @@ function printGrid(net, name) {
             grid[ii][jj] = "_";
             // If any of the layers are in netA, set the cell to "A".
             for(let kk = 0; kk < layers; kk++) {
-                if(layeredGrid[ii][jj][kk].isSet && net.has(layeredGrid[ii][jj][kk])) {
+                if(layeredGrid[ii][jj][kk].isSet && net.containsCell(layeredGrid[ii][jj][kk])) {
                     grid[ii][jj] = name;
                 }
                 else if(pmos.has(layeredGrid[ii][jj][kk]) || nmos.has(layeredGrid[ii][jj][kk])) {
@@ -969,14 +937,14 @@ function setRecursively(cell, net) {
     if(checkTransistor(cell, PDIFF, pmos)) return;
 
     // Add the cell to the net.
-    net.add(cell);
+    net.addCell(cell);
 
     // If CONTACT is set, add add all layers to the net.
     if(layeredGrid[cell.x][cell.y][CONTACT].isSet) {
         for (let ii = 0; ii < layers; ii++) {
             if(layeredGrid[cell.x][cell.y][ii].isSet) {
-                if(net.has(layeredGrid[cell.x][cell.y][ii]) === false) {
-                    net.add(layeredGrid[cell.x][cell.y][ii]);
+                if(net.containsCell(layeredGrid[cell.x][cell.y][ii]) === false) {
+                    net.addCell(layeredGrid[cell.x][cell.y][ii]);
                     setRecursively(layeredGrid[cell.x][cell.y][ii], net);
                 }
             }
@@ -986,8 +954,8 @@ function setRecursively(cell, net) {
     // For each layer of the cell in the net, recurse with all adjacent cells in the layer.
     // Generic function for the above code.
     function setAdjacent(deltaX, deltaY) {
-        if(net.has(layeredGrid[cell.x][cell.y][cell.layer]) && layeredGrid[cell.x][cell.y][cell.layer].isSet) {
-            if(net.has(layeredGrid[cell.x + deltaX][cell.y + deltaY][cell.layer]) === false) {
+        if(net.containsCell(layeredGrid[cell.x][cell.y][cell.layer]) && layeredGrid[cell.x][cell.y][cell.layer].isSet) {
+            if(net.containsCell(layeredGrid[cell.x + deltaX][cell.y + deltaY][cell.layer]) === false) {
                 setRecursively(layeredGrid[cell.x + deltaX][cell.y + deltaY][cell.layer], net);
             }
         }
