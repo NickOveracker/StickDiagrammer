@@ -228,7 +228,7 @@ let gridCanvas;
 let currentX;
 let currentY;
 let button;
-let nodeNodeMap;
+let nodeNodeMap = [];
 
 // Cycle through the following cursor colors by pressing space: PDIFF, NDIFF, POLY, METAL1, CONTACT
 // Additional colors: DELETE at index (numLayers + 0)
