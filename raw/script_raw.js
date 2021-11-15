@@ -794,7 +794,7 @@ function setNets() {
 // Function to get the net from the netlist that contains a given cell.
 function getNet(cell) {
     for (let ii = 0; ii < netlist.length; ii++) {
-        if (netlist[ii].has(cell)) {
+        if (netlist[ii].containsCell(cell)) {
             return netlist[ii];
         }
     }
