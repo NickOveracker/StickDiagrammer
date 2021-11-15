@@ -26,7 +26,7 @@ class Graph {
     // Check if two nodes are connected.
     isConnected(node1, node2) {
         let edges = node1.getEdges();
-        for (let ii = 0; i < edges.length; ii++) {
+        for (let ii = 0; ii < edges.length; ii++) {
             if (edges[ii].getNode2() === node2 || edges[ii].getNode1() === node2) {
                 return true;
             }
@@ -65,7 +65,7 @@ class Graph {
     }
 
     getIndexByNode(node) {
-        for (let ii = 0; i < this.nodes.length; ii++) {
+        for (let ii = 0; ii < this.nodes.length; ii++) {
             if (this.nodes[ii] === node) {
                 return ii;
             }
@@ -787,8 +787,10 @@ function setNets() {
         }
 
         // Same for output.
-        if(net === netY) {
-            graph.addEdge(transistor, outputNodes[0]);
+        for(let ii = 0; ii < outputs.length; ii++) {
+            if(net === outputNets[ii]) {
+                graph.addEdge(transistor, outputNodes[ii]);
+            }
         }
 
         // Loop through iterator2 to find all other transistors that share a net.
