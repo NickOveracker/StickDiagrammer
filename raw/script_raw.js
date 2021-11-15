@@ -228,6 +228,7 @@ let gridCanvas;
 let currentX;
 let currentY;
 let button;
+let nodeNodeMap;
 
 // Cycle through the following cursor colors by pressing space: PDIFF, NDIFF, POLY, METAL1, CONTACT
 // Additional colors: DELETE at index (numLayers + 0)
@@ -296,12 +297,6 @@ function computeOutput(inputVals, outputNode) {
     let nmosOut;
     let out;
     let firstLevel;
-    let nodeNodeMap = [];
-
-    for(let ii = 0; ii < graph.getNumNodes(); ii++) {
-        nodeNodeMap[ii] = [];
-        nodeNodeMap[ii][ii] = true;
-    }
 
     function mapNodes(node1, node2, isPath) {
         if(pathExists(node1, node2) !== undefined && pathExists(node2, node1) !== null) {
@@ -430,10 +425,20 @@ function computeOutput(inputVals, outputNode) {
 
     // Get pmos output.
     firstLevel = true;
+    nodeNodeMap.length = 0;
+    for(let ii = 0; ii < graph.getNumNodes(); ii++) {
+        nodeNodeMap[ii] = [];
+        nodeNodeMap[ii][ii] = true;
+    }
     pmosOut = computeOutputRecursive(vddNode, outputNode) ? 1 : "Z";
 
     // Get nmos output.
     firstLevel = true;
+    nodeNodeMap.length = 0;
+    for(let ii = 0; ii < graph.getNumNodes(); ii++) {
+        nodeNodeMap[ii] = [];
+        nodeNodeMap[ii][ii] = true;
+    }
     nmosOut = computeOutputRecursive(gndNode, outputNode) ? 0 : "Z";
 
     // Reconcile.
