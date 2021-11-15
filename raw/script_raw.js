@@ -217,7 +217,6 @@ let darkMode;
 let cellHeight;
 let cellWidth;
 let gridsize = 29;
-let layers = 5;
 let firstSaveState = 0;
 let saveState = 0;
 let lastSaveState = 0;
@@ -231,12 +230,15 @@ let currentY;
 let button;
 
 // Cycle through the following cursor colors by pressing space: PDIFF, NDIFF, POLY, METAL1, CONTACT
+// Additional colors: DELETE at index (numLayers + 0)
+let numLayers = 5;
 let PDIFF = 0;
 let NDIFF = 1;
 let POLY = 2;
 let METAL1 = 3;
 let CONTACT = 4;
-let cursorColors = ['#9400D3', '#32CD32', '#ff0000', '#00FFFF', '#cccccc'];
+let DELETE = numLayers;
+let cursorColors = ['#9400D3', '#32CD32', '#ff0000', '#00FFFF', '#cccccc', '#d0a020'];
 let cursorNames = ['pdiff', 'ndiff', 'poly', 'metal', 'contact'];
 let cursorColor = cursorColors[PDIFF];
 let cursorColorIndex = PDIFF;
@@ -278,14 +280,15 @@ let lightModeGridColor = '#999999';
 
 let netVDD = new Net("VDD", true, false, false);
 let netGND = new Net("GND", true, false, false);
-let netA = new Net("A", false, true, false);
-let netB = new Net("B", false, true, false);
-let netC = new Net("C", false, true, false);
-let netD = new Net("D", false, true, false);
-let netY = new Net("Y", false, false, true);
 
-let inputNets = [netA, netB, netC, netD];
-let outputNets = [netY];
+let inputNets = [];
+let outputNets = [];
+for(let ii = 0; let ii < inputs.length; ii++) {
+    inputNets.push(new Net(String.fromCharCode(65 + ii), false, true, false));
+}
+for(let ii = 0; let ii < outputs.length; ii++) {
+    outputNets.push(new Net(String.fromCharCode(89 - ii), false, false, true));
+}
 
 function computeOutput(inputVals, outputNode) {
     'use strict';
@@ -553,16 +556,17 @@ function drawBorder() {
 }
 
 // Define a function to change the cursor color.
-function changeCursorColor() {
+function changeLayer() {
   	'use strict';
-  	cursorColorIndex = (cursorColorIndex + 1) % cursorColors.length;
+    // Don't use cursorColors.length, because there are non-layer colors as well.
+  	cursorColorIndex = (cursorColorIndex + 1) % numLayers;
     cursorColor = cursorColors[cursorColorIndex];
 
     // set the outer border of the canvas to the new cursor color
     drawBorder();
 }
 
-function makeLayeredGrid(width, height, layers) {
+function makeLayeredGrid(width, height) {
   	'use strict';
     // Each cell has several layers with parameter isSet.
     // Initialize every element to false.
@@ -570,8 +574,8 @@ function makeLayeredGrid(width, height, layers) {
     for (let ii = 0; ii < width; ii++) {
         grid[ii] = new Array(height);
         for (let jj = 0; jj < height; jj++) {
-            grid[ii][jj] = new Array(layers);
-            for (let kk = 0; kk < layers; kk++) {
+            grid[ii][jj] = new Array(cursorCOlors.length);
+            for (let kk = 0; kk < cursorColors.length; kk++) {
                 grid[ii][jj][kk] = {isSet: false, x: ii, y: jj, layer: kk};
             }
         }
@@ -663,7 +667,7 @@ function setNets() {
     netlist.push(netGND);
     
     // Loop through the terminals and set their respective nets.
-    for(let ii = 0; ii < layers; ii++) {
+    for(let ii = 0; ii < numLayers; ii++) {
         for(let jj = 0; jj < inputNets.length; jj++) {
             if(layeredGrid[inputs[jj].x][inputs[jj].y][ii].isSet) { 
                 setRecursively(layeredGrid[inputs[jj].x][inputs[jj].y][ii], inputNets[jj]);
@@ -879,7 +883,7 @@ function setRecursively(cell, net) {
 
     // If CONTACT is set, add add all layers to the net.
     if(layeredGrid[cell.x][cell.y][CONTACT].isSet) {
-        for (let ii = 0; ii < layers; ii++) {
+        for (let ii = 0; ii < numLayers; ii++) {
             if(layeredGrid[cell.x][cell.y][ii].isSet) {
                 if(net.containsCell(layeredGrid[cell.x][cell.y][ii]) === false) {
                     net.addCell(layeredGrid[cell.x][cell.y][ii]);
@@ -939,13 +943,13 @@ function refreshCanvas() {
     }
 
     // Draw each layer in order.
-    for(let layer = 0; layer < layers; layer++) {
+    for(let layer = 0; layer < cursorColors.length; layer++) {
         for (let i = 1; i <= gridsize; i++) {
             for (let j = 1; j <= gridsize; j++) {
                 drawCell(i, j, layer, false);
 
                 // For the last layer, fill each filled cell with a cross.
-                if (layer == layers - 1) {
+                if (layer === numLayers - 1) {
                     if (layeredGrid[i-1][j-1][layer].isSet) {
                         ctx.fillStyle = "#000000";
                         ctx.beginPath();
@@ -1083,7 +1087,7 @@ function colorCell(clientX, clientY, noDelete, noAdd) {
 
         // Set a variable to true if any of the layers are set.
         let anyLayerSet = false;
-        for (let i = 0; i < layers; i++) {
+        for (let i = 0; i < numLayers; i++) {
             if (layeredGrid[x][y][i].isSet) {
                 anyLayerSet = true;
             }
@@ -1098,7 +1102,7 @@ function colorCell(clientX, clientY, noDelete, noAdd) {
 
                 if (toDelete) {
                     // Erase all layers of the cell.
-                    for (let i = 0; i < layers; i++) {
+                    for (let i = 0; i < numLayers; i++) {
                         layeredGrid[x][y][i].isSet = false;
                     }
                 } else {
@@ -1189,7 +1193,7 @@ window.onload = function() {
     // Initialize with a gridsize of 29 and 5 layers
     canvas = document.getElementById("canvas");
     ctx = canvas.getContext("2d");
-    layeredGrid = makeLayeredGrid(gridsize, gridsize, layers);
+    layeredGrid = makeLayeredGrid(gridsize, gridsize);
 
     // Add a div to one side to add the truth table.
     let truthTableDiv = document.createElement("div");
@@ -1228,10 +1232,11 @@ window.onload = function() {
         }
     });
 
-    // Note the grid coordinates when the left mouse button is released.
-    // Use the start and end coordinates to make either a horizontal or vertical line.
+    // Note the grid coordinates when the left or right mouse button is released.
+    // If the left (or primary) button, use the start and end coordinates to make either a horizontal or vertical line.
+    // If the right (or secondary) button, use the same coordinates to delete a line of cells.
     window.addEventListener("mouseup", function(event) {
-        if (event.button == 0) {
+        if (event.button === 0 || event.button === 2) {
             // If not between cells 1 and gridsize - 1, undo and return.
             if (event.clientX > canvas.offsetLeft + cellWidth &&
                 event.clientX < canvas.offsetLeft + canvas.width - cellWidth &&
@@ -1243,24 +1248,46 @@ window.onload = function() {
                     let endY = Math.floor((event.clientY - canvas.offsetTop - cellHeight) / cellHeight);
 
                     // If the mouse moved more horizontally than vertically,
-                    // draw a horizontal line.
+                    // draw or delete a horizontal line.
                     if (Math.abs(endX - startX) > Math.abs(endY - startY)) {
-                        for (let i = Math.min(startX, endX); i <= Math.max(startX, endX); i++) {
-                            layeredGrid[i][startY][cursorColorIndex].isSet = true;
+                        for (let ii = Math.min(startX, endX); ii <= Math.max(startX, endX); ii++) {
+                            if(event.button === 0) {
+                                layeredGrid[ii][startY][cursorColorIndex].isSet = true;
+                            } else {
+                                // clear all layers
+                                for(let jj = 0; jj < numLayers; jj++) {
+                                    layeredGrid[ii][startY][jj].isSet = false;
+                                }
+                            }
                         }
                     }
                     // If the mouse moved more vertically than horizontally,
-                    // draw a vertical line.
+                    // draw or delete a vertical line.
                     else {
-                        for (let i = Math.min(startY, endY); i <= Math.max(startY, endY); i++) {
-                            layeredGrid[startX][i][cursorColorIndex].isSet = true;
+                        for (let ii = Math.min(startY, endY); ii <= Math.max(startY, endY); ii++) {
+                            if(event.button === 0) {
+                                layeredGrid[startX][ii][cursorColorIndex].isSet = true;
+                            }
+                            else {
+                                // clear all layers
+                                for(let jj = 0; jj < numLayers; jj++) {
+                                    layeredGrid[startX][ii][jj].isSet = false;
+                                }
+                            }
                         }
                     }
                 }
                 // Just fill in the cell at the start coordinates.
                 else {
                     saveCurrentState();
-                    layeredGrid[startX][startY][cursorColorIndex].isSet = true;
+                    if(event.button === 0) {
+                        layeredGrid[startX][startY][cursorColorIndex].isSet = true;
+                    } else {
+                        // clear all layers
+                        for(let jj = 0; jj < numLayers; jj++) {
+                            layeredGrid[startX][startY][jj].isSet = false;
+                        }
+                    }
                 }
             }
             // If the mouse was released outside the canvas, undo and return.
@@ -1280,7 +1307,7 @@ window.onload = function() {
         currentY = event.clientY;
         
         // If the mouse is pressed and the mouse is between cells 1 and gridsize - 1,
-        if (event.buttons == 1) {
+        if (event.buttons === 1 || event.buttons === 2) {
             // Ignore if not inside the canvas
             if (event.clientX > canvas.offsetLeft + cellWidth &&
                 event.clientX < canvas.offsetLeft + canvas.width - cellWidth &&
@@ -1308,17 +1335,28 @@ window.onload = function() {
                 // draw a horizontal line.
                 if (rightX - leftX > bottomY - topY) {
                     for (let i = leftX; i <= rightX; i++) {
-                        layeredGrid[i][startY][cursorColorIndex].isSet = true;
+                        // If primary clicking, draw a line in the current layer.
+                        // If secondary clicking, draw the DELETE line.
+                        if(event.buttons === 1) {
+                            layeredGrid[i][startY][cursorColorIndex].isSet = true;
+                        } else {
+                            layeredGrid[i][startY][DELETE].isSet = true;
+                        }
                     }
                 }
                 // If the mouse moved more vertically than horizontally,
                 // draw a vertical line.
                 else {
                     for (let j = topY; j <= bottomY; j++) {
-                        layeredGrid[startX][j][cursorColorIndex].isSet = true;
+                        // If primary clicking, draw a line in the current layer.
+                        // If secondary clicking, draw the DELETE line.
+                        if(event.buttons === 1) {
+                            layeredGrid[startX][j][cursorColorIndex].isSet = true;
+                        } else {
+                            layeredGrid[startX][j][DELETE].isSet = true;
+                        }
                     }
                 }
-
                 refreshCanvas();
             }
         }
@@ -1327,7 +1365,7 @@ window.onload = function() {
     // When the user right-clicks on a cell in the canvas, erase it.
     // When clicking anywhere else, cycle through cursor colors.
     window.addEventListener("contextmenu", function(event) {
-        if (event.button == 2) {
+        if (event.button === 2) {
             // Don't show a context menu.
             event.preventDefault();
 
@@ -1337,7 +1375,7 @@ window.onload = function() {
             }
 
             // Cycle through the cursor colors by right clicking anywhere else.
-            changeCursorColor();
+            changeLayer();
             refreshCanvas();
         }
     });
@@ -1345,12 +1383,12 @@ window.onload = function() {
     // Keypress listeners
     window.addEventListener("keydown", function(event) {
         // Undo by pressing CTRL + Z
-        if (event.ctrlKey && event.keyCode == 90) {
+        if (event.ctrlKey && event.keyCode === 90) {
             undo();
         }
 
         // Redo by pressing CTRL + Y
-        if (event.ctrlKey && event.keyCode == 89) {
+        if (event.ctrlKey && event.keyCode === 89) {
             redo();
         }
 
