@@ -283,10 +283,10 @@ let netGND = new Net("GND", true, false, false);
 
 let inputNets = [];
 let outputNets = [];
-for(let ii = 0; let ii < inputs.length; ii++) {
+for(let ii = 0; ii < inputs.length; ii++) {
     inputNets.push(new Net(String.fromCharCode(65 + ii), false, true, false));
 }
-for(let ii = 0; let ii < outputs.length; ii++) {
+for(let ii = 0; ii < outputs.length; ii++) {
     outputNets.push(new Net(String.fromCharCode(89 - ii), false, false, true));
 }
 
