@@ -26,8 +26,8 @@ class Graph {
     // Check if two nodes are connected.
     isConnected(node1, node2) {
         let edges = node1.getEdges();
-        for (let i = 0; i < edges.length; i++) {
-            if (edges[i].getNode2() === node2 || edges[i].getNode1() === node2) {
+        for (let ii = 0; i < edges.length; ii++) {
+            if (edges[ii].getNode2() === node2 || edges[ii].getNode1() === node2) {
                 return true;
             }
         }
@@ -65,9 +65,9 @@ class Graph {
     }
 
     getIndexByNode(node) {
-        for (let i = 0; i < this.nodes.length; i++) {
-            if (this.nodes[i] === node) {
-                return i;
+        for (let ii = 0; i < this.nodes.length; ii++) {
+            if (this.nodes[ii] === node) {
+                return ii;
             }
         }
         return -1;
@@ -628,14 +628,14 @@ function drawGrid(size) {
         gridCtx.strokeStyle = lightModeGridColor;
     }
 
-    for (let i = 0; i < size + 2; i++) {
+    for (let ii = 0; ii < size + 2; ii++) {
         gridCtx.beginPath();
-        gridCtx.moveTo(i * cellWidth, 0);
-        gridCtx.lineTo(i * cellWidth, gridCanvas.height);
+        gridCtx.moveTo(ii * cellWidth, 0);
+        gridCtx.lineTo(ii * cellWidth, gridCanvas.height);
         gridCtx.stroke();
         gridCtx.beginPath();
-        gridCtx.moveTo(0, i * cellHeight);
-        gridCtx.lineTo(gridCanvas.width, i * cellHeight);
+        gridCtx.moveTo(0, ii * cellHeight);
+        gridCtx.lineTo(gridCanvas.width, ii * cellHeight);
         gridCtx.stroke();
     }
 }
@@ -937,40 +937,40 @@ function refreshCanvas() {
     }
 
     // Draw METAL1 across the grid at VDD_y and GND_y.
-    for (let i = railStartX; i < railEndX; i++) {
-        layeredGrid[i][VDD_y][METAL1].isSet = true;
-        layeredGrid[i][GND_y][METAL1].isSet = true;
+    for (let ii = railStartX; ii < railEndX; ii++) {
+        layeredGrid[ii][VDD_y][METAL1].isSet = true;
+        layeredGrid[ii][GND_y][METAL1].isSet = true;
     }
 
     // Draw each layer in order.
     for(let layer = 0; layer < cursorColors.length; layer++) {
-        for (let i = 1; i <= gridsize; i++) {
-            for (let j = 1; j <= gridsize; j++) {
-                drawCell(i, j, layer, false);
+        for (let ii = 1; ii <= gridsize; ii++) {
+            for (let jj = 1; jj <= gridsize; j++) {
+                drawCell(ii, jj, layer, false);
 
                 // For the last layer, fill each filled cell with a cross.
                 if (layer === CONTACT) {
-                    if (layeredGrid[i-1][j-1][layer].isSet) {
+                    if (layeredGrid[ii-1][jj-1][layer].isSet) {
                         ctx.fillStyle = "#000000";
                         ctx.beginPath();
-                        ctx.moveTo(i * cellWidth + cellWidth + 2, j * cellHeight - 1);
-                        ctx.lineTo(i * cellWidth, j * cellHeight + cellHeight + 1);
+                        ctx.moveTo(ii * cellWidth + cellWidth + 2, jj * cellHeight - 1);
+                        ctx.lineTo(ii * cellWidth, jj * cellHeight + cellHeight + 1);
                         ctx.stroke();
                         ctx.beginPath();
-                        ctx.moveTo(i * cellWidth + cellWidth + 2, j * cellHeight + cellHeight + 1);
-                        ctx.lineTo(i * cellWidth, j * cellHeight - 2);
+                        ctx.moveTo(ii * cellWidth + cellWidth + 2, jj * cellHeight + cellHeight + 1);
+                        ctx.lineTo(ii * cellWidth, jj * cellHeight - 2);
                         ctx.stroke();
                     }
                 }
 
                 // Set the terminals of the cell to null.
-                layeredGrid[i-1][j-1][NDIFF].term1 = null;
-                layeredGrid[i-1][j-1][NDIFF].term2 = null;
-                layeredGrid[i-1][j-1][NDIFF].gate  = null;
+                layeredGrid[ii-1][jj-1][NDIFF].term1 = null;
+                layeredGrid[ii-1][jj-1][NDIFF].term2 = null;
+                layeredGrid[ii-1][jj-1][NDIFF].gate  = null;
 
-                layeredGrid[i-1][j-1][PDIFF].term1 = null;
-                layeredGrid[i-1][j-1][PDIFF].term2 = null;
-                layeredGrid[i-1][j-1][PDIFF].gate  = null;
+                layeredGrid[ii-1][jj-1][PDIFF].term1 = null;
+                layeredGrid[ii-1][jj-1][PDIFF].term2 = null;
+                layeredGrid[ii-1][jj-1][PDIFF].gate  = null;
             }
         }
     }
@@ -1020,9 +1020,9 @@ function saveCurrentState() {
     saveState++;
 
     // Delete all save states after the current one.
-    for (let i = saveState; i < lastSaveState; i++) {
-        localStorage.removeItem('layeredGrid' + i);
-        localStorage.removeItem('canvas' + i);
+    for (let ii = saveState; ii < lastSaveState; ii++) {
+        localStorage.removeItem('layeredGrid' + ii);
+        localStorage.removeItem('canvas' + ii);
     }
 
     // Update the max save state.
@@ -1102,8 +1102,8 @@ function colorCell(clientX, clientY, noDelete, noAdd) {
 
                 if (toDelete) {
                     // Erase all layers of the cell.
-                    for (let i = 0; i < cursorColors.length; i++) {
-                        layeredGrid[x][y][i].isSet = false;
+                    for (let ii = 0; ii < cursorColors.length; ii++) {
+                        layeredGrid[x][y][ii].isSet = false;
                     }
                 } else {
                     layeredGrid[x][y][cursorColorIndex].isSet = true;
@@ -1152,24 +1152,24 @@ function refreshTruthTable(table) {
 
     let header = tableElement.createTHead();
     let headerRow = header.insertRow(0);
-    for (let i = 0; i < table[0].length; i++) {
-        let cell = headerRow.insertCell(i);
-        cell.innerHTML = table[0][i];
+    for (let ii = 0; ii < table[0].length; ii++) {
+        let cell = headerRow.insertCell(ii);
+        cell.innerHTML = table[0][ii];
     }
 
     // Create the rest of the table.
-    for (let i = 1; i < table.length; i++) {
-        let row = tableElement.insertRow(i);
-        for (let j = 0; j < table[i].length; j++) {
-            let cell = row.insertCell(j);
-            cell.innerHTML = table[i][j];
+    for (let ii = 1; ii < table.length; ii++) {
+        let row = tableElement.insertRow(ii);
+        for (let jj = 0; jj < table[ii].length; jj++) {
+            let cell = row.insertCell(jj);
+            cell.innerHTML = table[ii][jj];
         }
     }
 
     // Style the th
     let ths = tableElement.getElementsByTagName("th");
-    for (let i = 0; i < ths.length; i++) {
-        ths[i].setAttribute("style", "border: 1px solid black; padding: 5px;");
+    for (let ii = 0; ii < ths.length; ii++) {
+        ths[ii].setAttribute("style", "border: 1px solid black; padding: 5px;");
     }
 
     document.getElementById("truthTable").appendChild(button);
@@ -1275,15 +1275,20 @@ window.onload = function() {
                         }
                     }
                 }
-                // Just fill in the cell at the start coordinates.
+                // Just fill in or delete the cell at the start coordinates.
+                // If there is no cell at the start coordinates, change the cursor color.
                 else {
-                    saveCurrentState();
                     if(event.button === 0) {
+                        if(!layeredGrid[startX][startY][cursorColorIndex].isSet) saveCurrentState();
                         layeredGrid[startX][startY][cursorColorIndex].isSet = true;
                     } else {
-                        // clear all layers
-                        for(let jj = 0; jj < cursorColors.length; jj++) {
-                            layeredGrid[startX][startY][jj].isSet = false;
+                        // If in the canvas and over a colored cell, erase it.
+                        // Otherwise, change the layer.
+                        saveCurrentState();
+                        if(!colorCell(event.clientX, event.clientY, false, true)) {
+                            // Cycle through the cursor colors by right clicking anywhere else.
+                            undo();
+                            changeLayer();
                         }
                     }
                 }
@@ -1294,8 +1299,8 @@ window.onload = function() {
             }
         }
 
-        refreshCanvas();
         dragging = false;
+        refreshCanvas();
     });
 
     // Show a preview line when the user is dragging the mouse.
@@ -1358,15 +1363,6 @@ window.onload = function() {
         if (event.button === 2) {
             // Don't show a context menu.
             event.preventDefault();
-
-            // If in the canvas and over a colored cell, erase it.
-            if(colorCell(event.clientX, event.clientY, false, true)) {
-                return;
-            }
-
-            // Cycle through the cursor colors by right clicking anywhere else.
-            changeLayer();
-            refreshCanvas();
         }
     });
 
