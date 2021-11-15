@@ -1294,7 +1294,6 @@ window.onload = function() {
                         saveCurrentState();
                         if(!colorCell(event.clientX, event.clientY, false, true)) {
                             // Cycle through the cursor colors by right clicking anywhere else.
-                            undo();
                             changeLayer();
                         }
                     }
