@@ -27,7 +27,7 @@ class Graph {
     isConnected(node1, node2) {
         let edges = node1.getEdges();
         for (let i = 0; i < edges.length; i++) {
-            if (edges[i].getNode2() == node2 || edges[i].getNode1() == node2) {
+            if (edges[i].getNode2() === node2 || edges[i].getNode1() === node2) {
                 return true;
             }
         }
@@ -926,10 +926,10 @@ function refreshCanvas() {
 
     // Draw CONTACT at the coordinates of each input and output.
     for (let ii = 0; ii < inputs.length; ii++) {
-        drawCell(inputs[ii].x, inputs[ii].y, CONTACT, true);
+        layeredGrid[inputs[ii].x][inputs[ii].y][CONTACT].isSet = true;
     }
     for (let ii = 0; ii < outputs.length; ii++) {
-        drawCell(outputs[ii].x, outputs[ii].y, CONTACT, true);
+        layeredGrid[outputs[ii].x][outputs[ii].y][CONTACT].isSet = true;
     }
 
     // Draw METAL1 across the grid at VDD_y and GND_y.
