@@ -1081,8 +1081,12 @@ function redo() {
     }
 }
 
-function colorCell(clientX, clientY, noDelete, noAdd) {
+function clearIfPainted(clientX, clientY) {
   	'use strict';
+
+    // Set a variable to true if any of the layers are set.
+    let anyLayerSet = false;
+
     // Ignore if not inside the canvas
     if (clientX > canvas.offsetLeft + cellWidth &&
         clientX < canvas.offsetLeft + canvas.width - cellWidth &&
@@ -1092,36 +1096,17 @@ function colorCell(clientX, clientY, noDelete, noAdd) {
         let x = Math.floor((clientX - canvas.offsetLeft - cellWidth) / cellWidth);
         let y = Math.floor((clientY - canvas.offsetTop - cellHeight) / cellHeight);
 
-        // Set a variable to true if any of the layers are set.
-        let anyLayerSet = false;
+        // Erase all layers of the cell.
         for (let ii = 0; ii < cursorColors.length; ii++) {
             if (layeredGrid[x][y][ii].isSet) {
+                if(!anyLayerSet) saveCurrentState();
                 anyLayerSet = true;
+                layeredGrid[x][y][ii].isSet = false;
             }
-        }
-
-        if(noDelete || anyLayerSet) {
-            let isSet = layeredGrid[x][y][cursorColorIndex].isSet;
-            let toDelete = !noDelete && isSet || noAdd && anyLayerSet;
-
-            if(toDelete || !noAdd) {
-                saveCurrentState();
-
-                if (toDelete) {
-                    // Erase all layers of the cell.
-                    for (let ii = 0; ii < cursorColors.length; ii++) {
-                        layeredGrid[x][y][ii].isSet = false;
-                    }
-                } else {
-                    layeredGrid[x][y][cursorColorIndex].isSet = true;
-                }
-
-                refreshCanvas();
-            }
-            return true;
         }
     }
-    return false;
+
+    return anyLayerSet;
 }
 
 function getCell(clientX, clientY) {
@@ -1221,15 +1206,23 @@ window.onload = function() {
 
     refreshCanvas();
 
+    function inBounds(event) {
+  		'use strict';
+        let x = event.clientX;
+        let y = event.clientY;
+
+        return x > canvas.offsetLeft + cellWidth && 
+               x < canvas.offsetLeft + canvas.width - cellWidth &&
+               y > canvas.offsetTop + cellHeight &&
+               y < canvas.offsetTop + canvas.height - cellHeight;
+    }
+
     // Note the grid coordinates when the left mouse button is pressed.
     // Store the m in startX and startY.
     window.addEventListener("mousedown", function(event) {
         if (event.button === 0 || event.button === 2) {
             // Return if not between cells 1 and gridsize - 1
-            if (event.clientX > canvas.offsetLeft + cellWidth &&
-                event.clientX < canvas.offsetLeft + canvas.width - cellWidth &&
-                event.clientY > canvas.offsetTop + cellHeight &&
-                event.clientY < canvas.offsetTop + canvas.height - cellHeight)
+            if (inBounds(event))
             {
                 startX = Math.floor((event.clientX - canvas.offsetLeft - cellWidth) / cellWidth);
                 startY = Math.floor((event.clientY - canvas.offsetTop - cellHeight) / cellHeight);
@@ -1243,10 +1236,7 @@ window.onload = function() {
     window.addEventListener("mouseup", function(event) {
         if (event.button === 0 || event.button === 2) {
             // If not between cells 1 and gridsize - 1, undo and return.
-            if (event.clientX > canvas.offsetLeft + cellWidth &&
-                event.clientX < canvas.offsetLeft + canvas.width - cellWidth &&
-                event.clientY > canvas.offsetTop + cellHeight &&
-                event.clientY < canvas.offsetTop + canvas.height - cellHeight)
+            if (inBounds(event))
             {
                 if(dragging) {
                     let endX = Math.floor((event.clientX - canvas.offsetLeft - cellWidth) / cellWidth);
@@ -1291,9 +1281,7 @@ window.onload = function() {
                     } else {
                         // If in the canvas and over a colored cell, erase it.
                         // Otherwise, change the layer.
-                        saveCurrentState();
-                        if(!colorCell(event.clientX, event.clientY, false, true)) {
-                            // Cycle through the cursor colors by right clicking anywhere else.
+                        if(!clearIfPainted(event.clientX, event.clientY)) {
                             changeLayer();
                         }
                     }
@@ -1307,7 +1295,6 @@ window.onload = function() {
 
         dragging = false;
         refreshCanvas();
-        refreshCanvas();
     });
 
     // Show a preview line when the user is dragging the mouse.
@@ -1319,10 +1306,7 @@ window.onload = function() {
         // If the mouse is pressed and the mouse is between cells 1 and gridsize - 1,
         if (event.buttons === 1 || event.buttons === 2) {
             // Ignore if not inside the canvas
-            if (event.clientX > canvas.offsetLeft + cellWidth &&
-                event.clientX < canvas.offsetLeft + canvas.width - cellWidth &&
-                event.clientY > canvas.offsetTop + cellHeight &&
-                event.clientY < canvas.offsetTop + canvas.height - cellHeight)
+            if (inBounds(event))
             {
                 if(!dragging) {
                     dragging = true;
@@ -1359,7 +1343,6 @@ window.onload = function() {
                         layeredGrid[startX][ii][event.buttons === 1 ? cursorColorIndex : DELETE].isSet = true;
                     }
                 }
-                refreshCanvas();
                 refreshCanvas();
             }
         }
