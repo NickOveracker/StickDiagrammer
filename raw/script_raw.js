@@ -945,7 +945,7 @@ function refreshCanvas() {
     // Draw each layer in order.
     for(let layer = 0; layer < cursorColors.length; layer++) {
         for (let ii = 1; ii <= gridsize; ii++) {
-            for (let jj = 1; jj <= gridsize; j++) {
+            for (let jj = 1; jj <= gridsize; jj++) {
                 drawCell(ii, jj, layer, false);
 
                 // For the last layer, fill each filled cell with a cross.
