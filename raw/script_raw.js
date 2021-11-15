@@ -1,3 +1,5 @@
+/*jshint esversion: 6 */
+
 // Graph class to represent CMOS circuitry.
 class Graph {
     constructor() {
@@ -253,7 +255,6 @@ let outputs  = [Y];
 // Netlist is a list of nets.
 // Each net is a Set of cells.
 let netlist = [];
-let output;
 let graph;
 
 // VDD and GND are the two terminals of the grid.
@@ -287,11 +288,12 @@ let inputNets = [netA, netB, netC, netD];
 let outputNets = [netY];
 
 function computeOutput(inputVals, outputNode) {
+    'use strict';
     let pmosOut;
     let nmosOut;
     let out;
     let firstLevel;
-    nodeNodeMap = [];
+    let nodeNodeMap = [];
 
     for(let ii = 0; ii < graph.getNumNodes(); ii++) {
         nodeNodeMap[ii] = [];
@@ -391,7 +393,11 @@ function computeOutput(inputVals, outputNode) {
     
         if(gateNet.isInput) {
             let inputNum = node.getName().charCodeAt(0) - 65;
+          
+						/*jslint bitwise: true */
             let evalInput = !!((inputVals >> inputNum) & 1);
+          	/*jslint bitwise: false */
+          
             // Pass-through positive for NMOS.
             if(node.isNmos) {
                 return evalInput;
@@ -444,6 +450,7 @@ function computeOutput(inputVals, outputNode) {
 // 1 is VDD, 0 is GND.
 // Z is high impedance, X is error (VDD and GND contradiction.)
 function buildTruthTable() {
+  	'use strict';
     let header = [];
     let inputVals = [];
     let outputVals = [];
@@ -462,7 +469,9 @@ function buildTruthTable() {
         outputVals[ii] = tableOutputRow;
 
         for(let jj = 0; jj < inputs.length; jj++) {
+          	/*jslint bitwise: true */
             tableInputRow[jj] = (ii >> jj) & 1;
+            /*jslint bitwise: false */
         }
 
         inputVals[ii] = tableInputRow;
@@ -513,10 +522,11 @@ function buildTruthTable() {
     return table;
 }
 
-graph = new Graph()
+graph = new Graph();
 
 // Draw the outer border of the canvas.
 function drawBorder() {
+  	'use strict';
     ctx.strokeStyle = cursorColor;
     ctx.lineWidth = cellWidth;
     ctx.strokeRect(cellWidth/2, cellWidth/2, canvas.width - cellWidth, canvas.height - cellWidth);
@@ -544,7 +554,8 @@ function drawBorder() {
 
 // Define a function to change the cursor color.
 function changeCursorColor() {
-    cursorColorIndex = (cursorColorIndex + 1) % cursorColors.length;
+  	'use strict';
+  	cursorColorIndex = (cursorColorIndex + 1) % cursorColors.length;
     cursorColor = cursorColors[cursorColorIndex];
 
     // set the outer border of the canvas to the new cursor color
@@ -552,6 +563,7 @@ function changeCursorColor() {
 }
 
 function makeLayeredGrid(width, height, layers) {
+  	'use strict';
     // Each cell has several layers with parameter isSet.
     // Initialize every element to false.
     let grid = new Array(width);
@@ -569,6 +581,7 @@ function makeLayeredGrid(width, height, layers) {
 
 // Resize the canvas to the largest square that fits in the window.
 function resizeCanvas() {
+  	'use strict';
     let windowWidth = window.innerWidth;
     let windowHeight = window.innerHeight;
     let windowSize = Math.min(windowWidth, windowHeight);
@@ -579,6 +592,7 @@ function resizeCanvas() {
 // Draw a faint grid on the canvas.
 // Add an extra 2 units to the width and height for a border.
 function drawGrid(size) {
+  	'use strict';
     // Check if gridCanvas is defined.
     if (gridCanvas == undefined) {
         gridCanvas = document.createElement('canvas');
@@ -624,6 +638,7 @@ function drawGrid(size) {
 
 // Set the nets.
 function setNets() {
+  	'use strict';
     // Create a graph object.
     graph.clear();
 
@@ -746,7 +761,7 @@ function setNets() {
             transistor[term] = net;
             // Gates aren't nodes.
             // The transistors themselves are the nodes, as are VDD, GND, and all outputs.
-            term !== "gate" && net.addNode(graph.getNode(transistor));
+            if(term !== "gate") net.addNode(graph.getNode(transistor));
         }
     });
 
@@ -790,6 +805,7 @@ function setNets() {
 
 // Function to get the net from the netlist that contains a given cell.
 function getNet(cell) {
+  	'use strict';
     for (let ii = 0; ii < netlist.length; ii++) {
         if (netlist[ii].containsCell(cell)) {
             return netlist[ii];
@@ -799,6 +815,7 @@ function getNet(cell) {
 }
 
 function setRecursively(cell, net) {
+  	'use strict';
     // Return if this cell is in pmos or nmos already.
     if (nmos.has(cell) || pmos.has(cell)) {
         net.addNode(graph.getNode(cell));
@@ -825,9 +842,7 @@ function setRecursively(cell, net) {
         // If the layer is NDIFF or PDIFF and there is also a POLY at the same location,
         // add the cell to transistors.
         if (cell.layer === layer && cell.isSet) {
-            if (layeredGrid[cell.x][cell.y][POLY].isSet
-                && !layeredGrid[cell.x][cell.y][CONTACT].isSet) {
-
+            if (layeredGrid[cell.x][cell.y][POLY].isSet && !layeredGrid[cell.x][cell.y][CONTACT].isSet) {
                 transistorArray.add(cell);
                 graph.addNode(cell);
                 // Set the gate to the poly cell.
@@ -885,16 +900,17 @@ function setRecursively(cell, net) {
     }
 
     // Check the cells above and below.
-    (cell.y > 0) && setAdjacent(0, -1);
-    (cell.y < gridsize - 1) && setAdjacent(0, 1);
+    if(cell.y > 0) setAdjacent(0, -1);
+    if(cell.y < gridsize - 1) setAdjacent(0, 1);
 
     // Check the cells to the left and right.
-    (cell.x > 0) && setAdjacent(-1, 0);
-    (cell.x < gridsize - 1) && setAdjacent(1, 0);
+    if(cell.x > 0) setAdjacent(-1, 0);
+    if(cell.x < gridsize - 1) setAdjacent(1, 0);
 }
 
 // Initialize everything
 function refreshCanvas() {
+  	'use strict';
     resizeCanvas();
 
     // Draw the grid.
@@ -990,7 +1006,8 @@ function refreshCanvas() {
 
 // Save function to save the current state of the grid and the canvas.
 // Increment save state so we can maintain an undo buffer.
-function saveCurrentState() {    
+function saveCurrentState() {
+  	'use strict';
     // Save both the grid and the drawing.
     localStorage.setItem('layeredGrid' + saveState, JSON.stringify(layeredGrid));
     localStorage.setItem('canvas' + saveState, canvas.toDataURL());
@@ -1019,6 +1036,7 @@ function saveCurrentState() {
 
 // Undo by going back to the previous save state (if there is one) and redrawing the canvas.
 function undo() {
+  	'use strict';
     if(saveState === lastSaveState) {
         saveCurrentState();
         saveState--;
@@ -1030,7 +1048,7 @@ function undo() {
         img.src = localStorage.getItem('canvas' + saveState);
         img.onload = function() {
             ctx.drawImage(img, 0, 0);
-        }
+        };
 
         refreshCanvas();
     }
@@ -1038,6 +1056,7 @@ function undo() {
 
 // Redo by going forward to the next save state (if there is one) and redrawing the canvas.
 function redo() {
+  	'use strict';
     if (saveState < lastSaveState - 1) {
         saveState++;
         layeredGrid = JSON.parse(localStorage.getItem('layeredGrid' + saveState));
@@ -1045,13 +1064,14 @@ function redo() {
         img.src = localStorage.getItem('canvas' + saveState);
         img.onload = function() {
             ctx.drawImage(img, 0, 0);
-        }
+        };
 
         refreshCanvas();
     }
 }
 
 function colorCell(clientX, clientY, noDelete, noAdd) {
+  	'use strict';
     // Ignore if not inside the canvas
     if (clientX > canvas.offsetLeft + cellWidth &&
         clientX < canvas.offsetLeft + canvas.width - cellWidth &&
@@ -1094,6 +1114,7 @@ function colorCell(clientX, clientY, noDelete, noAdd) {
 }
 
 function getCell(clientX, clientY) {
+  	'use strict';
     // Ignore if not inside the canvas
     if (clientX > canvas.offsetLeft + cellWidth &&
         clientX < canvas.offsetLeft + canvas.width - cellWidth &&
@@ -1109,6 +1130,7 @@ function getCell(clientX, clientY) {
 
 // Table is a 2D array of single character strings.
 function refreshTruthTable(table) {
+  	'use strict';
     let tableDiv = document.getElementById("truthTable");
     tableDiv.innerHTML = "";
 
@@ -1152,6 +1174,7 @@ function refreshTruthTable(table) {
 }
 
 window.onload = function() {
+  	'use strict';
     // Clear local storage
     localStorage.clear();
 
@@ -1276,10 +1299,10 @@ window.onload = function() {
                 let endX = Math.floor((event.clientX - canvas.offsetLeft - cellWidth) / cellWidth);
                 let endY = Math.floor((event.clientY - canvas.offsetTop - cellHeight) / cellHeight);
                 
-                leftX = Math.min(startX, endX);
-                rightX = Math.max(startX, endX);
-                topY = Math.min(startY, endY);
-                bottomY = Math.max(startY, endY);
+                let leftX = Math.min(startX, endX);
+                let rightX = Math.max(startX, endX);
+                let topY = Math.min(startY, endY);
+                let bottomY = Math.max(startY, endY);
 
                 // If the mouse moved more horizontally than vertically,
                 // draw a horizontal line.
@@ -1376,4 +1399,4 @@ window.onload = function() {
         refreshTruthTable(buildTruthTable());
     };
     document.getElementById("truthTable").appendChild(button);
-}
+};
