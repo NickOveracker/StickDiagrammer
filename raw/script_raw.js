@@ -1,4 +1,27 @@
-/*jshint esversion: 6 */
+/* jshint bitwise: true */
+/* jshint curly: true */
+/* jshint eqeqeq: true */
+/* jshint esversion: 6 */
+/* jshint forin: true */
+/* jshint freeze: true */
+/* jshint futurehostile: true */
+/* jshint leanswitch: true */
+/* jshint maxcomplexity: 15 */
+/* jshint maxdepth: 6 */
+/* jshint maxparams: 4 */
+/* jshint maxstatements: 46 */
+/* jshint noarg: true */
+/* jshint nocomma: false */
+/* jshint nonbsp: true */
+/* jshint nonew: true */
+/* jshint noreturnawait: true */
+/* jshint regexpu: true */
+/* jshint strict: true */
+/* jshint trailingcomma: true */
+/* jshint undef: true */
+/* jshint unused: true */
+/* jshint varstmt: true */
+/* jshint browser: true */
 
 // Graph class to represent CMOS circuitry.
 class Graph {
@@ -147,9 +170,9 @@ class Edge {
     }
 
     getOtherNode(node) {
-        if (this.node1 == node) {
+        if (this.node1 === node) {
             return this.node2;
-        } else if (this.node2 == node) {
+        } else if (this.node2 === node) {
             return this.node1;
         } else {
             return null;
@@ -239,21 +262,21 @@ let POLY = 2;
 let METAL1 = 3;
 let CONTACT = 4;
 let DELETE = numLayers;
-let cursorColors = ['#9400D3', '#32CD32', '#ff0000', '#00FFFF', '#cccccc', '#d0a020'];
-let cursorNames = ['pdiff', 'ndiff', 'poly', 'metal', 'contact'];
+let cursorColors = ['#9400D3', '#32CD32', '#ff0000', '#00FFFF', '#cccccc', '#d0a020',];
+let cursorNames = ['pdiff', 'ndiff', 'poly', 'metal', 'contact',];
 let cursorColorIndex = PDIFF;
 let cursorColor = cursorColors[cursorColorIndex];
 
 // Objects to represent the coordinates of the inputs (A, B, C, D, ...)
 // and the output (Y, X, W, V, ...).
-let A = {x: 2, y: 8};
-let B = {x: 2, y: 12};
-let C = {x: 2, y: 16};
-let D = {x: 2, y: 20};
-let Y = {x: 26, y: 14};
+let A = {x: 2, y: 8,};
+let B = {x: 2, y: 12,};
+let C = {x: 2, y: 16,};
+let D = {x: 2, y: 20,};
+let Y = {x: 26, y: 14,};
 
-let inputs = [A, B, C, D];
-let outputs  = [Y];
+let inputs = [A, B, C, D,];
+let outputs  = [Y,];
 
 // Netlist is a list of nets.
 // Each net is a Set of cells.
@@ -291,12 +314,13 @@ for(let ii = 0; ii < outputs.length; ii++) {
     outputNets.push(new Net(String.fromCharCode(89 - ii), false, false, true));
 }
 
+/* jshint latedef: nofunc */
+
 function computeOutput(inputVals, outputNode) {
     'use strict';
     let pmosOut;
     let nmosOut;
     let out;
-    let firstLevel;
 
     function mapNodes(node1, node2, isPath) {
         if(pathExists(node1, node2) !== undefined && pathExists(node2, node1) !== null) {
@@ -306,7 +330,7 @@ function computeOutput(inputVals, outputNode) {
         nodeNodeMap[graph.getIndexByNode(node1)][graph.getIndexByNode(node2)] = isPath;
         nodeNodeMap[graph.getIndexByNode(node2)][graph.getIndexByNode(node1)] = isPath;
 
-        if(isPath === null) return;
+        if(isPath === null) { return; }
 
         // Map the path to node2 as false for all nodes mapped to node1.
         for(let ii = 0; ii < nodeNodeMap.length; ii++) {
@@ -358,14 +382,6 @@ function computeOutput(inputVals, outputNode) {
             }
         }
 
-        // Return if this is not the first level and the node is vddNode or gndNode.
-        // The rail nodes won't play nice with the rest of this.
-        if(!firstLevel && node.isSupply) {
-            return false;
-        }
-
-        firstLevel = false;
-
         // Recurse on all edges.
         let edges = node.getEdges();
         for(let ii = 0; ii < edges.length; ii++) {
@@ -392,7 +408,7 @@ function computeOutput(inputVals, outputNode) {
         if(gateNet.isInput) {
             let inputNum = node.getName().charCodeAt(0) - 65;
           
-						/*jslint bitwise: true */
+            /*jslint bitwise: true */
             let evalInput = !!((inputVals >> inputNum) & 1);
           	/*jslint bitwise: false */
           
@@ -424,7 +440,6 @@ function computeOutput(inputVals, outputNode) {
     }
 
     // Get pmos output.
-    firstLevel = true;
     nodeNodeMap.length = 0;
     for(let ii = 0; ii < graph.getNumNodes(); ii++) {
         nodeNodeMap[ii] = [];
@@ -433,7 +448,6 @@ function computeOutput(inputVals, outputNode) {
     pmosOut = computeOutputRecursive(vddNode, outputNode) ? 1 : "Z";
 
     // Get nmos output.
-    firstLevel = true;
     nodeNodeMap.length = 0;
     for(let ii = 0; ii < graph.getNumNodes(); ii++) {
         nodeNodeMap[ii] = [];
@@ -485,33 +499,9 @@ function buildTruthTable() {
         inputVals[ii] = tableInputRow;
     }
 
-    let outstr = "";
-
     // Header
     for(let jj = inputVals[0].length - 1; jj >= 0; jj--) {
-        outstr += String.fromCharCode(65 + jj) + " ";
         header[inputVals[0].length - 1 - jj] = String.fromCharCode(65 + jj);
-    }
-    outstr += " |";
-    for(let jj = 0; jj < outputVals[0].length; jj++) {
-        outstr += " " + String.fromCharCode(89 - jj);
-    }
-    outstr += "\n";
-    for(let jj = 0; jj <= inputVals[0].length + outputVals[0].length; jj++) {
-        outstr += "--";
-    }
-    outstr += "\n";
-
-    // Contents
-    for(let ii = 0; ii < inputVals.length; ii++) {
-        for(let jj = inputVals[ii].length - 1; jj >= 0; jj--) {
-            outstr += inputVals[ii][jj] + " ";
-        }
-        outstr += " |";
-        for(let jj = 0; jj < outputVals[ii].length; jj++) {
-            outstr += " " + outputVals[ii][jj];
-        }
-        outstr += "\n";
     }
 
     // Merge input and output into one table (input on the left, output on the right.)
@@ -581,7 +571,7 @@ function makeLayeredGrid(width, height) {
         for (let jj = 0; jj < height; jj++) {
             grid[ii][jj] = new Array(cursorColors.length);
             for (let kk = 0; kk < cursorColors.length; kk++) {
-                grid[ii][jj][kk] = {isSet: false, x: ii, y: jj, layer: kk};
+                grid[ii][jj][kk] = {isSet: false, x: ii, y: jj, layer: kk,};
             }
         }
     }
@@ -603,7 +593,7 @@ function resizeCanvas() {
 function drawGrid(size) {
   	'use strict';
     // Check if gridCanvas is defined.
-    if (gridCanvas == undefined) {
+    if (gridCanvas === undefined) {
         gridCanvas = document.createElement('canvas');
         document.body.appendChild(gridCanvas);
     }
@@ -645,31 +635,70 @@ function drawGrid(size) {
     }
 }
 
-// Set the nets.
-function setNets() {
-  	'use strict';
-    // Create a graph object.
-    graph.clear();
+// Map a function to every transistor terminal.
+function loopThroughTransistors(funct) {
+  'use strict';
+  let terms = ["term1", "term2", "gate",];
+               let transistorLists = [nmos, pmos,];
+  
+  for(let ii = 0; ii < transistorLists.length; ii++) {
+    let iterator = transistorLists[ii].values();
+    
+    for(let transistor = iterator.next(); !transistor.done; transistor = iterator.next()) {
+      let transistorCell = transistor.value;
+      let transistorNode = graph.getNode(transistorCell);
+      
+      for(let jj = 0; jj < terms.length; jj++) {
+        funct(transistorCell, transistorNode, terms[jj]);
+      }
+    }
+  }
+}
 
+// Clear necessary data structures in preparation for recomputation.
+function clearCircuit() {
+    'use strict';
+      // Create a graph object.
+      graph.clear();
+  
+      // Clear the net sets.
+      netVDD.clear();
+      netGND.clear();
+      nmos.clear();
+      pmos.clear();
+}
+
+// Push all terminal nets to the netlist.
+function resetNetlist() {
+    'use strict';
     // Clear the netlist.
     netlist.length = 0;
 
-    // Clear the net sets.
-    netVDD.clear();
-    netGND.clear();
-    nmos.clear();
-    pmos.clear();
+    // Add all terminal nets.
+    netlist.push(netVDD);
+    netlist.push(netGND);
+    for(let ii = 0; ii < inputNets.length; ii++) {
+        netlist.push(inputNets[ii]);
+    }
+    for(let ii = 0; ii < outputNets.length; ii++) {
+        netlist.push(outputNets[ii]);
+    }
+}
+
+// Set the nets.
+function setNets() {
+  	'use strict';
+		clearCircuit();
+  
     for(let ii = 0; ii < inputNets.length; ii++)  { inputNets[ii].clear(); }
     for(let ii = 0; ii < outputNets.length; ii++) { outputNets[ii].clear(); }
 
     // Add the VDD and GND nets.
     // Loop through every VDD cell and add to the VDD net.
     setRecursively(layeredGrid[railStartX][VDD_y][METAL1], netVDD);
-    netlist.push(netVDD);
 
     // Loop through every GND cell and add to the GND net.
     setRecursively(layeredGrid[railStartX][GND_y][METAL1], netGND);
-    netlist.push(netGND);
     
     // Loop through the terminals and set their respective nets.
     for(let ii = 0; ii < numLayers; ii++) {
@@ -684,12 +713,8 @@ function setNets() {
             }
         }
     }
-    for(let ii = 0; ii < inputNets.length; ii++) {
-        netlist.push(inputNets[ii]);
-    }
-    for(let ii = 0; ii < outputNets.length; ii++) {
-        netlist.push(outputNets[ii]);
-    }
+    
+    resetNetlist();
 
     // Add rail nodes to the graph.
     vddNode = graph.addNode(layeredGrid[railStartX][VDD_y][METAL1]);
@@ -707,25 +732,6 @@ function setNets() {
         outputNets[ii].addNode(outputNodes[ii]);
     }
 
-    // Map a function to every transistor terminal.
-    function loopThroughTransistors(funct) {
-        let terms = ["term1", "term2", "gate"];
-        let transistorLists = [nmos, pmos];
-
-        for(let ii = 0; ii < transistorLists.length; ii++) {
-            let iterator = transistorLists[ii].values();
-
-            for(let transistor = iterator.next(); !transistor.done; transistor = iterator.next()) {
-                let transistorCell = transistor.value;
-                let transistorNode = graph.getNode(transistorCell);
-
-                for(let jj = 0; jj < terms.length; jj++) {
-                    funct(transistorCell, transistorNode, terms[jj]);
-                }
-            }
-        }
-    }
-
     // Each nmos and pmos represents a relation between term1 and term2.
     // If term1 is not in any of the nets,
     // then create a new net and add term1 to it.
@@ -733,7 +739,7 @@ function setNets() {
     // Loop only through "term1" and "term2" for both transistor types.
     loopThroughTransistors(function(transistor, _, term) {
         // Skip for the gate terminal.
-        if(term === "gate") return;
+        if(term === "gate") { return; }
 
         let net = new Net("?", false, false, false);
 
@@ -770,14 +776,14 @@ function setNets() {
             transistor[term] = net;
             // Gates aren't nodes.
             // The transistors themselves are the nodes, as are VDD, GND, and all outputs.
-            if(term !== "gate") net.addNode(graph.getNode(transistor));
+            if(term !== "gate") { net.addNode(graph.getNode(transistor)); }
         }
     });
 
     // Loop through pmos/nmos and find every pmos/nmos that shares a net (on term1 or term2).
     loopThroughTransistors(function(_, transistor, termA) {
         // Skip for the gate terminal.
-        if(termA === "gate") return;
+        if(termA === "gate") { return; }
 
         let net = transistor.getCell()[termA];
 
@@ -800,10 +806,8 @@ function setNets() {
 
         // Loop through iterator2 to find all other transistors that share a net.
         loopThroughTransistors(function(_, transistor2, termB) {
-            // Skip for the gate terminal.
-            if(termB === "gate") return;
-
-            if(transistor === transistor2) { return; }
+            // Skip for the gate terminal or self-comparison.
+            if(termB === "gate" || transistor === transistor2) { return; }
 
             if(transistor2.getCell()[termB] !== undefined) {
                 if(transistor.getCell()[termA] === transistor2.getCell()[termB]) {
@@ -881,25 +885,6 @@ function setRecursively(cell, net) {
         return false;
     }
 
-    // Check the cell for a transistor.
-    if(checkTransistor(cell, NDIFF, nmos)) return;
-    if(checkTransistor(cell, PDIFF, pmos)) return;
-
-    // Add the cell to the net.
-    net.addCell(cell);
-
-    // If CONTACT is set, add add all layers to the net.
-    if(layeredGrid[cell.x][cell.y][CONTACT].isSet) {
-        for (let ii = 0; ii < numLayers; ii++) {
-            if(layeredGrid[cell.x][cell.y][ii].isSet) {
-                if(net.containsCell(layeredGrid[cell.x][cell.y][ii]) === false) {
-                    net.addCell(layeredGrid[cell.x][cell.y][ii]);
-                    setRecursively(layeredGrid[cell.x][cell.y][ii], net);
-                }
-            }
-        }
-    }
-
     // For each layer of the cell in the net, recurse with all adjacent cells in the layer.
     // Generic function for the above code.
     function setAdjacent(deltaX, deltaY) {
@@ -910,13 +895,31 @@ function setRecursively(cell, net) {
         }
     }
 
+    // Check the cell for a transistor.
+    if(checkTransistor(cell, NDIFF, nmos)) { return; }
+    if(checkTransistor(cell, PDIFF, pmos)) { return; }
+
+    // Add the cell to the net.
+    net.addCell(cell);
+
+    // If CONTACT is set, add add all layers to the net.
+    if(layeredGrid[cell.x][cell.y][CONTACT].isSet) {
+        for (let ii = 0; ii < numLayers; ii++) {
+            if(!layeredGrid[cell.x][cell.y][ii].isSet) { continue; }
+            if(net.containsCell(layeredGrid[cell.x][cell.y][ii]) === false) {
+                net.addCell(layeredGrid[cell.x][cell.y][ii]);
+                setRecursively(layeredGrid[cell.x][cell.y][ii], net);
+            }
+        }
+    }
+
     // Check the cells above and below.
-    if(cell.y > 0) setAdjacent(0, -1);
-    if(cell.y < gridsize - 1) setAdjacent(0, 1);
+    if(cell.y > 0) { setAdjacent(0, -1); }
+    if(cell.y < gridsize - 1) { setAdjacent(0, 1); }
 
     // Check the cells to the left and right.
-    if(cell.x > 0) setAdjacent(-1, 0);
-    if(cell.x < gridsize - 1) setAdjacent(1, 0);
+    if(cell.x > 0) { setAdjacent(-1, 0); }
+    if(cell.x < gridsize - 1) { setAdjacent(1, 0); }
 }
 
 // Initialize everything
@@ -1036,7 +1039,7 @@ function saveCurrentState() {
     lastSaveState = saveState;
 
     // If we've reached the max save state, delete the oldest one.
-    if (maxSaveState == saveState) {
+    if (maxSaveState === saveState) {
         localStorage.removeItem('layeredGrid' + firstSaveState);
         localStorage.removeItem('canvas' + firstSaveState);
 
@@ -1088,18 +1091,14 @@ function clearIfPainted(clientX, clientY) {
     let anyLayerSet = false;
 
     // Ignore if not inside the canvas
-    if (clientX > canvas.offsetLeft + cellWidth &&
-        clientX < canvas.offsetLeft + canvas.width - cellWidth &&
-        clientY > canvas.offsetTop + cellHeight &&
-        clientY < canvas.offsetTop + canvas.height - cellHeight)
-    {
+    if (inBounds({clientX: clientX, clientY: clientY,}, canvas)) {
         let x = Math.floor((clientX - canvas.offsetLeft - cellWidth) / cellWidth);
         let y = Math.floor((clientY - canvas.offsetTop - cellHeight) / cellHeight);
 
         // Erase all layers of the cell.
         for (let ii = 0; ii < cursorColors.length; ii++) {
             if (layeredGrid[x][y][ii].isSet) {
-                if(!anyLayerSet) saveCurrentState();
+                if(!anyLayerSet) { saveCurrentState(); }
                 anyLayerSet = true;
                 layeredGrid[x][y][ii].isSet = false;
             }
@@ -1112,14 +1111,11 @@ function clearIfPainted(clientX, clientY) {
 function getCell(clientX, clientY) {
   	'use strict';
     // Ignore if not inside the canvas
-    if (clientX > canvas.offsetLeft + cellWidth &&
-        clientX < canvas.offsetLeft + canvas.width - cellWidth &&
-        clientY > canvas.offsetTop + cellHeight &&
-        clientY < canvas.offsetTop + canvas.height - cellHeight)
-    {
+    if (inBounds({clientX: clientX, clientY: clientY,}, canvas)) {
+    
         let x = Math.floor((clientX - canvas.offsetLeft - cellWidth) / cellWidth);
         let y = Math.floor((clientY - canvas.offsetTop - cellHeight) / cellHeight);
-        return {x: x, y: y};
+        return {x: x, y: y,};
     }
     return null;
 }
@@ -1169,6 +1165,17 @@ function refreshTruthTable(table) {
     tableDiv.appendChild(tableElement);
 }
 
+function inBounds(event) {
+    'use strict';
+    let x = event.clientX;
+    let y = event.clientY;
+
+    return x > canvas.offsetLeft + cellWidth && 
+            x < canvas.offsetLeft + canvas.width - cellWidth &&
+            y > canvas.offsetTop + cellHeight &&
+            y < canvas.offsetTop + canvas.height - cellHeight;
+}
+
 window.onload = function() {
   	'use strict';
     // Clear local storage
@@ -1206,17 +1213,6 @@ window.onload = function() {
 
     refreshCanvas();
 
-    function inBounds(event) {
-  		'use strict';
-        let x = event.clientX;
-        let y = event.clientY;
-
-        return x > canvas.offsetLeft + cellWidth && 
-               x < canvas.offsetLeft + canvas.width - cellWidth &&
-               y > canvas.offsetTop + cellHeight &&
-               y < canvas.offsetTop + canvas.height - cellHeight;
-    }
-
     // Note the grid coordinates when the left mouse button is pressed.
     // Store the m in startX and startY.
     window.addEventListener("mousedown", function(event) {
@@ -1242,32 +1238,26 @@ window.onload = function() {
                     let endX = Math.floor((event.clientX - canvas.offsetLeft - cellWidth) / cellWidth);
                     let endY = Math.floor((event.clientY - canvas.offsetTop - cellHeight) / cellHeight);
 
-                    // If the mouse moved more horizontally than vertically,
-                    // draw or delete a horizontal line.
-                    if (Math.abs(endX - startX) > Math.abs(endY - startY)) {
-                        for (let ii = Math.min(startX, endX); ii <= Math.max(startX, endX); ii++) {
-                            if(event.button === 0) {
+                    // For primary (i.e. left) mouse button:
+                    // If the mouse moved more horizontally than vertically, draw a horizontal line.
+                    if(event.button === 0) {
+                        if (Math.abs(endX - startX) > Math.abs(endY - startY)) {
+                            for (let ii = Math.min(startX, endX); ii <= Math.max(startX, endX); ii++) {
                                 layeredGrid[ii][startY][cursorColorIndex].isSet = true;
-                            } else {
-                                // clear all layers
-                                for(let jj = 0; jj < cursorColors.length; jj++) {
-                                    layeredGrid[ii][startY][jj].isSet = false;
-                                }
                             }
                         }
-                    }
-                    // If the mouse moved more vertically than horizontally,
-                    // draw or delete a vertical line.
-                    else {
-                        for (let ii = Math.min(startY, endY); ii <= Math.max(startY, endY); ii++) {
-                            if(event.button === 0) {
+                        // If the mouse moved more vertically than horizontally, draw a vertical line.
+                        else {
+                            for (let ii = Math.min(startY, endY); ii <= Math.max(startY, endY); ii++) {
                                 layeredGrid[startX][ii][cursorColorIndex].isSet = true;
                             }
-                            else {
-                                // clear all layers
-                                for(let jj = 0; jj < cursorColors.length; jj++) {
-                                    layeredGrid[startX][ii][jj].isSet = false;
-                                }
+                        }
+                    } else {
+                        // For secondary (i.e. right) mouse button:
+                        // Delete a rectangle of squares
+                        for (let ii = Math.min(startX, endX); ii <= Math.max(startX, endX); ii++) {
+                            for (let jj = Math.min(startY, endY); jj <= Math.max(startY, endY); jj++) {
+                                layeredGrid[ii][jj][cursorColorIndex].isSet = false;
                             }
                         }
                     }
@@ -1276,7 +1266,7 @@ window.onload = function() {
                 // If there is no cell at the start coordinates, change the cursor color.
                 else {
                     if(event.button === 0) {
-                        if(!layeredGrid[startX][startY][cursorColorIndex].isSet) saveCurrentState();
+                        if(!layeredGrid[startX][startY][cursorColorIndex].isSet) { saveCurrentState(); }
                         layeredGrid[startX][startY][cursorColorIndex].isSet = true;
                     } else {
                         // If in the canvas and over a colored cell, erase it.
@@ -1325,22 +1315,28 @@ window.onload = function() {
                 let topY = Math.min(startY, endY);
                 let bottomY = Math.max(startY, endY);
 
-                // If the mouse moved more horizontally than vertically,
-                // draw a horizontal line.
-                if (rightX - leftX > bottomY - topY) {
-                    for (let ii = leftX; ii <= rightX; ii++) {
-                        // If primary clicking, draw a line in the current layer.
-                        // If secondary clicking, draw the DELETE line.
-                        layeredGrid[ii][startY][event.buttons === 1 ? cursorColorIndex : DELETE].isSet = true;
+                // Primary mouse button (i.e. left click)
+                if(event.buttons === 1) {
+                    // If the mouse moved more horizontally than vertically,
+                    // draw a horizontal line.
+                    if (rightX - leftX > bottomY - topY) {
+                        for (let ii = leftX; ii <= rightX; ii++) {
+                            layeredGrid[ii][startY][cursorColorIndex].isSet = true;
+                        }
                     }
-                }
-                // If the mouse moved more vertically than horizontally,
-                // draw a vertical line.
-                else {
-                    for (let ii = topY; ii <= bottomY; ii++) {
-                        // If primary clicking, draw a line in the current layer.
-                        // If secondary clicking, draw the DELETE line.
-                        layeredGrid[startX][ii][event.buttons === 1 ? cursorColorIndex : DELETE].isSet = true;
+                    // If the mouse moved more vertically than horizontally,
+                    // draw a vertical line.
+                    else {
+                        for (let ii = topY; ii <= bottomY; ii++) {
+                            layeredGrid[startX][ii][cursorColorIndex].isSet = true;
+                        }
+                    }
+                } else {
+                    // Secondary mouse button (i.e. right click)
+                    for (let ii = leftX; ii <= rightX; ii++) {
+                        for (let jj = topY; jj <= bottomY; jj++) {
+                            layeredGrid[ii][jj][DELETE].isSet = true;
+                        }
                     }
                 }
                 refreshCanvas();
@@ -1372,7 +1368,7 @@ window.onload = function() {
         // Input terminal key listeners.
         if ((event.keyCode >= 65) && (event.keyCode < 65 + inputs.length)) {
             let cell = getCell(currentX, currentY);
-            if (cell != null && !event.ctrlKey) {
+            if (cell !== null && !event.ctrlKey) {
                 // First, unset the CONTACT layer at the old coordinates.
                 layeredGrid[inputs[event.keyCode - 65].x][inputs[event.keyCode - 65].y][CONTACT].isSet = false;
                 // Then, set the new coordinates.
@@ -1386,7 +1382,7 @@ window.onload = function() {
         if ((event.keyCode <= 89) && (event.keyCode > 89 - outputs.length)) {
             // Skip if CTRL is pressed.
             let cell = getCell(currentX, currentY);
-            if (cell != null && !event.ctrlKey) {
+            if (cell !== null && !event.ctrlKey) {
                 // First, unset the CONTACT layer at the old coordinates.
                 layeredGrid[outputs[89 - event.keyCode].x][outputs[89 - event.keyCode].y][CONTACT].isSet = false;
                 // Then, set the new coordinates.
@@ -1402,7 +1398,7 @@ window.onload = function() {
     // Only change dark/light mode on keyup to avoid seizure-inducing flashes from holding down space.
     window.addEventListener("keyup", function(event) {
         // Toggle dark mode by pressing space
-        if (event.keyCode == 32) {
+        if (event.keyCode === 32) {
             darkMode = !darkMode;
             refreshCanvas();
         }
