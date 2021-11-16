@@ -10,7 +10,7 @@ For (professional ⋁ commercial ⋁ institutional) use, please contact: [nick.o
 A proper source-available or open-source license will be added at some point.
 
 ## Known Bugs
-* Clicking on right edge and dragging behaves as if clicked at (1,1)
+* ~~Clicking on right edge and dragging behaves as if clicked at (1,1)~~ *Resolved 2021/11/17*
 
 ## Feature Wishlist
 * Arbitrary number of I/O.
