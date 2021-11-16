@@ -1,3 +1,19 @@
+/***************************************************************************************************
+ * 
+ * ## Legal Stuff
+ * All rights are reserved by Nick Overacker.
+ *
+ * Free for (personal ∧ non-professional ∧ non-commercial) use.
+ * For (professional ⋁ commercial ⋁ institutional) use, please contact: nick.overacker@okstate.edu
+ *
+ * ## Stipulations for updates
+ *    - All builds must pass JSHint with no warnings (https://jshint.com/)
+ *      - Only the bitwise tag may be disabled, and only on a line-by-line basis.
+ *    - All builds must pass testbench stored at ./testbench.js
+ *      - The testbench may need to be modified for some breaking changes (e.g., new layers)
+ * 
+ **************************************************************************************************/
+
 /* jshint bitwise: true */
 /* jshint curly: true */
 /* jshint eqeqeq: true */
