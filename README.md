@@ -26,3 +26,10 @@ A proper source-available or open-source license will be added at some point.
 * Draw CMOS circuit schematic corresponding to the painted topology.
 * More metal layers.
 * Export netlist for use in electronics design software.
+
+## Absolute Pie in the Sky
+* Allow users to save designs, and use their outputs as inputs to other designs to produce complex, modular circuitry.
+* Generate Magic files (todo: check legality) from design for a given technology.
+* Nobel Peace Prize
+* Various accolades
+* Knowing that I spelled "accolades" correctly (I don't feel like Googling it)
