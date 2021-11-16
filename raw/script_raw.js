@@ -1223,6 +1223,11 @@ window.onload = function() {
                 startX = Math.floor((event.clientX - canvas.offsetLeft - cellWidth) / cellWidth);
                 startY = Math.floor((event.clientY - canvas.offsetTop - cellHeight) / cellHeight);
             }
+            else
+            {
+                startX = -1;
+                startY = -1;
+            }
         }
     });
 
@@ -1300,6 +1305,11 @@ window.onload = function() {
             // Ignore if not inside the canvas
             if (inBounds(event))
             {
+                if(startX === -1 || startY === -1) {
+                    startX = currentX;
+                    startY = currentY;
+                }
+
                 if(!dragging) {
                     dragging = true;
                     saveCurrentState();
