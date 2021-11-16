@@ -25,7 +25,7 @@
 /* jshint maxcomplexity: 16 */ // Challenge: Reduce to 10.
 /* jshint maxdepth: 7 */       // Challenge: Reduce to 4.
 /* jshint maxparams: 4 */
-/* jshint maxstatements: 46 */ // Challenge: Reduce to 30.
+/* jshint maxstatements: 30 */
 /* jshint noarg: true */
 /* jshint nocomma: false */
 /* jshint nonbsp: true */
@@ -938,6 +938,42 @@ function setRecursively(cell, net) {
     if(cell.x < gridsize - 1) { setAdjacent(1, 0); }
 }
 
+function decorateContact(x,y) {
+    'use strict';
+    ctx.fillStyle = "#000000";
+    ctx.beginPath();
+    ctx.moveTo(x * cellWidth + cellWidth + 2, y * cellHeight - 1);
+    ctx.lineTo(x * cellWidth, y * cellHeight + cellHeight + 1);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x * cellWidth + cellWidth + 2, y * cellHeight + cellHeight + 1);
+    ctx.lineTo(x * cellWidth, y * cellHeight - 2);
+    ctx.stroke();
+}
+
+function drawLabels() {
+    'use strict';
+    // Draw labels on the canvas above each input and output.
+    ctx.font = "bold 18px Arial";
+    ctx.fillStyle = darkMode ? "#ffffff" : "#000000";
+    for(let ii = 0; ii < inputs.length; ii++) {
+        ctx.fillText(String.fromCharCode(65 + ii),
+            cellWidth * (inputs[ii].x + 1.5),
+            cellHeight * (inputs[ii].y + 0.75));
+    }
+    for(let ii = 0; ii < outputs.length; ii++) {
+        ctx.fillText(String.fromCharCode(89 - ii),
+            cellWidth * (outputs[ii].x + 1.5),
+            cellHeight * (outputs[ii].y + 0.75));
+    }
+
+    // Draw a label on top of the VDD and GND rails.
+    ctx.font = "bold 18px Arial";
+    ctx.fillStyle = "#000000";
+    ctx.fillText("VDD", cellWidth * 3, cellHeight * (VDD_y + 1.75));
+    ctx.fillText("GND", cellWidth * 3, cellHeight * (GND_y + 1.75));
+}
+
 // Initialize everything
 function refreshCanvas() {
   	'use strict';
@@ -977,15 +1013,7 @@ function refreshCanvas() {
                 // For the last layer, fill each filled cell with a cross.
                 if (layer === CONTACT) {
                     if (layeredGrid[ii-1][jj-1][layer].isSet) {
-                        ctx.fillStyle = "#000000";
-                        ctx.beginPath();
-                        ctx.moveTo(ii * cellWidth + cellWidth + 2, jj * cellHeight - 1);
-                        ctx.lineTo(ii * cellWidth, jj * cellHeight + cellHeight + 1);
-                        ctx.stroke();
-                        ctx.beginPath();
-                        ctx.moveTo(ii * cellWidth + cellWidth + 2, jj * cellHeight + cellHeight + 1);
-                        ctx.lineTo(ii * cellWidth, jj * cellHeight - 2);
-                        ctx.stroke();
+                        decorateContact(ii, jj);
                     }
                 }
 
@@ -1011,25 +1039,7 @@ function refreshCanvas() {
     // set the outer border of the canvas to the cursor color
     drawBorder();
 
-    // Draw labels on the canvas above each input and output.
-    ctx.font = "bold 18px Arial";
-    ctx.fillStyle = darkMode ? "#ffffff" : "#000000";
-    for(let ii = 0; ii < inputs.length; ii++) {
-        ctx.fillText(String.fromCharCode(65 + ii),
-            cellWidth * (inputs[ii].x + 1.5),
-            cellHeight * (inputs[ii].y + 0.75));
-    }
-    for(let ii = 0; ii < outputs.length; ii++) {
-        ctx.fillText(String.fromCharCode(89 - ii),
-            cellWidth * (outputs[ii].x + 1.5),
-            cellHeight * (outputs[ii].y + 0.75));
-    }
-
-    // Draw a label on top of the VDD and GND rails.
-    ctx.font = "bold 18px Arial";
-    ctx.fillStyle = "#000000";
-    ctx.fillText("VDD", cellWidth * 3, cellHeight * (VDD_y + 1.75));
-    ctx.fillText("GND", cellWidth * 3, cellHeight * (GND_y + 1.75));
+    drawLabels();
 
     drawGrid(gridsize); // Not sure why but gotta draw this twice.
 }
@@ -1192,6 +1202,26 @@ function inBounds(event) {
             y < canvas.offsetTop + canvas.height - cellHeight;
 }
 
+function initTruthTable() {
+    'use strict';
+    // Add a div to one side to add the truth table.
+    let truthTableDiv = document.createElement("div");
+    truthTableDiv.id = "truthTable";
+    document.body.appendChild(truthTableDiv);
+    // Fix the size and position of the truth table div.
+    truthTableDiv.style.width = "300px";
+    truthTableDiv.style.height = "100%";
+    truthTableDiv.style.position = "absolute";
+    truthTableDiv.style.top = "0";
+    truthTableDiv.style.right = "0";
+    truthTableDiv.style.backgroundColor = darkMode ? "#333" : "#eee";
+    truthTableDiv.style.overflow = "auto";
+    // Set the font color in the table.
+    truthTableDiv.style.color = darkMode ? "#eee" : "#333";
+    // Center text alignment
+    truthTableDiv.style.textAlign = "center";
+}
+
 window.onload = function() {
   	'use strict';
     // Clear local storage
@@ -1210,24 +1240,9 @@ window.onload = function() {
     ctx = canvas.getContext("2d");
     layeredGrid = makeLayeredGrid(gridsize, gridsize);
 
-    // Add a div to one side to add the truth table.
-    let truthTableDiv = document.createElement("div");
-    truthTableDiv.id = "truthTable";
-    document.body.appendChild(truthTableDiv);
-    // Fix the size and position of the truth table div.
-    truthTableDiv.style.width = "300px";
-    truthTableDiv.style.height = "100%";
-    truthTableDiv.style.position = "absolute";
-    truthTableDiv.style.top = "0";
-    truthTableDiv.style.right = "0";
-    truthTableDiv.style.backgroundColor = darkMode ? "#333" : "#eee";
-    truthTableDiv.style.overflow = "auto";
-    // Set the font color in the table.
-    truthTableDiv.style.color = darkMode ? "#eee" : "#333";
-    // Center text alignment
-    truthTableDiv.style.textAlign = "center";
+    initTruthTable();
 
-    refreshCanvas();
+    //refreshCanvas();
 
     // Note the grid coordinates when the left mouse button is pressed.
     // Store the m in startX and startY.
