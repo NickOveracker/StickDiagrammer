@@ -4,6 +4,7 @@
 All rights are reserved by Nick Overacker.
 
 Free for (personal ∧ non-professional ∧ non-commercial) use.
+
 For (professional ⋁ commercial ⋁ institutional) use, please contact: [nick.overacker@okstate.edu](mailto:nick.overacker@okstate.edu)
 
 A proper source-available or open-source license will be added at some point.
