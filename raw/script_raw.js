@@ -6,10 +6,10 @@
 /* jshint freeze: true */
 /* jshint futurehostile: true */
 /* jshint leanswitch: true */
-/* jshint maxcomplexity: 15 */
-/* jshint maxdepth: 6 */
+/* jshint maxcomplexity: 16 */ // Challenge: Reduce to 10.
+/* jshint maxdepth: 7 */       // Challenge: Reduce to 4.
 /* jshint maxparams: 4 */
-/* jshint maxstatements: 46 */
+/* jshint maxstatements: 46 */ // Challenge: Reduce to 30.
 /* jshint noarg: true */
 /* jshint nocomma: false */
 /* jshint nonbsp: true */
