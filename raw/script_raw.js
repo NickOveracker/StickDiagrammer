@@ -1306,8 +1306,9 @@ window.onload = function() {
             if (inBounds(event))
             {
                 if(startX === -1 || startY === -1) {
-                    startX = currentX;
-                    startY = currentY;
+                    let temp = getCell(currentX, currentY);
+                    startX = temp.x;
+                    startY = temp.y;
                 }
 
                 if(!dragging) {
