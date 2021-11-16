@@ -1257,7 +1257,9 @@ window.onload = function() {
                         // Delete a rectangle of squares
                         for (let ii = Math.min(startX, endX); ii <= Math.max(startX, endX); ii++) {
                             for (let jj = Math.min(startY, endY); jj <= Math.max(startY, endY); jj++) {
-                                layeredGrid[ii][jj][cursorColorIndex].isSet = false;
+                                for(let kk = 0; kk < layeredGrid[ii][jj].length; kk++) {
+                                    layeredGrid[ii][jj][kk].isSet = false;
+                                }
                             }
                         }
                     }
@@ -1412,4 +1414,6 @@ window.onload = function() {
         refreshTruthTable(buildTruthTable());
     };
     document.getElementById("truthTable").appendChild(button);
+
+    setInterval(refreshCanvas, 500);
 };
