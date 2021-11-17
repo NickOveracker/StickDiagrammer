@@ -422,18 +422,13 @@ function computeOutput(inputVals, outputNode) {
         let gateNet = node.getCell().gate;
 
         if (gateNet.isInput) {
+            /*jslint bitwise: true */
             let inputNum = node.getName().charCodeAt(0) - 65;
 
-            /*jslint bitwise: true */
-            let evalInput = !!((inputVals >> inputNum) & 1);
-            /*jslint bitwise: false */
-
             // Pass-through positive for NMOS.
-            if (node.isNmos) {
-                return evalInput;
-            } else {
-                return !evalInput;
-            }
+            let evalInput = !!((inputVals >> inputNum) & 1);
+            return !(node.isNmos ^ evalInput);
+            /*jslint bitwise: false */
         }
 
         // Otherwise, recurse and see if this is active.
