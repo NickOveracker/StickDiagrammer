@@ -939,7 +939,7 @@ function decorateContact(x, y) {
     'use strict';
     ctx.fillStyle = "#000000";
     ctx.beginPath();
-    ctx.moveTo(x * cellWidth + cellWidth + 2, y * cellHeight - 1);
+    ctx.moveTo(x * cellWidth + cellWidth + 1, y * cellHeight - 1);
     ctx.lineTo(x * cellWidth, y * cellHeight + cellHeight + 1);
     ctx.stroke();
     ctx.beginPath();
@@ -983,7 +983,7 @@ function refreshCanvas() {
     function drawCell(i, j, layer, isBorder) {
         if (isBorder || layeredGrid[i - 1][j - 1][layer].isSet) {
             ctx.fillStyle = cursorColors[layer];
-            ctx.fillRect(i * cellWidth, j * cellHeight - 1, cellWidth + 2, cellHeight + 2);
+            ctx.fillRect(i * cellWidth, j * cellHeight - 1, cellWidth + 1, cellHeight + 2);
         }
     }
 
@@ -1226,10 +1226,11 @@ function initTruthTable() {
 
 function mapFuncToGrid(bounds, func) {
     'use strict';
-    for (let ii = bounds.left; ii <= bounds.right; ii++) {
-        for (let jj = bounds.top; jj <= bounds.bottom; jj++) {
-            for (let kk = bounds.lowLayer; kk <= bounds.highLayer; kk++) {
-                func(ii, jj, kk);
+    // Layers should be the outer loop to ensure that lower layers are drawn first.
+    for (let layer = bounds.lowLayer; layer <= bounds.highLayer; layer++) {
+        for (let x = bounds.left; x <= bounds.right; x++) {
+            for (let y = bounds.top; y <= bounds.bottom; y++) {
+                func(x, y, layer);
             }
         }
     }
