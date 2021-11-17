@@ -23,7 +23,7 @@
 /* jshint futurehostile: true */
 /* jshint leanswitch: true */
 /* jshint maxcomplexity: 13 */ // Challenge: Reduce to 10.
-/* jshint maxdepth: 5 */       // Challenge: Reduce to 4.
+/* jshint maxdepth: 4 */
 /* jshint maxparams: 4 */
 /* jshint maxstatements: 30 */
 /* jshint noarg: true */
@@ -1005,29 +1005,34 @@ function refreshCanvas() {
     }
 
     // Draw each layer in order.
-    for(let layer = 0; layer < cursorColors.length; layer++) {
-        for (let ii = 1; ii <= gridsize; ii++) {
-            for (let jj = 1; jj <= gridsize; jj++) {
-                drawCell(ii, jj, layer, false);
+    let bounds = {
+        left: 1,
+        right: gridsize,
+        top: 1,
+        bottom: gridsize,
+        lowLayer: 0,
+        highLayer: cursorColors.length - 1,
+    };
 
-                // For the last layer, fill each filled cell with a cross.
-                if (layer === CONTACT) {
-                    if (layeredGrid[ii-1][jj-1][layer].isSet) {
-                        decorateContact(ii, jj);
-                    }
-                }
+    mapFuncToGrid(bounds, function(x, y, layer) {
+        drawCell(x, y, layer, false);
 
-                // Set the terminals of the cell to null.
-                layeredGrid[ii-1][jj-1][NDIFF].term1 = null;
-                layeredGrid[ii-1][jj-1][NDIFF].term2 = null;
-                layeredGrid[ii-1][jj-1][NDIFF].gate  = null;
-
-                layeredGrid[ii-1][jj-1][PDIFF].term1 = null;
-                layeredGrid[ii-1][jj-1][PDIFF].term2 = null;
-                layeredGrid[ii-1][jj-1][PDIFF].gate  = null;
+        // For the last layer, fill each filled cell with a cross.
+        if (layer === CONTACT) {
+            if (layeredGrid[x-1][y-1][layer].isSet) {
+                decorateContact(x, y);
             }
         }
-    }
+
+        // Set the terminals of the cell to null.
+        layeredGrid[x-1][y-1][NDIFF].term1 = null;
+        layeredGrid[x-1][y-1][NDIFF].term2 = null;
+        layeredGrid[x-1][y-1][NDIFF].gate  = null;
+
+        layeredGrid[x-1][y-1][PDIFF].term1 = null;
+        layeredGrid[x-1][y-1][PDIFF].term2 = null;
+        layeredGrid[x-1][y-1][PDIFF].gate  = null;
+    });
     
     // Set dark mode as needed.
     if (darkMode) {
@@ -1237,52 +1242,48 @@ function mouseupHandler(event) {
     'use strict';
     if (event.button === 0 || event.button === 2) {
         // If not between cells 1 and gridsize - 1, undo and return.
-        if (inBounds(event))
-        {
-            if(dragging) {
-                let endX = Math.floor((event.clientX - canvas.offsetLeft - cellWidth) / cellWidth);
-                let endY = Math.floor((event.clientY - canvas.offsetTop - cellHeight) / cellHeight);
-                let bounds = {
-                    left: Math.min(startX, endX),
-                    right: Math.max(startX, endX),
-                    top: Math.min(startY, endY),
-                    bottom: Math.max(startY, endY),
-                    lowLayer: 0,
-                    highLayer: cursorColors.length - 1,
-                };
+        if (dragging && inBounds(event)) {
+            let endX = Math.floor((event.clientX - canvas.offsetLeft - cellWidth) / cellWidth);
+            let endY = Math.floor((event.clientY - canvas.offsetTop - cellHeight) / cellHeight);
+            let bounds = {
+                left: Math.min(startX, endX),
+                right: Math.max(startX, endX),
+                top: Math.min(startY, endY),
+                bottom: Math.max(startY, endY),
+                lowLayer: 0,
+                highLayer: cursorColors.length - 1,
+            };
 
-                // For primary (i.e. left) mouse button:
-                // If the mouse moved more horizontally than vertically, draw a horizontal line.
-                if(event.button === 0) {
-                    if (Math.abs(endX - startX) > Math.abs(endY - startY)) {
-                        bounds.lowLayer = bounds.highLayer = cursorColorIndex;
-                        bounds.bottom = bounds.top;
-                        mapFuncToGrid(bounds, function(x, y, layer) { layeredGrid[x][y][layer].isSet = true; });
-                    }
-                    // If the mouse moved more vertically than horizontally, draw a vertical line.
-                    else {
-                        bounds.lowLayer = bounds.highLayer = cursorColorIndex;
-                        bounds.right = bounds.left;
-                        mapFuncToGrid(bounds, function(x, y, layer) { layeredGrid[x][y][layer].isSet = true; });
-                    }
-                } else {
-                    // For secondary (i.e. right) mouse button:
-                    // Delete a rectangle of squares
-                    mapFuncToGrid(bounds, function(x, y, layer) { layeredGrid[x][y][layer].isSet = false; });
+            // For primary (i.e. left) mouse button:
+            // If the mouse moved more horizontally than vertically, draw a horizontal line.
+            if(event.button === 0) {
+                if (Math.abs(endX - startX) > Math.abs(endY - startY)) {
+                    bounds.lowLayer = bounds.highLayer = cursorColorIndex;
+                    bounds.bottom = bounds.top;
+                    mapFuncToGrid(bounds, function(x, y, layer) { layeredGrid[x][y][layer].isSet = true; });
                 }
+                // If the mouse moved more vertically than horizontally, draw a vertical line.
+                else {
+                    bounds.lowLayer = bounds.highLayer = cursorColorIndex;
+                    bounds.right = bounds.left;
+                    mapFuncToGrid(bounds, function(x, y, layer) { layeredGrid[x][y][layer].isSet = true; });
+                }
+            } else {
+                // For secondary (i.e. right) mouse button:
+                // Delete a rectangle of squares
+                mapFuncToGrid(bounds, function(x, y, layer) { layeredGrid[x][y][layer].isSet = false; });
             }
+        } else if(inBounds(event)) {
             // Just fill in or delete the cell at the start coordinates.
             // If there is no cell at the start coordinates, change the cursor color.
-            else {
-                if(event.button === 0) {
-                    if(!layeredGrid[startX][startY][cursorColorIndex].isSet) { saveCurrentState(); }
-                    layeredGrid[startX][startY][cursorColorIndex].isSet = true;
-                } else {
-                    // If in the canvas and over a colored cell, erase it.
-                    // Otherwise, change the layer.
-                    if(!clearIfPainted(event.clientX, event.clientY)) {
-                        changeLayer();
-                    }
+            if(event.button === 0) {
+                if(!layeredGrid[startX][startY][cursorColorIndex].isSet) { saveCurrentState(); }
+                layeredGrid[startX][startY][cursorColorIndex].isSet = true;
+            } else {
+                // If in the canvas and over a colored cell, erase it.
+                // Otherwise, change the layer.
+                if(!clearIfPainted(event.clientX, event.clientY)) {
+                    changeLayer();
                 }
             }
         }
@@ -1294,6 +1295,70 @@ function mouseupHandler(event) {
 
     dragging = false;
     refreshCanvas();
+}
+
+function mousemoveHandler(event) {
+    'use strict';
+    // Save the current X and Y coordinates.
+    currentX = event.clientX;
+    currentY = event.clientY;
+    
+    // If the mouse is pressed and the mouse is between cells 1 and gridsize - 1,
+    if (event.buttons === 1 || event.buttons === 2) {
+        // Ignore if not inside the canvas
+        if (inBounds(event))
+        {
+            if(startX === -1 || startY === -1) {
+                let temp = getCell(currentX, currentY);
+                startX = temp.x;
+                startY = temp.y;
+            }
+
+            if(!dragging) {
+                dragging = true;
+                saveCurrentState();
+            } else {
+                // Continuously refresh to update the preview line.
+                undo();
+                saveCurrentState();
+            }
+
+            let endX = Math.floor((event.clientX - canvas.offsetLeft - cellWidth) / cellWidth);
+            let endY = Math.floor((event.clientY - canvas.offsetTop - cellHeight) / cellHeight);
+            
+            let bounds = {
+                left:   Math.min(startX, endX),
+                right:  Math.max(startX, endX),
+                top:    Math.min(startY, endY),
+                bottom: Math.max(startY, endY),
+            };
+
+
+            // Primary mouse button (i.e. left click)
+            if(event.buttons === 1) {
+                // If the mouse moved more horizontally than vertically,
+                // draw a horizontal line.
+                if (bounds.right - bounds.left > bounds.bottom - bounds.top) {
+                    bounds.lowLayer = bounds.highLayer = cursorColorIndex;
+                    bounds.bottom = bounds.top;
+                    mapFuncToGrid(bounds, function(x, y, layer) { layeredGrid[x][y][layer].isSet = true; });
+                }
+                // If the mouse moved more vertically than horizontally,
+                // draw a vertical line.
+                else {
+                    bounds.lowLayer = bounds.highLayer = cursorColorIndex;
+                    bounds.right = bounds.left;
+                    mapFuncToGrid(bounds, function(x, y, layer) { layeredGrid[x][y][layer].isSet = true; });
+                }
+            } else {
+                // Secondary mouse button (i.e. right click)
+                // Highlight a rectangle of squares for deletion.
+                bounds.lowLayer = bounds.highLayer = DELETE;
+                mapFuncToGrid(bounds, function(x, y, layer) { layeredGrid[x][y][layer].isSet = true; });
+            }
+            refreshCanvas();
+        }
+    }
 }
 
 window.onload = function() {
@@ -1342,67 +1407,7 @@ window.onload = function() {
     window.addEventListener("mouseup", mouseupHandler);
 
     // Show a preview line when the user is dragging the mouse.
-    window.addEventListener("mousemove", function(event) {
-        // Save the current X and Y coordinates.
-        currentX = event.clientX;
-        currentY = event.clientY;
-        
-        // If the mouse is pressed and the mouse is between cells 1 and gridsize - 1,
-        if (event.buttons === 1 || event.buttons === 2) {
-            // Ignore if not inside the canvas
-            if (inBounds(event))
-            {
-                if(startX === -1 || startY === -1) {
-                    let temp = getCell(currentX, currentY);
-                    startX = temp.x;
-                    startY = temp.y;
-                }
-
-                if(!dragging) {
-                    dragging = true;
-                    saveCurrentState();
-                } else {
-                    // Continuously refresh to update the preview line.
-                    undo();
-                    saveCurrentState();
-                }
-
-                let endX = Math.floor((event.clientX - canvas.offsetLeft - cellWidth) / cellWidth);
-                let endY = Math.floor((event.clientY - canvas.offsetTop - cellHeight) / cellHeight);
-                
-                let leftX = Math.min(startX, endX);
-                let rightX = Math.max(startX, endX);
-                let topY = Math.min(startY, endY);
-                let bottomY = Math.max(startY, endY);
-
-                // Primary mouse button (i.e. left click)
-                if(event.buttons === 1) {
-                    // If the mouse moved more horizontally than vertically,
-                    // draw a horizontal line.
-                    if (rightX - leftX > bottomY - topY) {
-                        for (let ii = leftX; ii <= rightX; ii++) {
-                            layeredGrid[ii][startY][cursorColorIndex].isSet = true;
-                        }
-                    }
-                    // If the mouse moved more vertically than horizontally,
-                    // draw a vertical line.
-                    else {
-                        for (let ii = topY; ii <= bottomY; ii++) {
-                            layeredGrid[startX][ii][cursorColorIndex].isSet = true;
-                        }
-                    }
-                } else {
-                    // Secondary mouse button (i.e. right click)
-                    for (let ii = leftX; ii <= rightX; ii++) {
-                        for (let jj = topY; jj <= bottomY; jj++) {
-                            layeredGrid[ii][jj][DELETE].isSet = true;
-                        }
-                    }
-                }
-                refreshCanvas();
-            }
-        }
-    });
+    window.addEventListener("mousemove", mousemoveHandler);
 
     // When the user right-clicks on a cell in the canvas, erase it.
     // When clicking anywhere else, cycle through cursor colors.
