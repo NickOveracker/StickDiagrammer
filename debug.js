@@ -38,8 +38,10 @@ function printNodeNodeMap() {
 }
 
 // Print a grid with in all cells that are in a given net.
-function printGrid(net, name) {
+function printGrid(netNum) {
     let grid = [];
+    let net = netlist[netNum];
+    let name = "X";
     for(let ii = 0; ii < gridsize; ii++) {
         grid[ii] = [];
         for(let jj = 0; jj < gridsize; jj++) {
