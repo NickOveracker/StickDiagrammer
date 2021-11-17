@@ -1304,6 +1304,9 @@ function mouseupHandler(event) {
         else if (dragging) {
             undo();
         }
+        else if(event.button === 2) {
+            changeLayer();
+        }
     }
 
     dragging = false;
@@ -1436,8 +1439,7 @@ function keyupHandler(event) {
     }
 }
 
-// When the user right-clicks on a cell in the canvas, erase it.
-// When clicking anywhere else, cycle through cursor colors.
+// Don't show a context-menu when right-clicking
 function contextmenuHandler(event) {
     'use strict';
     if (event.button === 2) {
