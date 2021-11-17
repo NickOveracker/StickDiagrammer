@@ -22,7 +22,7 @@
 /* jshint freeze: true */
 /* jshint futurehostile: true */
 /* jshint leanswitch: true */
-/* jshint maxcomplexity: 16 */ // Challenge: Reduce to 10.
+/* jshint maxcomplexity: 13 */ // Challenge: Reduce to 10.
 /* jshint maxdepth: 5 */       // Challenge: Reduce to 4.
 /* jshint maxparams: 4 */
 /* jshint maxstatements: 30 */
