@@ -10,6 +10,9 @@ For (professional ⋁ commercial ⋁ institutional) use, please contact: [nick.o
 A proper source-available or open-source license will be added at some point.
 
 ## Known Bugs
+* Unexpected output when both terminals on one side of an inverter are shorted to VDD or GND.
+* * Short PMOS side to VDD: Output is 11111111. . .
+* * Short NMOS side to GND: Output is 0Z0Z0Z0Z. . .
 * Directly connecting output to input produces output of Z instead of reproducing the input.
 * ~~Directly connecting VDD to GND produces output of Z instead of the correct output X.~~ *Resolved 2021/11/18*
 * ~~Cells adjacent to painted cells are added to the same net, even if they aren't filled in.~~ *Resolved 2021/11/18*
