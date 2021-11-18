@@ -897,7 +897,7 @@ function setRecursively(cell, net) {
     // For each layer of the cell in the net, recurse with all adjacent cells in the layer.
     // Generic function for the above code.
     function setAdjacent(deltaX, deltaY) {
-        if (net.containsCell(layeredGrid[cell.x][cell.y][cell.layer]) && layeredGrid[cell.x][cell.y][cell.layer].isSet) {
+        if (net.containsCell(layeredGrid[cell.x][cell.y][cell.layer]) && layeredGrid[cell.x + deltaX][cell.y + deltaY][cell.layer].isSet) {
             if (net.containsCell(layeredGrid[cell.x + deltaX][cell.y + deltaY][cell.layer]) === false) {
                 setRecursively(layeredGrid[cell.x + deltaX][cell.y + deltaY][cell.layer], net);
             }
