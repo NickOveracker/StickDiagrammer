@@ -834,6 +834,8 @@ function setNets() {
             }
         });
     });
+
+    linkIdenticalNets();
 } // end function (setNets)
 
 function linkIdenticalNets() {
