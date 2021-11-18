@@ -82,7 +82,7 @@ class Graph {
 
     // Add an edge to the graph.
     addEdge(node1, node2) {
-        if (!this.isConnected(node1, node2)) {
+        if (!this.isConnected(node1, node2) && node1 !== node2) {
             let edge = new Edge(node1, node2);
             this.edges.push(edge);
         }
@@ -205,6 +205,14 @@ class Net {
         this.isSupply = isSupply;
         this.isInput = isInput;
         this.isOutput = isOutput;
+    }
+
+    isIdentical(net) {
+        // Two nets are identical if they have the same set of cells.
+        // By design, if two nets share even one cell, then they share all cells.
+        // So, we can just check a single cell.
+        let cell = this.cells.values().next().value;
+        return net.cells.has(cell);
     }
 
     addNode(node) {
@@ -827,6 +835,32 @@ function setNets() {
         });
     });
 } // end function (setNets)
+
+function linkIdenticalNets() {
+    'use strict';
+    function linkNodes(net1, net2) {
+        let nodeIterator1 = net1.getNodes().values();
+        let nodeIterator2 = net2.getNodes().values();
+
+        // Loop through net1's nodes.
+        for (let node1 = nodeIterator1.next(); !node1.done; node1 = nodeIterator1.next()) {
+            // Loop through net2's nodes.
+            for (let node2 = nodeIterator2.next(); !node2.done; node2 = nodeIterator2.next()) {
+                graph.addEdge(node1.value, node2.value);
+            }
+        }
+    }
+    // Loop through every net.
+    for (let ii = 0; ii < netlist.length; ii++) {
+        // Loop through every net again.
+        for (let jj = ii + 1; jj < netlist.length; jj++) {
+            // If the nets are identical, add an edge between them.
+            if (netlist[ii].isIdentical(netlist[jj])) {
+                linkNodes(netlist[ii], netlist[jj]);
+            }
+        }
+    }
+}
 
 // Function to get the net from the netlist that contains a given cell.
 function getNet(cell) {
