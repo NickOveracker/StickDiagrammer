@@ -10,8 +10,8 @@ For (professional ⋁ commercial ⋁ institutional) use, please contact: [nick.o
 A proper source-available or open-source license will be added at some point.
 
 ## Known Bugs
-* Cells adjacent to painted cells are added to the same net, even if they aren't filled in.
 * Directly connecting VDD to GND produces output of Z instead of the correct output X.
+* ~~Cells adjacent to painted cells are added to the same net, even if they aren't filled in.~~ *Resolved 2021/11/18*
 * ~~Lines can be dragged up or left while drawing.~~ *Resolved 2021/11/18*
 * ~~Clicking on right edge and dragging behaves as if clicked at (1,1).~~ *Resolved 2021/11/17*
 
