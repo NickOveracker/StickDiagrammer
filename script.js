@@ -1240,13 +1240,13 @@ function draw(bounds) {
     'use strict';
     if (Math.abs(bounds.endX - startX) > Math.abs(bounds.endY - startY)) {
         bounds.lowLayer = bounds.highLayer = cursorColorIndex;
-        bounds.bottom = bounds.top;
+        bounds.bottom = bounds.top = startY;
         mapFuncToGrid(bounds, function (x, y, layer) { layeredGrid[x][y][layer].isSet = true; });
     }
     // If the mouse moved more vertically than horizontally, draw a vertical line.
     else {
         bounds.lowLayer = bounds.highLayer = cursorColorIndex;
-        bounds.right = bounds.left;
+        bounds.right = bounds.left = startX;
         mapFuncToGrid(bounds, function (x, y, layer) { layeredGrid[x][y][layer].isSet = true; });
     }
 }
@@ -1356,14 +1356,14 @@ function mousemoveHandler(event) {
                 // draw a horizontal line.
                 if (bounds.right - bounds.left > bounds.bottom - bounds.top) {
                     bounds.lowLayer = bounds.highLayer = cursorColorIndex;
-                    bounds.bottom = bounds.top;
+                    bounds.bottom = bounds.top = startY;
                     mapFuncToGrid(bounds, function (x, y, layer) { layeredGrid[x][y][layer].isSet = true; });
                 }
                 // If the mouse moved more vertically than horizontally,
                 // draw a vertical line.
                 else {
                     bounds.lowLayer = bounds.highLayer = cursorColorIndex;
-                    bounds.right = bounds.left;
+                    bounds.right = bounds.left = startX;
                     mapFuncToGrid(bounds, function (x, y, layer) { layeredGrid[x][y][layer].isSet = true; });
                 }
             } else {
