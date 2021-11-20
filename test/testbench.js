@@ -568,6 +568,51 @@ function runTestbench() {
 
         2,
         "ZZZZZZZZZZZZZZZZ",
+
+        /* Direct Inputs */
+        1,
+
+        // Place terminal A
+        function() {
+            inputs[0].x = 8;
+            inputs[0].y = 4;
+        },
+
+        2,
+        "0101010101010101",
+
+        1,
+
+        // Place terminal B
+        function() {
+            inputs[1].x = 20;
+            inputs[1].y = 4;
+        },
+
+        2,
+        "0XX10XX10XX10XX1",
+
+        1,
+
+        // Place terminal C
+        function() {
+            inputs[2].x = 8;
+            inputs[2].y = 24;
+        },
+
+        2,
+        "0XXXXXX10XXXXXX1",
+
+        1,
+
+        // Place terminal D
+        function() {
+            inputs[3].x = 20;
+            inputs[3].y = 24;
+        },
+
+        2,
+        "0XXXXXXXXXXXXXX1",
     ];
 
     /** RUN TESTBENCH **/
