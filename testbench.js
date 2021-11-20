@@ -456,6 +456,92 @@ let events = [
 	
 	2,
     "XXXXXXXXXXXXXXXX",
+
+    /** Various transistor shorts **/
+    // METAL
+    // VDD to PDIFF
+    ["mousedown", {button:  0, clientX: mapX(2),   clientY: mapY(5)}],
+    ["mousemove", {buttons: 1, clientX: mapX(2),   clientY: mapY(3)}],
+    ["mouseup",   {button:  0, clientX: mapX(2),   clientY: mapY(3)}],
+
+    // GND to NDIFF
+    ["mousedown", {button:  0, clientX: mapX(2),   clientY: mapY(25)}],
+    ["mousemove", {buttons: 1, clientX: mapX(2),   clientY: mapY(28)}],
+    ["mouseup",   {button:  0, clientX: mapX(2),   clientY: mapY(28)}],
+    
+    0,
+
+    // CONTACTS
+    ["mousedown", {button:  0, clientX: mapX(29), clientY: mapY(5)}],
+    ["mouseup",   {button:  0, clientX: mapX(29), clientY: mapY(5)}],
+
+    ["mousedown", {button:  0, clientX: mapX(29), clientY: mapY(25)}],
+    ["mouseup",   {button:  0, clientX: mapX(29), clientY: mapY(25)}],
+
+
+    ["mousedown", {button:  0, clientX: mapX(2),  clientY: mapY(5)}],
+    ["mouseup",   {button:  0, clientX: mapX(2),  clientY: mapY(5)}],
+
+    ["mousedown", {button:  0, clientX: mapX(2),  clientY: mapY(25)}],
+    ["mouseup",   {button:  0, clientX: mapX(2),  clientY: mapY(25)}],
+
+    0,
+    
+    // PDIFF
+    ["mousedown", {button:  0, clientX: mapX(2),  clientY: mapY(5)}],
+    ["mousemove", {buttons: 1, clientX: mapX(29), clientY: mapY(5)}],
+    ["mouseup",   {button:  0, clientX: mapX(29), clientY: mapY(5)}],
+    0,
+
+    // NDIFF
+    ["mousedown", {button:  0, clientX: mapX(2),  clientY: mapY(25)}],
+    ["mousemove", {buttons: 1, clientX: mapX(29), clientY: mapY(25)}],
+    ["mouseup",   {button:  0, clientX: mapX(29), clientY: mapY(25)}],
+
+    0,
+
+    // POLY
+    ["mousedown", {button:  0, clientX: mapX(4),  clientY: mapY(4)}],
+    ["mousemove", {buttons: 1, clientX: mapX(4),  clientY: mapY(26)}],
+    ["mouseup",   {button:  0, clientX: mapX(4),  clientY: mapY(26)}],
+	
+	2,
+    "XXXXXXXXXXXXXXXX",
+
+    ["mousedown", {button:  2, clientX: mapX(2),  clientY: mapY(4)}],
+    ["mouseup",   {button:  2, clientX: mapX(2),  clientY: mapY(4)}],
+	
+	2,
+    "XXXXXXXXXXXXXXXX",
+
+	0,
+
+    ["mousedown", {button:  0, clientX: mapX(2),  clientY: mapY(4)}],
+    ["mouseup",   {button:  0, clientX: mapX(2),  clientY: mapY(4)}],
+
+    ["mousedown", {button:  2, clientX: mapX(2),  clientY: mapY(26)}],
+    ["mouseup",   {button:  2, clientX: mapX(2),  clientY: mapY(26)}],
+	
+	2,
+    "XXXXXXXXXXXXXXXX",
+
+    ["mousedown", {button:  0, clientX: mapX(2),  clientY: mapY(26)}],
+    ["mouseup",   {button:  0, clientX: mapX(2),  clientY: mapY(26)}],
+
+    ["mousedown", {button:  2, clientX: mapX(29), clientY: mapY(4)}],
+    ["mouseup",   {button:  2, clientX: mapX(29), clientY: mapY(4)}],
+	
+	2,
+    "X0X0X0X0X0X0X0X0",
+
+    ["mousedown", {button:  0, clientX: mapX(29), clientY: mapY(4)}],
+    ["mouseup",   {button:  0, clientX: mapX(29), clientY: mapY(4)}],
+
+    ["mousedown", {button:  2, clientX: mapX(29), clientY: mapY(26)}],
+    ["mouseup",   {button:  2, clientX: mapX(29), clientY: mapY(26)}],
+	
+	2,
+    "1X1X1X1X1X1X1X1X",
 ];
 
 /** RUN TESTBENCH **/
