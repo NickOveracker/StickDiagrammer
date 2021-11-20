@@ -542,6 +542,31 @@ let events = [
 	
 	2,
     "1X1X1X1X1X1X1X1X",
+
+    /* Various open circuits */
+    ["mousedown", {button:  2, clientX: mapX(2),  clientY: mapY(26)}],
+    ["mouseup",   {button:  2, clientX: mapX(2),  clientY: mapY(26)}],
+
+    ["mousedown", {button:  2, clientX: mapX(29), clientY: mapY(4)}],
+    ["mouseup",   {button:  2, clientX: mapX(29), clientY: mapY(4)}],
+	
+	2,
+    "1Z1Z1Z1Z1Z1Z1Z1Z",
+
+    ["mousedown", {button:  0, clientX: mapX(2),  clientY: mapY(26)}],
+    ["mouseup",   {button:  0, clientX: mapX(2),  clientY: mapY(26)}],
+
+    ["mousedown", {button:  2, clientX: mapX(2),  clientY: mapY(4)}],
+    ["mouseup",   {button:  2, clientX: mapX(2),  clientY: mapY(4)}],
+	
+	2,
+    "Z0Z0Z0Z0Z0Z0Z0Z0",
+
+    ["mousedown", {button:  2, clientX: mapX(2),  clientY: mapY(26)}],
+    ["mouseup",   {button:  2, clientX: mapX(2),  clientY: mapY(26)}],
+
+	2,
+    "ZZZZZZZZZZZZZZZZ",
 ];
 
 /** RUN TESTBENCH **/
