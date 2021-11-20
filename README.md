@@ -10,7 +10,7 @@ For (professional ⋁ commercial ⋁ institutional) use, please contact: [nick.o
 A proper source-available or open-source license will be added at some point.
 
 ## Known Bugs
-* Directly connecting output to input produces output of Z instead of reproducing the input.
+* ~~Directly connecting output to input produces output of Z instead of reproducing the input.~~ *Resolved 2021/11/20*
 * ~~Unexpected output when both terminals on one side of an inverter are shorted to VDD or GND.~~ *Resolved 2021/11/20*
 * * ~~Short PMOS side to VDD: Output is 11111111. . .~~
 * * ~~Short NMOS side to GND: Output is 0Z0Z0Z0Z. . .~~

@@ -345,7 +345,7 @@ function computeOutput(inputVals, outputNode) {
     'use strict';
     let pmosOut;
     let nmosOut;
-    let out;
+    let directInput;
 
     function mapNodes(node1, node2, isPath) {
         if (pathExists(node1, node2) !== undefined && pathExists(node2, node1) !== null) {
@@ -458,6 +458,31 @@ function computeOutput(inputVals, outputNode) {
         return false;
     }
 
+    function reconcileOutput(pOut, nOut, dIn) {
+        let out;
+
+        // Reconcile (nmos and pmos step)
+        if (pOut === "Z") {
+            out = nOut;
+        } else if (nOut === "Z") {
+            out = pOut;
+        } else {
+            out = "X";
+        }
+
+        // Handle direct connection between input and output.
+        if(dIn !== undefined) {
+            if(out === "Z") {
+                out = dIn;
+            }
+            else if(out !== dIn) {
+                out = "X";
+            }
+        }
+		
+		return out;
+    }
+
     // Get pmos output.
     nodeNodeMap.length = 0;
     for (let ii = 0; ii < graph.getNumNodes(); ii++) {
@@ -474,16 +499,22 @@ function computeOutput(inputVals, outputNode) {
     }
     nmosOut = computeOutputRecursive(gndNode, outputNode) ? 0 : "Z";
 
-    // Reconcile.
-    if (pmosOut === "Z") {
-        out = nmosOut;
-    } else if (nmosOut === "Z") {
-        out = pmosOut;
-    } else {
-        out = "X";
+    // Finally, see if an input is directly connected to the output.
+    for (let ii = 0; ii < inputNets.length; ii++) {
+        if(inputNets[ii].containsNode(outputNode)) {
+            /*jslint bitwise: true */
+            let temp = (inputVals >> ii) & 1;
+            /*jslint bitwise: false */
+
+            if(directInput === undefined || directInput === temp) {
+                directInput = temp;
+            } else {
+                directInput = "X";
+            }
+        }
     }
 
-    return out;
+    return reconcileOutput(pmosOut, nmosOut, directInput);
 }
 
 // Generate an output table.
@@ -845,13 +876,29 @@ function linkIdenticalNets() {
         let nodeIterator1 = net1.getNodes().values();
         let nodeIterator2 = net2.getNodes().values();
 
+        // If net1 is an input net, we need to reverse the order of the nodes.
+        // This is because there are no nodes in input nets to begin with.
+        // Loop through inputNets and find the net1.
+        for (let ii = 0; ii < inputNets.length; ii++) {
+            if (inputNets[ii] === net1) {
+                let temp = nodeIterator1;
+                nodeIterator1 = nodeIterator2;
+                nodeIterator2 = temp;
+                temp = net1;
+                net1 = net2;
+                net2 = temp;
+                break;
+            }
+        }
+
         // Loop through net1's nodes.
         for (let node1 = nodeIterator1.next(); !node1.done; node1 = nodeIterator1.next()) {
+            net2.addNode(node1.value);
+
             // Loop through net2's nodes.
             for (let node2 = nodeIterator2.next(); !node2.done; node2 = nodeIterator2.next()) {
                 graph.addEdge(node1.value, node2.value);
                 net1.addNode(node2.value);
-                net2.addNode(node1.value);
             }
         }
     }
