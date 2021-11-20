@@ -38,6 +38,7 @@
 /* jshint unused: true */
 /* jshint varstmt: true */
 /* jshint browser: true */
+/* globals runTestbench: false */
 
 // Graph class to represent CMOS circuitry.
 class Graph {
