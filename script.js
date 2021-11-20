@@ -1612,7 +1612,7 @@ window.onload = function () {
     refreshCanvas();
     setInterval(refreshCanvas, 500);
 
-    if(runTestbench) {
+    if(window.runTestbench) {
         runTestbench();
     }
 };
