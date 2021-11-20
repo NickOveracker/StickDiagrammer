@@ -711,6 +711,15 @@ function setNets() {
     for (let ii = 0; ii < inputNets.length; ii++) { inputNets[ii].clear(); }
     for (let ii = 0; ii < outputNets.length; ii++) { outputNets[ii].clear(); }
 
+    // Add rail nodes to the graph.
+    vddNode = graph.addNode(layeredGrid[railStartX][VDD_y][METAL1]);
+    gndNode = graph.addNode(layeredGrid[railStartX][GND_y][METAL1]);
+    vddNode.setAsSupply();
+    gndNode.setAsSupply();
+
+    netVDD.addNode(vddNode);
+    netGND.addNode(gndNode);
+
     // Add the VDD and GND nets.
     // Loop through every VDD cell and add to the VDD net.
     setRecursively(layeredGrid[railStartX][VDD_y][METAL1], netVDD);
@@ -733,15 +742,6 @@ function setNets() {
     }
 
     resetNetlist();
-
-    // Add rail nodes to the graph.
-    vddNode = graph.addNode(layeredGrid[railStartX][VDD_y][METAL1]);
-    gndNode = graph.addNode(layeredGrid[railStartX][GND_y][METAL1]);
-    vddNode.setAsSupply();
-    gndNode.setAsSupply();
-
-    netVDD.addNode(vddNode);
-    netGND.addNode(gndNode);
 
     // Add output nodes to the graph.
     outputNodes.length = 0;
@@ -849,6 +849,8 @@ function linkIdenticalNets() {
             // Loop through net2's nodes.
             for (let node2 = nodeIterator2.next(); !node2.done; node2 = nodeIterator2.next()) {
                 graph.addEdge(node1.value, node2.value);
+                net1.addNode(node2.value);
+                net2.addNode(node1.value);
             }
         }
     }
@@ -875,11 +877,31 @@ function getNet(cell) {
     return null;
 }
 
+// If there are any nodes at this cell, add them to the net.
+function addNodeByCellToNet(cell, net) {
+    'use strict';
+
+    let node = graph.getNode(cell);
+
+    if(node !== null) {
+        let nodeIterator = net.getNodes().values();
+
+        // Loop through net's nodes.
+        for (let node2 = nodeIterator.next(); !node2.done; node2 = nodeIterator.next()) {
+            graph.addEdge(node, node2.value);
+        }
+
+        net.addNode(node);
+    }
+}
+
 function setRecursively(cell, net) {
     'use strict';
+
+    addNodeByCellToNet(cell, net);
+
     // Return if this cell is in pmos or nmos already.
     if (nmos.has(cell) || pmos.has(cell)) {
-        net.addNode(graph.getNode(cell));
         return;
     }
 
