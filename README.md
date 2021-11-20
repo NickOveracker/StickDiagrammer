@@ -39,4 +39,11 @@ A proper source-available or open-source license will be added at some point.
 * Generate Magic files (todo: check legality) from design for a given technology.
 * Nobel Peace Prize
 * Various accolades
-* Knowing that I spelled "accolades" correctly (I don't feel like Googling it)
+* ~~Knowing that I spelled "accolades" correctly (I don't feel like Googling it)~~ *Resolved 2021/11/20*
+
+## Dogma of Development
+* Javascript errors or warnings must not be tolerated on the live page.
+* All functions must be in strict mode.
+* Live code must always clear JSLint with no errors or warnings.
+* Live code must always pass the testbench with no errors.
+* Software entropy must not increase.
