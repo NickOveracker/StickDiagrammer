@@ -1558,4 +1558,8 @@ window.onload = function () {
     document.getElementById("truthTable").appendChild(button);
 
     setInterval(refreshCanvas, 500);
+
+    if(runTestbench) {
+        runTestbench();
+    }
 };
