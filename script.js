@@ -9,7 +9,7 @@
  * ## Stipulations for updates
  *    - All builds must pass JSHint with no warnings (https://jshint.com/)
  *      - Only the bitwise tag may be disabled, and only on a line-by-line basis.
- *    - All builds must pass testbench stored at ./testbench.js
+ *    - All builds must pass testbench
  *      - The testbench may need to be modified for some breaking changes (e.g., new layers)
  * 
  **************************************************************************************************/
