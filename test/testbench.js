@@ -616,6 +616,6 @@ function runTestbench() {
 
             assertNext = false;
         }
-        "done"
+        console.log("tests done");
     }
 }
