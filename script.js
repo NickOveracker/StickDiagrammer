@@ -1425,6 +1425,7 @@ function mousemoveHandler(event) {
     // Save the current X and Y coordinates.
     currentX = event.clientX;
     currentY = event.clientY;
+    let currentCell = getCell(currentX, currentY);
 
     // If the mouse is pressed and the mouse is between cells 1 and gridsize - 1,
     if (event.buttons === 1 || event.buttons === 2) {
@@ -1436,9 +1437,10 @@ function mousemoveHandler(event) {
                 startY = temp.y;
             }
 
+
             if (!dragging) {
                 // don't start dragging unless the mouse has moved outside the cell
-                if(getCell(currentX, currentY) === {x: startX, y: startY}) {
+                if(currentCell.x === startX && currentCell.y === startY) {
                     return;
                 }
                 dragging = true;
