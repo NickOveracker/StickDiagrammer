@@ -1437,6 +1437,10 @@ function mousemoveHandler(event) {
             }
 
             if (!dragging) {
+                // don't start dragging unless the mouse has moved outside the cell
+                if(getCell(currentX, currentY) === getCell(startX, startY)) {
+                    return;
+                }
                 dragging = true;
                 saveCurrentState();
             } else {
