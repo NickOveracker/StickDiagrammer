@@ -40,6 +40,7 @@ A proper source-available or open-source license will be added at some point.
 * ~~Knowing that I spelled "accolades" correctly (I don't feel like Googling it)~~ *Resolved 2021/11/20*
 
 ## Known Bugs
+* Issue #7 (regarding NAND3 in complex circuit)
 * Minor visual glitches while drawing.
 * ~~Directly connecting output to input produces output of Z instead of reproducing the input.~~ *Resolved 2021/11/20*
 * ~~Unexpected output when both terminals of a transistor are shorted to VDD or GND.~~ *Resolved 2021/11/20*
