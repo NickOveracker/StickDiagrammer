@@ -26,8 +26,8 @@ A proper source-available or open-source license will be added at some point.
 * Show at least one (ideally every) path from rail voltage to output for each input configuration.
 * Record user input sequence in debug mode for the testbench.
 * Draw CMOS circuit schematic corresponding to the painted topology.
-* More metal layers.
 * Export netlist for use in electronics design software.
+* ~~More metal layers.~~ **Resolved 2021/11/21**
 * ~~Moveable VDD/GND terminals.~~ **Resolved 2021/11/21** *(move with + and - keys)*
 * ~~Show every layer in a cell, not just the top.~~ **Resolved 2021/11/21**
 
