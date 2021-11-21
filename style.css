@@ -19,16 +19,25 @@ canvas {
 }
 
 #truth-table-container table {
-    border: 1px solid #000;
+    border: 1px solid;
     margin: 0;
     padding: 0;
     border-collapse: collapse;
     width: 100%;
 }
 
-#truth-table-container table th {
-    border: 1px solid #000;
+#truth-table-container table .header {
+    border: 1px solid;
     padding: 5px;
+}
+
+#truth-table-container table td {
+    border: 1px dotted;
+}
+
+#truth-table-container table td.output {
+    border-left: 3px double;
+    font-weight: bold;
 }
 
 #dashboard {
@@ -38,4 +47,9 @@ canvas {
     top: 0;
     right: 0;
     overflow: auto;
+}
+
+#dashboard button {
+    width: 100%;
+    cursor: pointer;
 }

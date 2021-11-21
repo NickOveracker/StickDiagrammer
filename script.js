@@ -1259,18 +1259,21 @@ function getCell(clientX, clientY) {
 // Table is a 2D array of single character strings.
 function refreshTruthTable(table) {
     'use strict';
-    let tableDiv = document.getElementById("truth-table-container");
-    tableDiv.innerHTML = "";
-
     // Create a table with the correct number of rows and columns.
     // The first row should be a header.
-    let tableElement = document.createElement("table");
+    let tableElement = document.getElementById("truth-table");
+    tableElement.innerHTML = "";
 
     let header = tableElement.createTHead();
     let headerRow = header.insertRow(0);
     for (let ii = 0; ii < table[0].length; ii++) {
         let cell = headerRow.insertCell(ii);
+        headerRow.className = "header";
         cell.innerHTML = table[0][ii];
+
+        // Set the cell class depending on whether this is
+        // an input or output cell.
+        cell.className = ii < inputs.length ? "input" : "output";
     }
 
     // Create the rest of the table.
@@ -1279,10 +1282,12 @@ function refreshTruthTable(table) {
         for (let jj = 0; jj < table[ii].length; jj++) {
             let cell = row.insertCell(jj);
             cell.innerHTML = table[ii][jj];
+
+            // Set the cell class depending on whether this is
+            // an input or output cell.
+            cell.className = jj < inputs.length ? "input" : "output";
         }
     }
-
-    tableDiv.appendChild(tableElement);
 }
 
 function inBounds(event) {
@@ -1296,11 +1301,14 @@ function inBounds(event) {
         y < canvas.offsetTop + canvas.height - cellHeight;
 }
 
-function initTruthTable() {
+function refreshDashboard() {
     'use strict';
-    let truthTableDiv = document.getElementById("truth-table-container");
-    truthTableDiv.style.backgroundColor = darkMode ? "#333" : "#eee";
-    truthTableDiv.style.color = darkMode ? "#eee" : "#333";
+    let db = document.getElementById("dashboard");
+    let tt = document.getElementById("truth-table");
+    db.style.backgroundColor = darkMode ? "#333" : "#eee";
+    db.style.color = darkMode ? "#eee" : "#333";
+    tt.style.backgroundColor = db.style.backgroundColor;
+    tt.style.color = db.style.color;
 }
 
 function mapFuncToGrid(bounds, func) {
@@ -1571,13 +1579,19 @@ function keydownHandler(event) {
     refreshCanvas();
 }
 
+function toggleDarkMode() {
+    'use strict';
+    darkMode = !darkMode;
+    refreshDashboard();
+    refreshCanvas();
+}
+
 // Only change dark/light mode on keyup to avoid seizure-inducing flashes from holding down space.
 function keyupHandler(event) {
     'use strict';
     // Toggle dark mode by pressing space
     if (event.keyCode === 32) {
-        darkMode = !darkMode;
-        refreshCanvas();
+        toggleDarkMode();
     }
 }
 
@@ -1623,7 +1637,7 @@ window.onload = function () {
     ctx = canvas.getContext("2d");
     layeredGrid = makeLayeredGrid(gridsize, gridsize);
 
-    initTruthTable();
+    refreshDashboard();
 
     window.addEventListener("mousedown", mousedownHandler);
     window.addEventListener("mouseup", mouseupHandler);
