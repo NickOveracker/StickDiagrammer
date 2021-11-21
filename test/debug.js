@@ -82,6 +82,5 @@ getCell = function(clientX, clientY) {
         console.log(x, y);
         return {x: x, y: y};
     }
-    console.log("Out of bounds");
     return null;
 }
