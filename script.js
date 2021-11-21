@@ -1584,12 +1584,12 @@ function keydownHandler(event) {
     }
 
     // '+' key listener.
-    if (event.keyCode === 43) {
+    if (event.keyCode === 61) {
         placeVDD(event);
     }
 
     // '-' key listener.
-    if (event.keyCode === 45) {
+    if (event.keyCode === 173) {
         placeGND(event);
     }
 
