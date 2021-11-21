@@ -289,7 +289,7 @@ let CONTACT = 4;
 let DELETE = numLayers;
 let cursorColors = ['rgba(148, 0, 211, 1)', 'rgba(50, 205, 50, 1)', 'rgba(255, 0, 0, 0.5)', 'rgba(0, 255, 255, 0.5)', 'rgba(204, 204, 204, 0.5)', 'rgba(208, 160, 32, 0.5)', ];
 let cursorNames = ['pdiff', 'ndiff', 'poly', 'metal', 'contact', ];
-let cursorColorIndex = PDIFF;
+let cursorColorIndex = METAL1;
 let cursorColor = cursorColors[cursorColorIndex];
 
 // Objects to represent the coordinates of the inputs (A, B, C, D, ...)
@@ -310,10 +310,8 @@ let graph;
 
 // VDD and GND are the two terminals of the grid.
 // The terminals are always at the top and bottom of the grid.
-let VDD_y = 1;
-let GND_y = gridsize - 2;
-let railStartX = 1;
-let railEndX = gridsize - 1;
+let vddCell = {x: 1, y: 1};
+let gndCell = {x: 1, y: gridsize - 2};
 
 // Nodes
 let vddNode;
@@ -744,8 +742,8 @@ function setNets() {
     for (let ii = 0; ii < outputNets.length; ii++) { outputNets[ii].clear(); }
 
     // Add rail nodes to the graph.
-    vddNode = graph.addNode(layeredGrid[railStartX][VDD_y][METAL1]);
-    gndNode = graph.addNode(layeredGrid[railStartX][GND_y][METAL1]);
+    vddNode = graph.addNode(layeredGrid[vddCell.x][vddCell.y][CONTACT]);
+    gndNode = graph.addNode(layeredGrid[gndCell.x][gndCell.y][CONTACT]);
     vddNode.setAsSupply();
     gndNode.setAsSupply();
 
@@ -754,10 +752,10 @@ function setNets() {
 
     // Add the VDD and GND nets.
     // Loop through every VDD cell and add to the VDD net.
-    setRecursively(layeredGrid[railStartX][VDD_y][METAL1], netVDD);
+    setRecursively(layeredGrid[vddCell.x][vddCell.y][CONTACT], netVDD);
 
     // Loop through every GND cell and add to the GND net.
-    setRecursively(layeredGrid[railStartX][GND_y][METAL1], netGND);
+    setRecursively(layeredGrid[gndCell.x][gndCell.y][CONTACT], netGND);
 
     // Loop through the terminals and set their respective nets.
     for (let ii = 0; ii < numLayers; ii++) {
@@ -1070,11 +1068,9 @@ function drawLabels() {
             cellHeight * (outputs[ii].y + 0.75));
     }
 
-    // Draw a label on top of the VDD and GND rails.
-    ctx.font = "bold 18px Arial";
-    ctx.fillStyle = "#000000";
-    ctx.fillText("VDD", cellWidth * 3, cellHeight * (VDD_y + 1.75));
-    ctx.fillText("GND", cellWidth * 3, cellHeight * (GND_y + 1.75));
+    // Same for VDD and GND
+    ctx.fillText("VDD", cellWidth * (vddCell.x + 1.5), cellHeight * (vddCell.y + 0.75));
+    ctx.fillText("GND", cellWidth * (gndCell.x + 1.5), cellHeight * (gndCell.y + 0.75));
 }
 
 // Initialize everything
@@ -1101,11 +1097,9 @@ function refreshCanvas() {
         layeredGrid[outputs[ii].x][outputs[ii].y][CONTACT].isSet = true;
     }
 
-    // Draw METAL1 across the grid at VDD_y and GND_y.
-    for (let ii = railStartX; ii < railEndX; ii++) {
-        layeredGrid[ii][VDD_y][METAL1].isSet = true;
-        layeredGrid[ii][GND_y][METAL1].isSet = true;
-    }
+    // Set the CONTACT layer on the VDD and GND cells.
+    layeredGrid[vddCell.x][vddCell.y][CONTACT].isSet = true;
+    layeredGrid[gndCell.x][gndCell.y][CONTACT].isSet = true;
 
     // Draw each layer in order.
     let bounds = {
@@ -1535,6 +1529,32 @@ function placeOutput(event) {
     }
 }
 
+function placeVDD(event) {
+    'use strict';
+    let cell = getCell(currentX, currentY);
+    if (cell !== null) {
+        // First, unset the CONTACT layer at the old coordinates.
+        layeredGrid[outputs[89 - event.keyCode].x][outputs[89 - event.keyCode].y][CONTACT].isSet = false;
+        // Then, set the new coordinates.
+        vddCell.x = cell.x;
+        vddCell.y = cell.y;
+        refreshCanvas();
+    }
+}
+
+function placeGND(event) {
+    'use strict';
+    let cell = getCell(currentX, currentY);
+    if (cell !== null) {
+        // First, unset the CONTACT layer at the old coordinates.
+        layeredGrid[outputs[89 - event.keyCode].x][outputs[89 - event.keyCode].y][CONTACT].isSet = false;
+        // Then, set the new coordinates.
+        gndCell.x = cell.x;
+        gndCell.y = cell.y;
+        refreshCanvas();
+    }
+}
+
 function keydownHandler(event) {
     'use strict';
     // Undo by pressing CTRL + Z
@@ -1555,6 +1575,16 @@ function keydownHandler(event) {
     // Output terminal key listeners.
     if ((event.keyCode <= 89) && (event.keyCode > 89 - outputs.length)) {
         placeOutput(event);
+    }
+
+    // '+' key listener.
+    if (event.keyCode === 187) {
+        placeVDD(event);
+    }
+
+    // '-' key listener.
+    if (event.keyCode === 189) {
+        placeGND(event);
     }
 
     refreshCanvas();
