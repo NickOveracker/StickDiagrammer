@@ -1570,12 +1570,12 @@ function keydownHandler(event) {
     }
 
     // '+' key listener.
-    if (event.keyCode === 61) {
+    if (event.keyCode === 61 || event.keyCode === 187 || event.keyCode === 107) {
         placeVDD();
     }
 
     // '-' key listener.
-    if (event.keyCode === 173) {
+    if (event.keyCode === 173 || event.keyCode === 189 || event.keyCode === 109) {
         placeGND();
     }
 
