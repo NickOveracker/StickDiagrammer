@@ -310,8 +310,8 @@ let graph;
 
 // VDD and GND are the two terminals of the grid.
 // The terminals are always at the top and bottom of the grid.
-let vddCell = {x: 1, y: 1};
-let gndCell = {x: 1, y: gridsize - 2};
+let vddCell = {x: 1, y: 1,};
+let gndCell = {x: 1, y: gridsize - 2,};
 
 // Nodes
 let vddNode;
@@ -1555,18 +1555,24 @@ function placeGND(event) {
     }
 }
 
-function keydownHandler(event) {
+function ctrlCommandHandler(event) {
     'use strict';
-    // Undo by pressing CTRL + Z
-    if (event.ctrlKey && event.keyCode === 90) {
+    if (event.keyCode === 90) {
+        // z
         undo();
-    }
-
-    // Redo by pressing CTRL + Y
-    if (event.ctrlKey && event.keyCode === 89) {
+    } else if (event.keyCode === 89) {
+        // y
         redo();
     }
+}
 
+function keydownHandler(event) {
+    'use strict';
+    if(event.ctrlKey) {
+        ctrlCommandHandler(event);
+        return;
+    }
+    
     // Input terminal key listeners.
     if ((event.keyCode >= 65) && (event.keyCode < 65 + inputs.length)) {
         placeInput(event);
