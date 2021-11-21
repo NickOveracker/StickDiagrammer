@@ -1422,6 +1422,31 @@ function mouseupHandler(event) {
 // Show a preview line when the user is dragging the mouse.
 function mousemoveHandler(event) {
     'use strict';
+
+    function leftMouseMoveHandler(bounds) {
+        // If the mouse moved more horizontally than vertically,
+        // draw a horizontal line.
+        if (bounds.right - bounds.left > bounds.bottom - bounds.top) {
+            bounds.lowLayer = bounds.highLayer = cursorColorIndex;
+            bounds.bottom = bounds.top = startY;
+            mapFuncToGrid(bounds, function (x, y, layer) { layeredGrid[x][y][layer].isSet = true; });
+        }
+        // If the mouse moved more vertically than horizontally,
+        // draw a vertical line.
+        else {
+            bounds.lowLayer = bounds.highLayer = cursorColorIndex;
+            bounds.right = bounds.left = startX;
+            mapFuncToGrid(bounds, function (x, y, layer) { layeredGrid[x][y][layer].isSet = true; });
+        }
+    }
+
+    function rightMouseMoveHandler(bounds) {
+        // Secondary mouse button (i.e. right click)
+        // Highlight a rectangle of squares for deletion.
+        bounds.lowLayer = bounds.highLayer = DELETE;
+        mapFuncToGrid(bounds, function (x, y, layer) { layeredGrid[x][y][layer].isSet = true; });
+    }
+
     // Save the current X and Y coordinates.
     currentX = event.clientX;
     currentY = event.clientY;
@@ -1464,25 +1489,9 @@ function mousemoveHandler(event) {
 
             // Primary mouse button (i.e. left click)
             if (event.buttons === 1) {
-                // If the mouse moved more horizontally than vertically,
-                // draw a horizontal line.
-                if (bounds.right - bounds.left > bounds.bottom - bounds.top) {
-                    bounds.lowLayer = bounds.highLayer = cursorColorIndex;
-                    bounds.bottom = bounds.top = startY;
-                    mapFuncToGrid(bounds, function (x, y, layer) { layeredGrid[x][y][layer].isSet = true; });
-                }
-                // If the mouse moved more vertically than horizontally,
-                // draw a vertical line.
-                else {
-                    bounds.lowLayer = bounds.highLayer = cursorColorIndex;
-                    bounds.right = bounds.left = startX;
-                    mapFuncToGrid(bounds, function (x, y, layer) { layeredGrid[x][y][layer].isSet = true; });
-                }
+                leftMouseMoveHandler(bounds);
             } else {
-                // Secondary mouse button (i.e. right click)
-                // Highlight a rectangle of squares for deletion.
-                bounds.lowLayer = bounds.highLayer = DELETE;
-                mapFuncToGrid(bounds, function (x, y, layer) { layeredGrid[x][y][layer].isSet = true; });
+                rightMouseMoveHandler(bounds);
             }
             refreshCanvas();
         }
