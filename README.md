@@ -44,6 +44,6 @@ A proper source-available or open-source license will be added at some point.
 ## Dogma of Development
 * Javascript errors or warnings must not be tolerated on the live page.
 * All functions must be in strict mode.
-* Live code must always clear JSLint with no errors or warnings.
+* Live code must always clear JSHint with no errors or warnings.
 * Live code must always pass the testbench with no errors.
 * Software entropy must not increase.
