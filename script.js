@@ -1517,6 +1517,19 @@ function placeOutput(event) {
     }
 }
 
+function placeIO(event) {
+    'use strict';
+    // Input terminal key listeners.
+    if ((event.keyCode >= 65) && (event.keyCode < 65 + inputs.length)) {
+        placeInput(event);
+    }
+
+    // Output terminal key listeners.
+    if ((event.keyCode <= 89) && (event.keyCode > 89 - outputs.length)) {
+        placeOutput(event);
+    }
+}
+
 function placeVDD() {
     'use strict';
     let cell = getCell(currentX, currentY);
@@ -1556,26 +1569,13 @@ function keydownHandler(event) {
     'use strict';
     if(event.ctrlKey) {
         ctrlCommandHandler(event);
-        return;
-    }
-    
-    // Input terminal key listeners.
-    if ((event.keyCode >= 65) && (event.keyCode < 65 + inputs.length)) {
-        placeInput(event);
-    }
-
-    // Output terminal key listeners.
-    if ((event.keyCode <= 89) && (event.keyCode > 89 - outputs.length)) {
-        placeOutput(event);
-    }
-
-    // '+' key listener.
-    if (event.keyCode === 61 || event.keyCode === 187 || event.keyCode === 107) {
+    } else if(event.keyCode >= 65 && event.keyCode <= 90) {
+        placeIO(event);
+    } else if (event.keyCode === 61 || event.keyCode === 187 || event.keyCode === 107) {
+        // '+' key listener.
         placeVDD();
-    }
-
-    // '-' key listener.
-    if (event.keyCode === 173 || event.keyCode === 189 || event.keyCode === 109) {
+    } else if (event.keyCode === 173 || event.keyCode === 189 || event.keyCode === 109) {
+        // '-' key listener.
         placeGND();
     }
 
