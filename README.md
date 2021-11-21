@@ -17,16 +17,17 @@ A proper source-available or open-source license will be added at some point.
 * Software entropy must not increase.
 
 ## Feature Wishlist
+* More efficient data structure for the grid.
 * Arbitrary number of I/O.
 * Arbitrary width/height.
 * HTML button interface for those who prefer not to use a keyboard.
 * Mobile interface.
-* Foolproof usage instructions.
 * Student/Teacher modes with generating/grading homework, practice problems, etc.
 * Show at least one (ideally every) path from rail voltage to output for each input configuration.
 * Record user input sequence in debug mode for the testbench.
 * Draw CMOS circuit schematic corresponding to the painted topology.
 * Export netlist for use in electronics design software.
+* ~~Foolproof usage instructions.~~ **Resolved 2021/11/21**
 * ~~More metal layers.~~ **Resolved 2021/11/21**
 * ~~Moveable VDD/GND terminals.~~ **Resolved 2021/11/21** *(move with + and - keys)*
 * ~~Show every layer in a cell, not just the top.~~ **Resolved 2021/11/21**
