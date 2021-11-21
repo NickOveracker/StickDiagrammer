@@ -19,7 +19,6 @@ A proper source-available or open-source license will be added at some point.
 ## Feature Wishlist
 * Arbitrary number of I/O.
 * Arbitrary width/height.
-* Moveable VDD/GND terminals.
 * HTML button interface for those who prefer not to use a keyboard.
 * Mobile interface.
 * Foolproof usage instructions.
@@ -29,6 +28,7 @@ A proper source-available or open-source license will be added at some point.
 * Draw CMOS circuit schematic corresponding to the painted topology.
 * More metal layers.
 * Export netlist for use in electronics design software.
+* ~~Moveable VDD/GND terminals.~~ **Resolved 2021/11/21** *(move with + and - keys)*
 * ~~Show every layer in a cell, not just the top.~~ **Resolved 2021/11/21**
 
 ## Absolute Pie in the Sky

@@ -10,6 +10,19 @@ function runTestbench() {
 
     let events = [
         /* 5-stage inverter */
+        // VDD/GND rails.
+        ["mousedown", {button:  0, clientX: mapX(2),  clientY: mapY(2)}],
+        ["mousemove", {buttons: 1, clientX: mapX(28), clientY: mapY(2)}],
+        ["mouseup",   {button:  0, clientX: mapX(28), clientY: mapY(2)}],
+
+        ["mousedown", {button:  0, clientX: mapX(2),  clientY: mapY(28)}],
+        ["mousemove", {buttons: 1, clientX: mapX(28), clientY: mapY(28)}],
+        ["mouseup",   {button:  0, clientX: mapX(28), clientY: mapY(28)}],
+
+        0,
+
+        0,
+
         // PDIFF
         ["mousedown", {button:  0, clientX: mapX(2),  clientY: mapY(5)}],
         ["mousemove", {buttons: 1, clientX: mapX(29), clientY: mapY(5)}],
@@ -446,9 +459,9 @@ function runTestbench() {
         "0000000000000001",
         
         /** VDD-Y-GND SHORT **/
-        ["mousedown", {button:  2, clientX: mapX(1),   clientY: mapY(1)}],
-        ["mousemove", {buttons: 2, clientX: mapX(29),  clientY: mapY(29)}],
-        ["mouseup",   {button:  2, clientX: mapX(29),  clientY: mapY(29)}],
+        ["mousedown", {button:  2, clientX: mapX(1),   clientY: mapY(3)}],
+        ["mousemove", {buttons: 2, clientX: mapX(29),  clientY: mapY(27)}],
+        ["mouseup",   {button:  2, clientX: mapX(29),  clientY: mapY(27)}],
         
         // METAL
         ["mousedown", {button:  0, clientX: mapX(29),   clientY: mapY(2)}],
