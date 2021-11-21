@@ -1259,20 +1259,12 @@ function getCell(clientX, clientY) {
 // Table is a 2D array of single character strings.
 function refreshTruthTable(table) {
     'use strict';
-    let tableDiv = document.getElementById("truthTable");
+    let tableDiv = document.getElementById("truth-table-container");
     tableDiv.innerHTML = "";
 
     // Create a table with the correct number of rows and columns.
     // The first row should be a header.
     let tableElement = document.createElement("table");
-    tableElement.setAttribute("class", "truthTable");
-    tableElement.setAttribute("id", "truthTable");
-    tableElement.setAttribute("border", "1");
-    tableElement.setAttribute("cellspacing", "0");
-    tableElement.setAttribute("cellpadding", "0");
-    tableElement.setAttribute("style", "border-collapse: collapse;");
-    // 100% width
-    tableElement.setAttribute("width", "100%");
 
     let header = tableElement.createTHead();
     let headerRow = header.insertRow(0);
@@ -1290,14 +1282,6 @@ function refreshTruthTable(table) {
         }
     }
 
-    // Style the th
-    let ths = tableElement.getElementsByTagName("th");
-    for (let ii = 0; ii < ths.length; ii++) {
-        ths[ii].setAttribute("style", "border: 1px solid black; padding: 5px;");
-    }
-
-    document.getElementById("truthTable").appendChild(button);
-
     tableDiv.appendChild(tableElement);
 }
 
@@ -1314,22 +1298,9 @@ function inBounds(event) {
 
 function initTruthTable() {
     'use strict';
-    // Add a div to one side to add the truth table.
-    let truthTableDiv = document.createElement("div");
-    truthTableDiv.id = "truthTable";
-    document.body.appendChild(truthTableDiv);
-    // Fix the size and position of the truth table div.
-    truthTableDiv.style.width = "300px";
-    truthTableDiv.style.height = "100%";
-    truthTableDiv.style.position = "absolute";
-    truthTableDiv.style.top = "0";
-    truthTableDiv.style.right = "0";
+    let truthTableDiv = document.getElementById("truth-table-container");
     truthTableDiv.style.backgroundColor = darkMode ? "#333" : "#eee";
-    truthTableDiv.style.overflow = "auto";
-    // Set the font color in the table.
     truthTableDiv.style.color = darkMode ? "#eee" : "#333";
-    // Center text alignment
-    truthTableDiv.style.textAlign = "center";
 }
 
 function mapFuncToGrid(bounds, func) {
@@ -1661,14 +1632,12 @@ window.onload = function () {
     window.addEventListener("keydown", keydownHandler);
     window.addEventListener("keyup", keyupHandler);
 
-    // Add a button in the table div to call setNets() and refreshTruthTable(buildTruthTable())
-    button = document.createElement("button");
-    button.innerHTML = "Set Nets";
+    // Set up the evaluate button.
+    button = document.getElementById("generate-truth-table");
     button.onclick = function () {
         setNets();
         refreshTruthTable(buildTruthTable());
     };
-    document.getElementById("truthTable").appendChild(button);
 
     refreshCanvas();
     setInterval(refreshCanvas, 500);
