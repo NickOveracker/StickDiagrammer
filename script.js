@@ -1511,7 +1511,6 @@ function placeInput(event) {
         // Then, set the new coordinates.
         inputs[event.keyCode - 65].x = cell.x;
         inputs[event.keyCode - 65].y = cell.y;
-        refreshCanvas();
     }
 }
 
@@ -1525,7 +1524,6 @@ function placeOutput(event) {
         // Then, set the new coordinates.
         outputs[89 - event.keyCode].x = cell.x;
         outputs[89 - event.keyCode].y = cell.y;
-        refreshCanvas();
     }
 }
 
@@ -1534,11 +1532,10 @@ function placeVDD(event) {
     let cell = getCell(currentX, currentY);
     if (cell !== null) {
         // First, unset the CONTACT layer at the old coordinates.
-        layeredGrid[outputs[89 - event.keyCode].x][outputs[89 - event.keyCode].y][CONTACT].isSet = false;
+        layeredGrid[vddCell.x][vddCell.y][CONTACT].isSet = false;
         // Then, set the new coordinates.
         vddCell.x = cell.x;
         vddCell.y = cell.y;
-        refreshCanvas();
     }
 }
 
@@ -1547,11 +1544,10 @@ function placeGND(event) {
     let cell = getCell(currentX, currentY);
     if (cell !== null) {
         // First, unset the CONTACT layer at the old coordinates.
-        layeredGrid[outputs[89 - event.keyCode].x][outputs[89 - event.keyCode].y][CONTACT].isSet = false;
+        layeredGrid[gndCell.x][gndCell.y][CONTACT].isSet = false;
         // Then, set the new coordinates.
         gndCell.x = cell.x;
         gndCell.y = cell.y;
-        refreshCanvas();
     }
 }
 
