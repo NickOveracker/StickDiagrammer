@@ -9,15 +9,12 @@ For (professional ⋁ commercial ⋁ institutional) use, please contact: [nick.o
 
 A proper source-available or open-source license will be added at some point.
 
-## Known Bugs
-* ~~Directly connecting output to input produces output of Z instead of reproducing the input.~~ **Resolved 2021/11/20**
-* ~~Unexpected output when both terminals on one side of an inverter are shorted to VDD or GND.~~ **Resolved 2021/11/20**
-* * ~~Short PMOS side to VDD: Output is 11111111. . .~~
-* * ~~Short NMOS side to GND: Output is 0Z0Z0Z0Z. . .~~
-* ~~Directly connecting VDD to GND produces output of Z instead of the correct output X.~~ **Resolved 2021/11/18**
-* ~~Cells adjacent to painted cells are added to the same net, even if they aren't filled in.~~ **Resolved 2021/11/18**
-* ~~Lines can be dragged up or left while drawing.~~ **Resolved 2021/11/18**
-* ~~Clicking on right edge and dragging behaves as if clicked at (1,1).~~ **Resolved 2021/11/17**
+## Dogma of Development
+* Javascript errors or warnings must not be tolerated on the live page.
+* All functions must be in strict mode.
+* Live code must always clear JSHint with no errors or warnings.
+* Live code must always pass the testbench with no errors.
+* Software entropy must not increase.
 
 ## Feature Wishlist
 * Arbitrary number of I/O.
@@ -41,9 +38,12 @@ A proper source-available or open-source license will be added at some point.
 * Various accolades
 * ~~Knowing that I spelled "accolades" correctly (I don't feel like Googling it)~~ **Resolved 2021/11/20**
 
-## Dogma of Development
-* Javascript errors or warnings must not be tolerated on the live page.
-* All functions must be in strict mode.
-* Live code must always clear JSHint with no errors or warnings.
-* Live code must always pass the testbench with no errors.
-* Software entropy must not increase.
+## Known Bugs
+* ~~Directly connecting output to input produces output of Z instead of reproducing the input.~~ **Resolved 2021/11/20**
+* ~~Unexpected output when both terminals of a transistor are shorted to VDD or GND.~~ **Resolved 2021/11/20**
+* * ~~Short PMOS side to VDD: Output is 11111111. . .~~
+* * ~~Short NMOS side to GND: Output is 0Z0Z0Z0Z. . .~~
+* ~~Directly connecting VDD to GND produces output of Z instead of the correct output X.~~ **Resolved 2021/11/18**
+* ~~Cells adjacent to painted cells are added to the same net, even if they aren't filled in.~~ **Resolved 2021/11/18**
+* ~~Lines can be dragged up or left while drawing.~~ **Resolved 2021/11/18**
+* ~~Clicking on right edge and dragging behaves as if clicked at (1,1).~~ **Resolved 2021/11/17**
