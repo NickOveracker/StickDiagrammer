@@ -268,7 +268,7 @@ let gridsize = 29;
 let firstSaveState = 0;
 let saveState = 0;
 let lastSaveState = 0;
-let maxSaveState = 15;
+let maxSaveState = 5;
 let dragging = false;
 let startX;
 let startY;
@@ -280,15 +280,23 @@ let nodeNodeMap = [];
 
 // Cycle through the following cursor colors by pressing space: PDIFF, NDIFF, POLY, METAL1, CONTACT
 // Additional colors: DELETE at index (numLayers + 0)
-let numLayers = 5;
-let PDIFF = 0;
-let NDIFF = 1;
-let POLY = 2;
-let METAL1 = 3;
-let CONTACT = 4;
-let DELETE = numLayers;
-let cursorColors = ['rgba(148, 0, 211, 1)', 'rgba(50, 205, 50, 1)', 'rgba(255, 0, 0, 0.5)', 'rgba(0, 255, 255, 0.5)', 'rgba(204, 204, 204, 0.5)', 'rgba(208, 160, 32, 0.5)', ];
-let cursorNames = ['pdiff', 'ndiff', 'poly', 'metal', 'contact', ];
+let cursorColors = ['rgba(148, 0, 211, 1)',     // pdiff
+                    'rgba(50, 205, 50, 1)',     // ndiff
+                    'rgba(255, 0, 0, 0.5)',     // poly
+                    'rgba(0, 255, 255, 0.5)',   // metal1
+                    'rgba(255, 0, 204, 0.5)',   // metal2
+                    'rgba(204, 204, 204, 0.5)', // contact
+                    'rgba(208, 160, 32, 0.5)',  // delete
+                ];
+let numLayers = cursorColors.length;
+let PDIFF   = 0;
+let NDIFF   = PDIFF + 1;
+let POLY    = NDIFF + 1;
+let METAL1  = POLY + 1;
+let METAL2  = METAL1 + 1;
+let CONTACT = METAL2 + 1;
+let DELETE  = numLayers;
+let cursorNames = ['pdiff', 'ndiff', 'poly', 'metal1', 'metal2', 'contact', ];
 let cursorColorIndex = METAL1;
 let cursorColor = cursorColors[cursorColorIndex];
 
