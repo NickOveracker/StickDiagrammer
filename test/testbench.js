@@ -1,4 +1,39 @@
+/* jshint bitwise: true */
+/* jshint curly: true */
+/* jshint eqeqeq: true */
+/* jshint esversion: 9 */
+/* jshint forin: true */
+/* jshint freeze: true */
+/* jshint futurehostile: true */
+/* jshint leanswitch: true */
+/* jshint maxcomplexity: 10 */
+/* jshint maxdepth: 4 */
+/* jshint maxparams: 4 */
+/* jshint noarg: true */
+/* jshint nocomma: false */
+/* jshint nonbsp: true */
+/* jshint nonew: true */
+/* jshint noreturnawait: true */
+/* jshint regexpu: true */
+/* jshint strict: true */
+/* jshint trailingcomma: false */
+/* jshint undef: true */
+/* jshint unused: false */
+/* jshint varstmt: true */
+/* jshint browser: true */
+/* globals cellWidth: false,
+           canvas: false,
+           cellHeight: false,
+           inputs: false,
+           outputs: false,
+           changeLayer: false,
+           setNets: false,
+           computeOutput: false,
+           outputNodes: false
+*/
+
 function runTestbench() {
+    'use strict';
     let evt;
     let executeNext = false;
     let assertNext = false;
