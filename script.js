@@ -1656,6 +1656,34 @@ window.onload = function () {
         refreshTruthTable(buildTruthTable());
     };
 
+    // Set up the instructions close button.
+    button = document.getElementById("toggle-instructions");
+    button.onclick = function () {
+        let button = document.getElementById("toggle-instructions");
+        let div = document.getElementById("instructions");
+        if(div.style.left !== "-270px") {
+            div.style.left = "-270px";
+            button.innerHTML = "》";
+        } else {
+            div.style.left = "0px";
+            button.innerHTML = "《";
+        }
+    };
+
+    // Set up the dashboard close button.
+    button = document.getElementById("toggle-dashboard");
+    button.onclick = function () {
+		let button = document.getElementById("toggle-dashboard");
+        let div = document.getElementById("dashboard");
+        if(div.style.right !== "-270px") {
+            div.style.right = "-270px";
+            button.innerHTML = "《";
+        } else {
+            div.style.right = "0px";
+            button.innerHTML = "》";
+        }
+    };
+
     refreshCanvas();
     setInterval(refreshCanvas, 500);
 

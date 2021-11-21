@@ -1,6 +1,10 @@
 * { margin:0; padding:0; } /* to remove the top and left whitespace */
 
-html, body { width:100%; height:100%; } /* just to be sure these are full screen*/
+html, body {
+	width:100%;
+	height:100%;
+	overflow: hidden;
+} /* just to be sure these are full screen*/
 
 canvas {
     padding-left: 0;
@@ -12,10 +16,29 @@ canvas {
 
 #truth-table-container {
 /*    position: absolute; */
-    width: 100%;
-    background-color: #fff;
     text-align: center;
+    margin-top: 30px;
+    width: 90%;
+    top: 0;
+    right: 0;
+    position: absolute;
     z-index: 1;
+}
+
+#dashboard-close {
+    position: absolute;
+    width: 10%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+
+#dashboard-close button {
+    width: 100%;
+    top: 0;
+    bottom: 0;
+    position: absolute;
+    cursor: pointer;
 }
 
 #truth-table-container table {
@@ -47,7 +70,6 @@ canvas {
     height: 100%;
     top: 0;
     right: 0;
-    overflow: auto;
 }
 
 #dashboard button {
@@ -61,7 +83,6 @@ canvas {
     height: 100%;
     top: 0;
     left: 0;
-    overflow: auto;
 }
 
 #instructions ul {
@@ -87,6 +108,31 @@ canvas {
 
 #instructions h1 {
 	text-align: center;
+    margin-top: 30px;
+}
+
+#instructions-text {
+    position: absolute;
+    width: 90%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+
+#instructions-close {
+    position: absolute;
+    width: 10%;
+    height: 100%;
+    top: 0;
+    right: 0;
+}
+
+#instructions-close button {
+    width: 100%;
+    top: 0;
+    bottom: 0;
+    position: absolute;
+    cursor: pointer;
 }
 
 #instructions a {

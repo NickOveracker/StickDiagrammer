@@ -10,35 +10,43 @@
 </head>
 <body>
 	<div id="instructions">
-		<h1>Instructions</h1>
-		<ul>
-			<li>Left-click to paint a cell with the selected layer.
-				<ul><li>Left-click and drag to draw a line.</li></ul>
-			</li>
+        <div id="instructions-text">
+            <h1>Instructions</h1>
+            <ul>
+                <li>Left-click to paint a cell with the selected layer.
+                    <ul><li>Left-click and drag to draw a line.</li></ul>
+                </li>
 
-			<li>Right-click to clear all layers on the selected cell.
-			   <ul><li>Right-click and drag to clear all cells in the selected area.</li></ul>
-			</li>
+                <li>Right-click to clear all layers on the selected cell.
+                <ul><li>Right-click and drag to clear all cells in the selected area.</li></ul>
+                </li>
 
-			<li>Right-click without dragging away from any painted cell to change layers.</li>
-			
-			<li>Point at a cell and type "=" or "+" to move the VDD contact to that cell.</li>
+                <li>Right-click without dragging away from any painted cell to change layers.</li>
+                
+                <li>Point at a cell and type "=" or "+" to move the VDD contact to that cell.</li>
 
-			<li>Point at a cell and type "-" to move the GND contact to that cell.</li>
+                <li>Point at a cell and type "-" to move the GND contact to that cell.</li>
 
-			<li>Point at a cell and type "A", "B", "C", "D", or "Y" to move the chosen contact to that cell.</li>
+                <li>Point at a cell and type "A", "B", "C", "D", or "Y" to move the chosen contact to that cell.</li>
 
-			<li>Click "Evaluate" to generate a truth table for the painted diagram.</li>
+                <li>Click "Evaluate" to generate a truth table for the painted diagram.</li>
 
-			<li>Press the Spacebar to toggle dark mode.</li>
+                <li>Press the Spacebar to toggle dark mode.</li>
 
-			<li><a href="https://ko-fi.com/twentynine">Toss a coin to your Witcher.</a></li>
-		</ul>
+                <li><a href="https://ko-fi.com/twentynine">Toss a coin to your Witcher.</a></li>
+            </ul>
+        </div>
+        <div id="instructions-close">
+            <button id="toggle-instructions">《</button>
+        </div>
 	</div>
     <div id="canvas-div">
         <canvas id="canvas"></canvas>
     </div>
     <div id="dashboard">
+        <div id="dashboard-close">
+            <button id="toggle-dashboard">》</button>
+        </div>
         <div id="truth-table-container">
             <button id="generate-truth-table">Evaluate</button>
             <table id="truth-table"></table>
