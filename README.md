@@ -27,25 +27,25 @@ A proper source-available or open-source license will be added at some point.
 * Record user input sequence in debug mode for the testbench.
 * Draw CMOS circuit schematic corresponding to the painted topology.
 * Export netlist for use in electronics design software.
-* ~~Foolproof usage instructions.~~ **Resolved 2021/11/21**
-* ~~More metal layers.~~ **Resolved 2021/11/21**
-* ~~Moveable VDD/GND terminals.~~ **Resolved 2021/11/21** *(move with + and - keys)*
-* ~~Show every layer in a cell, not just the top.~~ **Resolved 2021/11/21**
+* ~~Foolproof usage instructions.~~ *Resolved 2021/11/21*
+* ~~More metal layers.~~ *Resolved 2021/11/21*
+* ~~Moveable VDD/GND terminals.~~ *Resolved 2021/11/21 (move with + and - keys)*
+* ~~Show every layer in a cell, not just the top.~~ *Resolved 2021/11/21*
 
 ## Absolute Pie in the Sky
 * Allow users to save designs, and use their outputs as inputs to other designs to produce complex, modular circuitry.
 * Generate Magic files (todo: check legality) from design for a given technology.
 * Nobel Peace Prize
 * Various accolades
-* ~~Knowing that I spelled "accolades" correctly (I don't feel like Googling it)~~ **Resolved 2021/11/20**
+* ~~Knowing that I spelled "accolades" correctly (I don't feel like Googling it)~~ *Resolved 2021/11/20*
 
 ## Known Bugs
 * Minor visual glitches while drawing.
-* ~~Directly connecting output to input produces output of Z instead of reproducing the input.~~ **Resolved 2021/11/20**
-* ~~Unexpected output when both terminals of a transistor are shorted to VDD or GND.~~ **Resolved 2021/11/20**
+* ~~Directly connecting output to input produces output of Z instead of reproducing the input.~~ *Resolved 2021/11/20*
+* ~~Unexpected output when both terminals of a transistor are shorted to VDD or GND.~~ *Resolved 2021/11/20*
 * * ~~Short PMOS side to VDD: Output is 11111111. . .~~
 * * ~~Short NMOS side to GND: Output is 0Z0Z0Z0Z. . .~~
-* ~~Directly connecting VDD to GND produces output of Z instead of the correct output X.~~ **Resolved 2021/11/18**
-* ~~Cells adjacent to painted cells are added to the same net, even if they aren't filled in.~~ **Resolved 2021/11/18**
-* ~~Lines can be dragged up or left while drawing.~~ **Resolved 2021/11/18**
-* ~~Clicking on right edge and dragging behaves as if clicked at (1,1).~~ **Resolved 2021/11/17**
+* ~~Directly connecting VDD to GND produces output of Z instead of the correct output X.~~ *Resolved 2021/11/18*
+* ~~Cells adjacent to painted cells are added to the same net, even if they aren't filled in.~~ *Resolved 2021/11/18*
+* ~~Lines can be dragged up or left while drawing.~~ *Resolved 2021/11/18*
+* ~~Clicking on right edge and dragging behaves as if clicked at (1,1).~~ *Resolved 2021/11/17*
