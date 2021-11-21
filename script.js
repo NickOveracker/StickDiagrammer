@@ -287,7 +287,7 @@ let POLY = 2;
 let METAL1 = 3;
 let CONTACT = 4;
 let DELETE = numLayers;
-let cursorColors = ['#9400D3', '#32CD32', '#ff0000', '#00FFFF', '#cccccc', '#d0a020', ];
+let cursorColors = ['rgba(148, 0, 211, 1)', 'rgba(50, 205, 50, 1)', 'rgba(255, 0, 0, 0.5)', 'rgba(0, 255, 255, 0.5)', 'rgba(204, 204, 204, 0.5)', 'rgba(208, 160, 32, 0.5)', ];
 let cursorNames = ['pdiff', 'ndiff', 'poly', 'metal', 'contact', ];
 let cursorColorIndex = PDIFF;
 let cursorColor = cursorColors[cursorColorIndex];
@@ -1130,11 +1130,11 @@ function refreshCanvas() {
         // Set the terminals of the cell to null.
         layeredGrid[x - 1][y - 1][NDIFF].term1 = null;
         layeredGrid[x - 1][y - 1][NDIFF].term2 = null;
-        layeredGrid[x - 1][y - 1][NDIFF].gate = null;
+        layeredGrid[x - 1][y - 1][NDIFF].gatek = null;
 
         layeredGrid[x - 1][y - 1][PDIFF].term1 = null;
         layeredGrid[x - 1][y - 1][PDIFF].term2 = null;
-        layeredGrid[x - 1][y - 1][PDIFF].gate = null;
+        layeredGrid[x - 1][y - 1][PDIFF].gate  = null;
     });
 
     // Set dark mode as needed.
@@ -1347,7 +1347,17 @@ function draw(bounds) {
     if (Math.abs(bounds.endX - startX) > Math.abs(bounds.endY - startY)) {
         bounds.lowLayer = bounds.highLayer = cursorColorIndex;
         bounds.bottom = bounds.top = startY;
-        mapFuncToGrid(bounds, function (x, y, layer) { layeredGrid[x][y][layer].isSet = true; });
+        mapFuncToGrid(bounds, function (x, y, layer) {
+            layeredGrid[x][y][layer].isSet = true;
+            // don't allow ndiff and pdiff on the same cell
+            if(layer === PDIFF) {
+                // Unset the ndiff layer
+                layeredGrid[x][y][NDIFF].isSet = false;
+            } else if(layer === NDIFF) {
+                // Unset the pdiff layer
+                layeredGrid[x][y][PDIFF].isSet = false;
+            }
+        });
     }
     // If the mouse moved more vertically than horizontally, draw a vertical line.
     else {
