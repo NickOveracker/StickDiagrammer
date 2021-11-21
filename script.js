@@ -1303,12 +1303,15 @@ function inBounds(event) {
 
 function refreshDashboard() {
     'use strict';
-    let db = document.getElementById("dashboard");
-    let tt = document.getElementById("truth-table");
-    db.style.backgroundColor = darkMode ? "#333" : "#eee";
-    db.style.color = darkMode ? "#eee" : "#333";
-    tt.style.backgroundColor = db.style.backgroundColor;
-    tt.style.color = db.style.color;
+    let dd = document.getElementById("dashboard");
+    let td = document.getElementById("truth-table");
+    let id = document.getElementById("instructions");
+    dd.style.backgroundColor = darkMode ? "#333" : "#eee";
+    dd.style.color = darkMode ? "#eee" : "#333";
+    td.style.backgroundColor = dd.style.backgroundColor;
+    td.style.color = dd.style.color;
+    id.style.backgroundColor = dd.style.backgroundColor;
+    id.style.color = dd.style.color;
 }
 
 function mapFuncToGrid(bounds, func) {

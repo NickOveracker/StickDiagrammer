@@ -37,6 +37,7 @@ canvas {
 
 #truth-table-container table td.output {
     border-left: 3px double;
+    border-right: 3px double;
     font-weight: bold;
 }
 
@@ -52,4 +53,44 @@ canvas {
 #dashboard button {
     width: 100%;
     cursor: pointer;
+}
+
+#instructions {
+    position: absolute;
+    width: 300px;
+    height: 100%;
+    top: 0;
+    left: 0;
+    overflow: auto;
+}
+
+#instructions ul {
+    list-style-type: disc;
+    padding: revert;
+}
+
+#instructions ul li {
+    padding: 5px;
+    margin: 5px;
+}
+
+#instructions ul li ul {
+	list-style-type: circle;
+    padding: revert;
+    margin: revert;
+}
+
+#instructions ul li ul li {
+    padding: revert;
+    margin: revert;
+}
+
+#instructions h1 {
+	text-align: center;
+}
+
+#instructions a {
+    font-weight: bolder;
+    text-decoration: overline underline;
+    color: inherit;
 }
