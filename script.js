@@ -288,7 +288,7 @@ let cursorColors = ['rgba(148, 0, 211, 1)',     // pdiff
                     'rgba(204, 204, 204, 0.5)', // contact
                     'rgba(208, 160, 32, 0.5)',  // delete
                 ];
-let numLayers = cursorColors.length;
+let numLayers = cursorColors.length - 1;
 let PDIFF   = 0;
 let NDIFF   = PDIFF + 1;
 let POLY    = NDIFF + 1;
@@ -1535,7 +1535,7 @@ function placeOutput(event) {
     }
 }
 
-function placeVDD(event) {
+function placeVDD() {
     'use strict';
     let cell = getCell(currentX, currentY);
     if (cell !== null) {
@@ -1547,7 +1547,7 @@ function placeVDD(event) {
     }
 }
 
-function placeGND(event) {
+function placeGND() {
     'use strict';
     let cell = getCell(currentX, currentY);
     if (cell !== null) {
@@ -1589,12 +1589,12 @@ function keydownHandler(event) {
 
     // '+' key listener.
     if (event.keyCode === 61) {
-        placeVDD(event);
+        placeVDD();
     }
 
     // '-' key listener.
     if (event.keyCode === 173) {
-        placeGND(event);
+        placeGND();
     }
 
     refreshCanvas();
