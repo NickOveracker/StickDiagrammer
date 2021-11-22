@@ -84,3 +84,18 @@ getCell = function(clientX, clientY) {
     }
     return null;
 }
+
+Node.prototype.getName = function() {
+    let name = "";
+    if(this.cell.gate && this.cell.gate.name !== "?") {
+        name = this.cell.gate.name;
+        name += this.isPmos ? "+" : "";
+        name += this.isNmos ? "-" : "";
+    } else {
+        name = graph.getIndexByNode(this);
+        name += this.isPmos ? "+" : "";
+        name += this.isNmos ? "-" : "";
+    }
+
+    return name;
+}
