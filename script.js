@@ -388,14 +388,12 @@ function computeOutput(inputVals, outputNode) {
     function computeOutputRecursive(node, targetNode) {
         // We found it?
         if (node === targetNode) {
-            console.log("Found " + targetNode.getName() + "!");
             return true;
         }
 
         // Prevent too much recursion.
         // If this is already being checked, it will be null.
         if (pathExists(node, targetNode) === null) {
-            console.log("Already checking for path between" + node.getName() + " and " + targetNode.getName());
             return false;
         }
 
@@ -413,7 +411,6 @@ function computeOutput(inputVals, outputNode) {
         if (node.isTransistor()) {
             if (!evaluate(node)) {
                 mapNodes(node, targetNode, false);
-                console.log(node.getName() + " is not active.");
                 return false;
             }
         }
@@ -424,20 +421,17 @@ function computeOutput(inputVals, outputNode) {
             if (pathExists(edges[ii].getOtherNode(node), targetNode)) {
                 mapNodes(node, targetNode, true);
                 mapNodes(node, edges[ii].getOtherNode(node), true);
-                console.log(node.getName() + " is connected to " + edges[ii].getOtherNode(node).getName());
                 return true;
             }
             if (computeOutputRecursive(edges[ii].getOtherNode(node), targetNode)) {
                 mapNodes(node, targetNode, true);
                 mapNodes(node, edges[ii].getOtherNode(node), true);
-                console.log(node.getName() + " is connected to " + edges[ii].getOtherNode(node).getName());
                 return true;
             }
         }
 
         // No findy :(
         mapNodes(node, targetNode, false);
-        console.log(node.getName() + " is not connected to " + targetNode.getName());
         return false;
     }
 
@@ -450,7 +444,6 @@ function computeOutput(inputVals, outputNode) {
 
             // Pass-through positive for NMOS.
             let evalInput = !!((inputVals >> inputNum) & 1);
-            console.log('evaluating input ' + node.getName() + ': ' + !(node.isNmos ^ evalInput));
             return !(node.isNmos ^ evalInput);
             /*jslint bitwise: false */
         }
@@ -462,17 +455,14 @@ function computeOutput(inputVals, outputNode) {
             let gateNode = gateNodeIterator.next().value;
 
             if (node.isPmos && (pathExists(gateNode, gndNode) || computeOutputRecursive(gateNode, gndNode))) {
-                console.log('evaluating input ' + node.getName() + ': true');
                 return true;
             } else {
                 if (!node.isPmos && (pathExists(gateNode, vddNode) || computeOutputRecursive(gateNode, vddNode))) {
-                    console.log('evaluating input ' + node.getName() + ': true');
                     return true;
                 }
             }
         }
 
-        console.log('evaluating input ' + node.getName() + ': false');
         return false;
     }
 
