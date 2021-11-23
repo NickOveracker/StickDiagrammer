@@ -352,6 +352,7 @@ function computeOutput(inputVals, outputNode) {
     let pmosOut;
     let nmosOut;
     let directInput;
+    let triggers = [];
 
     function mapNodes(node1, node2, isPath) {
         let currentMapping = pathExists(node1, node2);
@@ -385,6 +386,21 @@ function computeOutput(inputVals, outputNode) {
         return nodeNodeMap[graph.getIndexByNode(node1)][graph.getIndexByNode(node2)];
     }
 
+    function executeTriggers(node, targetNode) {
+        let triggerList = triggers[graph.getIndexByNode(node)];
+        if (triggerList === undefined) { return; }
+        triggerList = triggerList[graph.getIndexByNode(targetNode)];
+        if (triggerList === undefined) { return; }
+        for (let ii = 0; ii < triggerList.length; ii++) {
+            let pathEval = pathExists(triggerList[ii].node, triggerList[ii].targetNode);
+            if(pathEval === undefined || pathEval === null) {
+                mapNodes(node, targetNode, undefined);
+                computeOutputRecursive(triggerList[ii].node, triggerList[ii].targetNode);
+            }
+        }
+    }
+
+
     function computeOutputRecursive(node, targetNode) {
         // We found it?
         if (node === targetNode) {
@@ -394,7 +410,7 @@ function computeOutput(inputVals, outputNode) {
         // Prevent too much recursion.
         // If this is already being checked, it will be null.
         if (pathExists(node, targetNode) === null) {
-            return false;
+            return null;
         }
 
         // Avoid infinite loops.
@@ -409,29 +425,88 @@ function computeOutput(inputVals, outputNode) {
         // Ignore in case of output or supply, since these don't have
         // gates to evaluate. Simply arriving at them means they are active.
         if (node.isTransistor()) {
-            if (!evaluate(node)) {
-                mapNodes(node, targetNode, false);
+            let evalResult = evaluate(node);
+            if (evalResult === false) {
+                let allNodes = graph.nodes;
+                for(let qq = 0; qq < allNodes.length; qq++) {
+                    if(allNodes[qq] === node) { continue; }
+                    mapNodes(node, allNodes[qq], false);
+                    executeTriggers(node, allNodes[qq]);
+                }
                 return false;
+            } else if (evalResult === null) {
+                if(triggers[graph.getIndexByNode(node)] === undefined) {
+                    triggers[graph.getIndexByNode(node)] = [];
+                }
+                if(triggers[graph.getIndexByNode(vddNode)] === undefined) {
+                    triggers[graph.getIndexByNode(vddNode)] = [];
+                }
+                if(triggers[graph.getIndexByNode(gndNode)] === undefined) {
+                    triggers[graph.getIndexByNode(gndNode)] = [];
+                }
+                if(triggers[graph.getIndexByNode(node)][graph.getIndexByNode(vddNode)] === undefined) {
+                    triggers[graph.getIndexByNode(node)][graph.getIndexByNode(vddNode)] = [];
+                    triggers[graph.getIndexByNode(vddNode)][graph.getIndexByNode(node)] = [];
+                }
+                if(triggers[graph.getIndexByNode(node)][graph.getIndexByNode(gndNode)] === undefined) {
+                    triggers[graph.getIndexByNode(node)][graph.getIndexByNode(gndNode)] = [];
+                    triggers[graph.getIndexByNode(gndNode)][graph.getIndexByNode(node)] = [];
+                }
+                triggers[graph.getIndexByNode(node)][graph.getIndexByNode(vddNode)].push({node: node, targetNode: vddNode});
+                triggers[graph.getIndexByNode(vddNode)][graph.getIndexByNode(node)].push({node: vddNode, targetNode: node});
+                triggers[graph.getIndexByNode(node)][graph.getIndexByNode(gndNode)].push({node: node, targetNode: gndNode});
+                triggers[graph.getIndexByNode(gndNode)][graph.getIndexByNode(node)].push({node: gndNode, targetNode: node});
+                mapNodes(node, targetNode, undefined);
+                return null;
             }
         }
 
         // Recurse on all edges.
         let edges = node.getEdges();
+        let hasNullPath = false;
         for (let ii = 0; ii < edges.length; ii++) {
-            if (pathExists(edges[ii].getOtherNode(node), targetNode)) {
+            let otherNode = edges[ii].getOtherNode(node);
+            let hasPath = pathExists(otherNode, targetNode);
+            if (hasPath) {
                 mapNodes(node, targetNode, true);
                 mapNodes(node, edges[ii].getOtherNode(node), true);
+                executeTriggers(node, targetNode);
+                executeTriggers(node, edges[ii].getOtherNode(node));
                 return true;
             }
-            if (computeOutputRecursive(edges[ii].getOtherNode(node), targetNode)) {
+            let result = computeOutputRecursive(otherNode, targetNode);
+            if (result) {
                 mapNodes(node, targetNode, true);
                 mapNodes(node, edges[ii].getOtherNode(node), true);
+                executeTriggers(node, targetNode);
+                executeTriggers(node, edges[ii].getOtherNode(node));
                 return true;
+            }
+
+            if(result === null || hasPath === null) {
+                hasNullPath = true;
+                if(triggers[graph.getIndexByNode(otherNode)] === undefined) {
+                    triggers[graph.getIndexByNode(otherNode)] = [];
+                }
+                if(triggers[graph.getIndexByNode(targetNode)] === undefined) {
+                    triggers[graph.getIndexByNode(targetNode)] = [];
+                }
+                if(triggers[graph.getIndexByNode(otherNode)][graph.getIndexByNode(targetNode)] === undefined) {
+                    triggers[graph.getIndexByNode(otherNode)][graph.getIndexByNode(targetNode)] = [];
+                    triggers[graph.getIndexByNode(targetNode)][graph.getIndexByNode(otherNode)] = [];
+                }
+                triggers[graph.getIndexByNode(otherNode)][graph.getIndexByNode(targetNode)].push({node: node, targetNode: targetNode});
+                triggers[graph.getIndexByNode(targetNode)][graph.getIndexByNode(otherNode)].push({node: node, targetNode: targetNode});
             }
         }
 
         // No findy :(
+        if (hasNullPath) {
+            //mapNodes(node, targetNode, undefined);
+            return null;
+        }
         mapNodes(node, targetNode, false);
+        executeTriggers(node, targetNode);
         return false;
     }
 
@@ -450,19 +525,65 @@ function computeOutput(inputVals, outputNode) {
 
         // Otherwise, recurse and see if this is active.
         let gateNodeIterator = gateNet.getNodes().values();
+        let hasNullPath = false;
+
+        function registerTrigger(fromNode, toNode, triggerNode) {
+            if(triggers[graph.getIndexByNode(fromNode)] === undefined) {
+                triggers[graph.getIndexByNode(fromNode)] = [];
+            }
+            if(triggers[graph.getIndexByNode(toNode)] === undefined) {
+                triggers[graph.getIndexByNode(toNode)] = [];
+            }
+            if(triggers[graph.getIndexByNode(fromNode)][graph.getIndexByNode(toNode)] === undefined) {
+                triggers[graph.getIndexByNode(fromNode)][graph.getIndexByNode(toNode)] = [];
+                triggers[graph.getIndexByNode(toNode)][graph.getIndexByNode(fromNode)] = [];
+            }
+            triggers[graph.getIndexByNode(fromNode)][graph.getIndexByNode(toNode)].push({node: triggerNode, targetNode: vddNode});
+            triggers[graph.getIndexByNode(toNode)][graph.getIndexByNode(fromNode)].push({node: triggerNode, targetNode: vddNode});
+            triggers[graph.getIndexByNode(fromNode)][graph.getIndexByNode(toNode)].push({node: triggerNode, targetNode: gndNode});
+            triggers[graph.getIndexByNode(toNode)][graph.getIndexByNode(fromNode)].push({node: triggerNode, targetNode: gndNode});
+        }
+
 
         for (let ii = 0; ii < gateNet.size(); ii++) {
             let gateNode = gateNodeIterator.next().value;
+            let gateToGnd = pathExists(gateNode, gndNode);
+            let gateToVdd = pathExists(gateNode, vddNode);
 
-            if (node.isPmos && (pathExists(gateNode, gndNode) || computeOutputRecursive(gateNode, gndNode))) {
-                return true;
+            if (gateToGnd === null || gateToVdd === null) {
+                hasNullPath = true;
+            }
+            
+            if(node.isPmos) {
+                if (gateToGnd) {
+                    return true;
+                }
+                gateToGnd = computeOutputRecursive(gateNode, gndNode);
+                if (gateToGnd === null) {
+                    hasNullPath = true;
+                    registerTrigger(gateNode, gndNode, node);
+                }
+                if(gateToGnd) {
+                    return true;
+                }
             } else {
-                if (!node.isPmos && (pathExists(gateNode, vddNode) || computeOutputRecursive(gateNode, vddNode))) {
+                if (gateToVdd) {
+                    return true;
+                }
+                gateToVdd = computeOutputRecursive(gateNode, vddNode);
+                if (gateToVdd === null) {
+                    hasNullPath = true;
+                    registerTrigger(gateNode, vddNode, node);
+                }
+                if(gateToVdd) {
                     return true;
                 }
             }
         }
 
+        if(hasNullPath) {
+            return null;
+        }
         return false;
     }
 
@@ -505,6 +626,8 @@ function computeOutput(inputVals, outputNode) {
         nodeNodeMap[ii] = [];
         nodeNodeMap[ii][ii] = true;
     }
+	console.log(inputVals);
+    triggers.length = 0;
     nmosOut = computeOutputRecursive(gndNode, outputNode) ? 0 : "Z";
 
     // Finally, see if an input is directly connected to the output.
