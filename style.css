@@ -15,13 +15,14 @@ canvas {
 }
 
 #truth-table-container {
-/*    position: absolute; */
     text-align: center;
     margin-top: 30px;
     width: 90%;
     top: 0;
     right: 0;
     position: absolute;
+    overflow-y: auto;
+    font-size: 2.2vh;
     z-index: 1;
 }
 
@@ -107,7 +108,7 @@ canvas {
 }
 
 #instructions h1 {
-	text-align: center;
+    text-align: center;
     margin-top: 30px;
 }
 
@@ -117,6 +118,8 @@ canvas {
     height: 100%;
     top: 0;
     left: 0;
+    font-size: 2.2vh;
+    overflow-y: auto;
 }
 
 #instructions-close {
