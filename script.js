@@ -806,8 +806,6 @@ function setNets() {
     // Add rail nodes to the graph.
     vddNode = graph.addNode(layeredGrid[vddCell.x][vddCell.y][CONTACT]);
     gndNode = graph.addNode(layeredGrid[gndCell.x][gndCell.y][CONTACT]);
-    vddNode.setAsSupply();
-    gndNode.setAsSupply();
 
     netVDD.addNode(vddNode);
     netGND.addNode(gndNode);
