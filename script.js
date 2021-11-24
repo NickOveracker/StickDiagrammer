@@ -49,11 +49,11 @@ class Graph {
     // Clear the graph.
     clear() {
         // Destroy all nodes.
-        for (let ii = 0; ii < nodes.length; ii++) {
-            nodes[ii].destroy();
+        for (let ii = 0; ii < this.nodes.length; ii++) {
+            this.nodes[ii].destroy();
         }
 
-        nodes.length = 0;
+        this.nodes.length = 0;
     }
 
    // Add a node to the graph.
