@@ -129,7 +129,7 @@ class Node {
     }
 
     getName() {
-        return this.cell.gate.getName();
+        return this.cell.gate.name;
     }
 }
 
@@ -205,10 +205,6 @@ class Net {
 
     containsCell(cell) {
         return this.cells.has(cell);
-    }
-
-    getName() {
-        return this.name;
     }
 
     size() {
