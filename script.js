@@ -58,13 +58,13 @@ class Graph {
 
    // Add a node to the graph.
     addNode(cell) {
-        nodes.push(new Node(cell));
+        this.nodes.push(new Node(cell));
         return node;
     }
 
     // Return the node with the given cell.
     getNode(cell) {
-        for (let node of nodes) {
+        for (let node of this.nodes) {
             if (node.cell === cell) {
                 return node;
             }
@@ -73,8 +73,8 @@ class Graph {
     }
 
     getIndexByNode(node) {
-        for (let ii = 0; ii < nodes.length; ii++) {
-            if (nodes[ii] === node) {
+        for (let ii = 0; ii < this.nodes.length; ii++) {
+            if (this.nodes[ii] === node) {
                 return ii;
             }
         }
@@ -93,17 +93,17 @@ class Node {
 
     // Destructor
     destroy() {
-        for(let ii = 0; ii < edges.length; ii++) {
-            edges[ii].destroy();
+        for(let ii = 0; ii < this.edges.length; ii++) {
+            this.edges[ii].destroy();
         }
-        cell = undefined;
-        edges.length = 0;
+        this.cell = undefined;
+        this.edges.length = 0;
     }
 
     // Check if two nodes are connected.
     isConnected(otherNode) {
-        for (let ii = 0; ii < edges.length; ii++) {
-            if (edges[ii].getNode1() === otherNode || edges[ii].getNode2() === otherNode) {
+        for (let ii = 0; ii < this.edges.length; ii++) {
+            if (this.edges[ii].getNode1() === otherNode || this.edges[ii].getNode2() === otherNode) {
                 return true;
             }
         }
@@ -111,22 +111,22 @@ class Node {
     }
  
     isTransistor() {
-        return isPmos || isNmos;
+        return this.isPmos || this.isNmos;
     }
 
     addEdge(edge) {
-        edges.push(edge);
+        this.edges.push(edge);
     }
 
     removeEdge(edge) {
-        let index = edges.indexOf(edge);
+        let index = this.edges.indexOf(edge);
         if (index > -1) {
-            edges.splice(index, 1);
+            this.edges.splice(index, 1);
         }
     }
 
     getName() {
-        return cell.gate.getName();
+        return this.cell.gate.getName();
     }
 }
 
@@ -142,23 +142,23 @@ class Edge {
 
     // Destructor
     destroy() {
-        node1 = undefined;
-        node2 = undefined;
+        this.node1 = undefined;
+        this.node2 = undefined;
     }
 
     getNode1() {
-        return node1;
+        return this.node1;
     }
 
     getNode2() {
-        return node2;
+        return this.node2;
     }
 
     getOtherNode(node) {
-        if (node1 === node) {
-            return node2;
-        } else if (node2 === node) {
-            return node1;
+        if (this.node1 === node) {
+            return this.node2;
+        } else if (this.node2 === node) {
+            return this.node1;
         } else {
             return null;
         }
@@ -178,41 +178,41 @@ class Net {
         // Two nets are identical if they have the same set of cells.
         // By design, if two nets share even one cell, then they share all cells.
         // So, we can just check a single cell.
-        let cell = cells.values().next().value;
+        let cell = this.cells.values().next().value;
         return net.cells.has(cell);
     }
 
     addNode(node) {
-        nodes.add(node);
+        this.nodes.add(node);
     }
 
     removeNode(node) {
-        nodes.delete(node);
+        this.nodes.delete(node);
     }
 
     containsNode(node) {
-        return nodes.has(node);
+        return this.nodes.has(node);
     }
 
     clear() {
-        cells.clear();
-        nodes.clear();
+        this.cells.clear();
+        this.nodes.clear();
     }
 
     addCell(cell) {
-        cells.add(cell);
+        this.cells.add(cell);
     }
 
     containsCell(cell) {
-        return cells.has(cell);
+        return this.cells.has(cell);
     }
 
     getName() {
-        return name;
+        return this.name;
     }
 
     size() {
-        return nodes.size;
+        return this.nodes.size;
     }
 }
 
