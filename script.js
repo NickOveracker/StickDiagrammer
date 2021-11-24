@@ -115,8 +115,8 @@ class Node {
         return this.isPmos || this.isNmos;
     }
 
-    addEdge(edge) {
-        this.edges.push(edge);
+    addEdge(node) {
+        this.edges.push(new Edge(this, node));
     }
 
     removeEdge(edge) {
