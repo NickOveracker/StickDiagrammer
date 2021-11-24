@@ -43,7 +43,7 @@
 // Graph class to represent CMOS circuitry.
 class Graph {
     constructor() {
-        nodes = [];
+        this.nodes = [];
     }
 
     // Clear the graph.
