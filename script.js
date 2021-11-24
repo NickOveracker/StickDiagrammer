@@ -461,6 +461,8 @@ function computeOutput(inputVals, outputNode) {
 
     function evaluate(node) {
         let gateNet = node.cell.gate;
+        let gateNodeIterator;
+        let hasNullPath;
 
         if (gateNet.isInput) {
             /*jslint bitwise: true */
@@ -473,44 +475,33 @@ function computeOutput(inputVals, outputNode) {
         }
 
         // Otherwise, recurse and see if this is active.
-        let gateNodeIterator = gateNet.nodes.values();
-        let hasNullPath = false;
+        gateNodeIterator = gateNet.nodes.values();
+        hasNullPath = false;
 
-        for (let ii = 0; ii < gateNet.size(); ii++) {
-            let gateNode = gateNodeIterator.next().value;
+        for (let gateNode = gateNodeIterator.next(); !gateNode.done; gateNode = gateNodeIterator.next()) {
+            gateNode = gateNode.value;
             let gateToGnd = pathExists(gateNode, gndNode);
             let gateToVdd = pathExists(gateNode, vddNode);
+            let relevantPathExists;
+            let relevantNode;
 
-            if (gateToGnd === null || gateToVdd === null) {
+            if(gateToGnd === null || gateToVdd === null) {
                 hasNullPath = true;
             }
             
             if(node.isPmos) {
-                if (gateToGnd) {
-                    return true;
-                }
-                gateToGnd = computeOutputRecursive(gateNode, gndNode);
-                if (gateToGnd === null) {
-                    hasNullPath = true;
-                    registerTrigger(gateNode, gndNode, node, vddNode);
-                    registerTrigger(gateNode, gndNode, node, gndNode);
-                }
-                if(gateToGnd) {
-                    return true;
-                }
+                relevantNode = gndNode;
             } else {
-                if (gateToVdd) {
-                    return true;
-                }
-                gateToVdd = computeOutputRecursive(gateNode, vddNode);
-                if (gateToVdd === null) {
-                    hasNullPath = true;
-                    registerTrigger(gateNode, vddNode, node, vddNode);
-                    registerTrigger(gateNode, vddNode, node, gndNode);
-                }
-                if(gateToVdd) {
-                    return true;
-                }
+                relevantNode = vddNode;
+            }
+
+            relevantPathExists = computeOutputRecursive(gateNode, relevantNode);
+            if (relevantPathExists === null) {
+                hasNullPath = true;
+                registerTrigger(gateNode, relevantNode, node, vddNode);
+                registerTrigger(gateNode, relevantNode, node, gndNode);
+            } else if(relevantPathExists) {
+                return true;
             }
         }
 
