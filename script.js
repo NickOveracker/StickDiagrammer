@@ -544,7 +544,7 @@ function computeOutput(inputVals, outputNode) {
 
     // Get pmos output.
     nodeNodeMap.length = 0;
-    for (let ii = 0; ii < graph.nodes.length(); ii++) {
+    for (let ii = 0; ii < graph.nodes.length; ii++) {
         nodeNodeMap[ii] = [];
         nodeNodeMap[ii][ii] = true;
     }
@@ -552,7 +552,7 @@ function computeOutput(inputVals, outputNode) {
 
     // Get nmos output.
     nodeNodeMap.length = 0;
-    for (let ii = 0; ii < graph.nodes.length(); ii++) {
+    for (let ii = 0; ii < graph.nodes.length; ii++) {
         nodeNodeMap[ii] = [];
         nodeNodeMap[ii][ii] = true;
     }
