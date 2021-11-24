@@ -58,7 +58,8 @@ class Graph {
 
    // Add a node to the graph.
     addNode(cell) {
-        this.nodes.push(new Node(cell));
+        let node = new Node(cell);
+        this.nodes.push(node);
         return node;
     }
 
