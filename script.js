@@ -421,26 +421,26 @@ function computeOutput(inputVals, outputNode) {
 
         // Recurse on all edges.
         hasNullPath = false;
-        node.edges.forEach(function(edge) {
-            let otherNode = edge.getOtherNode(node);
+        for(let ii = 0; ii < node.edges.length; ii++) {
+            let otherNode = node.edges[ii].getOtherNode(node);
             let hasPath = pathExists(otherNode, targetNode);
             if (hasPath) {
                 mapNodes(node, targetNode, true);
-                mapNodes(node, edge.getOtherNode(node), true);
+                mapNodes(node, node.edges[ii].getOtherNode(node), true);
                 return true;
             }
-            let result = computeOutputRecursive(otherNode, targetNode);
+            let result = hasPath !== false && computeOutputRecursive(otherNode, targetNode);
             if (result) {
                 mapNodes(node, targetNode, true);
-                mapNodes(node, edge.getOtherNode(node), true);
+                mapNodes(node, node.edges[ii].getOtherNode(node), true);
                 return true;
             }
 
             if(result === null || hasPath === null) {
                 hasNullPath = true;
-                registerTrigger(targetNode, edge.getOtherNode(node), node, targetNode);
+                registerTrigger(targetNode, node.edges[ii].getOtherNode(node), node, targetNode);
             }
-        });
+        }
 
         // No findy :(
         if (hasNullPath) {
