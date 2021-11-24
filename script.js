@@ -449,13 +449,14 @@ function computeOutput(inputVals, outputNode) {
             }
         });
 
-        // No findy :(
-        if (hasNullPath) {
-            //mapNodes(node, targetNode, undefined);
+        if(pathFound) {
+            return true;
+        } else if(hasNullPath) {
             return null;
+        } else {
+            mapNodes(node, targetNode, false);
+            return false;
         }
-        mapNodes(node, targetNode, false);
-        return false;
     }
 
     function evaluate(node) {
