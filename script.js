@@ -404,7 +404,7 @@ function computeOutput(inputVals, outputNode) {
         if (node.isTransistor()) {
             let evalResult = evaluate(node);
             if (evalResult === false) {
-                graph.nodes.map(function(otherNode) {
+                graph.nodes.forEach(function(otherNode) {
                     if(node === otherNode) {
                         return;
                     }
@@ -421,7 +421,7 @@ function computeOutput(inputVals, outputNode) {
 
         // Recurse on all edges.
         hasNullPath = false;
-        node.edges.map(function(edge) {
+        node.edges.forEach(function(edge) {
             let otherNode = edge.getOtherNode(node);
             let hasPath = pathExists(otherNode, targetNode);
             if (hasPath) {
