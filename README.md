@@ -1,7 +1,7 @@
 # StickDiagrammer
 
 ## Live Pages
-* Stable site: [Stixu.io](http://stixu.io)
+* Stable site: [Stixu.io](https://stixu.io)
 * Development: [Github.io](https://nickoveracker.github.io/StickDiagrammer)
 
 ## Legal Stuff
