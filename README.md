@@ -1,8 +1,8 @@
 # StickDiagrammer
 
 ## Live Pages
-Stable site: [Stixu.io](http://stixu.io)
-Development: [Github.io](https://nickoveracker.github.io/StickDiagrammer)
+* Stable site: [Stixu.io](http://stixu.io)
+* Development: [Github.io](https://nickoveracker.github.io/StickDiagrammer)
 
 ## Legal Stuff
 All rights are reserved by Nick Overacker.
