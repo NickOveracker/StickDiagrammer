@@ -377,20 +377,22 @@ function computeOutput(inputVals, outputNode) {
     }
 
     function computeOutputRecursive(node, targetNode) {
+        let hasPath;
+        let hasNullPath;
+
         // We found it?
         if (node === targetNode) {
             return true;
         }
 
+        hasPath = pathExists(node, targetNode);
         // Prevent too much recursion.
-        // If this is already being checked, it will be null.
-        if (pathExists(node, targetNode) === null) {
+        // If this is already being checked, the path will be null.
+        if (hasPath === null) {
             return null;
-        }
-
+        } else if (hasPath !== undefined) {
         // Avoid infinite loops.
-        if (pathExists(node, targetNode) !== undefined) {
-            return pathExists(node, targetNode);
+            return hasPath;
         }
 
         // Initialize to null.
@@ -402,10 +404,12 @@ function computeOutput(inputVals, outputNode) {
         if (node.isTransistor()) {
             let evalResult = evaluate(node);
             if (evalResult === false) {
-                for(let ii = 0; ii < graph.nodes.length; ii++) {
-                    if(graph.nodes[ii] === node) { continue; }
-                    mapNodes(node, graph.nodes[ii], false);
-                }
+                graph.nodes.map(function(otherNode) {
+                    if(node === otherNode) {
+                        return;
+                    }
+                    mapNodes(node, otherNode, false);
+                });
                 return false;
             } else if (evalResult === null) {
                 registerTrigger(node, vddNode, node, targetNode);
@@ -416,28 +420,27 @@ function computeOutput(inputVals, outputNode) {
         }
 
         // Recurse on all edges.
-        let edges = node.edges;
-        let hasNullPath = false;
-        for (let ii = 0; ii < edges.length; ii++) {
-            let otherNode = edges[ii].getOtherNode(node);
+        hasNullPath = false;
+        node.edges.map(function(edge) {
+            let otherNode = edge.getOtherNode(node);
             let hasPath = pathExists(otherNode, targetNode);
             if (hasPath) {
                 mapNodes(node, targetNode, true);
-                mapNodes(node, edges[ii].getOtherNode(node), true);
+                mapNodes(node, edge.getOtherNode(node), true);
                 return true;
             }
             let result = computeOutputRecursive(otherNode, targetNode);
             if (result) {
                 mapNodes(node, targetNode, true);
-                mapNodes(node, edges[ii].getOtherNode(node), true);
+                mapNodes(node, edge.getOtherNode(node), true);
                 return true;
             }
 
             if(result === null || hasPath === null) {
                 hasNullPath = true;
-                registerTrigger(targetNode, edges[ii].getOtherNode(node), node, targetNode);
+                registerTrigger(targetNode, edge.getOtherNode(node), node, targetNode);
             }
-        }
+        });
 
         // No findy :(
         if (hasNullPath) {
