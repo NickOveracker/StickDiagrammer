@@ -334,6 +334,10 @@ function computeOutput(inputVals, outputNode) {
                 nodeNodeMap[graph.getIndexByNode(node1)][ii] = isPath;
             }
         }
+
+        if(isPath !== undefined) {
+            executeTriggers(node1, node2);
+        }
     }
 
     function pathExists(node1, node2) {
@@ -398,11 +402,9 @@ function computeOutput(inputVals, outputNode) {
         if (node.isTransistor()) {
             let evalResult = evaluate(node);
             if (evalResult === false) {
-                let allNodes = graph.nodes;
-                for(let qq = 0; qq < allNodes.length; qq++) {
-                    if(allNodes[qq] === node) { continue; }
-                    mapNodes(node, allNodes[qq], false);
-                    executeTriggers(node, allNodes[qq]);
+                for(let ii = 0; ii < graph.nodes.length; ii++) {
+                    if(graph.nodes[ii] === node) { continue; }
+                    mapNodes(node, graph.nodes[ii], false);
                 }
                 return false;
             } else if (evalResult === null) {
@@ -422,16 +424,12 @@ function computeOutput(inputVals, outputNode) {
             if (hasPath) {
                 mapNodes(node, targetNode, true);
                 mapNodes(node, edges[ii].getOtherNode(node), true);
-                executeTriggers(node, targetNode);
-                executeTriggers(node, edges[ii].getOtherNode(node));
                 return true;
             }
             let result = computeOutputRecursive(otherNode, targetNode);
             if (result) {
                 mapNodes(node, targetNode, true);
                 mapNodes(node, edges[ii].getOtherNode(node), true);
-                executeTriggers(node, targetNode);
-                executeTriggers(node, edges[ii].getOtherNode(node));
                 return true;
             }
 
@@ -447,7 +445,6 @@ function computeOutput(inputVals, outputNode) {
             return null;
         }
         mapNodes(node, targetNode, false);
-        executeTriggers(node, targetNode);
         return false;
     }
 
