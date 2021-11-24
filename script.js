@@ -423,24 +423,19 @@ function computeOutput(inputVals, outputNode) {
         // Recurse on all edges.
         hasNullPath = false;
         pathFound = false;
-        node.edges.forEach(function(edge) {
-            if(pathFound) {
-                return;
-            }
+        node.edges.some(function(edge) {
             let otherNode = edge.getOtherNode(node);
             let hasPath = pathExists(otherNode, targetNode);
             if (hasPath) {
                 mapNodes(node, targetNode, true);
                 mapNodes(node, edge.getOtherNode(node), true);
-                pathFound = true;
-                return;
+                return pathFound = true;
             }
             let result = hasPath !== false && computeOutputRecursive(otherNode, targetNode);
             if (result) {
                 mapNodes(node, targetNode, true);
                 mapNodes(node, edge.getOtherNode(node), true);
-                pathFound = true;
-                return;
+                return pathFound = true;
             }
 
             if(result === null || hasPath === null) {
