@@ -5,13 +5,10 @@
 * Development: [Github.io](https://nickoveracker.github.io/StickDiagrammer)
 
 ## Legal Stuff
-All rights are reserved by Nick Overacker.
-
-Free for (personal ∧ non-professional ∧ non-commercial) use.
-
-For (professional ⋁ commercial ⋁ institutional) use, please contact: [nick.overacker@okstate.edu](mailto:nick.overacker@okstate.edu)
-
-A proper source-available or open-source license will be added at some point.
+* All rights are reserved by Nick Overacker.
+* Free for (personal ∧ non-professional ∧ non-commercial) use.
+* For (professional ⋁ commercial ⋁ institutional) use, please contact: [nick.overacker@okstate.edu](mailto:nick.overacker@okstate.edu)
+* A proper source-available or open-source license will be added at some point.
 
 ## Dogma of Development
 * Above all else, the code must work.
