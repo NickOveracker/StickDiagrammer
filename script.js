@@ -43,70 +43,38 @@
 // Graph class to represent CMOS circuitry.
 class Graph {
     constructor() {
-        this.nodes = [];
-        this.edges = [];
+        nodes = [];
     }
 
     // Clear the graph.
     clear() {
         // Destroy all nodes.
-        for (let ii = 0; ii < this.nodes.length; ii++) {
-            this.nodes[ii].destroy();
+        for (let ii = 0; ii < nodes.length; ii++) {
+            nodes[ii].destroy();
         }
 
-        // Destroy all edges.
-        for (let ii = 0; ii < this.edges.length; ii++) {
-            this.edges[ii].destroy();
-        }
-
-        this.nodes.length = 0;
-        this.edges.length = 0;
+        nodes.length = 0;
     }
 
-    // Check if two nodes are connected.
-    isConnected(node1, node2) {
-        let edges = node1.getEdges();
-        for (let ii = 0; ii < edges.length; ii++) {
-            if (edges[ii].getNode2() === node2 || edges[ii].getNode1() === node2) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    // Add a node to the graph.
+   // Add a node to the graph.
     addNode(cell) {
-        let node = new Node(cell);
-        this.nodes.push(node);
+        nodes.push(new Node(cell));
         return node;
-    }
-
-    // Add an edge to the graph.
-    addEdge(node1, node2) {
-        if (!this.isConnected(node1, node2) && node1 !== node2) {
-            let edge = new Edge(node1, node2);
-            this.edges.push(edge);
-        }
     }
 
     // Return the node with the given cell.
     getNode(cell) {
-        for (let node of this.nodes) {
-            if (node.getCell() === cell) {
+        for (let node of nodes) {
+            if (node.cell === cell) {
                 return node;
             }
         }
         return null;
     }
 
-    // Return the number of nodes in the graph.
-    getNumNodes() {
-        return this.nodes.length;
-    }
-
     getIndexByNode(node) {
-        for (let ii = 0; ii < this.nodes.length; ii++) {
-            if (this.nodes[ii] === node) {
+        for (let ii = 0; ii < nodes.length; ii++) {
+            if (nodes[ii] === node) {
                 return ii;
             }
         }
@@ -121,44 +89,44 @@ class Node {
         this.edges = [];
         this.isPmos = layeredGrid[cell.x][cell.y][PDIFF].isSet;
         this.isNmos = layeredGrid[cell.x][cell.y][NDIFF].isSet;
-        this.isSupply = false;
     }
 
     // Destructor
     destroy() {
-        this.cell = null;
-        this.edges = null;
+        for(let ii = 0; ii < edges.length; ii++) {
+            edges[ii].destroy();
+        }
+        cell = undefined;
+        edges.length = 0;
     }
 
+    // Check if two nodes are connected.
+    isConnected(otherNode) {
+        for (let ii = 0; ii < edges.length; ii++) {
+            if (edges[ii].getNode1() === otherNode || edges[ii].getNode2() === otherNode) {
+                return true;
+            }
+        }
+        return false;
+    }
+ 
     isTransistor() {
-        return this.isPmos || this.isNmos;
-    }
-
-    setAsSupply() {
-        this.isSupply = true;
+        return isPmos || isNmos;
     }
 
     addEdge(edge) {
-        this.edges.push(edge);
+        edges.push(edge);
     }
 
     removeEdge(edge) {
-        let index = this.edges.indexOf(edge);
+        let index = edges.indexOf(edge);
         if (index > -1) {
-            this.edges.splice(index, 1);
+            edges.splice(index, 1);
         }
     }
 
-    getEdges() {
-        return this.edges;
-    }
-
-    getCell() {
-        return this.cell;
-    }
-
     getName() {
-        return this.cell.gate.getName();
+        return cell.gate.getName();
     }
 }
 
@@ -174,23 +142,23 @@ class Edge {
 
     // Destructor
     destroy() {
-        this.node1 = null;
-        this.node2 = null;
+        node1 = undefined;
+        node2 = undefined;
     }
 
     getNode1() {
-        return this.node1;
+        return node1;
     }
 
     getNode2() {
-        return this.node2;
+        return node2;
     }
 
     getOtherNode(node) {
-        if (this.node1 === node) {
-            return this.node2;
-        } else if (this.node2 === node) {
-            return this.node1;
+        if (node1 === node) {
+            return node2;
+        } else if (node2 === node) {
+            return node1;
         } else {
             return null;
         }
@@ -199,62 +167,52 @@ class Edge {
 
 // Set of cells that are electrically connected to one another.
 class Net {
-    constructor(name, isSupply, isInput, isOutput) {
+    constructor(name, isInput) {
         this.name = name;
         this.cells = new Set();
         this.nodes = new Set();
-        this.isSupply = isSupply;
         this.isInput = isInput;
-        this.isOutput = isOutput;
     }
 
     isIdentical(net) {
         // Two nets are identical if they have the same set of cells.
         // By design, if two nets share even one cell, then they share all cells.
         // So, we can just check a single cell.
-        let cell = this.cells.values().next().value;
+        let cell = cells.values().next().value;
         return net.cells.has(cell);
     }
 
     addNode(node) {
-        this.nodes.add(node);
+        nodes.add(node);
     }
 
     removeNode(node) {
-        this.nodes.delete(node);
+        nodes.delete(node);
     }
 
     containsNode(node) {
-        return this.nodes.has(node);
-    }
-
-    getNodes() {
-        return this.nodes;
+        return nodes.has(node);
     }
 
     clear() {
-        this.cells.clear();
-        this.nodes.clear();
+        cells.clear();
+        nodes.clear();
     }
 
     addCell(cell) {
-        this.cells.add(cell);
+        cells.add(cell);
     }
 
     containsCell(cell) {
-        return this.cells.has(cell);
-    }
-
-    getCells() {
-        return this.cells;
+        return cells.has(cell);
     }
 
     getName() {
-        return this.name;
+        return name;
     }
 
     size() {
-        return this.nodes.size;
+        return nodes.size;
     }
 }
 
@@ -333,16 +291,16 @@ let pmos = new Set();
 let darkModeGridColor = '#cccccc';
 let lightModeGridColor = '#999999';
 
-let netVDD = new Net("VDD", true, false, false);
-let netGND = new Net("GND", true, false, false);
+let netVDD = new Net("VDD", false);
+let netGND = new Net("GND", false);
 
 let inputNets = [];
 let outputNets = [];
 for (let ii = 0; ii < inputs.length; ii++) {
-    inputNets.push(new Net(String.fromCharCode(65 + ii), false, true, false));
+    inputNets.push(new Net(String.fromCharCode(65 + ii), true));
 }
 for (let ii = 0; ii < outputs.length; ii++) {
-    outputNets.push(new Net(String.fromCharCode(89 - ii), false, false, true));
+    outputNets.push(new Net(String.fromCharCode(89 - ii), false));
 }
 
 /* jshint latedef: nofunc */
@@ -460,7 +418,7 @@ function computeOutput(inputVals, outputNode) {
         }
 
         // Recurse on all edges.
-        let edges = node.getEdges();
+        let edges = node.edges;
         let hasNullPath = false;
         for (let ii = 0; ii < edges.length; ii++) {
             let otherNode = edges[ii].getOtherNode(node);
@@ -498,7 +456,7 @@ function computeOutput(inputVals, outputNode) {
     }
 
     function evaluate(node) {
-        let gateNet = node.getCell().gate;
+        let gateNet = node.cell.gate;
 
         if (gateNet.isInput) {
             /*jslint bitwise: true */
@@ -511,7 +469,7 @@ function computeOutput(inputVals, outputNode) {
         }
 
         // Otherwise, recurse and see if this is active.
-        let gateNodeIterator = gateNet.getNodes().values();
+        let gateNodeIterator = gateNet.nodes.values();
         let hasNullPath = false;
 
         for (let ii = 0; ii < gateNet.size(); ii++) {
@@ -585,7 +543,7 @@ function computeOutput(inputVals, outputNode) {
 
     // Get pmos output.
     nodeNodeMap.length = 0;
-    for (let ii = 0; ii < graph.getNumNodes(); ii++) {
+    for (let ii = 0; ii < graph.nodes.length(); ii++) {
         nodeNodeMap[ii] = [];
         nodeNodeMap[ii][ii] = true;
     }
@@ -593,7 +551,7 @@ function computeOutput(inputVals, outputNode) {
 
     // Get nmos output.
     nodeNodeMap.length = 0;
-    for (let ii = 0; ii < graph.getNumNodes(); ii++) {
+    for (let ii = 0; ii < graph.nodes.length(); ii++) {
         nodeNodeMap[ii] = [];
         nodeNodeMap[ii][ii] = true;
     }
@@ -892,7 +850,7 @@ function setNets() {
         // Skip for the gate terminal.
         if (term === "gate") { return; }
 
-        let net = new Net("?", false, false, false);
+        let net = new Net("?", false);
 
         // If the transistor's term1/term2 is not in any of the nets,
         // then create a new net and add term1/term2 to it.
@@ -918,7 +876,7 @@ function setNets() {
         let net = getNet(transistor[term]);
 
         if (net === null) {
-            net = new Net("?", false, false, false);
+            net = new Net("?", false);
             setRecursively(transistor[term], net);
             netlist.push(net);
         }
@@ -936,22 +894,22 @@ function setNets() {
         // Skip for the gate terminal.
         if (termA === "gate") { return; }
 
-        let net = transistor.getCell()[termA];
+        let net = transistor.cell[termA];
 
         // If net is netVDD, add an edge to vddNode.
         if (net === netVDD) {
-            graph.addEdge(transistor, vddNode);
+            transistor.addEdge(vddNode);
         }
 
         // If net is netGND, add an edge to gndNode.
         if (net === netGND) {
-            graph.addEdge(transistor, gndNode);
+            transistor.addEdge(gndNode);
         }
 
         // Same for output.
         for (let ii = 0; ii < outputs.length; ii++) {
             if (net === outputNets[ii]) {
-                graph.addEdge(transistor, outputNodes[ii]);
+                transistor.addEdge(outputNodes[ii]);
             }
         }
 
@@ -960,9 +918,9 @@ function setNets() {
             // Skip for the gate terminal or self-comparison.
             if (termB === "gate" || transistor === transistor2) { return; }
 
-            if (transistor2.getCell()[termB] !== undefined) {
-                if (transistor.getCell()[termA] === transistor2.getCell()[termB]) {
-                    graph.addEdge(transistor, transistor2);
+            if (transistor2.cell[termB] !== undefined) {
+                if (transistor.cell[termA] === transistor2.cell[termB]) {
+                    transistor.addEdge(transistor2);
                 }
             }
         });
@@ -974,8 +932,8 @@ function setNets() {
 function linkIdenticalNets() {
     'use strict';
     function linkNodes(net1, net2) {
-        let nodeIterator1 = net1.getNodes().values();
-        let nodeIterator2 = net2.getNodes().values();
+        let nodeIterator1 = net1.nodes.values();
+        let nodeIterator2 = net2.nodes.values();
 
         // If net1 is an input net, we need to reverse the order of the nodes.
         // This is because there are no nodes in input nets to begin with.
@@ -998,7 +956,7 @@ function linkIdenticalNets() {
 
             // Loop through net2's nodes.
             for (let node2 = nodeIterator2.next(); !node2.done; node2 = nodeIterator2.next()) {
-                graph.addEdge(node1.value, node2.value);
+                node1.value.addEdge(node2.value);
                 net1.addNode(node2.value);
             }
         }
@@ -1033,11 +991,11 @@ function addNodeByCellToNet(cell, net) {
     let node = graph.getNode(cell);
 
     if(node !== null) {
-        let nodeIterator = net.getNodes().values();
+        let nodeIterator = net.nodes.values();
 
         // Loop through net's nodes.
         for (let node2 = nodeIterator.next(); !node2.done; node2 = nodeIterator.next()) {
-            graph.addEdge(node, node2.value);
+            node.addEdge(node2.value);
         }
 
         net.addNode(node);
