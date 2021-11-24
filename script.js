@@ -116,7 +116,9 @@ class Node {
     }
 
     addEdge(node) {
-        this.edges.push(new Edge(this, node));
+        let edge = new Edge(this, node);
+        this.edges.push(edge);
+        node.edges.push(edge);
     }
 
     removeEdge(edge) {
@@ -136,9 +138,6 @@ class Edge {
     constructor(node1, node2) {
         this.node1 = node1;
         this.node2 = node2;
-        // Add the edge to the nodes.
-        node1.addEdge(this);
-        node2.addEdge(this);
     }
 
     // Destructor
