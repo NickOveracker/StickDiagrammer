@@ -116,21 +116,13 @@ class LayeredGrid {
         let layer = Math.floor(index / (this.width * this.height));
         let y = Math.floor((index - (layer * this.width * this.height)) / this.width);
         let x = index - (layer * this.width * this.height) - (y * this.width);
-        return { x: x, y: y, layer: layer };
+        return { x: x, y: y, layer: layer, };
     }
 
     // Map a function to all set values in the grid
     map(bounds, func, includeEmpty) {
         let cell;
-
-        // We can optimize when empty cells aren't needed
-        if(!includeEmpty) {
-            this.grid.forEach(function(cell) {
-                if(cell) {
-                    func(cell.x, cell.y, cell.layer);
-                }
-            });
-        }
+        let coords;
 
         let outOfGrid = function(x, y, layer) {
             return x < 0     || x >= this.width  ||
@@ -147,15 +139,23 @@ class LayeredGrid {
                     cell = this.grid[this.convertFromCoordinates(x, y, layer)];
                     if(cell || includeEmpty) {
                         func(x, y, layer);
-		    }
-		}
+                    }
+                }
             }
         }
     }
 
     // Clear all values in the grid
     clearAll() {
-        this.map(function(cell) {
+        let bounds = {
+            left: 0,
+            right: this.width - 1,
+            top: 0,
+            bottom: this.height - 1,
+            lowLayer: 0,
+            highLayer: this.layers - 1,
+        };
+        this.map(bounds, function(cell) {
             this.grid[cell] = null;
         });
     }
