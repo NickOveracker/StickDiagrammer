@@ -30,6 +30,8 @@
            setNets: false,
            computeOutput: false,
            outputNodes: false
+           cursorColorIndex: false,
+           METAL1: false,
 */
 
 function runTestbench(runTo) {
@@ -1133,7 +1135,7 @@ function runTestbench(runTo) {
     // Label with their test case names.
     results.forEach(function(result, index) {
         p = document.createElement("p");
-        p.innerHTML = `<span onclick="runTestBench(${index + 1})"><b>Test ${index}:</b> ${testCases[index]}</span>`;
+        p.innerHTML = `<span onclick="runTestbench(${index + 1})"><b>Test ${index}:</b> ${testCases[index]}</span>`;
         p.innerHTML += `<b style='float:right;color:${result ? "green'>PASS" : "red'>FAIL"}</b>`;
         document.getElementById("instructions-text").appendChild(p);
     });
