@@ -1157,6 +1157,8 @@ function setRecursively(cell, net) {
 
 function decorateContact(x, y) {
     'use strict';
+    x = x + 1;
+    y = y + 1;
     ctx.fillStyle = "#000000";
     ctx.beginPath();
     ctx.moveTo(x * cellWidth + cellWidth + 1, y * cellHeight - 1);
@@ -1232,19 +1234,19 @@ function refreshCanvas() {
 
         // For the last layer, fill each filled cell with a cross.
         if (layer === CONTACT) {
-            if (layeredGrid.get(x - 1, y - 1, layer).isSet) {
+            if (layeredGrid.get(x, y, layer).isSet) {
                 decorateContact(x, y);
             }
         }
 
         // Set the terminals of the cell to null.
-        layeredGrid.get(x - 1, y - 1, NDIFF).term1 = null;
-        layeredGrid.get(x - 1, y - 1, NDIFF).term2 = null;
-        layeredGrid.get(x - 1, y - 1, NDIFF).gate  = null;
+        layeredGrid.get(x, y, NDIFF).term1 = null;
+        layeredGrid.get(x, y, NDIFF).term2 = null;
+        layeredGrid.get(x, y, NDIFF).gate  = null;
 
-        layeredGrid.get(x - 1, y - 1, PDIFF).term1 = null;
-        layeredGrid.get(x - 1, y - 1, PDIFF).term2 = null;
-        layeredGrid.get(x - 1, y - 1, PDIFF).gate  = null;
+        layeredGrid.get(x, y, PDIFF).term1 = null;
+        layeredGrid.get(x, y, PDIFF).term2 = null;
+        layeredGrid.get(x, y, PDIFF).gate  = null;
     });
 
     // Set dark mode as needed.
