@@ -649,8 +649,8 @@ function computeOutput(inputVals, outputNode) {
                 out = "X";
             }
         }
-		
-		return out;
+        
+        return out;
     }
 
     // Get pmos output.
@@ -800,6 +800,11 @@ function drawGrid(size) {
     if (gridCanvas === undefined) {
         gridCanvas = document.createElement('canvas');
         document.body.appendChild(gridCanvas);
+    }
+
+    // Return if the size has not changed.
+    if (gridCanvas.width === canvas.width - 1 || gridCanvas.height === canvas.height - 1) {
+        return;
     }
 
     // Place gridCanvas behind the canvas.
@@ -1813,7 +1818,7 @@ window.onload = function () {
     // Set up the dashboard close button.
     button = document.getElementById("toggle-dashboard");
     button.onclick = function () {
-		let button = document.getElementById("toggle-dashboard");
+        let button = document.getElementById("toggle-dashboard");
         let div = document.getElementById("dashboard");
         if(div.style.right !== "-270px") {
             div.style.right = "-270px";
