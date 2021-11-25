@@ -1259,7 +1259,7 @@ function refreshCanvas() {
 
     // Draw CONTACT at the coordinates of each input and output.
     inputs.forEach(function(input) {
-        drawCell(input.x, input.y, CONTACT);
+        layeredGrid.set(input.x, input.y, CONTACT);
     });
     outputs.forEach(function(output) {
         layeredGrid.set(output.x, output.y, CONTACT);
