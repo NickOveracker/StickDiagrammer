@@ -41,6 +41,7 @@ function runTestbench() {
     let assertNext = false;
     let tv;
     let testVector = 0;
+    let p;
     let results = [];
     let testCases = ["Five-stage inverter",
                      "Four-stage buffer",
@@ -1114,13 +1115,16 @@ function runTestbench() {
 
     // Clear #instructions-text and replace its contents with the elapsed time
     document.getElementById("instructions-text").innerHTML = "";
-    document.getElementById("instructions-text").appendChild(document.createTextNode(`Elapsed time: ${endTime - startTime}ms`));
+    p = document.createElement("p");
+    p.innerHTML = `<b>Elapsed time:</b> ${endTime - startTime}ms`;
+    document.getElementById("instructions-text").appendChild(p);
+
     // Add indidual test results to #instructions-text as PASS or FAIL
     // Label with their test case names.
     results.forEach(function(result, index) {
-        let p = document.createElement("p");
+        p = document.createElement("p");
         p.innerHTML = `<b>Test ${index}:</b> ${testCases[index]}<br>`;
-        p.innerHTML += `<b style='text-align: right; color:${result ? "green'>PASS" : "red'>FAIL"}</b>`;
+        p.innerHTML += `<b style='float:right;color:${result ? "green'>PASS" : "red'>FAIL"}</b>`;
         document.getElementById("instructions-text").appendChild(p);
     });
 }
