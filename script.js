@@ -1269,7 +1269,7 @@ function refreshCanvas() {
 function saveCurrentState() {
     'use strict';
     // Save both the grid and the drawing.
-    localStorage.setItem('layeredGrid' + saveState, JSON.stringify(layeredGrid));
+    localStorage.setItem('layeredGrid' + saveState, JSON.stringify(layeredGrid.grid));
     localStorage.setItem('canvas' + saveState, canvas.toDataURL());
 
     // Increment the save state.
@@ -1303,7 +1303,7 @@ function undo() {
     }
     if (saveState > firstSaveState) {
         saveState--;
-        layeredGrid = JSON.parse(localStorage.getItem('layeredGrid' + saveState));
+        layeredGrid.grid = JSON.parse(localStorage.getItem('layeredGrid' + saveState));
         let img = new Image();
         img.src = localStorage.getItem('canvas' + saveState);
         img.onload = function () {
@@ -1319,7 +1319,7 @@ function redo() {
     'use strict';
     if (saveState < lastSaveState - 1) {
         saveState++;
-        layeredGrid = JSON.parse(localStorage.getItem('layeredGrid' + saveState));
+        layeredGrid.grid = JSON.parse(localStorage.getItem('layeredGrid' + saveState));
         let img = new Image();
         img.src = localStorage.getItem('canvas' + saveState);
         img.onload = function () {
