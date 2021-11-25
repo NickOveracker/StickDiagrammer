@@ -107,19 +107,18 @@ class LayeredGrid {
 
     // Map a function to all set values in the grid
     map(bounds, func, includeEmpty) {
-        for(let cell in this.grid) {
-            if(this.grid[cell] || includeEmpty) {
-                let layer = Math.floor(cell / this.width / this.height);
-                let y = Math.floor((cell - layer * this.width * this.height) / this.width);
-                let x = cell - layer * this.width * this.height - y * this.width;
-
-                if(bounds.left > x || bounds.right < x ||
-                   bounds.top > y || bounds.bottom < y ||
-                   bounds.lowLayer > layer || bounds.highLayer < layer) {
-                    continue;
-                }
-
-                func(x, y, layer);
+        let cell;
+        for(let layer = bounds.lowLayer; layer <= bounds.highLayer; layer++) {
+            for(let y = bounds.top; y <= bounds.bottom; y++) {
+                for(let x = bounds.left; x <= bounds.right; x++) {
+                    if(x < 0 || x >= this.width || y < 0 || y >= this.height || layer < 0 || layer >= this.layers) {
+                        continue;
+                    }
+                    cell = this.grid[x + y * this.width + layer * this.width * this.height];
+                    if(cell || includeEmpty) {
+                        func(x, y, layer);
+		    }
+		}
             }
         }
     }
@@ -1549,7 +1548,7 @@ function mousemoveHandler(event) {
         bounds.lowLayer = bounds.highLayer = DELETE;
         layeredGrid.map(bounds, function (x, y, layer) {
             layeredGrid.set(x, y, layer);
-        });
+        }, true);
     }
 
     // Save the current X and Y coordinates.
