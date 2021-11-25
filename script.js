@@ -1199,9 +1199,9 @@ function refreshCanvas() {
 
     // Check the layers of the grid, and draw cells as needed.
     function drawCell(i, j, layer, isBorder) {
-        if (isBorder || layeredGrid.get(i - 1, j - 1, layer).isSet) {
+        if (isBorder || layeredGrid.get(i, j, layer).isSet) {
             ctx.fillStyle = cursorColors[layer];
-            ctx.fillRect(i * cellWidth, j * cellHeight - 1, cellWidth + 1, cellHeight + 2);
+            ctx.fillRect((i+1) * cellWidth, (j+1) * cellHeight - 1, cellWidth + 1, cellHeight + 2);
         }
     }
 
