@@ -1436,15 +1436,15 @@ function refreshTruthTable(table) {
 
     // Create the rest of the table.
     table.forEach(function (row, rowIndex) {
-        let row = tableElement.insertRow(rowIndex);
+        let tRow = tableElement.insertRow(rowIndex);
 
-        table[rowIndex].forEach(function (col, colIndex) {
-            let cell = row.insertCell(colIndex);
-            cell.innerHTML = table[rowIndex][colIndex];
+        row.forEach(function (cell, colIndex) {
+            let tCell = row.insertCell(colIndex);
+            tCell.innerHTML = cell;
 
             // Set the cell class depending on whether this is
             // an input or output cell.
-            cell.className = colIndex < inputs.length ? "input" : "output";
+            tCell.className = colIndex < inputs.length ? "input" : "output";
         });
     });
 }
