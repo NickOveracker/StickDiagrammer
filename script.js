@@ -113,7 +113,7 @@ class LayeredGrid {
                 if(bounds.left > cell.x || bounds.right < cell.x ||
                    bounds.top > cell.y || bounds.bottom < cell.y ||
                    bounds.lowLayer > cell.layer || bounds.highLayer < cell.layer) {
-                    return;
+                    continue;
                 }
                 func(cell.x, cell.y, cell.layer);
             }
