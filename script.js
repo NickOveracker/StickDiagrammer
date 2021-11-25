@@ -803,10 +803,10 @@ function drawGrid(size) {
     }
 
     // Return if the size has not changed.
-    if (gridCanvas.width      === canvas.width - 1  &&
-        gridCanvas.height     === canvas.height - 1 &&
-        gridCanvas.style.left === canvas.style.left &&
-        gridCanvas.style.top  === canvas.style.top) {
+    if (gridCanvas.width      === canvas.width - 1         &&
+        gridCanvas.height     === canvas.height - 1        &&
+        gridCanvas.style.left === canvas.offsetLeft + 'px' &&
+        gridCanvas.style.top  === canvas.offsetTop  + 'px') {
         return;
     }
 
