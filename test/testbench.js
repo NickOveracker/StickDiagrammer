@@ -1118,11 +1118,9 @@ function runTestbench() {
     // Add indidual test results to #instructions-text as PASS or FAIL
     // Label with their test case names.
     results.forEach(function(result, index) {
-        document.getElementById("instructions-text").appendChild(document.createElement("br"));
-        document.getElementById("instructions-text").appendChild(document.createTextNode(`<b>Test ${index}:</b> ${testCases[index]}`));
-        document.getElementById("instructions-text").appendChild(document.createElement("br"));
-        document.getElementById("instructions-text")
-            .appendChild(document.createTextNode(`<b style='text-align: right; color:${result ? "green'>PASS" : "red'>FAIL"}</b>`)
-        );
+        let p = document.createElement("p");
+        p.innerHTML = `<b>Test ${index}:</b> ${testCases[index]}<br>`;
+        p.innerHTML += `<b style='text-align: right; color:${result ? "green'>PASS" : "red'>FAIL"}</b>`;
+        document.getElementById("instructions-text").appendChild(p);
     });
 }
