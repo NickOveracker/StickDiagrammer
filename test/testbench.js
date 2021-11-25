@@ -6,7 +6,7 @@
 /* jshint freeze: true */
 /* jshint futurehostile: true */
 /* jshint leanswitch: true */
-/* jshint maxcomplexity: 10 */
+/* jshint maxcomplexity: 15 */
 /* jshint maxdepth: 4 */
 /* jshint maxparams: 4 */
 /* jshint noarg: true */
@@ -32,7 +32,7 @@
            outputNodes: false
 */
 
-function runTestbench() {
+function runTestbench(runTo) {
     'use strict';
     let endTime;
     let evt;
@@ -42,6 +42,7 @@ function runTestbench() {
     let testVector = 0;
     let p;
     let results = [];
+    let startTime;
     let testCases = ["Five-stage inverter",
                      "Four-stage buffer",
                     "OR-4",
@@ -63,12 +64,22 @@ function runTestbench() {
                     "Direct input #4:",
                     "A*B*(C+D)",
     ];
-    let startTime;
+    runTo = runTo || testCases.length;
+
+    // Set up the testbench
+    while(cursorColorIndex !== METAL1) {
+        changeLayer();
+    }
 
     function mapX(x) {return x*cellWidth + canvas.offsetLeft + cellWidth;}
     function mapY(y) {return y*cellHeight + canvas.offsetTop + cellHeight;}
 
     let events = [
+        // Clear the canvas
+        ["mousedown", {button:  2, clientX: mapX(1),   clientY: mapY(1)}],
+        ["mousemove", {buttons: 2, clientX: mapX(29),  clientY: mapY(29)}],
+        ["mouseup",   {button:  2, clientX: mapX(29),  clientY: mapY(29)}],
+
         /* 5-stage inverter */
         // VDD/GND rails.
         ["mousedown", {button:  0, clientX: mapX(2),  clientY: mapY(2)}],
@@ -1064,7 +1075,7 @@ function runTestbench() {
 
     /** RUN TESTBENCH **/
     startTime = Date.now();
-    for(let ii = 0; ii < events.length; ii++) {
+    for(let ii = 0; ii < events.length && testVector <= runTo; ii++) {
         if(events[ii] === 0) {
             changeLayer();
             continue;
@@ -1122,7 +1133,7 @@ function runTestbench() {
     // Label with their test case names.
     results.forEach(function(result, index) {
         p = document.createElement("p");
-        p.innerHTML = `<b>Test ${index}:</b> ${testCases[index]}`;
+        p.innerHTML = `<span onclick="runTestBench(${index})"><b>Test ${index}:</b> ${testCases[index]}</span>`;
         p.innerHTML += `<b style='float:right;color:${result ? "green'>PASS" : "red'>FAIL"}</b>`;
         document.getElementById("instructions-text").appendChild(p);
     });
