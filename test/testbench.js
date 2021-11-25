@@ -1075,6 +1075,8 @@ function runTestbench(runTo) {
         2,
         "0000000100010001",
 
+        0,
+
         /** AOI4 **/
         1,
         function() {
