@@ -63,7 +63,7 @@ function runTestbench() {
                     "Direct input #4:",
                     "A*B*(C+D)",
     ];
-    let startTime = Date.now();
+    let startTime;
 
     function mapX(x) {return x*cellWidth + canvas.offsetLeft + cellWidth;}
     function mapY(y) {return y*cellHeight + canvas.offsetTop + cellHeight;}
@@ -1065,7 +1065,7 @@ function runTestbench() {
    ];
 
     /** RUN TESTBENCH **/
-
+    startTime = Date.now();
     for(let ii = 0; ii < events.length; ii++) {
         if(events[ii] === 0) {
             changeLayer();
