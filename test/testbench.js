@@ -34,11 +34,35 @@
 
 function runTestbench() {
     'use strict';
+    let startTime = Date.now();
+    let endTime;
     let evt;
     let executeNext = false;
     let assertNext = false;
     let tv;
     let testVector = 0;
+    let results = [];
+    let testCases = ["Five-stage inverter",
+                     "Four-stage buffer",
+                    "OR-4",
+                    "NOR-4",
+                    "NAND-4",
+                    "AND-4",
+                    "Short-circuit #1",
+                    "Short-circuit #2",
+                    "Short-circuit #3",
+                    "Short-circuit #4",
+                    "Short-circuit #5",
+                    "Short-circuit #6",
+                    "Open-circuit #1",
+                    "Open-circuit #2",
+                    "Open-circuit #3",
+                    "Direct input #1:",
+                    "Direct input #2:",
+                    "Direct input #3:",
+                    "Direct input #4:",
+                    "A*B*(C+D)",
+    ];
 
     function mapX(x) {return x*cellWidth + canvas.offsetLeft + cellWidth;}
     function mapY(y) {return y*cellHeight + canvas.offsetTop + cellHeight;}
@@ -463,7 +487,7 @@ function runTestbench() {
         2,
         "0111111111111111",
 
-        /** NOR-4 **/
+        /* NOR-4 */
         1,
 
         // Place terminals
@@ -1080,11 +1104,23 @@ function runTestbench() {
                 }
             }
         
-            console.assert(tv === events[ii], "Error on vector #%d", testVector);
+            results[testVector] = tv === events[ii];
             testVector++;
 
             assertNext = false;
         }
     }
-    console.log("tests done");
+    endTime = Date.now();
+
+    // Clear #instructions-text and replace its contents with the elapsed time
+    document.getElementById("instructions-text").innerHTML = "";
+    document.getElementById("instructions-text").appendChild(document.createTextNode(`Elapsed time: ${endTime - startTime}ms`));
+    // Add indidual test results to #instructions-text as PASS or FAIL
+    // Label with their test case names.
+    results.forEach(function(result, index) {
+        document.getElementById("instructions-text").appendChild(document.createElement("br"));
+        document.getElementById("instructions-text").appendChild(document.createTextNode(`Test ${index}: ${testCases[index]}`));
+        document.getElementById("instructions-text").appendChild(document.createElement("br"));
+        document.getElementById("instructions-text").appendChild(document.createTextNode(`${result ? "PASS" : "FAIL"}`));
+    });
 }

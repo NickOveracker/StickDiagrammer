@@ -122,7 +122,6 @@ class LayeredGrid {
     // Map a function to all set values in the grid
     map(bounds, func, includeEmpty) {
         let cell;
-        let coords;
 
         let outOfGrid = function(x, y, layer) {
             return x < 0     || x >= this.width  ||
