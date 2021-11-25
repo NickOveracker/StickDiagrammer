@@ -1356,8 +1356,6 @@ function undo() {
         img.onload = function () {
             ctx.drawImage(img, 0, 0);
         };
-
-        refreshCanvas();
     }
 }
 
@@ -1372,8 +1370,6 @@ function redo() {
         img.onload = function () {
             ctx.drawImage(img, 0, 0);
         };
-
-        refreshCanvas();
     }
 }
 
@@ -1551,7 +1547,6 @@ function mouseupHandler(event) {
     }
 
     dragging = false;
-    refreshCanvas();
 }
 
 // Show a preview line when the user is dragging the mouse.
@@ -1634,7 +1629,6 @@ function mousemoveHandler(event) {
             } else {
                 rightMouseMoveHandler(bounds);
             }
-            refreshCanvas();
         }
     }
 }
@@ -1725,15 +1719,12 @@ function keydownHandler(event) {
         // '-' key listener.
         placeGND();
     }
-
-    refreshCanvas();
 }
 
 function toggleDarkMode() {
     'use strict';
     darkMode = !darkMode;
     refreshDashboard();
-    refreshCanvas();
 }
 
 // Only change dark/light mode on keyup to avoid seizure-inducing flashes from holding down space.
@@ -1833,7 +1824,7 @@ window.onload = function () {
     };
 
     refreshCanvas();
-    setInterval(refreshCanvas, 500);
+    setInterval(refreshCanvas, 200);
 
     if(window.runTestbench) {
         runTestbench();
