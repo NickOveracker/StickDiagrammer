@@ -214,9 +214,7 @@ class Node {
 
     // Destructor
     destroy() {
-        for(let ii = 0; ii < this.edges.length; ii++) {
-            this.edges[ii].destroy();
-        }
+        this.edges.forEach((edge) => {edge.destroy();});
         this.cell = undefined;
         this.edges.length = 0;
     }
@@ -853,18 +851,18 @@ function loopThroughTransistors(funct) {
     let terms = ["term1", "term2", "gate", ];
     let transistorLists = [nmos, pmos, ];
 
-    for (let ii = 0; ii < transistorLists.length; ii++) {
-        let iterator = transistorLists[ii].values();
+    transistorLists.forEach(function (transistorList) {
+        let iterator = transistorLists.values();
 
         for (let transistor = iterator.next(); !transistor.done; transistor = iterator.next()) {
             let transistorCell = transistor.value;
             let transistorNode = graph.getNode(transistorCell);
 
-            for (let jj = 0; jj < terms.length; jj++) {
-                funct(transistorCell, transistorNode, terms[jj]);
-            }
+            terms.forEach(function(term) {
+                funct(transistorCell, transistorNode, term);
+            });
         }
-    }
+    });
 }
 
 // Clear necessary data structures in preparation for recomputation.
@@ -889,12 +887,13 @@ function resetNetlist() {
     // Add all terminal nets.
     netlist.push(netVDD);
     netlist.push(netGND);
-    for (let ii = 0; ii < inputNets.length; ii++) {
-        netlist.push(inputNets[ii]);
-    }
-    for (let ii = 0; ii < outputNets.length; ii++) {
-        netlist.push(outputNets[ii]);
-    }
+
+    inpuNets.forEach(function(net) {
+        netlist.push(net);
+    });
+    outputNets.forEach(function(net) {
+        netlist.push(net);
+    });
 }
 
 // Set the nets.
@@ -902,8 +901,8 @@ function setNets() {
     'use strict';
     clearCircuit();
 
-    for (let ii = 0; ii < inputNets.length; ii++) { inputNets[ii].clear(); }
-    for (let ii = 0; ii < outputNets.length; ii++) { outputNets[ii].clear(); }
+    inputNets.forEach(function (net) { net.clear(); });
+    outputNets.forEach(function (net) { net.clear(); });
 
     // Add rail nodes to the graph.
     vddNode = graph.addNode(layeredGrid.get(vddCell.x, vddCell.y, CONTACT));
@@ -920,27 +919,28 @@ function setNets() {
     setRecursively(layeredGrid.get(gndCell.x, gndCell.y, CONTACT), netGND);
 
     // Loop through the terminals and set their respective nets.
-    for (let ii = 0; ii < numLayers; ii++) {
-        for (let jj = 0; jj < inputNets.length; jj++) {
-            if (layeredGrid.get(inputs[jj].x, inputs[jj].y, ii).isSet) {
-                setRecursively(layeredGrid.get(inputs[jj].x, inputs[jj].y, ii), inputNets[jj]);
+    cursorColors.forEach(function (_, layer) {
+        inputs.forEach(function(input, index) {
+            if (layeredGrid.get(input.x, input.y, layer).isSet) {
+                setRecursively(layeredGrid.get(input.x, input.y, layer), inputNets[index]);
             }
-        }
-        for (let jj = 0; jj < outputNets.length; jj++) {
-            if (layeredGrid.get(outputs[jj].x, outputs[jj].y, ii).isSet) {
-                setRecursively(layeredGrid.get(outputs[jj].x, outputs[jj].y, ii), outputNets[jj]);
+        });
+
+        outputs.forEach(function(output, index) {
+            if (layeredGrid.get(output.x, output.y, layer).isSet) {
+                setRecursively(layeredGrid.get(output.x, output.y, layer), outputNets[index]);
             }
-        }
-    }
+        });
+    });
 
     resetNetlist();
 
     // Add output nodes to the graph.
     outputNodes.length = 0;
-    for (let ii = 0; ii < outputs.length; ii++) {
-        outputNodes[ii] = graph.addNode(layeredGrid.get(outputs[ii].x, outputs[ii].y, CONTACT));
-        outputNets[ii].addNode(outputNodes[ii]);
-    }
+    outputs.forEach(function(output, index) {
+        outputNodes[index] = graph.addNode(layeredGrid.get(output.x, output.y, CONTACT));
+        outputNets[index].addNode(outputNodes[index]);
+    });
 
     // Each nmos and pmos represents a relation between term1 and term2.
     // If term1 is not in any of the nets,
@@ -1008,11 +1008,11 @@ function setNets() {
         }
 
         // Same for output.
-        for (let ii = 0; ii < outputs.length; ii++) {
-            if (net === outputNets[ii]) {
-                transistor.addEdge(outputNodes[ii]);
+        outputsNets.forEach(function (outputNet, index) {
+            if (net === outputNet) {
+                transistor.addEdge(outputNodes[index]);
             }
-        }
+        });
 
         // Loop through iterator2 to find all other transistors that share a net.
         loopThroughTransistors(function (_, transistor2, termB) {
@@ -1039,17 +1039,17 @@ function linkIdenticalNets() {
         // If net1 is an input net, we need to reverse the order of the nodes.
         // This is because there are no nodes in input nets to begin with.
         // Loop through inputNets and find the net1.
-        for (let ii = 0; ii < inputNets.length; ii++) {
-            if (inputNets[ii] === net1) {
+        inputNets.some(function (net) {
+            if (net === net1) {
                 let temp = nodeIterator1;
                 nodeIterator1 = nodeIterator2;
                 nodeIterator2 = temp;
                 temp = net1;
                 net1 = net2;
                 net2 = temp;
-                break;
-            }
-        }
+                return true;
+             }
+        });
 
         // Loop through net1's nodes.
         for (let node1 = nodeIterator1.next(); !node1.done; node1 = nodeIterator1.next()) {
@@ -1173,13 +1173,15 @@ function setRecursively(cell, net) {
 
     function handleContact(cell, net) {
         if (layeredGrid.get(cell.x, cell.y, CONTACT).isSet) {
-            for (let ii = 0; ii < numLayers; ii++) {
-                if (!layeredGrid.get(cell.x, cell.y, ii).isSet) { continue; }
-                if (net.containsCell(layeredGrid.get(cell.x, cell.y, ii)) === false) {
-                    net.addCell(layeredGrid.get(cell.x, cell.y, ii));
-                    setRecursively(layeredGrid.get(cell.x, cell.y, ii), net);
+            cursorColors.forEach(function(_, layer) {
+                if (!layeredGrid.get(cell.x, cell.y, layer).isSet) {
+                    continue;
                 }
-            }
+                if (net.containsCell(layeredGrid.get(cell.x, cell.y, layer)) === false) {
+                    net.addCell(layeredGrid.get(cell.x, cell.y, layer));
+                    setRecursively(layeredGrid.get(cell.x, cell.y, layer), net);
+                }
+            });
         }
     }
 
@@ -1222,16 +1224,17 @@ function drawLabels() {
     // Draw labels on the canvas above each input and output.
     ctx.font = "bold 18px Arial";
     ctx.fillStyle = darkMode ? "#ffffff" : "#000000";
-    for (let ii = 0; ii < inputs.length; ii++) {
-        ctx.fillText(String.fromCharCode(65 + ii),
-            cellWidth * (inputs[ii].x + 1.5),
-            cellHeight * (inputs[ii].y + 0.75));
-    }
-    for (let ii = 0; ii < outputs.length; ii++) {
-        ctx.fillText(String.fromCharCode(89 - ii),
-            cellWidth * (outputs[ii].x + 1.5),
-            cellHeight * (outputs[ii].y + 0.75));
-    }
+
+    inputs.forEach(function(input, index) {
+        ctx.fillText(String.fromCharCode(65 + index),
+            cellWidth * (input.x + 1.5),
+            cellHeight * (input.y + 0.75));
+    });
+    outputs.forEach(function(output, index) {
+        ctx.fillText(String.fromCharCode(89 - index),
+            cellWidth * (output.x + 1.5),
+            cellHeight * (output.y + 0.75));
+    });
 
     // Same for VDD and GND
     ctx.fillText("VDD", cellWidth * (vddCell.x + 1.5), cellHeight * (vddCell.y + 0.75));
@@ -1255,12 +1258,12 @@ function refreshCanvas() {
     }
 
     // Draw CONTACT at the coordinates of each input and output.
-    for (let ii = 0; ii < inputs.length; ii++) {
-        layeredGrid.set(inputs[ii].x, inputs[ii].y, CONTACT);
-    }
-    for (let ii = 0; ii < outputs.length; ii++) {
-        layeredGrid.set(outputs[ii].x, outputs[ii].y, CONTACT);
-    }
+    inputs.forEach(function(input) {
+        drawCell(input.x, input.y, CONTACT);
+    });
+    outputs.forEach(function(output) {
+        layeredGrid.set(output.x, output.y, CONTACT);
+    });
 
     // Set the CONTACT layer on the VDD and GND cells.
     layeredGrid.set(vddCell.x, vddCell.y, CONTACT);
@@ -1389,13 +1392,13 @@ function clearIfPainted(clientX, clientY) {
         let y = Math.floor((clientY - canvas.offsetTop - cellHeight) / cellHeight);
 
         // Erase all layers of the cell.
-        for (let ii = 0; ii < cursorColors.length; ii++) {
-            if (layeredGrid.get(x, y, ii).isSet) {
+        cursorColors.forEach(function (_, layer) {
+            if (layeredGrid.get(x, y, layer).isSet) {
                 if (!anyLayerSet) { saveCurrentState(); }
                 anyLayerSet = true;
-                layeredGrid.clear(x, y, ii);
+                layeredGrid.clear(x, y, layer);
             }
-        }
+        });
     }
 
     return anyLayerSet;
@@ -1423,28 +1426,27 @@ function refreshTruthTable(table) {
 
     let header = tableElement.createTHead();
     let headerRow = header.insertRow(0);
-    for (let ii = 0; ii < table[0].length; ii++) {
-        let cell = headerRow.insertCell(ii);
-        headerRow.className = "header";
-        cell.innerHTML = table[0][ii];
 
-        // Set the cell class depending on whether this is
-        // an input or output cell.
-        cell.className = ii < inputs.length ? "input" : "output";
-    }
+    table[0].forEach(function (element, index) {
+        let cell = headerRow.insertCell(index);
+        headerRow.className = "header";
+        cell.innerHTML = element;
+        cell.className = index < inputs.length ? "input" : "output";
+    });
 
     // Create the rest of the table.
-    for (let ii = 1; ii < table.length; ii++) {
-        let row = tableElement.insertRow(ii);
-        for (let jj = 0; jj < table[ii].length; jj++) {
-            let cell = row.insertCell(jj);
-            cell.innerHTML = table[ii][jj];
+    table.forEach(function (row, rowIndex) {
+        let row = tableElement.insertRow(rowIndex);
+
+        table[rowIndex].forEach(function (col, colIndex) {
+            let cell = row.insertCell(colIndex);
+            cell.innerHTML = table[rowIndex][colIndex];
 
             // Set the cell class depending on whether this is
             // an input or output cell.
-            cell.className = jj < inputs.length ? "input" : "output";
-        }
-    }
+            cell.className = colIndex < inputs.length ? "input" : "output";
+        });
+    });
 }
 
 function inBounds(event) {
