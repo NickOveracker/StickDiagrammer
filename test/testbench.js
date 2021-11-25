@@ -1124,6 +1124,11 @@ function runTestbench(runTo) {
     }
     endTime = Date.now();
 
+    // Only overwrite the results if all tests were run.
+    if(runTo < testCases.length) {
+        return;
+    }
+
     // Clear #instructions-text and replace its contents with the elapsed time
     document.getElementById("instructions-text").innerHTML = "";
     p = document.createElement("p");
@@ -1135,7 +1140,7 @@ function runTestbench(runTo) {
     // Label with their test case names.
     results.forEach(function(result, index) {
         p = document.createElement("p");
-        p.innerHTML = `<span onclick="runTestbench(${index + 1})"><b>Test ${index}:</b> ${testCases[index]}</span>`;
+        p.innerHTML = `<span style="text-decoration:underline" onclick="runTestbench(${index + 1})"><b>Test ${index}:</b> ${testCases[index]}</span>`;
         p.innerHTML += `<b style='float:right;color:${result ? "green'>PASS" : "red'>FAIL"}</b>`;
         document.getElementById("instructions-text").appendChild(p);
     });
