@@ -109,6 +109,9 @@ class LayeredGrid {
     map(bounds, func, includeEmpty) {
         for(let cell in this.grid) {
             if(this.grid[cell] || includeEmpty) {
+                if(!this.grid[cell]) {
+                    this.set(cell % this.width, Math.floor(cell / this.width), Math.floor(cell / (this.width * this.height)));
+                }
                 cell = this.grid[cell];
                 if(bounds.left > cell.x || bounds.right < cell.x ||
                    bounds.top > cell.y || bounds.bottom < cell.y ||
