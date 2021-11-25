@@ -109,16 +109,16 @@ class LayeredGrid {
     map(bounds, func, includeEmpty) {
         for(let cell in this.grid) {
             if(this.grid[cell] || includeEmpty) {
-                if(!this.grid[cell]) {
-                    this.set(cell % this.width, Math.floor(cell / this.width), Math.floor(cell / (this.width * this.height)));
-                }
-                cell = this.grid[cell];
-                if(bounds.left > cell.x || bounds.right < cell.x ||
-                   bounds.top > cell.y || bounds.bottom < cell.y ||
-                   bounds.lowLayer > cell.layer || bounds.highLayer < cell.layer) {
+                let x = cell % this.width;
+                let y = Math.floor(cell / this.width);
+                let layer = Math.floor(cell / (this.width * this.height));
+                if(bounds.left > x || bounds.right < x ||
+                   bounds.top > y || bounds.bottom < y ||
+                   bounds.lowLayer > layer || bounds.highLayer < layer) {
                     return;
                 }
-                func(cell.x, cell.y, cell.layer);
+
+                func(x, y, layer);
             }
         }
     }
