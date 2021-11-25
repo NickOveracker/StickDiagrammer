@@ -1075,7 +1075,7 @@ function runTestbench(runTo) {
 
     /** RUN TESTBENCH **/
     startTime = Date.now();
-    for(let ii = 0; ii < events.length && testVector <= runTo; ii++) {
+    for(let ii = 0; ii < events.length && testVector < runTo; ii++) {
         if(events[ii] === 0) {
             changeLayer();
             continue;
@@ -1133,7 +1133,7 @@ function runTestbench(runTo) {
     // Label with their test case names.
     results.forEach(function(result, index) {
         p = document.createElement("p");
-        p.innerHTML = `<span onclick="runTestBench(${index})"><b>Test ${index}:</b> ${testCases[index]}</span>`;
+        p.innerHTML = `<span onclick="runTestBench(${index + 1})"><b>Test ${index}:</b> ${testCases[index]}</span>`;
         p.innerHTML += `<b style='float:right;color:${result ? "green'>PASS" : "red'>FAIL"}</b>`;
         document.getElementById("instructions-text").appendChild(p);
     });
