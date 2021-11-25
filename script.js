@@ -354,7 +354,7 @@ let nodeNodeMap = [];
 
 // Cycle through the following cursor colors by pressing space: PDIFF, NDIFF, POLY, METAL1, CONTACT
 // Additional colors: DELETE at index (numLayers + 0)
-let cursorColors = ['rgba(148, 0, 211, 1)',     // pdiff
+let cursorColors = ['rgba(118, 0, 181, 1)',     // pdiff
                     'rgba(50, 205, 50, 1)',     // ndiff
                     'rgba(255, 0, 0, 0.5)',     // poly
                     'rgba(0, 255, 255, 0.5)',   // metal1
