@@ -51,6 +51,7 @@ function runTestbench(runTo) {
                     "NOR-4",
                     "NAND-4",
                     "AND-4",
+                    "This test always fails",
                     "Short-circuit #1",
                     "Short-circuit #2",
                     "Short-circuit #3",
@@ -593,6 +594,10 @@ function runTestbench(runTo) {
 
         2,
         "0000000000000001",
+
+        /* ALWAYS FAIL TEST */
+        2,
+        "0000000000000011",
         
         /** VDD-Y-GND SHORT **/
         ["mousedown", {button:  2, clientX: mapX(1),   clientY: mapY(3)}],
@@ -1080,16 +1085,16 @@ function runTestbench(runTo) {
         /** AOI4 **/
         1,
         function() {
-            inputs[0].x  = 6;
-            inputs[0].y  = 9;
-            inputs[1].x  = 10;
-            inputs[1].y  = 9;
-            inputs[2].x  = 16;
-            inputs[2].y  = 9;
-            inputs[3].x  = 20;
-            inputs[3].y  = 9;
-            outputs[0].x = 21;
-            outputs[0].y = 9;
+            inputs[0].x  = 5;
+            inputs[0].y  = 8;
+            inputs[1].x  = 9;
+            inputs[1].y  = 8;
+            inputs[2].x  = 15;
+            inputs[2].y  = 8;
+            inputs[3].x  = 19;
+            inputs[3].y  = 8;
+            outputs[0].x = 3;
+            outputs[0].y = 21;
         },
 
         ["mousedown", {button:  2, clientX: mapX(1),   clientY: mapY(1)}],
@@ -1193,7 +1198,7 @@ function runTestbench(runTo) {
         ["mouseup",   {button:  0, clientX: mapX(24), clientY: mapY(21)}],
 
         ["mousedown", {button:  0, clientX: mapX(25), clientY: mapY(25)}],
-        ["mousemove", {buttons: 1, clientX: mapX(25), clientY: mapY(25)}],
+        ["mousemove", {buttons: 1, clientX: mapX(25), clientY: mapY(28)}],
         ["mouseup",   {button:  0, clientX: mapX(25), clientY: mapY(28)}],
 
         ["mousedown", {button:  0, clientX: mapX(29), clientY: mapY(2)}],
@@ -1284,11 +1289,11 @@ function runTestbench(runTo) {
         ["mousedown", {button:  0, clientX: mapX(14), clientY: mapY(14)}],
         ["mouseup",   {button:  0, clientX: mapX(14), clientY: mapY(14)}],
 
-        ["mousedown", {button:  0, clientX: mapX(18), clientY: mapY(19)}],
-        ["mouseup",   {button:  0, clientX: mapX(18), clientY: mapY(19)}],
+        ["mousedown", {button:  0, clientX: mapX(17), clientY: mapY(19)}],
+        ["mouseup",   {button:  0, clientX: mapX(17), clientY: mapY(19)}],
 
-        ["mousedown", {button:  0, clientX: mapX(18), clientY: mapY(16)}],
-        ["mouseup",   {button:  0, clientX: mapX(18), clientY: mapY(16)}],
+        ["mousedown", {button:  0, clientX: mapX(17), clientY: mapY(16)}],
+        ["mouseup",   {button:  0, clientX: mapX(17), clientY: mapY(16)}],
 
         ["mousedown", {button:  0, clientX: mapX(18), clientY: mapY(5)}],
         ["mouseup",   {button:  0, clientX: mapX(18), clientY: mapY(5)}],
@@ -1314,11 +1319,11 @@ function runTestbench(runTo) {
         ["mousedown", {button:  0, clientX: mapX(25), clientY: mapY(25)}],
         ["mouseup",   {button:  0, clientX: mapX(25), clientY: mapY(25)}],
 
-        ["mousedown", {button:  0, clientX: mapX(25), clientY: mapY(21)}],
-        ["mouseup",   {button:  0, clientX: mapX(25), clientY: mapY(21)}],
+        ["mousedown", {button:  0, clientX: mapX(24), clientY: mapY(21)}],
+        ["mouseup",   {button:  0, clientX: mapX(24), clientY: mapY(21)}],
 
-        ["mousedown", {button:  0, clientX: mapX(25), clientY: mapY(19)}],
-        ["mouseup",   {button:  0, clientX: mapX(25), clientY: mapY(19)}],
+        ["mousedown", {button:  0, clientX: mapX(24), clientY: mapY(19)}],
+        ["mouseup",   {button:  0, clientX: mapX(24), clientY: mapY(19)}],
 
         ["mousedown", {button:  0, clientX: mapX(29), clientY: mapY(16)}],
         ["mouseup",   {button:  0, clientX: mapX(29), clientY: mapY(16)}],
