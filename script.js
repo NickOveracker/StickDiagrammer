@@ -1426,16 +1426,17 @@ function refreshTruthTable(table) {
 
     let header = tableElement.createTHead();
     let headerRow = header.insertRow(0);
+    headerRow.className = "header";
 
     table[0].forEach(function (element, index) {
         let cell = headerRow.insertCell(index);
-        headerRow.className = "header";
         cell.innerHTML = element;
         cell.className = index < inputs.length ? "input" : "output";
     });
 
     // Create the rest of the table.
     table.forEach(function (row, rowIndex) {
+        if(rowIndex === 0) { return; }
         let tRow = tableElement.insertRow(rowIndex);
 
         row.forEach(function (cell, colIndex) {
