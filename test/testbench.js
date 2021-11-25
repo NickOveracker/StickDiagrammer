@@ -34,7 +34,6 @@
 
 function runTestbench() {
     'use strict';
-    let startTime = Date.now();
     let endTime;
     let evt;
     let executeNext = false;
@@ -64,6 +63,7 @@ function runTestbench() {
                     "Direct input #4:",
                     "A*B*(C+D)",
     ];
+    let startTime = Date.now();
 
     function mapX(x) {return x*cellWidth + canvas.offsetLeft + cellWidth;}
     function mapY(y) {return y*cellHeight + canvas.offsetTop + cellHeight;}
@@ -1118,12 +1118,13 @@ function runTestbench() {
     p = document.createElement("p");
     p.innerHTML = `<b>Elapsed time:</b> ${endTime - startTime}ms`;
     document.getElementById("instructions-text").appendChild(p);
+    document.getElementById("instructions-text").appendChild(document.createElement("br"));
 
     // Add indidual test results to #instructions-text as PASS or FAIL
     // Label with their test case names.
     results.forEach(function(result, index) {
         p = document.createElement("p");
-        p.innerHTML = `<b>Test ${index}:</b> ${testCases[index]}<br>`;
+        p.innerHTML = `<b>Test ${index}:</b> ${testCases[index]}`;
         p.innerHTML += `<b style='float:right;color:${result ? "green'>PASS" : "red'>FAIL"}</b>`;
         document.getElementById("instructions-text").appendChild(p);
     });

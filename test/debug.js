@@ -1,3 +1,5 @@
+let PRINT_MOUSE_POS = false;
+
 // Represent the graph visually as a graph in the console.
 Graph.prototype.print = function() {
     console.log('graph G {');
@@ -79,7 +81,7 @@ getCell = function(clientX, clientY) {
     {
         let x = Math.floor((clientX - canvas.offsetLeft - cellWidth) / cellWidth);
         let y = Math.floor((clientY - canvas.offsetTop - cellHeight) / cellHeight);
-        console.log(x, y);
+        PRINT_MOUSE_POS && console.log(x, y);
         return {x: x, y: y};
     }
     return null;
