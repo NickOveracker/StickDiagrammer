@@ -86,6 +86,13 @@ class LayeredGrid {
             term2: null,
             gate: null,
         };
+
+        // Only allow one of NDIFF or PDIFF to be set
+        if(layer === PDIFF) {
+            this.clear(x, y, NDIFF);
+        } else if(layer === NDIFF) {
+            this.clear(x, y, PDIFF);
+        }
     }
 
     // Clear the value at a given coordinate
@@ -1431,14 +1438,6 @@ function draw(bounds) {
         bounds.bottom = bounds.top = startY;
         layeredGrid.map(bounds, function (x, y, layer) {
             layeredGrid.set(x, y, layer);
-            // don't allow ndiff and pdiff on the same cell
-            if(layer === PDIFF) {
-                // Unset the ndiff layer
-                layeredGrid.clear(x, y, NDIFF);
-            } else if(layer === NDIFF) {
-                // Unset the pdiff layer
-                layeredGrid.clear(x, y, PDIFF);
-            }
         });
     }
     // If the mouse moved more vertically than horizontally, draw a vertical line.
@@ -1455,7 +1454,7 @@ function cellClickHandler(event) {
     // If there is no cell at the start coordinates, change the cursor color.
     if (event.button === 0) {
         if (!layeredGrid.get(startX, startY, cursorColorIndex).isSet) { saveCurrentState(); }
-        layeredGrid.get(startX, startY, cursorColorIndex).isSet = true;
+        layeredGrid.set(startX, startY, cursorColorIndex);
     } else {
         // If in the canvas and over a colored cell, erase it.
         // Otherwise, change the layer.
