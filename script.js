@@ -8,7 +8,9 @@
  *
  * ## Stipulations for updates
  *    - All builds must pass JSHint with no warnings (https://jshint.com/)
- *      - Only the bitwise tag may be disabled, and only on a line-by-line basis.
+ *      - This following tags may be disabled, but only on a line-by-line basis.
+ *      - "jshint bitwise" (bitwise operators)
+ *      - "jshint -W093" (returning and assigning in one step)
  *    - All builds must pass testbench
  *      - The testbench may need to be modified for some breaking changes (e.g., new layers)
  * 
@@ -39,6 +41,95 @@
 /* jshint varstmt: true */
 /* jshint browser: true */
 /* globals runTestbench: false */
+
+class LayeredGrid {
+    constructor(width, height, layers) {
+        this.width = width;
+        this.height = height;
+        this.layers = layers;
+        this.grid = new Array(width * height * layers);
+        this.defaultCell = { isSet: false, };
+    }
+    
+    // Get the value at a given coordinate
+    // If it isn't set, return the default value
+    // If it's out of bounds, return null
+    get(x, y, layer) {
+        let cell;
+
+        if(x < 0 || x >= this.width || y < 0 || y >= this.height || layer < 0 || layer >= this.layers) {
+            return null;
+        }
+
+        cell = this.grid[x + (y * this.width) + (layer * this.width * this.height)];
+
+        if(!cell) {
+            return this.defaultCell;
+        }
+
+        return cell;
+    }
+    
+    // Set the value at a given coordinate
+    // If it's out of bounds, do nothing
+    set(x, y, layer) {
+        if(x < 0 || x >= this.width || y < 0 || y >= this.height || layer < 0 || layer >= this.layers) {
+            return;
+        }
+
+        this.grid[x + (y * this.width) + (layer * this.width * this.height)] = {
+            isSet: true,
+            x: x,
+            y: y,
+            layer: layer,
+            term1: null,
+            term2: null,
+            gate: null,
+        };
+
+        // Only allow one of NDIFF or PDIFF to be set
+        if(layer === PDIFF) {
+            this.clear(x, y, NDIFF);
+        } else if(layer === NDIFF) {
+            this.clear(x, y, PDIFF);
+        }
+    }
+
+    // Clear the value at a given coordinate
+    // If it's out of bounds, do nothing
+    clear(x, y, layer) {
+        if(x < 0 || x >= this.width || y < 0 || y >= this.height || layer < 0 || layer >= this.layers) {
+            return;
+        }
+
+        this.grid[x + (y * this.width) + (layer * this.width * this.height)] = undefined;
+    }
+
+    // Map a function to all set values in the grid
+    map(bounds, func, includeEmpty) {
+        let cell;
+        for(let layer = bounds.lowLayer; layer <= bounds.highLayer; layer++) {
+            for(let y = bounds.top; y <= bounds.bottom; y++) {
+                for(let x = bounds.left; x <= bounds.right; x++) {
+                    if(x < 0 || x >= this.width || y < 0 || y >= this.height || layer < 0 || layer >= this.layers) {
+                        continue;
+                    }
+                    cell = this.grid[x + y * this.width + layer * this.width * this.height];
+                    if(cell || includeEmpty) {
+                        func(x, y, layer);
+		    }
+		}
+            }
+        }
+    }
+
+    // Clear all values in the grid
+    clearAll() {
+        this.map(function(cell) {
+            this.grid[cell] = undefined;
+        });
+    }
+}
 
 // Graph class to represent CMOS circuitry.
 class Graph {
@@ -88,8 +179,8 @@ class Node {
     constructor(cell) {
         this.cell = cell;
         this.edges = [];
-        this.isPmos = layeredGrid[cell.x][cell.y][PDIFF].isSet;
-        this.isNmos = layeredGrid[cell.x][cell.y][NDIFF].isSet;
+        this.isPmos = layeredGrid.get(cell.x, cell.y, PDIFF).isSet;
+        this.isNmos = layeredGrid.get(cell.x, cell.y, NDIFF).isSet;
     }
 
     // Destructor
@@ -423,6 +514,7 @@ function computeOutput(inputVals, outputNode) {
         // Recurse on all edges.
         hasNullPath = false;
         pathFound = false;
+        /*jshint -W093 */
         node.edges.some(function(edge) {
             let otherNode = edge.getOtherNode(node);
             let hasPath = pathExists(otherNode, targetNode);
@@ -443,6 +535,7 @@ function computeOutput(inputVals, outputNode) {
                 registerTrigger(targetNode, edge.getOtherNode(node), node, targetNode);
             }
         });
+        /*jshint +W093 */
 
         if(pathFound) {
             return true;
@@ -660,23 +753,6 @@ function changeLayer() {
     drawBorder();
 }
 
-function makeLayeredGrid(width, height) {
-    'use strict';
-    // Each cell has several layers with parameter isSet.
-    // Initialize every element to false.
-    let grid = new Array(width);
-    for (let ii = 0; ii < width; ii++) {
-        grid[ii] = new Array(height);
-        for (let jj = 0; jj < height; jj++) {
-            grid[ii][jj] = new Array(cursorColors.length);
-            for (let kk = 0; kk < cursorColors.length; kk++) {
-                grid[ii][jj][kk] = { isSet: false, x: ii, y: jj, layer: kk, };
-            }
-        }
-    }
-    return grid;
-}
-
 // Resize the canvas to the largest square that fits in the window.
 function resizeCanvas() {
     'use strict';
@@ -793,29 +869,29 @@ function setNets() {
     for (let ii = 0; ii < outputNets.length; ii++) { outputNets[ii].clear(); }
 
     // Add rail nodes to the graph.
-    vddNode = graph.addNode(layeredGrid[vddCell.x][vddCell.y][CONTACT]);
-    gndNode = graph.addNode(layeredGrid[gndCell.x][gndCell.y][CONTACT]);
+    vddNode = graph.addNode(layeredGrid.get(vddCell.x, vddCell.y, CONTACT));
+    gndNode = graph.addNode(layeredGrid.get(gndCell.x, gndCell.y, CONTACT));
 
     netVDD.addNode(vddNode);
     netGND.addNode(gndNode);
 
     // Add the VDD and GND nets.
     // Loop through every VDD cell and add to the VDD net.
-    setRecursively(layeredGrid[vddCell.x][vddCell.y][CONTACT], netVDD);
+    setRecursively(layeredGrid.get(vddCell.x, vddCell.y, CONTACT), netVDD);
 
     // Loop through every GND cell and add to the GND net.
-    setRecursively(layeredGrid[gndCell.x][gndCell.y][CONTACT], netGND);
+    setRecursively(layeredGrid.get(gndCell.x, gndCell.y, CONTACT), netGND);
 
     // Loop through the terminals and set their respective nets.
     for (let ii = 0; ii < numLayers; ii++) {
         for (let jj = 0; jj < inputNets.length; jj++) {
-            if (layeredGrid[inputs[jj].x][inputs[jj].y][ii].isSet) {
-                setRecursively(layeredGrid[inputs[jj].x][inputs[jj].y][ii], inputNets[jj]);
+            if (layeredGrid.get(inputs[jj].x, inputs[jj].y, ii).isSet) {
+                setRecursively(layeredGrid.get(inputs[jj].x, inputs[jj].y, ii), inputNets[jj]);
             }
         }
         for (let jj = 0; jj < outputNets.length; jj++) {
-            if (layeredGrid[outputs[jj].x][outputs[jj].y][ii].isSet) {
-                setRecursively(layeredGrid[outputs[jj].x][outputs[jj].y][ii], outputNets[jj]);
+            if (layeredGrid.get(outputs[jj].x, outputs[jj].y, ii).isSet) {
+                setRecursively(layeredGrid.get(outputs[jj].x, outputs[jj].y, ii), outputNets[jj]);
             }
         }
     }
@@ -825,7 +901,7 @@ function setNets() {
     // Add output nodes to the graph.
     outputNodes.length = 0;
     for (let ii = 0; ii < outputs.length; ii++) {
-        outputNodes[ii] = graph.addNode(layeredGrid[outputs[ii].x][outputs[ii].y][CONTACT]);
+        outputNodes[ii] = graph.addNode(layeredGrid.get(outputs[ii].x, outputs[ii].y, CONTACT));
         outputNets[ii].addNode(outputNodes[ii]);
     }
 
@@ -1007,11 +1083,12 @@ function setRecursively(cell, net) {
 
         // Helper function to set the terminals of transistors.
         function setTerminals(x, y, layer) {
-            if (layeredGrid[x][y][layer].isSet) {
+            let getCell = layeredGrid.get(x, y, layer);
+            if (getCell.isSet) {
                 if (cell.term1 === undefined) {
-                    cell.term1 = layeredGrid[x][y][layer];
+                    cell.term1 = getCell;
                 } else {
-                    cell.term2 = layeredGrid[x][y][layer];
+                    cell.term2 = getCell;
                 }
             }
         }
@@ -1019,11 +1096,11 @@ function setRecursively(cell, net) {
         // If the layer is NDIFF or PDIFF and there is also a POLY at the same location,
         // add the cell to transistors.
         if (cell.layer === layer && cell.isSet) {
-            if (layeredGrid[cell.x][cell.y][POLY].isSet && !layeredGrid[cell.x][cell.y][CONTACT].isSet) {
+            if (layeredGrid.get(cell.x, cell.y, POLY).isSet && !layeredGrid.get(cell.x, cell.y, CONTACT).isSet) {
                 transistorArray.add(cell);
                 graph.addNode(cell);
                 // Set the gate to the poly cell.
-                cell.gate = layeredGrid[cell.x][cell.y][POLY];
+                cell.gate = layeredGrid.get(cell.x, cell.y, POLY);
 
                 // Check adjacent cells for NDIFF.
                 // Set term1 to the first one found.
@@ -1050,20 +1127,20 @@ function setRecursively(cell, net) {
     // For each layer of the cell in the net, recurse with all adjacent cells in the layer.
     // Generic function for the above code.
     function setAdjacent(deltaX, deltaY) {
-        if (net.containsCell(layeredGrid[cell.x][cell.y][cell.layer]) && layeredGrid[cell.x + deltaX][cell.y + deltaY][cell.layer].isSet) {
-            if (net.containsCell(layeredGrid[cell.x + deltaX][cell.y + deltaY][cell.layer]) === false) {
-                setRecursively(layeredGrid[cell.x + deltaX][cell.y + deltaY][cell.layer], net);
+        if (net.containsCell(layeredGrid.get(cell.x, cell.y, cell.layer)) && layeredGrid.get(cell.x + deltaX, cell.y + deltaY, cell.layer).isSet) {
+            if (net.containsCell(layeredGrid.get(cell.x + deltaX, cell.y + deltaY, cell.layer)) === false) {
+                setRecursively(layeredGrid.get(cell.x + deltaX, cell.y + deltaY, cell.layer), net);
             }
         }
     }
 
     function handleContact(cell, net) {
-        if (layeredGrid[cell.x][cell.y][CONTACT].isSet) {
+        if (layeredGrid.get(cell.x, cell.y, CONTACT).isSet) {
             for (let ii = 0; ii < numLayers; ii++) {
-                if (!layeredGrid[cell.x][cell.y][ii].isSet) { continue; }
-                if (net.containsCell(layeredGrid[cell.x][cell.y][ii]) === false) {
-                    net.addCell(layeredGrid[cell.x][cell.y][ii]);
-                    setRecursively(layeredGrid[cell.x][cell.y][ii], net);
+                if (!layeredGrid.get(cell.x, cell.y, ii).isSet) { continue; }
+                if (net.containsCell(layeredGrid.get(cell.x, cell.y, ii)) === false) {
+                    net.addCell(layeredGrid.get(cell.x, cell.y, ii));
+                    setRecursively(layeredGrid.get(cell.x, cell.y, ii), net);
                 }
             }
         }
@@ -1090,6 +1167,8 @@ function setRecursively(cell, net) {
 
 function decorateContact(x, y) {
     'use strict';
+    x = x + 1;
+    y = y + 1;
     ctx.fillStyle = "#000000";
     ctx.beginPath();
     ctx.moveTo(x * cellWidth + cellWidth + 1, y * cellHeight - 1);
@@ -1131,24 +1210,24 @@ function refreshCanvas() {
     drawGrid(gridsize);
 
     // Check the layers of the grid, and draw cells as needed.
-    function drawCell(i, j, layer, isBorder) {
-        if (isBorder || layeredGrid[i - 1][j - 1][layer].isSet) {
+    function drawCell(i, j, layer) {
+        if (layeredGrid.get(i, j, layer).isSet) {
             ctx.fillStyle = cursorColors[layer];
-            ctx.fillRect(i * cellWidth, j * cellHeight - 1, cellWidth + 1, cellHeight + 2);
+            ctx.fillRect((i+1) * cellWidth, (j+1) * cellHeight - 1, cellWidth + 1, cellHeight + 2);
         }
     }
 
     // Draw CONTACT at the coordinates of each input and output.
     for (let ii = 0; ii < inputs.length; ii++) {
-        layeredGrid[inputs[ii].x][inputs[ii].y][CONTACT].isSet = true;
+        layeredGrid.set(inputs[ii].x, inputs[ii].y, CONTACT);
     }
     for (let ii = 0; ii < outputs.length; ii++) {
-        layeredGrid[outputs[ii].x][outputs[ii].y][CONTACT].isSet = true;
+        layeredGrid.set(outputs[ii].x, outputs[ii].y, CONTACT);
     }
 
     // Set the CONTACT layer on the VDD and GND cells.
-    layeredGrid[vddCell.x][vddCell.y][CONTACT].isSet = true;
-    layeredGrid[gndCell.x][gndCell.y][CONTACT].isSet = true;
+    layeredGrid.set(vddCell.x, vddCell.y, CONTACT);
+    layeredGrid.set(gndCell.x, gndCell.y, CONTACT);
 
     // Draw each layer in order.
     let bounds = {
@@ -1160,24 +1239,24 @@ function refreshCanvas() {
         highLayer: cursorColors.length - 1,
     };
 
-    mapFuncToGrid(bounds, function (x, y, layer) {
-        drawCell(x, y, layer, false);
+    layeredGrid.map(bounds, function (x, y, layer) {
+        drawCell(x, y, layer);
 
         // For the last layer, fill each filled cell with a cross.
         if (layer === CONTACT) {
-            if (layeredGrid[x - 1][y - 1][layer].isSet) {
+            if (layeredGrid.get(x, y, layer).isSet) {
                 decorateContact(x, y);
             }
         }
 
         // Set the terminals of the cell to null.
-        layeredGrid[x - 1][y - 1][NDIFF].term1 = null;
-        layeredGrid[x - 1][y - 1][NDIFF].term2 = null;
-        layeredGrid[x - 1][y - 1][NDIFF].gate  = null;
+        layeredGrid.get(x, y, NDIFF).term1 = null;
+        layeredGrid.get(x, y, NDIFF).term2 = null;
+        layeredGrid.get(x, y, NDIFF).gate  = null;
 
-        layeredGrid[x - 1][y - 1][PDIFF].term1 = null;
-        layeredGrid[x - 1][y - 1][PDIFF].term2 = null;
-        layeredGrid[x - 1][y - 1][PDIFF].gate  = null;
+        layeredGrid.get(x, y, PDIFF).term1 = null;
+        layeredGrid.get(x, y, PDIFF).term2 = null;
+        layeredGrid.get(x, y, PDIFF).gate  = null;
     });
 
     // Set dark mode as needed.
@@ -1200,7 +1279,7 @@ function refreshCanvas() {
 function saveCurrentState() {
     'use strict';
     // Save both the grid and the drawing.
-    localStorage.setItem('layeredGrid' + saveState, JSON.stringify(layeredGrid));
+    localStorage.setItem('layeredGrid' + saveState, JSON.stringify(layeredGrid.grid));
     localStorage.setItem('canvas' + saveState, canvas.toDataURL());
 
     // Increment the save state.
@@ -1234,7 +1313,7 @@ function undo() {
     }
     if (saveState > firstSaveState) {
         saveState--;
-        layeredGrid = JSON.parse(localStorage.getItem('layeredGrid' + saveState));
+        layeredGrid.grid = JSON.parse(localStorage.getItem('layeredGrid' + saveState));
         let img = new Image();
         img.src = localStorage.getItem('canvas' + saveState);
         img.onload = function () {
@@ -1250,7 +1329,7 @@ function redo() {
     'use strict';
     if (saveState < lastSaveState - 1) {
         saveState++;
-        layeredGrid = JSON.parse(localStorage.getItem('layeredGrid' + saveState));
+        layeredGrid.grid = JSON.parse(localStorage.getItem('layeredGrid' + saveState));
         let img = new Image();
         img.src = localStorage.getItem('canvas' + saveState);
         img.onload = function () {
@@ -1274,10 +1353,10 @@ function clearIfPainted(clientX, clientY) {
 
         // Erase all layers of the cell.
         for (let ii = 0; ii < cursorColors.length; ii++) {
-            if (layeredGrid[x][y][ii].isSet) {
+            if (layeredGrid.get(x, y, ii).isSet) {
                 if (!anyLayerSet) { saveCurrentState(); }
                 anyLayerSet = true;
-                layeredGrid[x][y][ii].isSet = false;
+                layeredGrid.clear(x, y, ii);
             }
         }
     }
@@ -1355,40 +1434,22 @@ function refreshDashboard() {
     id.style.color = dd.style.color;
 }
 
-function mapFuncToGrid(bounds, func) {
-    'use strict';
-    // Layers should be the outer loop to ensure that lower layers are drawn first.
-    for (let layer = bounds.lowLayer; layer <= bounds.highLayer; layer++) {
-        for (let x = bounds.left; x <= bounds.right; x++) {
-            for (let y = bounds.top; y <= bounds.bottom; y++) {
-                func(x, y, layer);
-            }
-        }
-    }
-}
-
 function draw(bounds) {
     'use strict';
     if (Math.abs(bounds.endX - startX) > Math.abs(bounds.endY - startY)) {
         bounds.lowLayer = bounds.highLayer = cursorColorIndex;
         bounds.bottom = bounds.top = startY;
-        mapFuncToGrid(bounds, function (x, y, layer) {
-            layeredGrid[x][y][layer].isSet = true;
-            // don't allow ndiff and pdiff on the same cell
-            if(layer === PDIFF) {
-                // Unset the ndiff layer
-                layeredGrid[x][y][NDIFF].isSet = false;
-            } else if(layer === NDIFF) {
-                // Unset the pdiff layer
-                layeredGrid[x][y][PDIFF].isSet = false;
-            }
-        });
+        layeredGrid.map(bounds, function (x, y, layer) {
+            layeredGrid.set(x, y, layer);
+        }, true);
     }
     // If the mouse moved more vertically than horizontally, draw a vertical line.
     else {
         bounds.lowLayer = bounds.highLayer = cursorColorIndex;
         bounds.right = bounds.left = startX;
-        mapFuncToGrid(bounds, function (x, y, layer) { layeredGrid[x][y][layer].isSet = true; });
+        layeredGrid.map(bounds, function (x, y, layer) {
+            layeredGrid.set(x, y, layer);
+        }, true);
     }
 }
 
@@ -1397,8 +1458,8 @@ function cellClickHandler(event) {
     // Just fill in or delete the cell at the start coordinates.
     // If there is no cell at the start coordinates, change the cursor color.
     if (event.button === 0) {
-        if (!layeredGrid[startX][startY][cursorColorIndex].isSet) { saveCurrentState(); }
-        layeredGrid[startX][startY][cursorColorIndex].isSet = true;
+        if (!layeredGrid.get(startX, startY, cursorColorIndex).isSet) { saveCurrentState(); }
+        layeredGrid.set(startX, startY, cursorColorIndex);
     } else {
         // If in the canvas and over a colored cell, erase it.
         // Otherwise, change the layer.
@@ -1436,7 +1497,9 @@ function mouseupHandler(event) {
             } else {
                 // For secondary (i.e. right) mouse button:
                 // Delete a rectangle of squares
-                mapFuncToGrid(bounds, function (x, y, layer) { layeredGrid[x][y][layer].isSet = false; });
+                layeredGrid.map(bounds, function (x, y, layer) {
+                    layeredGrid.clear(x, y, layer);
+                });
             }
         } else if (inBounds(event)) {
             cellClickHandler(event);
@@ -1464,14 +1527,18 @@ function mousemoveHandler(event) {
         if (bounds.right - bounds.left > bounds.bottom - bounds.top) {
             bounds.lowLayer = bounds.highLayer = cursorColorIndex;
             bounds.bottom = bounds.top = startY;
-            mapFuncToGrid(bounds, function (x, y, layer) { layeredGrid[x][y][layer].isSet = true; });
+            layeredGrid.map(bounds, function (x, y, layer) {
+                layeredGrid.set(x, y, layer);
+            }, true);
         }
         // If the mouse moved more vertically than horizontally,
         // draw a vertical line.
         else {
             bounds.lowLayer = bounds.highLayer = cursorColorIndex;
             bounds.right = bounds.left = startX;
-            mapFuncToGrid(bounds, function (x, y, layer) { layeredGrid[x][y][layer].isSet = true; });
+            layeredGrid.map(bounds, function (x, y, layer) {
+                layeredGrid.set(x, y, layer);
+            }, true);
         }
     }
 
@@ -1479,7 +1546,9 @@ function mousemoveHandler(event) {
         // Secondary mouse button (i.e. right click)
         // Highlight a rectangle of squares for deletion.
         bounds.lowLayer = bounds.highLayer = DELETE;
-        mapFuncToGrid(bounds, function (x, y, layer) { layeredGrid[x][y][layer].isSet = true; });
+        layeredGrid.map(bounds, function (x, y, layer) {
+            layeredGrid.set(x, y, layer);
+        }, true);
     }
 
     // Save the current X and Y coordinates.
@@ -1538,7 +1607,7 @@ function placeInput(event) {
     let cell = getCell(currentX, currentY);
     if (cell !== null && !event.ctrlKey) {
         // First, unset the CONTACT layer at the old coordinates.
-        layeredGrid[inputs[event.keyCode - 65].x][inputs[event.keyCode - 65].y][CONTACT].isSet = false;
+        layeredGrid.clear(inputs[event.keyCode - 65].x, inputs[event.keyCode - 65].y, CONTACT);
         // Then, set the new coordinates.
         inputs[event.keyCode - 65].x = cell.x;
         inputs[event.keyCode - 65].y = cell.y;
@@ -1551,7 +1620,7 @@ function placeOutput(event) {
     let cell = getCell(currentX, currentY);
     if (cell !== null && !event.ctrlKey) {
         // First, unset the CONTACT layer at the old coordinates.
-        layeredGrid[outputs[89 - event.keyCode].x][outputs[89 - event.keyCode].y][CONTACT].isSet = false;
+        layeredGrid.clear(outputs[89 - event.keyCode].x, outputs[89 - event.keyCode].y, CONTACT);
         // Then, set the new coordinates.
         outputs[89 - event.keyCode].x = cell.x;
         outputs[89 - event.keyCode].y = cell.y;
@@ -1576,7 +1645,7 @@ function placeVDD() {
     let cell = getCell(currentX, currentY);
     if (cell !== null) {
         // First, unset the CONTACT layer at the old coordinates.
-        layeredGrid[vddCell.x][vddCell.y][CONTACT].isSet = false;
+        layeredGrid.clear(vddCell.x, vddCell.y, CONTACT);
         // Then, set the new coordinates.
         vddCell.x = cell.x;
         vddCell.y = cell.y;
@@ -1588,7 +1657,7 @@ function placeGND() {
     let cell = getCell(currentX, currentY);
     if (cell !== null) {
         // First, unset the CONTACT layer at the old coordinates.
-        layeredGrid[gndCell.x][gndCell.y][CONTACT].isSet = false;
+        layeredGrid.clear(gndCell.x, gndCell.y, CONTACT);
         // Then, set the new coordinates.
         gndCell.x = cell.x;
         gndCell.y = cell.y;
@@ -1679,7 +1748,8 @@ window.onload = function () {
     // Initialize with a gridsize of 29 and 5 layers
     canvas = document.getElementById("canvas");
     ctx = canvas.getContext("2d");
-    layeredGrid = makeLayeredGrid(gridsize, gridsize);
+    //makeLayeredGrid(gridsize, gridsize);
+    layeredGrid = new LayeredGrid(gridsize, gridsize, cursorColors.length);
 
     refreshDashboard();
 
