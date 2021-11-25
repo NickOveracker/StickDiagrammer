@@ -1207,8 +1207,8 @@ function refreshCanvas() {
     drawGrid(gridsize);
 
     // Check the layers of the grid, and draw cells as needed.
-    function drawCell(i, j, layer, isBorder) {
-        if (isBorder || layeredGrid.get(i, j, layer).isSet) {
+    function drawCell(i, j, layer) {
+        if (layeredGrid.get(i, j, layer).isSet) {
             ctx.fillStyle = cursorColors[layer];
             ctx.fillRect((i+1) * cellWidth, (j+1) * cellHeight - 1, cellWidth + 1, cellHeight + 2);
         }
@@ -1237,7 +1237,7 @@ function refreshCanvas() {
     };
 
     layeredGrid.map(bounds, function (x, y, layer) {
-        drawCell(x, y, layer, false);
+        drawCell(x, y, layer);
 
         // For the last layer, fill each filled cell with a cross.
         if (layer === CONTACT) {
@@ -1438,13 +1438,15 @@ function draw(bounds) {
         bounds.bottom = bounds.top = startY;
         layeredGrid.map(bounds, function (x, y, layer) {
             layeredGrid.set(x, y, layer);
-        });
+        }, true);
     }
     // If the mouse moved more vertically than horizontally, draw a vertical line.
     else {
         bounds.lowLayer = bounds.highLayer = cursorColorIndex;
         bounds.right = bounds.left = startX;
-        layeredGrid.map(bounds, function (x, y, layer) { layeredGrid.set(x, y, layer); });
+        layeredGrid.map(bounds, function (x, y, layer) {
+            layeredGrid.set(x, y, layer);
+        }, true);
     }
 }
 
@@ -1492,7 +1494,9 @@ function mouseupHandler(event) {
             } else {
                 // For secondary (i.e. right) mouse button:
                 // Delete a rectangle of squares
-                layeredGrid.map(bounds, function (x, y, layer) { layeredGrid.clear(x, y, layer); });
+                layeredGrid.map(bounds, function (x, y, layer) {
+                    layeredGrid.clear(x, y, layer);
+                });
             }
         } else if (inBounds(event)) {
             cellClickHandler(event);
@@ -1520,14 +1524,18 @@ function mousemoveHandler(event) {
         if (bounds.right - bounds.left > bounds.bottom - bounds.top) {
             bounds.lowLayer = bounds.highLayer = cursorColorIndex;
             bounds.bottom = bounds.top = startY;
-            layeredGrid.map(bounds, function (x, y, layer) { layeredGrid.set(x, y, layer); });
+            layeredGrid.map(bounds, function (x, y, layer) {
+                layeredGrid.set(x, y, layer);
+            }, true);
         }
         // If the mouse moved more vertically than horizontally,
         // draw a vertical line.
         else {
             bounds.lowLayer = bounds.highLayer = cursorColorIndex;
             bounds.right = bounds.left = startX;
-            layeredGrid.map(bounds, function (x, y, layer) { layeredGrid.set(x, y, layer); });
+            layeredGrid.map(bounds, function (x, y, layer) {
+                layeredGrid.set(x, y, layer);
+            }, true);
         }
     }
 
@@ -1535,7 +1543,9 @@ function mousemoveHandler(event) {
         // Secondary mouse button (i.e. right click)
         // Highlight a rectangle of squares for deletion.
         bounds.lowLayer = bounds.highLayer = DELETE;
-        layeredGrid.map(bounds, function (x, y, layer) { layeredGrid.set(x, y, layer); });
+        layeredGrid.map(bounds, function (x, y, layer) {
+            layeredGrid.set(x, y, layer);
+        });
     }
 
     // Save the current X and Y coordinates.
