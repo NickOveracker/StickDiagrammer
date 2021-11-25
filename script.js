@@ -110,8 +110,9 @@ class LayeredGrid {
         for(let cell in this.grid) {
             if(this.grid[cell] || includeEmpty) {
                 let x = cell % this.width;
-                let y = Math.floor(cell / this.width);
-                let layer = Math.floor(cell / (this.width * this.height));
+                let y = (cell - x) % this.width;
+                let layer = (cell - x - y) % (this.width * this.height);
+
                 if(bounds.left > x || bounds.right < x ||
                    bounds.top > y || bounds.bottom < y ||
                    bounds.lowLayer > layer || bounds.highLayer < layer) {
