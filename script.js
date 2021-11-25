@@ -106,14 +106,14 @@ class LayeredGrid {
     }
 
     // Map a function to all set values in the grid
-    map(bounds, func) {
+    map(bounds, func, includeEmpty) {
         for(let cell in this.grid) {
-            if(this.grid[cell]) {
+            if(this.grid[cell] || includeEmpty) {
                 cell = this.grid[cell];
                 if(bounds.left > cell.x || bounds.right < cell.x ||
                    bounds.top > cell.y || bounds.bottom < cell.y ||
                    bounds.lowLayer > cell.layer || bounds.highLayer < cell.layer) {
-                    continue;
+                    return;
                 }
                 func(cell.x, cell.y, cell.layer);
             }
