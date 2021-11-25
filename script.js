@@ -1175,7 +1175,7 @@ function setRecursively(cell, net) {
         if (layeredGrid.get(cell.x, cell.y, CONTACT).isSet) {
             cursorColors.forEach(function(_, layer) {
                 if (!layeredGrid.get(cell.x, cell.y, layer).isSet) {
-                    continue;
+                    return;
                 }
                 if (net.containsCell(layeredGrid.get(cell.x, cell.y, layer)) === false) {
                     net.addCell(layeredGrid.get(cell.x, cell.y, layer));
