@@ -102,19 +102,49 @@ class LayeredGrid {
             return;
         }
 
-        this.grid[x + (y * this.width) + (layer * this.width * this.height)] = undefined;
+        this.grid[x + (y * this.width) + (layer * this.width * this.height)] = null;
+    }
+
+    // The grid is implemented as a flat array, so this function
+    // returns the index of the cell at a given coordinate
+    convertFromCoordinates(x, y, layer) {
+        return x + (y * this.width) + (layer * this.width * this.height);
+    }
+
+    // Convert the index of a cell to its coordinates
+    convertToCoordinates(index) {
+        let layer = Math.floor(index / (this.width * this.height));
+        let y = Math.floor((index - (layer * this.width * this.height)) / this.width);
+        let x = index - (layer * this.width * this.height) - (y * this.width);
+        return { x: x, y: y, layer: layer };
     }
 
     // Map a function to all set values in the grid
     map(bounds, func, includeEmpty) {
         let cell;
+
+        // We can optimize when empty cells aren't needed
+        if(!includeEmpty) {
+            this.grid.forEach(function(cell) {
+                if(cell) {
+                    func(cell.x, cell.y, cell.layer);
+                }
+            });
+        }
+
+        let outOfGrid = function(x, y, layer) {
+            return x < 0     || x >= this.width  ||
+                   y < 0     || y >= this.height || 
+                   layer < 0 || layer >= this.layers;
+        }.bind(this);
+
         for(let layer = bounds.lowLayer; layer <= bounds.highLayer; layer++) {
             for(let y = bounds.top; y <= bounds.bottom; y++) {
                 for(let x = bounds.left; x <= bounds.right; x++) {
-                    if(x < 0 || x >= this.width || y < 0 || y >= this.height || layer < 0 || layer >= this.layers) {
+                    if(outOfGrid(x, y, layer)) {
                         continue;
                     }
-                    cell = this.grid[x + y * this.width + layer * this.width * this.height];
+                    cell = this.grid[this.convertFromCoordinates(x, y, layer)];
                     if(cell || includeEmpty) {
                         func(x, y, layer);
 		    }
@@ -126,7 +156,7 @@ class LayeredGrid {
     // Clear all values in the grid
     clearAll() {
         this.map(function(cell) {
-            this.grid[cell] = undefined;
+            this.grid[cell] = null;
         });
     }
 }
@@ -1231,10 +1261,10 @@ function refreshCanvas() {
 
     // Draw each layer in order.
     let bounds = {
-        left: 1,
-        right: gridsize,
-        top: 1,
-        bottom: gridsize,
+        left: 0,
+        right: gridsize - 1,
+        top: 0,
+        bottom: gridsize - 1,
         lowLayer: 0,
         highLayer: cursorColors.length - 1,
     };
