@@ -852,15 +852,15 @@ function loopThroughTransistors(funct) {
     let transistorLists = [nmos, pmos, ];
 
     transistorLists.forEach(function (transistorList) {
-        let iterator = transistorLists.values();
+        let iterator = transistorList.values();
 
         for (let transistor = iterator.next(); !transistor.done; transistor = iterator.next()) {
             let transistorCell = transistor.value;
             let transistorNode = graph.getNode(transistorCell);
 
-            terms.forEach(function(term) {
-                funct(transistorCell, transistorNode, term);
-            });
+            for(let ii = 0; ii < terms.length; ii++) {
+                funct(transistorCell, transistorNode, terms[ii]);
+            }
         }
     });
 }
@@ -888,7 +888,7 @@ function resetNetlist() {
     netlist.push(netVDD);
     netlist.push(netGND);
 
-    inpuNets.forEach(function(net) {
+    inputNets.forEach(function(net) {
         netlist.push(net);
     });
     outputNets.forEach(function(net) {
@@ -1008,7 +1008,7 @@ function setNets() {
         }
 
         // Same for output.
-        outputsNets.forEach(function (outputNet, index) {
+        outputNets.forEach(function (outputNet, index) {
             if (net === outputNet) {
                 transistor.addEdge(outputNodes[index]);
             }
@@ -1439,7 +1439,7 @@ function refreshTruthTable(table) {
         let tRow = tableElement.insertRow(rowIndex);
 
         row.forEach(function (cell, colIndex) {
-            let tCell = row.insertCell(colIndex);
+            let tCell = tRow.insertCell(colIndex);
             tCell.innerHTML = cell;
 
             // Set the cell class depending on whether this is
