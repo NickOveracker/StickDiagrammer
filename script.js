@@ -355,13 +355,13 @@ let nodeNodeMap = [];
 // Cycle through the following cursor colors by pressing space: PDIFF, NDIFF, POLY, METAL1, CONTACT
 // Additional colors: DELETE at index (numLayers + 0)
 let cursors = [
-    {name: 'pdiff',   color: 'rgba(118,   0, 181,   1)', selectable: true },
-    {name: 'ndiff',   color: 'rgba(50,  205,  50,   1)', selectable: true },
-    {name: 'poly',    color: 'rgba(255,   0,   0, 0.5)', selectable: true },
-    {name: 'metal1',  color: 'rgba(0,   255, 255, 0.5)', selectable: true },
-    {name: 'metal2',  color: 'rgba(255,   0, 204, 0.5)', selectable: true },
-    {name: 'contact', color: 'rgba(204, 204, 204, 0.5)', selectable: true },
-    {name: 'delete',  color: 'rgba(208, 160,  32, 0.5)', selectable: false},
+    {name: 'pdiff',   color: 'rgba(118,   0, 181,   1)', selectable: true, },
+    {name: 'ndiff',   color: 'rgba(50,  205,  50,   1)', selectable: true, },
+    {name: 'poly',    color: 'rgba(255,   0,   0, 0.5)', selectable: true, },
+    {name: 'metal1',  color: 'rgba(0,   255, 255, 0.5)', selectable: true, },
+    {name: 'metal2',  color: 'rgba(255,   0, 204, 0.5)', selectable: true, },
+    {name: 'contact', color: 'rgba(204, 204, 204, 0.5)', selectable: true, },
+    {name: 'delete',  color: 'rgba(208, 160,  32, 0.5)', selectable: false,},
 ];
 let numLayers = cursors.length - 1;
 let PDIFF   = 0;
