@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="../style.css">
 </head>
 <body>
-	<div id="instructions">
+    <div id="instructions" class="sidebar left open">
         <div id="instructions-text">
             <h1>Instructions</h1>
             <ul>
@@ -38,16 +38,16 @@
                 <li><a href="https://ko-fi.com/twentynine">Toss a coin to your Witcher.</a></li>
             </ul>
         </div>
-        <div id="instructions-close">
-            <button id="toggle-instructions">《</button>
+        <div id="instructions-close" class="toggle-button-container">
+            <button id="toggle-instructions" class="toggle-button">《</button>
         </div>
-	</div>
+    </div>
     <div id="canvas-div">
         <canvas id="canvas"></canvas>
     </div>
-    <div id="dashboard">
-        <div id="dashboard-close">
-            <button id="toggle-dashboard">》</button>
+    <div id="dashboard" class="sidebar right open">
+        <div id="dashboard-close" class="toggle-button-container">
+            <button id="toggle-dashboard" class="toggle-button">》</button>
         </div>
         <div id="truth-table-container">
             <button id="generate-truth-table">Evaluate</button>
