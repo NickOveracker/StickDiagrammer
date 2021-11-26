@@ -351,6 +351,7 @@ let currentX;
 let currentY;
 let button;
 let nodeNodeMap = [];
+let lastRefreshTime = 0;
 
 // Cycle through the following cursor colors by pressing space: PDIFF, NDIFF, POLY, METAL1, CONTACT
 // Additional colors: DELETE at index (numLayers + 0)
@@ -1306,10 +1307,9 @@ function refreshCanvas() {
 
     // set the outer border of the canvas to the cursor color
     drawBorder();
-
     drawLabels();
-
     drawGrid(gridsize); // Not sure why but gotta draw this twice.
+    lastRefreshTime = Date.now();
 }
 
 // Save function to save the current state of the grid and the canvas.
@@ -1545,6 +1545,11 @@ function mouseupHandler(event) {
 // Show a preview line when the user is dragging the mouse.
 function mousemoveHandler(event) {
     'use strict';
+
+    // Make sure at least 20ms have elapsed since the last refresh.
+    // This prevents the preview line from being drawn too often.
+    let now = new Date().getTime();
+    if(now - lastRefreshTime < 20) { return; }
 
     function leftMouseMoveHandler(bounds) {
         // If the mouse moved more horizontally than vertically,
@@ -1834,11 +1839,11 @@ window.onload = function () {
         if(div.classList.contains('open')) {
             div.classList.remove('open');
             div.classList.add('closed');
-            button.innerHTML = "》";
+            button.innerHTML = "》"; // TODO: Replace with a font-awesome icon.
         } else {
             div.classList.remove('closed');
             div.classList.add('open');
-            button.innerHTML = "《";
+            button.innerHTML = "《"; // TODO: Replace with a font-awesome icon.
         }
     };
 
@@ -1851,11 +1856,11 @@ window.onload = function () {
         if(div.classList.contains('open')) {
             div.classList.remove('open');
             div.classList.add('closed');
-            button.innerHTML = "《";
+            button.innerHTML = "《"; // TODO: Replace with a font-awesome icon.
         } else {
             div.classList.remove('closed');
             div.classList.add('open');
-            button.innerHTML = "》";
+            button.innerHTML = "》"; // TODO: Replace with a font-awesome icon.
         }
     };
 
