@@ -19,7 +19,7 @@
 * Software entropy must not increase.
 
 ## Feature Wishlist
-* More efficient data structure for the grid.
+* Warn user when pulling up with NMOS or pulling down with PMOS.
 * Arbitrary number of I/O.
 * Arbitrary width/height.
 * HTML button interface for those who prefer not to use a keyboard.
@@ -29,6 +29,7 @@
 * Record user input sequence in debug mode for the testbench.
 * Draw CMOS circuit schematic corresponding to the painted topology.
 * Export netlist for use in electronics design software.
+* ~~More efficient data structure for the grid.~~ *Resolved 2021/11/25**
 * ~~Foolproof usage instructions.~~ *Resolved 2021/11/21*
 * ~~More metal layers.~~ *Resolved 2021/11/21*
 * ~~Moveable VDD/GND terminals.~~ *Resolved 2021/11/21 (move with + and - keys)*
@@ -42,7 +43,7 @@
 * ~~Knowing that I spelled "accolades" correctly (I don't feel like Googling it)~~ *Resolved 2021/11/20*
 
 ## Known Bugs
-* Minor visual glitches while drawing (due to large size of data structure)
+* Minor visual glitches while drawing (due to canvas refresh)
 * ~~Issue #7 (regarding NAND3 in complex circuit)~~ *Resolved 2021/11/23*
 * ~~Directly connecting output to input produces output of Z instead of reproducing the input.~~ *Resolved 2021/11/20*
 * ~~Unexpected output when both terminals of a transistor are shorted to VDD or GND.~~ *Resolved 2021/11/20*
