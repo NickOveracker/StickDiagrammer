@@ -1358,7 +1358,7 @@ function undo() {
             ctx.drawImage(img, 0, 0);
         };
 
-        refreshCanvas();
+        //refreshCanvas();
     }
 }
 
@@ -1374,7 +1374,7 @@ function redo() {
             ctx.drawImage(img, 0, 0);
         };
 
-        refreshCanvas();
+        //refreshCanvas();
     }
 }
 
@@ -1539,7 +1539,7 @@ function mouseupHandler(event) {
     }
 
     dragging = false;
-    refreshCanvas();
+    //refreshCanvas();
 }
 
 // Show a preview line when the user is dragging the mouse.
@@ -1624,7 +1624,7 @@ function mousemoveHandler(event) {
             // Make sure at least 15ms have elapsed since the last refresh.
             // This prevents the preview line from being drawn too often.
             if(Date.now() - lastRefreshTime > 15) {
-                refreshCanvas();
+                //refreshCanvas();
             }
         }
     }
@@ -1717,7 +1717,7 @@ function keydownHandler(event) {
         placeGND();
     }
 
-    refreshCanvas();
+    //refreshCanvas();
 }
 
 function setDarkMode(setToDark) {
@@ -1764,7 +1764,7 @@ function toggleDarkMode() {
     }
 
     // If the canvas has been instantiated, refresh it.
-    canvas && refreshCanvas();
+    //canvas && refreshCanvas();
 }
 
 // Only change dark/light mode on keyup to avoid seizure-inducing flashes from holding down space.
@@ -1864,7 +1864,8 @@ window.onload = function () {
     };
 
     refreshCanvas();
-    setInterval(refreshCanvas, 500);
+    // 60 fps
+    setInterval(refreshCanvas, 16);
 
     if(window.runTestbench) {
         runTestbench();
