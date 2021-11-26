@@ -1304,15 +1304,6 @@ function refreshCanvas() {
         layeredGrid.get(x, y, PDIFF).gate  = null;
     });
 
-    // Set dark mode as needed.
-    if (darkMode) {
-        document.body.classList.add('dark');
-        document.body.classList.remove('light');
-    } else {
-        document.body.classList.add('light');
-        document.body.classList.remove('dark');
-    }
-
     // set the outer border of the canvas to the cursor color
     drawBorder();
 
@@ -1466,29 +1457,6 @@ function inBounds(event) {
         x < canvas.offsetLeft + canvas.width - cellWidth &&
         y > canvas.offsetTop + cellHeight &&
         y < canvas.offsetTop + canvas.height - cellHeight;
-}
-
-function refreshDashboard() {
-    'use strict';
-    let dd = document.getElementById("dashboard");
-    let td = document.getElementById("truth-table");
-    let id = document.getElementById("instructions");
-
-    if(darkMode) {
-        dd.classList.add('dark-accent');
-        td.classList.add('dark-accent');
-        id.classList.add('dark-accent');
-        dd.classList.remove('light-accent');
-        td.classList.remove('light-accent');
-        id.classList.remove('light-accent');
-    } else {
-        dd.classList.add('light-accent');
-        td.classList.add('light-accent');
-        id.classList.add('light-accent');
-        dd.classList.remove('dark-accent');
-        td.classList.remove('dark-accent');
-        id.classList.remove('dark-accent');
-    }
 }
 
 function draw(bounds) {
@@ -1748,10 +1716,49 @@ function keydownHandler(event) {
     refreshCanvas();
 }
 
+function setDarkMode(setToDark) {
+    'use strict';
+
+    if (setToDark) {
+        // Set to false so that toggleDarkMode() will set to true.
+        darkMode = false;
+        toggleDarkMode();
+    } else {
+        // Set to true so that toggleDarkMode() will set to false.
+        darkMode = true;
+        toggleDarkMode();
+    }
+}
+
 function toggleDarkMode() {
     'use strict';
+    let dd = document.getElementById("dashboard");
+    let td = document.getElementById("truth-table");
+    let id = document.getElementById("instructions");
+
     darkMode = !darkMode;
-    refreshDashboard();
+
+    if (darkMode) {
+        document.body.classList.add('dark');
+        document.body.classList.remove('light');
+
+        dd.classList.add('dark-accent');
+        td.classList.add('dark-accent');
+        id.classList.add('dark-accent');
+        td.classList.remove('light-accent');
+        id.classList.remove('light-accent');
+    } else {
+        document.body.classList.add('light');
+        document.body.classList.remove('dark');
+
+        dd.classList.add('light-accent');
+        td.classList.add('light-accent');
+        id.classList.add('light-accent');
+        dd.classList.remove('dark-accent');
+        td.classList.remove('dark-accent');
+        id.classList.remove('dark-accent');
+    }
+
     refreshCanvas();
 }
 
@@ -1795,19 +1802,13 @@ window.onload = function () {
     localStorage.clear();
 
     // Set to dark mode if it is night time
-    if (new Date().getHours() > 19 || new Date().getHours() < 7) {
-        darkMode = true;
-    } else {
-        darkMode = false;
-    }
+    setDarkMode(new Date().getHours() > 19 || new Date().getHours() < 7);
 
     // Initialize with a gridsize of 29 and 5 layers
     canvas = document.getElementById("canvas");
     ctx = canvas.getContext("2d");
     //makeLayeredGrid(gridsize, gridsize);
     layeredGrid = new LayeredGrid(gridsize, gridsize, cursors.length);
-
-    refreshDashboard();
 
     window.addEventListener("mousedown", mousedownHandler);
     window.addEventListener("mouseup", mouseupHandler);
