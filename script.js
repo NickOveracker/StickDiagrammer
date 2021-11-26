@@ -1759,7 +1759,8 @@ function toggleDarkMode() {
         id.classList.remove('dark-accent');
     }
 
-    refreshCanvas();
+    // If the canvas has been instantiated, refresh it.
+    canvas && refreshCanvas();
 }
 
 // Only change dark/light mode on keyup to avoid seizure-inducing flashes from holding down space.
