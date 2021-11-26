@@ -1318,7 +1318,7 @@ function saveCurrentState() {
     'use strict';
     // Save both the grid and the drawing.
     localStorage.setItem('layeredGrid' + saveState, JSON.stringify(layeredGrid.grid));
-    localStorage.setItem('canvas' + saveState, canvas.toDataURL());
+    //localStorage.setItem('canvas' + saveState, canvas.toDataURL());
 
     // Increment the save state.
     saveState++;
@@ -1326,7 +1326,7 @@ function saveCurrentState() {
     // Delete all save states after the current one.
     for (let ii = saveState; ii < lastSaveState; ii++) {
         localStorage.removeItem('layeredGrid' + ii);
-        localStorage.removeItem('canvas' + ii);
+        //localStorage.removeItem('canvas' + ii);
     }
 
     // Update the max save state.
@@ -1335,7 +1335,7 @@ function saveCurrentState() {
     // If we've reached the max save state, delete the oldest one.
     if (maxSaveState === saveState) {
         localStorage.removeItem('layeredGrid' + firstSaveState);
-        localStorage.removeItem('canvas' + firstSaveState);
+        //localStorage.removeItem('canvas' + firstSaveState);
 
         firstSaveState++;
         maxSaveState++;
@@ -1352,11 +1352,11 @@ function undo() {
     if (saveState > firstSaveState) {
         saveState--;
         layeredGrid.grid = JSON.parse(localStorage.getItem('layeredGrid' + saveState));
-        let img = new Image();
-        img.src = localStorage.getItem('canvas' + saveState);
-        img.onload = function () {
-            ctx.drawImage(img, 0, 0);
-        };
+        //let img = new Image();
+        //img.src = localStorage.getItem('canvas' + saveState);
+        //img.onload = function () {
+        //    ctx.drawImage(img, 0, 0);
+        //};
 
         //refreshCanvas();
     }
@@ -1368,11 +1368,11 @@ function redo() {
     if (saveState < lastSaveState - 1) {
         saveState++;
         layeredGrid.grid = JSON.parse(localStorage.getItem('layeredGrid' + saveState));
-        let img = new Image();
-        img.src = localStorage.getItem('canvas' + saveState);
-        img.onload = function () {
-            ctx.drawImage(img, 0, 0);
-        };
+        //let img = new Image();
+        //img.src = localStorage.getItem('canvas' + saveState);
+        //img.onload = function () {
+        //    ctx.drawImage(img, 0, 0);
+        //};
 
         //refreshCanvas();
     }
