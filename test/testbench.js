@@ -30,8 +30,12 @@
            setNets: false,
            computeOutput: false,
            outputNodes: false,
-           cursorColorIndex: false,
-           METAL1: false,
+           layeredGrid: false,
+           cursors: false,
+           CONTACT: false,
+           cursorIndex: false,
+           vddCell: false,
+           gndCell: false,
 */
 
 function runTestbench(runTo) {
@@ -1436,6 +1440,19 @@ function runTestbench(runTo) {
         }
 
         if(assertNext) {
+            // Set CONTACT at the coordinates of each input and output.
+            inputs.forEach(function(input) {
+                layeredGrid.set(input.x, input.y, CONTACT);
+            });
+            outputs.forEach(function(output) {
+                layeredGrid.set(output.x, output.y, CONTACT);
+            });
+
+            // Set the CONTACT layer on the VDD and GND cells.
+            layeredGrid.set(vddCell.x, vddCell.y, CONTACT);
+            layeredGrid.set(gndCell.x, gndCell.y, CONTACT);
+
+            // Do it.
             setNets();
             tv = "";
             
