@@ -351,7 +351,6 @@ let currentX;
 let currentY;
 let button;
 let nodeNodeMap = [];
-let lastRefreshTime = 0;
 
 // Cycle through the following cursor colors by pressing space: PDIFF, NDIFF, POLY, METAL1, CONTACT
 // Additional colors: DELETE at index (numLayers + 0)
@@ -1263,18 +1262,6 @@ function refreshCanvas() {
         }
     }
 
-    // Draw CONTACT at the coordinates of each input and output.
-    inputs.forEach(function(input) {
-        layeredGrid.set(input.x, input.y, CONTACT);
-    });
-    outputs.forEach(function(output) {
-        layeredGrid.set(output.x, output.y, CONTACT);
-    });
-
-    // Set the CONTACT layer on the VDD and GND cells.
-    layeredGrid.set(vddCell.x, vddCell.y, CONTACT);
-    layeredGrid.set(gndCell.x, gndCell.y, CONTACT);
-
     // Draw each layer in order.
     let bounds = {
         left: 0,
@@ -1296,6 +1283,7 @@ function refreshCanvas() {
         }
 
         // Set the terminals of the cell to null.
+        // TODO: Move this side-effect somewhere else.
         layeredGrid.get(x, y, NDIFF).term1 = null;
         layeredGrid.get(x, y, NDIFF).term2 = null;
         layeredGrid.get(x, y, NDIFF).gate  = null;
@@ -1309,7 +1297,6 @@ function refreshCanvas() {
     drawBorder();
     drawLabels();
     drawGrid(gridsize); // Not sure why but gotta draw this twice.
-    lastRefreshTime = Date.now();
 }
 
 // Save function to save the current state of the grid and the canvas.
@@ -1318,7 +1305,6 @@ function saveCurrentState() {
     'use strict';
     // Save both the grid and the drawing.
     localStorage.setItem('layeredGrid' + saveState, JSON.stringify(layeredGrid.grid));
-    //localStorage.setItem('canvas' + saveState, canvas.toDataURL());
 
     // Increment the save state.
     saveState++;
@@ -1326,7 +1312,6 @@ function saveCurrentState() {
     // Delete all save states after the current one.
     for (let ii = saveState; ii < lastSaveState; ii++) {
         localStorage.removeItem('layeredGrid' + ii);
-        //localStorage.removeItem('canvas' + ii);
     }
 
     // Update the max save state.
@@ -1335,7 +1320,6 @@ function saveCurrentState() {
     // If we've reached the max save state, delete the oldest one.
     if (maxSaveState === saveState) {
         localStorage.removeItem('layeredGrid' + firstSaveState);
-        //localStorage.removeItem('canvas' + firstSaveState);
 
         firstSaveState++;
         maxSaveState++;
@@ -1352,13 +1336,6 @@ function undo() {
     if (saveState > firstSaveState) {
         saveState--;
         layeredGrid.grid = JSON.parse(localStorage.getItem('layeredGrid' + saveState));
-        //let img = new Image();
-        //img.src = localStorage.getItem('canvas' + saveState);
-        //img.onload = function () {
-        //    ctx.drawImage(img, 0, 0);
-        //};
-
-        //refreshCanvas();
     }
 }
 
@@ -1368,13 +1345,6 @@ function redo() {
     if (saveState < lastSaveState - 1) {
         saveState++;
         layeredGrid.grid = JSON.parse(localStorage.getItem('layeredGrid' + saveState));
-        //let img = new Image();
-        //img.src = localStorage.getItem('canvas' + saveState);
-        //img.onload = function () {
-        //    ctx.drawImage(img, 0, 0);
-        //};
-
-        //refreshCanvas();
     }
 }
 
@@ -1539,7 +1509,6 @@ function mouseupHandler(event) {
     }
 
     dragging = false;
-    //refreshCanvas();
 }
 
 // Show a preview line when the user is dragging the mouse.
@@ -1621,11 +1590,6 @@ function mousemoveHandler(event) {
             } else {
                 rightMouseMoveHandler(bounds);
             }
-            // Make sure at least 15ms have elapsed since the last refresh.
-            // This prevents the preview line from being drawn too often.
-            if(Date.now() - lastRefreshTime > 15) {
-                //refreshCanvas();
-            }
         }
     }
 }
@@ -1639,6 +1603,8 @@ function placeInput(event) {
         // Then, set the new coordinates.
         inputs[event.keyCode - 65].x = cell.x;
         inputs[event.keyCode - 65].y = cell.y;
+        // Set the CONTACT layer at the new coordinates.
+        layeredGrid.set(cell.x, cell.y, CONTACT);
     }
 }
 
@@ -1652,6 +1618,8 @@ function placeOutput(event) {
         // Then, set the new coordinates.
         outputs[89 - event.keyCode].x = cell.x;
         outputs[89 - event.keyCode].y = cell.y;
+        // Set the CONTACT layer at the new coordinates.
+        layeredGrid.set(cell.x, cell.y, CONTACT);
     }
 }
 
@@ -1677,6 +1645,8 @@ function placeVDD() {
         // Then, set the new coordinates.
         vddCell.x = cell.x;
         vddCell.y = cell.y;
+        // Set the CONTACT layer at the new coordinates.
+        layeredGrid.set(cell.x, cell.y, CONTACT);
     }
 }
 
@@ -1689,6 +1659,8 @@ function placeGND() {
         // Then, set the new coordinates.
         gndCell.x = cell.x;
         gndCell.y = cell.y;
+        // Set the CONTACT layer at the new coordinates.
+        layeredGrid.set(cell.x, cell.y, CONTACT);
     }
 }
 
@@ -1716,8 +1688,6 @@ function keydownHandler(event) {
         // '-' key listener.
         placeGND();
     }
-
-    //refreshCanvas();
 }
 
 function setDarkMode(setToDark) {
@@ -1749,6 +1719,7 @@ function toggleDarkMode() {
         dd.classList.add('dark-accent');
         td.classList.add('dark-accent');
         id.classList.add('dark-accent');
+        dd.classList.remove('light-accent');
         td.classList.remove('light-accent');
         id.classList.remove('light-accent');
     } else {
@@ -1762,9 +1733,6 @@ function toggleDarkMode() {
         td.classList.remove('dark-accent');
         id.classList.remove('dark-accent');
     }
-
-    // If the canvas has been instantiated, refresh it.
-    //canvas && refreshCanvas();
 }
 
 // Only change dark/light mode on keyup to avoid seizure-inducing flashes from holding down space.
@@ -1862,6 +1830,18 @@ window.onload = function () {
             button.innerHTML = "》"; // TODO: Replace with a font-awesome icon.
         }
     };
+
+    // Set CONTACT at the coordinates of each input and output.
+    inputs.forEach(function(input) {
+        layeredGrid.set(input.x, input.y, CONTACT);
+    });
+    outputs.forEach(function(output) {
+        layeredGrid.set(output.x, output.y, CONTACT);
+    });
+
+    // Set the CONTACT layer on the VDD and GND cells.
+    layeredGrid.set(vddCell.x, vddCell.y, CONTACT);
+    layeredGrid.set(gndCell.x, gndCell.y, CONTACT);
 
     refreshCanvas();
     // 60 fps
