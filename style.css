@@ -80,7 +80,7 @@ canvas {
 }
 
 .sidebar.closed {
-    width: 0;
+    width: 30px;
 }
 
 .sidebar.right {
@@ -124,14 +124,6 @@ canvas {
 
 /* temp  -- for evaluate button, I think */
 .sidebar button {
-    width: 100%;
-    top: 0;
-    bottom: 0;
-    position: absolute;
-    cursor: pointer;
-}
-
-button {
     width: 100%;
     cursor: pointer;
 }
