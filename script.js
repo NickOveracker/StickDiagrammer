@@ -1546,11 +1546,6 @@ function mouseupHandler(event) {
 function mousemoveHandler(event) {
     'use strict';
 
-    // Make sure at least 20ms have elapsed since the last refresh.
-    // This prevents the preview line from being drawn too often.
-    let now = new Date().getTime();
-    if(now - lastRefreshTime < 20) { return; }
-
     function leftMouseMoveHandler(bounds) {
         // If the mouse moved more horizontally than vertically,
         // draw a horizontal line.
@@ -1626,7 +1621,11 @@ function mousemoveHandler(event) {
             } else {
                 rightMouseMoveHandler(bounds);
             }
-            refreshCanvas();
+            // Make sure at least 15ms have elapsed since the last refresh.
+            // This prevents the preview line from being drawn too often.
+            if(Date.now() - lastRefreshTime > 15) {
+                refreshCanvas();
+            }
         }
     }
 }
