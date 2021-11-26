@@ -95,10 +95,31 @@ class LayeredGrid {
         }
     }
 
+    isTerminal(x, y, layer) {
+        let isTerminal = false;
+
+        // Loop through inputs, outputs, and VDD/GND
+        isTerminal = layer === CONTACT && inputs.some(function(input) {
+            return input.x === x && input.y === y;
+        });
+
+        isTerminal = isTerminal || layer === CONTACT && outputs.some(function(output) {
+            return output.x === x && output.y === y;
+        });
+
+        isTerminal = isTerminal || vddCell.x === x && vddCell.y === y;
+        isTerminal = isTerminal || gndCell.x === x && gndCell.y === y;
+
+        return isTerminal;
+    }
+
     // Clear the value at a given coordinate
     // If it's out of bounds, do nothing
+    // Do not clear CONTACT for inputs, outputs, or VDD/GND
     clear(x, y, layer) {
-        if(x < 0 || x >= this.width || y < 0 || y >= this.height || layer < 0 || layer >= this.layers) {
+        let outOfBounds = x < 0 || x >= this.width || y < 0 || y >= this.height || layer < 0 || layer >= this.layers;
+
+        if(outOfBounds || this.isTerminal(x, y, layer)) {
             return;
         }
 
