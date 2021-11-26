@@ -1830,11 +1830,14 @@ window.onload = function () {
     button.onclick = function () {
         let button = document.getElementById("toggle-instructions");
         let div = document.getElementById("instructions");
-        if(div.style.left !== "-270px") {
-            div.style.left = "-270px";
+        // Remove the 'open' class and replace with 'closed'.
+        if(div.classList.contains('open')) {
+            div.classList.remove('open');
+            div.classList.add('closed');
             button.innerHTML = "》";
         } else {
-            div.style.left = "0px";
+            div.classList.remove('closed');
+            div.classList.add('open');
             button.innerHTML = "《";
         }
     };
@@ -1844,11 +1847,14 @@ window.onload = function () {
     button.onclick = function () {
         let button = document.getElementById("toggle-dashboard");
         let div = document.getElementById("dashboard");
-        if(div.style.right !== "-270px") {
-            div.style.right = "-270px";
+        // Remove the 'open' class and replace with 'closed'.
+        if(div.classList.contains('open')) {
+            div.classList.remove('open');
+            div.classList.add('closed');
             button.innerHTML = "《";
         } else {
-            div.style.right = "0px";
+            div.classList.remove('closed');
+            div.classList.add('open');
             button.innerHTML = "》";
         }
     };
