@@ -72,23 +72,24 @@ canvas {
 .sidebar {
     position: absolute;
     height: 100%;
+    width: 300px;
     top: 0;
 }
 
-.sidebar.open {
-    width: 300px;
+.sidebar.left.open {
+    left: 0;
 }
 
-.sidebar.closed {
-    width: 30px;
-}
-
-.sidebar.right {
+.sidebar.right.open {
     right: 0;
 }
 
-.sidebar.left {
-    left: 0;
+.sidebar.left.closed {
+    left: -270px;
+}
+
+.sidebar.right.closed {
+    right: -270px;
 }
 
 .sidebar .toggle-button {
