@@ -29,7 +29,7 @@
            changeLayer: false,
            setNets: false,
            computeOutput: false,
-           outputNodes: false
+           outputNodes: false,
            cursorColorIndex: false,
            METAL1: false,
 */
