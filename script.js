@@ -119,7 +119,7 @@ class LayeredGrid {
     clear(x, y, layer) {
         let outOfBounds = x < 0 || x >= this.width || y < 0 || y >= this.height || layer < 0 || layer >= this.layers;
 
-        if(outOfBounds || this.isTerminal(x, y, layer)) {
+        if(outOfBounds || layer === CONTACT && this.isTerminal(x, y, layer)) {
             return;
         }
 
