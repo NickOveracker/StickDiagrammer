@@ -91,7 +91,7 @@ canvas {
     left: 0;
 }
 
-.sidebar.toggle-button {
+.sidebar .toggle-button {
     position: absolute;
     top: 0;
     width: 30px;
@@ -99,30 +99,31 @@ canvas {
     cursor: pointer;
 }
 
-.sidebar.left.toggle-button {
+.sidebar.left .toggle-button {
     right: 0;
 }
 
-.sidebar.right.toggle-button {
+.sidebar.right .toggle-button {
     left: 0;
 }
 
-.sidebar.toggle-button-container {
+.sidebar .toggle-button-container {
     position: absolute;
     width: 30px;
     height: 100%;
     top: 0;
 }
 
-.sidebar.left.toggle-button-container {
+.sidebar.left .toggle-button-container {
     right: 0;
 }
 
-.sidebar.right.toggle-button-container {
+.sidebar.right .toggle-button-container {
     left: 0;
 }
 
-.sidebar.toggle-button {
+/* temp  -- for evaluate button, I think */
+.sidebar button {
     width: 100%;
     top: 0;
     bottom: 0;
