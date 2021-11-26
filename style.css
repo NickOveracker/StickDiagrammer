@@ -6,6 +6,26 @@ html, body {
 	overflow: hidden;
 } /* just to be sure these are full screen*/
 
+.dark {
+    background-color: #000;
+    color: #fff;
+}
+
+.light {
+    background-color: #fff;
+    color: #000;
+}
+
+.dark-accent {
+    background-color: #333;
+    color: #eee;
+}
+
+.light-accent {
+    background-color: #eee;
+    color: #333;
+}
+
 canvas {
     padding-left: 0;
     padding-right: 0;

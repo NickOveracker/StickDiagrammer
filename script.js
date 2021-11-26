@@ -330,6 +330,8 @@ class Net {
     }
 }
 
+let inputs;
+let outputs;
 let layeredGrid;
 let canvas;
 let ctx;
@@ -352,15 +354,16 @@ let nodeNodeMap = [];
 
 // Cycle through the following cursor colors by pressing space: PDIFF, NDIFF, POLY, METAL1, CONTACT
 // Additional colors: DELETE at index (numLayers + 0)
-let cursorColors = ['rgba(118, 0, 181, 1)',     // pdiff
-                    'rgba(50, 205, 50, 1)',     // ndiff
-                    'rgba(255, 0, 0, 0.5)',     // poly
-                    'rgba(0, 255, 255, 0.5)',   // metal1
-                    'rgba(255, 0, 204, 0.5)',   // metal2
-                    'rgba(204, 204, 204, 0.5)', // contact
-                    'rgba(208, 160, 32, 0.5)',  // delete
-                ];
-let numLayers = cursorColors.length - 1;
+let cursors = [
+    {name: 'pdiff',   color: 'rgba(118,   0, 181,   1)', selectable: true },
+    {name: 'ndiff',   color: 'rgba(50,  205,  50,   1)', selectable: true },
+    {name: 'poly',    color: 'rgba(255,   0,   0, 0.5)', selectable: true },
+    {name: 'metal1',  color: 'rgba(0,   255, 255, 0.5)', selectable: true },
+    {name: 'metal2',  color: 'rgba(255,   0, 204, 0.5)', selectable: true },
+    {name: 'contact', color: 'rgba(204, 204, 204, 0.5)', selectable: true },
+    {name: 'delete',  color: 'rgba(208, 160,  32, 0.5)', selectable: false},
+];
+let numLayers = cursors.length - 1;
 let PDIFF   = 0;
 let NDIFF   = PDIFF + 1;
 let POLY    = NDIFF + 1;
@@ -368,9 +371,7 @@ let METAL1  = POLY + 1;
 let METAL2  = METAL1 + 1;
 let CONTACT = METAL2 + 1;
 let DELETE  = numLayers;
-let cursorNames = ['pdiff', 'ndiff', 'poly', 'metal1', 'metal2', 'contact', ];
-let cursorColorIndex = METAL1;
-let cursorColor = cursorColors[cursorColorIndex];
+let cursorIndex = 0;
 
 // Objects to represent the coordinates of the inputs (A, B, C, D, ...)
 // and the output (Y, X, W, V, ...).
@@ -380,8 +381,8 @@ let C = { x: 2, y: 16, };
 let D = { x: 2, y: 20, };
 let Y = { x: 26, y: 14, };
 
-let inputs = [A, B, C, D, ];
-let outputs = [Y, ];
+inputs = [A, B, C, D, ];
+outputs = [Y, ];
 
 // Netlist is a list of nets.
 // Each net is a Set of cells.
@@ -744,7 +745,7 @@ graph = new Graph();
 // Draw the outer border of the canvas.
 function drawBorder() {
     'use strict';
-    ctx.strokeStyle = cursorColor;
+    ctx.strokeStyle = cursors[cursorIndex].color;
     ctx.lineWidth = cellWidth;
     ctx.strokeRect(cellWidth / 2, cellWidth / 2, canvas.width - cellWidth, canvas.height - cellWidth);
 
@@ -766,15 +767,19 @@ function drawBorder() {
     ctx.fillStyle = darkMode ? '#000000' : '#ffffff';
     ctx.font = '20px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText(cursorNames[cursorColorIndex], canvas.width / 2, cellHeight * 3 / 4);
+    ctx.fillText(cursors[cursorIndex].name, canvas.width / 2, cellHeight * 3 / 4);
 }
 
-// Define a function to change the cursor color.
+// Change the layer/cursor color
 function changeLayer() {
     'use strict';
-    // Don't use cursorColors.length, because there are non-layer colors as well.
-    cursorColorIndex = (cursorColorIndex + 1) % numLayers;
-    cursorColor = cursorColors[cursorColorIndex];
+    // Go to the next selectable index.
+    let tempIndex = cursorIndex + 1;
+
+    while(tempIndex >= cursors.length || !cursors[tempIndex].selectable) {
+        tempIndex = tempIndex >= cursors.length - 1 ? 0 : tempIndex + 1;
+    }
+    cursorIndex = tempIndex;
 
     // set the outer border of the canvas to the new cursor color
     drawBorder();
@@ -919,7 +924,7 @@ function setNets() {
     setRecursively(layeredGrid.get(gndCell.x, gndCell.y, CONTACT), netGND);
 
     // Loop through the terminals and set their respective nets.
-    cursorColors.forEach(function (_, layer) {
+    cursors.forEach(function (_, layer) {
         inputs.forEach(function(input, index) {
             if (layeredGrid.get(input.x, input.y, layer).isSet) {
                 setRecursively(layeredGrid.get(input.x, input.y, layer), inputNets[index]);
@@ -1173,7 +1178,7 @@ function setRecursively(cell, net) {
 
     function handleContact(cell, net) {
         if (layeredGrid.get(cell.x, cell.y, CONTACT).isSet) {
-            cursorColors.forEach(function(_, layer) {
+            cursors.forEach(function(_, layer) {
                 if (!layeredGrid.get(cell.x, cell.y, layer).isSet) {
                     return;
                 }
@@ -1252,7 +1257,7 @@ function refreshCanvas() {
     // Check the layers of the grid, and draw cells as needed.
     function drawCell(i, j, layer) {
         if (layeredGrid.get(i, j, layer).isSet) {
-            ctx.fillStyle = cursorColors[layer];
+            ctx.fillStyle = cursors[layer].color;
             ctx.fillRect((i+1) * cellWidth, (j+1) * cellHeight - 1, cellWidth + 1, cellHeight + 2);
         }
     }
@@ -1276,7 +1281,7 @@ function refreshCanvas() {
         top: 0,
         bottom: gridsize - 1,
         lowLayer: 0,
-        highLayer: cursorColors.length - 1,
+        highLayer: cursors.length - 1,
     };
 
     layeredGrid.map(bounds, function (x, y, layer) {
@@ -1301,9 +1306,11 @@ function refreshCanvas() {
 
     // Set dark mode as needed.
     if (darkMode) {
-        document.body.style.backgroundColor = 'black';
+        document.body.classList.add('dark');
+        document.body.classList.remove('light');
     } else {
-        document.body.style.backgroundColor = 'white';
+        document.body.classList.add('light');
+        document.body.classList.remove('dark');
     }
 
     // set the outer border of the canvas to the cursor color
@@ -1392,7 +1399,7 @@ function clearIfPainted(clientX, clientY) {
         let y = Math.floor((clientY - canvas.offsetTop - cellHeight) / cellHeight);
 
         // Erase all layers of the cell.
-        cursorColors.forEach(function (_, layer) {
+        cursors.forEach(function (_, layer) {
             if (layeredGrid.get(x, y, layer).isSet) {
                 if (!anyLayerSet) { saveCurrentState(); }
                 anyLayerSet = true;
@@ -1466,18 +1473,28 @@ function refreshDashboard() {
     let dd = document.getElementById("dashboard");
     let td = document.getElementById("truth-table");
     let id = document.getElementById("instructions");
-    dd.style.backgroundColor = darkMode ? "#333" : "#eee";
-    dd.style.color = darkMode ? "#eee" : "#333";
-    td.style.backgroundColor = dd.style.backgroundColor;
-    td.style.color = dd.style.color;
-    id.style.backgroundColor = dd.style.backgroundColor;
-    id.style.color = dd.style.color;
+
+    if(darkMode) {
+        dd.classList.add('dark-accent');
+        td.classList.add('dark-accent');
+        id.classList.add('dark-accent');
+        dd.classList.remove('light-accent');
+        td.classList.remove('light-accent');
+        id.classList.remove('light-accent');
+    } else {
+        dd.classList.add('light-accent');
+        td.classList.add('light-accent');
+        id.classList.add('light-accent');
+        dd.classList.remove('dark-accent');
+        td.classList.remove('dark-accent');
+        id.classList.remove('dark-accent');
+    }
 }
 
 function draw(bounds) {
     'use strict';
     if (Math.abs(bounds.endX - startX) > Math.abs(bounds.endY - startY)) {
-        bounds.lowLayer = bounds.highLayer = cursorColorIndex;
+        bounds.lowLayer = bounds.highLayer = cursorIndex;
         bounds.bottom = bounds.top = startY;
         layeredGrid.map(bounds, function (x, y, layer) {
             layeredGrid.set(x, y, layer);
@@ -1485,7 +1502,7 @@ function draw(bounds) {
     }
     // If the mouse moved more vertically than horizontally, draw a vertical line.
     else {
-        bounds.lowLayer = bounds.highLayer = cursorColorIndex;
+        bounds.lowLayer = bounds.highLayer = cursorIndex;
         bounds.right = bounds.left = startX;
         layeredGrid.map(bounds, function (x, y, layer) {
             layeredGrid.set(x, y, layer);
@@ -1498,8 +1515,8 @@ function cellClickHandler(event) {
     // Just fill in or delete the cell at the start coordinates.
     // If there is no cell at the start coordinates, change the cursor color.
     if (event.button === 0) {
-        if (!layeredGrid.get(startX, startY, cursorColorIndex).isSet) { saveCurrentState(); }
-        layeredGrid.set(startX, startY, cursorColorIndex);
+        if (!layeredGrid.get(startX, startY, cursorIndex).isSet) { saveCurrentState(); }
+        layeredGrid.set(startX, startY, cursorIndex);
     } else {
         // If in the canvas and over a colored cell, erase it.
         // Otherwise, change the layer.
@@ -1525,7 +1542,7 @@ function mouseupHandler(event) {
                 top: Math.min(startY, endY),
                 bottom: Math.max(startY, endY),
                 lowLayer: 0,
-                highLayer: cursorColors.length - 1,
+                highLayer: cursors.length - 1,
                 endX: endX,
                 endY: endY,
             };
@@ -1565,7 +1582,7 @@ function mousemoveHandler(event) {
         // If the mouse moved more horizontally than vertically,
         // draw a horizontal line.
         if (bounds.right - bounds.left > bounds.bottom - bounds.top) {
-            bounds.lowLayer = bounds.highLayer = cursorColorIndex;
+            bounds.lowLayer = bounds.highLayer = cursorIndex;
             bounds.bottom = bounds.top = startY;
             layeredGrid.map(bounds, function (x, y, layer) {
                 layeredGrid.set(x, y, layer);
@@ -1574,7 +1591,7 @@ function mousemoveHandler(event) {
         // If the mouse moved more vertically than horizontally,
         // draw a vertical line.
         else {
-            bounds.lowLayer = bounds.highLayer = cursorColorIndex;
+            bounds.lowLayer = bounds.highLayer = cursorIndex;
             bounds.right = bounds.left = startX;
             layeredGrid.map(bounds, function (x, y, layer) {
                 layeredGrid.set(x, y, layer);
@@ -1788,7 +1805,7 @@ window.onload = function () {
     canvas = document.getElementById("canvas");
     ctx = canvas.getContext("2d");
     //makeLayeredGrid(gridsize, gridsize);
-    layeredGrid = new LayeredGrid(gridsize, gridsize, cursorColors.length);
+    layeredGrid = new LayeredGrid(gridsize, gridsize, cursors.length);
 
     refreshDashboard();
 

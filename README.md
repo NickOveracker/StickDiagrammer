@@ -1,4 +1,4 @@
-# StickDiagrammer
+# Stixu: VLSI Stick Diagrammer
 
 ## Live Pages
 * Stable site: [Stixu.io](https://stixu.io)

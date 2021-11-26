@@ -71,7 +71,7 @@ function runTestbench(runTo) {
     runTo = runTo || testCases.length;
 
     // Set up the testbench
-    while(cursorColorIndex !== METAL1) {
+    while(cursors[cursorIndex].name !== "metal1") {
         changeLayer();
     }
 
