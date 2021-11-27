@@ -21,9 +21,19 @@ html, body {
     color: #eee;
 }
 
+.dark-accent .toggle-button-container {
+    background-color: #eee;
+    color: #333;
+}
+
 .light-accent {
     background-color: #eee;
     color: #333;
+}
+
+.light-accent .toggle-button-container {
+    background-color: #333;
+    color: #eee;
 }
 
 canvas {

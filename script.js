@@ -1880,8 +1880,8 @@ window.onload = function () {
         } else {
             div.classList.remove('closed');
             div.classList.add('open');
-            button.classList.remove('chevron-left');
-            button.classList.add('chevron-right');
+            button.classList.remove('fa-chevron-left');
+            button.classList.add('fa-chevron-right');
         }
     };
 
