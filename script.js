@@ -1279,7 +1279,7 @@ function refreshCanvas() {
     // Check the layers of the grid, and draw cells as needed.
     function drawCell(i, j, layer) {
         if (layeredGrid.get(i, j, layer).isSet) {
-            ctx.fillStyle = useFlatColors? cursors[cursorIndex].flatColor : cursors[layer].color;
+            ctx.fillStyle = useFlatColors? cursors[layer].flatColor : cursors[layer].color;
             ctx.fillRect((i+1) * cellWidth, (j+1) * cellHeight - 1, cellWidth + 1, cellHeight + 2);
         }
     }
@@ -1619,6 +1619,8 @@ function mousemoveHandler(event) {
 function placeInput(event) {
     'use strict';
     let cell = getCell(currentX, currentY);
+    let oldX, oldY;
+
     if (cell !== null && !event.ctrlKey) {
         // First, note the current coordinates.
         oldX = cell.x;
