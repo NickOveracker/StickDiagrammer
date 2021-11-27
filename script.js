@@ -1866,11 +1866,13 @@ window.onload = function () {
         if(div.classList.contains('open')) {
             div.classList.remove('open');
             div.classList.add('closed');
-            button.innerHTML = "《"; // TODO: Replace with a font-awesome icon.
+            button.classList.remove('chevron-right');
+            button.classList.add('chevron-left');
         } else {
             div.classList.remove('closed');
             div.classList.add('open');
-            button.innerHTML = "》"; // TODO: Replace with a font-awesome icon.
+            button.classList.remove('chevron-left');
+            button.classList.add('chevron-right');
         }
     };
 
