@@ -1623,10 +1623,8 @@ function placeInput(event) {
 
     if (cell !== null && !event.ctrlKey) {
         // First, note the current coordinates.
-        oldX = cell.x;
-        oldY = cell.y;
-        // Unset the CONTACT layer at the old coordinates.
-        layeredGrid.clear(inputs[event.keyCode - 65].x, inputs[event.keyCode - 65].y, CONTACT);
+        oldX = inputs[event.keyCode - 65].x;
+        oldY = inputs[event.keyCode - 65].y;
         // Then, set the new coordinates.
         inputs[event.keyCode - 65].x = cell.x;
         inputs[event.keyCode - 65].y = cell.y;
@@ -1641,14 +1639,18 @@ function placeOutput(event) {
     'use strict';
     // Skip if CTRL is pressed.
     let cell = getCell(currentX, currentY);
+    let oldX, oldY;
     if (cell !== null && !event.ctrlKey) {
-        // First, unset the CONTACT layer at the old coordinates.
-        layeredGrid.clear(outputs[89 - event.keyCode].x, outputs[89 - event.keyCode].y, CONTACT);
+        // First, note the current coordinates.
+        oldX = outputs[89 - event.keyCode].x;
+        oldY = outputs[89 - event.keyCode].y;
         // Then, set the new coordinates.
         outputs[89 - event.keyCode].x = cell.x;
         outputs[89 - event.keyCode].y = cell.y;
         // Set the CONTACT layer at the new coordinates.
         layeredGrid.set(cell.x, cell.y, CONTACT);
+        // Unset the CONTACT layer at the old coordinates.
+        layeredGrid.clear(oldX, oldY, CONTACT);
     }
 }
 
@@ -1668,28 +1670,36 @@ function placeIO(event) {
 function placeVDD() {
     'use strict';
     let cell = getCell(currentX, currentY);
+    let oldX, oldY;
     if (cell !== null) {
-        // First, unset the CONTACT layer at the old coordinates.
-        layeredGrid.clear(vddCell.x, vddCell.y, CONTACT);
+        // First, note the current coordinates.
+        oldX = vddCell.x;
+        oldY = vddCell.y;
         // Then, set the new coordinates.
         vddCell.x = cell.x;
         vddCell.y = cell.y;
         // Set the CONTACT layer at the new coordinates.
         layeredGrid.set(cell.x, cell.y, CONTACT);
+        // Unset the CONTACT layer at the old coordinates.
+        layeredGrid.clear(oldX, oldY, CONTACT);
     }
 }
 
 function placeGND() {
     'use strict';
     let cell = getCell(currentX, currentY);
+    let oldX, oldY;
     if (cell !== null) {
-        // First, unset the CONTACT layer at the old coordinates.
-        layeredGrid.clear(gndCell.x, gndCell.y, CONTACT);
+        // First, note the current coordinates.
+        oldX = gndCell.x;
+        oldY = gndCell.y;
         // Then, set the new coordinates.
         gndCell.x = cell.x;
         gndCell.y = cell.y;
         // Set the CONTACT layer at the new coordinates.
         layeredGrid.set(cell.x, cell.y, CONTACT);
+        // Unset the CONTACT layer at the old coordinates.
+        layeredGrid.clear(oldX, oldY, CONTACT);
     }
 }
 
