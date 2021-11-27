@@ -1,9 +1,9 @@
 * { margin:0; padding:0; } /* to remove the top and left whitespace */
 
 html, body {
-	width:100%;
-	height:100%;
-	overflow: hidden;
+    width:100%;
+    height:100%;
+    overflow: hidden;
 } /* just to be sure these are full screen*/
 
 .dark {
@@ -17,23 +17,23 @@ html, body {
 }
 
 .dark-accent {
-    background-color: #aaa;
-    color: #000;
+    background-color: #333;
+    color: #eee;
 }
 
-.dark-accent .toggle-button-container {
+.dark-accent .toggle-button {
     background-color: #888;
     color: #fff;
 }
 
 .light-accent {
-    background-color: #888;
-    color: #fff;
+    background-color: #eee;
+    color: #333;
 }
 
-.light-accent .toggle-button-container {
-    background-color: #333;
-    color: #eee;
+.light-accent .toggle-button {
+    background-color: #aaa;
+    color: #000;
 }
 
 canvas {
@@ -102,33 +102,33 @@ canvas {
     right: -270px;
 }
 
-.sidebar .toggle-button {
+.sidebar .toggle-button-label {
     position: absolute;
-    cursor: pointer;
     top: 50%;
     transform: translate(0, -50%);
 }
 
-.sidebar.right .toggle-button {
+.sidebar.right .toggle-button-label {
     left: 25%;
 }
 
-.sidebar.left .toggle-button {
+.sidebar.left .toggle-button-label {
     right: 25%;
 }
 
-.sidebar .toggle-button-container {
+.sidebar .toggle-button {
     position: absolute;
     width: 30px;
     height: 100%;
     top: 0;
+    cursor: pointer;
 }
 
-.sidebar.left .toggle-button-container {
+.sidebar.left .toggle-button {
     right: 0;
 }
 
-.sidebar.right .toggle-button-container {
+.sidebar.right .toggle-button {
     left: 0;
 }
 
@@ -149,7 +149,7 @@ canvas {
 }
 
 #instructions ul li ul {
-	list-style-type: circle;
+    list-style-type: circle;
     padding: revert;
     margin: revert;
 }

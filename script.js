@@ -1848,40 +1848,40 @@ window.onload = function () {
     };
 
     // Set up the instructions close button.
-    button = document.getElementById("toggle-instructions");
+    button = document.getElementById("instructions-close");
     button.onclick = function () {
-        let button = document.getElementById("toggle-instructions");
+        let label  = document.getElementById("instructions-close-label");
         let div = document.getElementById("instructions");
         // Remove the 'open' class and replace with 'closed'.
         if(div.classList.contains('open')) {
             div.classList.remove('open');
             div.classList.add('closed');
-            button.classList.remove('fa-chevron-left');
-            button.classList.add('fa-chevron-right');
+            label.classList.remove('fa-chevron-left');
+            label.classList.add('fa-chevron-right');
         } else {
             div.classList.remove('closed');
             div.classList.add('open');
-            button.classList.remove('fa-chevron-right');
-            button.classList.add('fa-chevron-left');
+            label.classList.remove('fa-chevron-right');
+            label.classList.add('fa-chevron-left');
         }
     };
 
     // Set up the dashboard close button.
-    button = document.getElementById("toggle-dashboard");
+    button = document.getElementById("dashboard-close");
     button.onclick = function () {
-        let button = document.getElementById("toggle-dashboard");
+        let label = document.getElementById("dashboard-close-label");
         let div = document.getElementById("dashboard");
         // Remove the 'open' class and replace with 'closed'.
         if(div.classList.contains('open')) {
             div.classList.remove('open');
             div.classList.add('closed');
-            button.classList.remove('fa-chevron-right');
-            button.classList.add('fa-chevron-left');
+            label.classList.remove('fa-chevron-right');
+            label.classList.add('fa-chevron-left');
         } else {
             div.classList.remove('closed');
             div.classList.add('open');
-            button.classList.remove('fa-chevron-left');
-            button.classList.add('fa-chevron-right');
+            label.classList.remove('fa-chevron-left');
+            label.classList.add('fa-chevron-right');
         }
     };
 
