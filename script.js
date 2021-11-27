@@ -363,7 +363,7 @@ let gridsize = 29;
 let firstSaveState = 0;
 let saveState = 0;
 let lastSaveState = 0;
-let maxSaveState = 5;
+let maxSaveState = 20;
 let dragging = false;
 let startX;
 let startY;
