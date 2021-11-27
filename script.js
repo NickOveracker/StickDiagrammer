@@ -1616,86 +1616,18 @@ function mousemoveHandler(event) {
     }
 }
 
-function placeInput(event) {
+function placeTerminal(event, terminal) {
     'use strict';
     let cell = getCell(currentX, currentY);
     let oldX, oldY;
 
     if (cell !== null && !event.ctrlKey) {
         // First, note the current coordinates.
-        oldX = inputs[event.keyCode - 65].x;
-        oldY = inputs[event.keyCode - 65].y;
+        oldX = terminal.x;
+        oldY = terminal.y;
         // Then, set the new coordinates.
-        inputs[event.keyCode - 65].x = cell.x;
-        inputs[event.keyCode - 65].y = cell.y;
-        // Set the CONTACT layer at the new coordinates.
-        layeredGrid.set(cell.x, cell.y, CONTACT);
-        // Unset the CONTACT layer at the old coordinates.
-        layeredGrid.clear(oldX, oldY, CONTACT);
-    }
-}
-
-function placeOutput(event) {
-    'use strict';
-    // Skip if CTRL is pressed.
-    let cell = getCell(currentX, currentY);
-    let oldX, oldY;
-    if (cell !== null && !event.ctrlKey) {
-        // First, note the current coordinates.
-        oldX = outputs[89 - event.keyCode].x;
-        oldY = outputs[89 - event.keyCode].y;
-        // Then, set the new coordinates.
-        outputs[89 - event.keyCode].x = cell.x;
-        outputs[89 - event.keyCode].y = cell.y;
-        // Set the CONTACT layer at the new coordinates.
-        layeredGrid.set(cell.x, cell.y, CONTACT);
-        // Unset the CONTACT layer at the old coordinates.
-        layeredGrid.clear(oldX, oldY, CONTACT);
-    }
-}
-
-function placeIO(event) {
-    'use strict';
-    // Input terminal key listeners.
-    if ((event.keyCode >= 65) && (event.keyCode < 65 + inputs.length)) {
-        placeInput(event);
-    }
-
-    // Output terminal key listeners.
-    if ((event.keyCode <= 89) && (event.keyCode > 89 - outputs.length)) {
-        placeOutput(event);
-    }
-}
-
-function placeVDD() {
-    'use strict';
-    let cell = getCell(currentX, currentY);
-    let oldX, oldY;
-    if (cell !== null) {
-        // First, note the current coordinates.
-        oldX = vddCell.x;
-        oldY = vddCell.y;
-        // Then, set the new coordinates.
-        vddCell.x = cell.x;
-        vddCell.y = cell.y;
-        // Set the CONTACT layer at the new coordinates.
-        layeredGrid.set(cell.x, cell.y, CONTACT);
-        // Unset the CONTACT layer at the old coordinates.
-        layeredGrid.clear(oldX, oldY, CONTACT);
-    }
-}
-
-function placeGND() {
-    'use strict';
-    let cell = getCell(currentX, currentY);
-    let oldX, oldY;
-    if (cell !== null) {
-        // First, note the current coordinates.
-        oldX = gndCell.x;
-        oldY = gndCell.y;
-        // Then, set the new coordinates.
-        gndCell.x = cell.x;
-        gndCell.y = cell.y;
+        terminal.x = cell.x;
+        terminal.y = cell.y;
         // Set the CONTACT layer at the new coordinates.
         layeredGrid.set(cell.x, cell.y, CONTACT);
         // Unset the CONTACT layer at the old coordinates.
@@ -1716,17 +1648,16 @@ function ctrlCommandHandler(event) {
 
 function keydownHandler(event) {
     'use strict';
-    if(event.ctrlKey) {
-        ctrlCommandHandler(event);
-    } else if(event.keyCode >= 65 && event.keyCode <= 90) {
-        placeIO(event);
-    } else if (event.keyCode === 61 || event.keyCode === 187 || event.keyCode === 107) {
-        // '+' key listener.
-        placeVDD();
-    } else if (event.keyCode === 173 || event.keyCode === 189 || event.keyCode === 109) {
-        // '-' key listener.
-        placeGND();
-    }
+    let isInput  = (keyCode) => { return (keyCode >= 65) && (keyCode < 65 + inputs.length );    }; // Y, X, W, ...
+    let isOutput = (keyCode) => { return (keyCode <= 89) && (keyCode > 89 - outputs.length);    }; // A, B, C, ...
+    let isVDD    = (keyCode) => { return keyCode === 61 || keyCode === 187 || keyCode === 107;  }; // + key
+    let isGND    = (keyCode) => { return keyCode === 173 || keyCode === 189 || keyCode === 109; }; // - key
+
+    if      (event.ctrlKey)           { ctrlCommandHandler(event); }
+    else if (isInput(event.keyCode))  { placeTerminal(event, inputs[event.keyCode - 65]); }
+    else if (isOutput(event.keyCode)) { placeTerminal(event, outputs[89 - event.keyCode]); }
+    else if (isVDD(event.keyCode))    { placeTerminal(event, vddCell); }
+    else if (isGND(event.keyCode))    { placeTerminal(event, gndCell); }
 }
 
 function setDarkMode(setToDark) {
