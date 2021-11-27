@@ -1489,7 +1489,7 @@ function cellClickHandler(event) {
 // Note the grid coordinates when the left or right mouse button is released.
 // If the left (or primary) button, use the start and end coordinates to make either a horizontal or vertical line.
 // If the right (or secondary) button, use the same coordinates to delete a line of cells.
-function mouseupHandler(event) {
+function canvasMouseUpHandler(event) {
     'use strict';
     if (event.button === 0 || event.button === 2) {
         // If not between cells 1 and gridsize - 1, undo and return.
@@ -1798,7 +1798,7 @@ function contextmenuHandler(event) {
 
 // Note the grid coordinates when the left mouse button is pressed.
 // Store the m in startX and startY.
-function mousedownHandler(event) {
+function canvasMouseDownHandler(event) {
     'use strict';
     if (event.button === 0 || event.button === 2) {
         // Return if not between cells 1 and gridsize - 1
@@ -1817,6 +1817,9 @@ window.onload = function () {
     // Clear local storage
     localStorage.clear();
 
+    // Get the canvas div to attach listeners to.
+    canvasContainer = document.getElementById("canvas-container");
+
     // Set to dark mode if it is night time
     setDarkMode(new Date().getHours() > 19 || new Date().getHours() < 7);
 
@@ -1826,12 +1829,16 @@ window.onload = function () {
     //makeLayeredGrid(gridsize, gridsize);
     layeredGrid = new LayeredGrid(gridsize, gridsize, cursors.length);
 
-    window.addEventListener("mousedown", mousedownHandler);
-    window.addEventListener("mouseup", mouseupHandler);
-    window.addEventListener("mousemove", mousemoveHandler);
-    window.addEventListener("contextmenu", contextmenuHandler);
+    // Canvas mouse event listeners.
+    canvasContainer.addEventListener("mousedown", canvasMouseDownHandler);
+    canvasContainer.addEventListener("mouseup", canvasMouseUpHandler);
+    canvasContainer.addEventListener("contextmenu", contextmenuHandler);
+
+    // Some of these pertain the the canvas, but we don't know whether
+    // it will be selected.
     window.addEventListener("keydown", keydownHandler);
     window.addEventListener("keyup", keyupHandler);
+    window.addEventListener("mousemove", mousemoveHandler);
 
     // Set up the evaluate button.
     button = document.getElementById("generate-truth-table");
