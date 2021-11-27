@@ -1856,13 +1856,13 @@ window.onload = function () {
         if(div.classList.contains('open')) {
             div.classList.remove('open');
             div.classList.add('closed');
-            button.classList.remove('chevron-left');
-            button.classList.add('chevron-right');
+            button.classList.remove('fa-chevron-left');
+            button.classList.add('fa-chevron-right');
         } else {
             div.classList.remove('closed');
             div.classList.add('open');
-            button.classList.remove('chevron-right');
-            button.classList.add('chevron-left');
+            button.classList.remove('fa-chevron-right');
+            button.classList.add('fa-chevron-left');
         }
     };
 
@@ -1875,8 +1875,8 @@ window.onload = function () {
         if(div.classList.contains('open')) {
             div.classList.remove('open');
             div.classList.add('closed');
-            button.classList.remove('chevron-right');
-            button.classList.add('chevron-left');
+            button.classList.remove('fa-chevron-right');
+            button.classList.add('fa-chevron-left');
         } else {
             div.classList.remove('closed');
             div.classList.add('open');
