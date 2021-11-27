@@ -17,18 +17,18 @@ html, body {
 }
 
 .dark-accent {
-    background-color: #333;
-    color: #eee;
+    background-color: #aaa;
+    color: #000;
 }
 
 .dark-accent .toggle-button-container {
-    background-color: #eee;
-    color: #333;
+    background-color: #888;
+    color: #fff;
 }
 
 .light-accent {
-    background-color: #eee;
-    color: #333;
+    background-color: #888;
+    color: #fff;
 }
 
 .light-accent .toggle-button-container {
