@@ -372,17 +372,18 @@ let currentX;
 let currentY;
 let button;
 let nodeNodeMap = [];
+let useFlatColors = false;
 
 // Cycle through the following cursor colors by pressing space: PDIFF, NDIFF, POLY, METAL1, CONTACT
 // Additional colors: DELETE at index (numLayers + 0)
 let cursors = [
-    {name: 'pdiff',   color: 'rgba(118,   0, 181,   1)', selectable: true, },
-    {name: 'ndiff',   color: 'rgba(50,  205,  50,   1)', selectable: true, },
-    {name: 'poly',    color: 'rgba(255,   0,   0, 0.5)', selectable: true, },
-    {name: 'metal1',  color: 'rgba(0,   255, 255, 0.5)', selectable: true, },
-    {name: 'metal2',  color: 'rgba(255,   0, 204, 0.5)', selectable: true, },
-    {name: 'contact', color: 'rgba(204, 204, 204, 0.5)', selectable: true, },
-    {name: 'delete',  color: 'rgba(208, 160,  32, 0.5)', selectable: false,},
+    {name: 'pdiff',   color: 'rgba(118,   0, 181,   1)', flatColor: 'rgb(118,   0, 181)', selectable: true, },
+    {name: 'ndiff',   color: 'rgba(50,  205,  50,   1)', flatColor: 'rgb(50,  205,  50)', selectable: true, },
+    {name: 'poly',    color: 'rgba(255,   0,   0, 0.5)', flatColor: 'rgb(255,   0,   0)', selectable: true, },
+    {name: 'metal1',  color: 'rgba(0,   255, 255, 0.5)', flatColor: 'rgb(0,   255, 255)', selectable: true, },
+    {name: 'metal2',  color: 'rgba(255,   0, 204, 0.5)', flatColor: 'rgb(255,   0, 204)', selectable: true, },
+    {name: 'contact', color: 'rgba(204, 204, 204, 0.5)', flatColor: 'rgb(204, 204, 204)', selectable: true, },
+    {name: 'delete',  color: 'rgba(208, 160,  32, 0.5)', flatColor: 'rgb(208, 160,  32)', selectable: false,},
 ];
 let numLayers = cursors.length - 1;
 let PDIFF   = 0;
@@ -766,7 +767,7 @@ graph = new Graph();
 // Draw the outer border of the canvas.
 function drawBorder() {
     'use strict';
-    ctx.strokeStyle = cursors[cursorIndex].color;
+    ctx.strokeStyle = useFlatColors? cursors[cursorIndex].flatColor : cursors[cursorIndex].color;
     ctx.lineWidth = cellWidth;
     ctx.strokeRect(cellWidth / 2, cellWidth / 2, canvas.width - cellWidth, canvas.height - cellWidth);
 
@@ -1278,7 +1279,7 @@ function refreshCanvas() {
     // Check the layers of the grid, and draw cells as needed.
     function drawCell(i, j, layer) {
         if (layeredGrid.get(i, j, layer).isSet) {
-            ctx.fillStyle = cursors[layer].color;
+            ctx.fillStyle = useFlatColors? cursors[cursorIndex].flatColor : cursors[layer].color;
             ctx.fillRect((i+1) * cellWidth, (j+1) * cellHeight - 1, cellWidth + 1, cellHeight + 2);
         }
     }
@@ -1619,13 +1620,18 @@ function placeInput(event) {
     'use strict';
     let cell = getCell(currentX, currentY);
     if (cell !== null && !event.ctrlKey) {
-        // First, unset the CONTACT layer at the old coordinates.
+        // First, note the current coordinates.
+        oldX = cell.x;
+        oldY = cell.y;
+        // Unset the CONTACT layer at the old coordinates.
         layeredGrid.clear(inputs[event.keyCode - 65].x, inputs[event.keyCode - 65].y, CONTACT);
         // Then, set the new coordinates.
         inputs[event.keyCode - 65].x = cell.x;
         inputs[event.keyCode - 65].y = cell.y;
         // Set the CONTACT layer at the new coordinates.
         layeredGrid.set(cell.x, cell.y, CONTACT);
+        // Unset the CONTACT layer at the old coordinates.
+        layeredGrid.clear(oldX, oldY, CONTACT);
     }
 }
 
@@ -1762,6 +1768,10 @@ function keyupHandler(event) {
     // Toggle dark mode by pressing space
     if (event.keyCode === 32) {
         toggleDarkMode();
+    }
+    // Toggle useFlatColors by pressing 'f'
+    if (event.keyCode === 70) {
+        useFlatColors = !useFlatColors;
     }
 }
 
