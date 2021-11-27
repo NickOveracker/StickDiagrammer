@@ -715,54 +715,45 @@ function computeOutput(inputVals, outputNode) {
 // Z is high impedance, X is error (VDD and GND contradiction.)
 function buildTruthTable() {
     'use strict';
-    let header      = new Array(inputs.length + outputs.length);
-    let inputTable  = new Array(Math.pow(2, inputs.length));
-    let outputTable = new Array(Math.pow(2, inputs.length));
+    let header = [];
+    let inputVals = [];
+    let outputVals = [];
 
     // Each loop iteration is a combination of input values.
     // I.e., one row of the output table.
-    inputTable.forEach(function(row, rowIndex) {
-        let tableInputRow  = new Array(inputs.length);
-        let tableOutputRow = new Array(outputs.length);
+    for (let ii = 0; ii < Math.pow(2, inputs.length); ii++) {
+        let tableInputRow = [];
+        let tableOutputRow = [];
 
         // Compute each output.
-        tableOutputRow.forEach(function(cell, colIndex) {
-            cell = computeOutput(rowIndex, outputNodes[colIndex]);
-        });
+        for (let jj = 0; jj < outputs.length; jj++) {
+            tableOutputRow[jj] = computeOutput(ii, outputNodes[jj]);
+        }
 
-        outputTable[rowIndex] = tableOutputRow;
+        outputVals[ii] = tableOutputRow;
 
-        tableInputRow.forEach(function(cell, colIndex) {
+        for (let jj = 0; jj < inputs.length; jj++) {
             /*jslint bitwise: true */
-            cell = (rowIndex >> colIndex) & 1;
+            tableInputRow[jj] = (ii >> jj) & 1;
             /*jslint bitwise: false */
-        });
+        }
 
-        row = tableInputRow;
-    });
+        inputVals[ii] = tableInputRow;
+    }
 
     // Header
-    // This needs to run backwards in the current setup.
-    // TODO: This needs to be refactored.
-    for (let jj = inputTable[0].length - 1; jj >= 0; jj--) {
-        header[inputTable[0].length - 1 - jj] = String.fromCharCode(65 + jj);
+    for (let jj = inputVals[0].length - 1; jj >= 0; jj--) {
+        header[inputVals[0].length - 1 - jj] = String.fromCharCode(65 + jj);
     }
 
     // Merge input and output into one table (input on the left, output on the right.)
-    let table = new Array(inputTable.length + 1); // +1 for header.
-    table.forEach(function(row, rowIndex) {
-        if(rowIndex === 0) {
-            row = header;
-            row[header.length] = "Y";
-            return;
-        }
+    let table = [];
+    table[0] = header;
+    table[0][header.length] = "Y";
+    for (let ii = 0; ii < inputVals.length; ii++) {
         // Reverse the input row.
-        let inputRow = new Array(inputs.length);
-        inputRow.forEach(function(cell, colIndex) {
-            cell = inputTable[rowIndex - 1][inputTable[rowIndex - 1].length - 1 - colIndex];
-        });
-        row = inputRow.concat(outputTable[rowIndex - 1]);
-    });
+        table[ii + 1] = inputVals[ii].reverse().concat(outputVals[ii]);
+    }
 
     return table;
 }
