@@ -1818,7 +1818,7 @@ window.onload = function () {
     localStorage.clear();
 
     // Get the canvas div to attach listeners to.
-    canvasContainer = document.getElementById("canvas-container");
+    let canvasContainer = document.getElementById("canvas-container");
 
     // Set to dark mode if it is night time
     setDarkMode(new Date().getHours() > 19 || new Date().getHours() < 7);
