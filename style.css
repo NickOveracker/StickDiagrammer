@@ -94,18 +94,17 @@ canvas {
 
 .sidebar .toggle-button {
     position: absolute;
-    top: 0;
-    width: 30px;
-    height: 100%;
     cursor: pointer;
-}
-
-.sidebar.left .toggle-button {
-    right: 0;
+    top: 50%;
+    transform: translate(0, -50%);
 }
 
 .sidebar.right .toggle-button {
-    left: 0;
+    left: 25%;
+}
+
+.sidebar.left .toggle-button {
+    right: 25%;
 }
 
 .sidebar .toggle-button-container {
