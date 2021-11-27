@@ -1318,7 +1318,6 @@ function refreshCanvas() {
     // set the outer border of the canvas to the cursor color
     drawBorder();
     drawLabels();
-    drawGrid(gridsize); // Not sure why but gotta draw this twice.
 }
 
 // Save function to save the current state of the grid and the canvas.
@@ -1477,7 +1476,7 @@ function cellClickHandler(event) {
     if (event.button === 0) {
         if (!layeredGrid.get(startX, startY, cursorIndex).isSet) { saveCurrentState(); }
         layeredGrid.set(startX, startY, cursorIndex);
-    } else {
+    } else if(event.button === 2) {
         // If in the canvas and over a colored cell, erase it.
         // Otherwise, change the layer.
         if (!clearIfPainted(event.clientX, event.clientY)) {
