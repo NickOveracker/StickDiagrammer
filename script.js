@@ -239,7 +239,7 @@ class LayeredGrid {
             if(input.y + yOffset >= 0 && input.y + yOffset < this.height) {
                 input.y += yOffset;
             }
-        });
+        }.bind(this));
 
         outputs.forEach(function(output) {
             if(output.x + xOffset >= 0 && output.x + xOffset < this.width) {
@@ -248,7 +248,7 @@ class LayeredGrid {
             if(output.y + yOffset >= 0 && output.y + yOffset < this.height) {
                 output.y += yOffset;
             }
-        });
+        }.bind(this));
 
         if(vddCell.x + xOffset >= 0 && vddCell.x + xOffset < this.width) {
             vddCell.x += xOffset;
