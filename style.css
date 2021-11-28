@@ -85,8 +85,13 @@ canvas {
     top: 0;
 }
 
+.sidebar-left {
+    padding-right: 30px;
+}
+
 .sidebar.right {
     text-align: center;
+    padding-left: 30px;
 }
 
 .sidebar.left.open {
@@ -109,6 +114,10 @@ canvas {
     position: absolute;
     top: 50%;
     transform: translate(0, -50%);
+}
+
+.sidebar half-width {
+    width: 50%;
 }
 
 .sidebar.right .toggle-button-label {
