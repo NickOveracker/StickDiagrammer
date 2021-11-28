@@ -1829,6 +1829,10 @@ function setUpControls() {
     let addRowButton = document.getElementById("add-row");
     let removeColumnButton = document.getElementById("remove-column");
     let addColumnButton = document.getElementById("add-column");
+    let shiftLeftButton = document.getElementById("shift-left");
+    let shiftRightButton = document.getElementById("shift-right");
+    let shiftUpButton = document.getElementById("shift-up");
+    let shiftDownButton = document.getElementById("shift-down");
 
     removeRowButton.addEventListener("click", function() {
         layeredGrid.resize(layeredGrid.width, layeredGrid.height - 1);
@@ -1852,6 +1856,22 @@ function setUpControls() {
         layeredGrid.resize(layeredGrid.width + 1, layeredGrid.height);
         document.getElementById("column-count").innerHTML = layeredGrid.width;
         drawGrid();
+    });
+
+    shiftLeftButton.addEventListener("click", function() {
+        layeredGrid.shift(-1, 0);
+    });
+
+    shiftRightButton.addEventListener("click", function() {
+        layeredGrid.shift(1, 0);
+    });
+
+    shiftUpButton.addEventListener("click", function() {
+        layeredGrid.shift(0, -1);
+    });
+
+    shiftDownButton.addEventListener("click", function() {
+        layeredGrid.shift(0, 1);
     });
 }
 
