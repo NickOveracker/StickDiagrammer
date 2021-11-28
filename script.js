@@ -220,7 +220,7 @@ class LayeredGrid {
         for(let layer = 0; layer < this.layers; layer++) {
             for(let y = 0; y < this.height; y++) {
                 for(let x = 0; x < this.width; x++) {
-                    if(oldGrid[this.convertFromCoordinates(x - xOffset, y - yOffset, layer)]) {
+                    if(oldGrid[x - xOffset + ((y - yOffset) * this.width) + (layer * this.width * this.height)]) {
                         this.set(x, y, layer);
                     }
                 }
