@@ -215,14 +215,15 @@ class LayeredGrid {
     // Shift the grid by a given offset
     shift(xOffset, yOffset) {
         let oldGrid = this.grid;
-        let oldWidth = this.width;
-        let oldHeight = this.height;
         this.grid = new Array(this.width * this.height * this.layers);
 
         for(let layer = 0; layer < this.layers; layer++) {
             for(let y = 0; y < this.height; y++) {
                 for(let x = 0; x < this.width; x++) {
-                    if(oldGrid[x - xOffset + ((y - yOffset) * oldWIdth) + (layer * oldWidth * oldHeight)]) {
+                    if(x - offset < 0 || x - offset >= this.width || y - offset < 0 || y - offset >= this.height) {
+                        continue;
+                    }
+                    if(oldGrid[x - xOffset + ((y - yOffset) * this.width) + (layer * this.width * this.height)]) {
                         this.set(x, y, layer);
                     }
                 }
