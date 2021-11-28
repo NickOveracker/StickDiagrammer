@@ -1,4 +1,4 @@
-/***************************************************************************************************
+/**************************************************************************************************
  * 
  * ## Legal Stuff
  * All rights are reserved by Nick Overacker.
@@ -844,7 +844,7 @@ function resizeCanvas() {
 
 // Draw a faint grid on the canvas.
 // Add an extra 2 units to the width and height for a border.
-function drawGrid(width, height) {
+function drawGrid() {
     'use strict';
     // Check if gridCanvas is defined.
     if (gridCanvas === undefined) {
@@ -871,8 +871,8 @@ function drawGrid(width, height) {
 
     // Set the gridCanvas context.
     let gridCtx = gridCanvas.getContext('2d');
-    cellWidth = canvas.width / (width + 2);
-    cellHeight = canvas.height / (height + 2);
+    cellWidth = canvas.width / (layeredGrid.width + 2);
+    cellHeight = canvas.height / (layeredGrid.height + 2);
 
     // Clear the grid canvas.
     gridCanvas.getContext('2d').clearRect(0, 0, gridCanvas.width, gridCanvas.height);
@@ -885,14 +885,14 @@ function drawGrid(width, height) {
         gridCtx.strokeStyle = lightModeGridColor;
     }
 
-    for (let ii = 0; ii < Math.max(width, height) + 2; ii++) {
-        if(ii < width + 2) {
+    for (let ii = 0; ii < Math.max(layeredGrid.width, layeredGrid.height) + 2; ii++) {
+        if(ii < layeredGrid.width + 2) {
             gridCtx.beginPath();
             gridCtx.moveTo(ii * cellWidth, 0);
             gridCtx.lineTo(ii * cellWidth, gridCanvas.height);
             gridCtx.stroke();
         }
-        if(ii < height + 2) {
+        if(ii < layeredGrid.height + 2) {
             gridCtx.beginPath();
             gridCtx.moveTo(0, ii * cellHeight);
             gridCtx.lineTo(gridCanvas.width, ii * cellHeight);
@@ -1303,7 +1303,7 @@ function refreshCanvas() {
     resizeCanvas();
 
     // Draw the grid.
-    drawGrid(layeredGrid.width, layeredGrid.height);
+    drawGrid();
 
     // Check the layers of the grid, and draw cells as needed.
     function drawCell(i, j, layer) {
