@@ -838,8 +838,14 @@ function resizeCanvas() {
     let windowWidth = window.innerWidth;
     let windowHeight = window.innerHeight;
     let windowSize = Math.min(windowWidth, windowHeight);
+    let sizeChanged = canvas.width !== windowSize || canvas.height !== windowSize;
+
     canvas.width = windowSize;
     canvas.height = windowSize;
+
+    if(sizeChanged) {
+        drawGrid();
+    }
 }
 
 // Draw a faint grid on the canvas.
@@ -850,14 +856,6 @@ function drawGrid() {
     if (gridCanvas === undefined) {
         gridCanvas = document.createElement('canvas');
         document.body.appendChild(gridCanvas);
-    }
-
-    // Return if the size has not changed.
-    if (gridCanvas.width      === canvas.width - 1         &&
-        gridCanvas.height     === canvas.height - 1        &&
-        gridCanvas.style.left === canvas.offsetLeft + 'px' &&
-        gridCanvas.style.top  === canvas.offsetTop  + 'px') {
-        return;
     }
 
     // Place gridCanvas behind the canvas.
@@ -1301,9 +1299,6 @@ function drawLabels() {
 function refreshCanvas() {
     'use strict';
     resizeCanvas();
-
-    // Draw the grid.
-    drawGrid();
 
     // Check the layers of the grid, and draw cells as needed.
     function drawCell(i, j, layer) {
