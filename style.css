@@ -85,13 +85,13 @@ canvas {
     top: 0;
 }
 
-.sidebar-left {
-    padding-right: 30px;
+.sidebar.left {
+    margin-right: 30px;
 }
 
 .sidebar.right {
     text-align: center;
-    padding-left: 30px;
+    margin-left: 30px;
 }
 
 .sidebar.left.open {
@@ -117,7 +117,7 @@ canvas {
 }
 
 .sidebar half-width {
-    width: 50%;
+    width: 49%;
 }
 
 .sidebar.right .toggle-button-label {
