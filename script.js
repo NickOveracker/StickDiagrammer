@@ -198,9 +198,14 @@ class LayeredGrid {
             lowLayer: 0,
             highLayer: this.layers - 1,
         };
-        this.map(bounds, function(cell) {
-            this.grid[cell] = oldGrid[cell];
-        }, true);
+
+        for(let layer = bounds.lowLayer; layer <= bounds.highLayer; layer++) {
+            for(let y = bounds.top; y <= bounds.bottom; y++) {
+                for(let x = bounds.left; x <= bounds.right; x++) {
+                    this.grid[this.convertFromCoordinates(x, y, layer)] = oldGrid[x + (y * oldWidth) + (layer * oldWidth * oldHeight)];
+                }
+            }
+        }
     }
 }
 
@@ -802,7 +807,7 @@ function drawBorder() {
 
     // For the middle 11 cells of the upper border, fill with the grid color.
     ctx.fillStyle = darkMode ? "#ffffff" : "#000000";
-    let startCell = Math.floor(gridWidth / 2) - 4;
+    let startCell = Math.floor(layeredGrid.width / 2) - 4;
     ctx.fillRect(startCell * cellWidth, 0, cellWidth * 11, cellHeight);
 
     // Write the cursor color name in the middle of the upper border of the canvas.
@@ -1248,11 +1253,11 @@ function setRecursively(cell, net) {
 
     // Check the cells above and below.
     if (cell.y > 0) { setAdjacent(0, -1); }
-    if (cell.y < gridHeight - 1) { setAdjacent(0, 1); }
+    if (cell.y < layeredGrid.height - 1) { setAdjacent(0, 1); }
 
     // Check the cells to the left and right.
     if (cell.x > 0) { setAdjacent(-1, 0); }
-    if (cell.x < gridWidth - 1) { setAdjacent(1, 0); }
+    if (cell.x < layeredGrid.width - 1) { setAdjacent(1, 0); }
 }
 
 function decorateContact(x, y) {
@@ -1298,7 +1303,7 @@ function refreshCanvas() {
     resizeCanvas();
 
     // Draw the grid.
-    drawGrid(gridWidth, gridHeight);
+    drawGrid(layeredGrid.width, layeredGrid.height);
 
     // Check the layers of the grid, and draw cells as needed.
     function drawCell(i, j, layer) {
@@ -1311,11 +1316,11 @@ function refreshCanvas() {
     // Draw each layer in order.
     let bounds = {
         left: 0,
-        right: gridWidth - 1,
+        right: layeredGrid.width - 1,
         top: 0,
-        bottom: gridHeight - 1,
+        bottom: layeredGrid.height - 1,
         lowLayer: 0,
-        highLayer: cursors.length - 1,
+        highLayer: layeredGrid.layers - 1,
     };
 
     layeredGrid.map(bounds, function (x, y, layer) {
