@@ -179,6 +179,29 @@ class LayeredGrid {
             this.grid[cell] = null;
         });
     }
+
+    // Change the height of the grid
+    resize(width, height, layers) {
+        let oldGrid = this.grid;
+        this.width = width;
+        this.height = height;
+        this.layers = layers;
+        this.grid = new Array(width * height * layers);
+
+        // Copy the old grid into the new grid
+        let bounds = {
+            left: 0,
+            right: Math.min(this.width - 1, oldGrid.length - 1),
+            top: 0,
+            bottom: Math.min(this.height - 1, oldGrid.length - 1),
+            lowLayer: 0,
+            highLayer: Math.min(this.layers - 1, oldGrid.length - 1),
+        };
+        this.map(bounds, function(cell) {
+            this.grid[cell] = oldGrid[cell];
+        }
+        .bind(this));
+    }
 }
 
 // Graph class to represent CMOS circuitry.
@@ -359,7 +382,8 @@ let ctx;
 let darkMode;
 let cellHeight;
 let cellWidth;
-let gridsize = 29;
+let gridWidth = 29;
+let gridHeight = 29;
 let firstSaveState = 0;
 let saveState = 0;
 let lastSaveState = 0;
@@ -414,7 +438,7 @@ let graph;
 // VDD and GND are the two terminals of the grid.
 // The terminals are always at the top and bottom of the grid.
 let vddCell = {x: 1, y: 1,};
-let gndCell = {x: 1, y: gridsize - 2,};
+let gndCell = {x: 1, y: gridHeight - 2,};
 
 // Nodes
 let vddNode;
@@ -778,7 +802,7 @@ function drawBorder() {
 
     // For the middle 11 cells of the upper border, fill with the grid color.
     ctx.fillStyle = darkMode ? "#ffffff" : "#000000";
-    let startCell = Math.floor(gridsize / 2) - 4;
+    let startCell = Math.floor(gridWidth / 2) - 4;
     ctx.fillRect(startCell * cellWidth, 0, cellWidth * 11, cellHeight);
 
     // Write the cursor color name in the middle of the upper border of the canvas.
@@ -815,7 +839,7 @@ function resizeCanvas() {
 
 // Draw a faint grid on the canvas.
 // Add an extra 2 units to the width and height for a border.
-function drawGrid(size) {
+function drawGrid(width, height) {
     'use strict';
     // Check if gridCanvas is defined.
     if (gridCanvas === undefined) {
@@ -842,8 +866,8 @@ function drawGrid(size) {
 
     // Set the gridCanvas context.
     let gridCtx = gridCanvas.getContext('2d');
-    cellWidth = canvas.width / (size + 2);
-    cellHeight = canvas.height / (size + 2);
+    cellWidth = canvas.width / (width + 2);
+    cellHeight = canvas.height / (height + 2);
 
     // Clear the grid canvas.
     gridCanvas.getContext('2d').clearRect(0, 0, gridCanvas.width, gridCanvas.height);
@@ -856,15 +880,19 @@ function drawGrid(size) {
         gridCtx.strokeStyle = lightModeGridColor;
     }
 
-    for (let ii = 0; ii < size + 2; ii++) {
-        gridCtx.beginPath();
-        gridCtx.moveTo(ii * cellWidth, 0);
-        gridCtx.lineTo(ii * cellWidth, gridCanvas.height);
-        gridCtx.stroke();
-        gridCtx.beginPath();
-        gridCtx.moveTo(0, ii * cellHeight);
-        gridCtx.lineTo(gridCanvas.width, ii * cellHeight);
-        gridCtx.stroke();
+    for (let ii = 0; ii < Math.max(width, height) + 2; ii++) {
+        if(ii < width + 2) {
+            gridCtx.beginPath();
+            gridCtx.moveTo(ii * cellWidth, 0);
+            gridCtx.lineTo(ii * cellWidth, gridCanvas.height);
+            gridCtx.stroke();
+        }
+        if(ii < height + 2) {
+            gridCtx.beginPath();
+            gridCtx.moveTo(0, ii * cellHeight);
+            gridCtx.lineTo(gridCanvas.width, ii * cellHeight);
+            gridCtx.stroke();
+        }
     }
 }
 
@@ -1220,11 +1248,11 @@ function setRecursively(cell, net) {
 
     // Check the cells above and below.
     if (cell.y > 0) { setAdjacent(0, -1); }
-    if (cell.y < gridsize - 1) { setAdjacent(0, 1); }
+    if (cell.y < gridHeight - 1) { setAdjacent(0, 1); }
 
     // Check the cells to the left and right.
     if (cell.x > 0) { setAdjacent(-1, 0); }
-    if (cell.x < gridsize - 1) { setAdjacent(1, 0); }
+    if (cell.x < gridWidth - 1) { setAdjacent(1, 0); }
 }
 
 function decorateContact(x, y) {
@@ -1270,7 +1298,7 @@ function refreshCanvas() {
     resizeCanvas();
 
     // Draw the grid.
-    drawGrid(gridsize);
+    drawGrid(gridWidth, gridHeight);
 
     // Check the layers of the grid, and draw cells as needed.
     function drawCell(i, j, layer) {
@@ -1283,9 +1311,9 @@ function refreshCanvas() {
     // Draw each layer in order.
     let bounds = {
         left: 0,
-        right: gridsize - 1,
+        right: gridWidth - 1,
         top: 0,
-        bottom: gridsize - 1,
+        bottom: gridHeight - 1,
         lowLayer: 0,
         highLayer: cursors.length - 1,
     };
@@ -1738,6 +1766,34 @@ function canvasMouseDownHandler(event) {
     }
 }
 
+function setUpControls() {
+    'use strict';
+    let removeRowButton = document.getElementById("remove-row");
+    let addRowButton = document.getElementById("add-row");
+    let removeColumnButton = document.getElementById("remove-column");
+    let addColumnButton = document.getElementById("add-column");
+
+    removeRowButton.addEventListener("click", function() {
+        gridHeight--;
+        document.getElementById("row-count").innerHTML = gridHeight;
+    });
+
+    addRowButton.addEventListener("click", function() {
+        gridHeight++;
+        document.getElementById("row-count").innerHTML = gridHeight;
+    });
+
+    removeColumnButton.addEventListener("click", function() {
+        gridWidth--;
+        document.getElementById("column-count").innerHTML = gridWidth;
+    });
+
+    addColumnButton.addEventListener("click", function() {
+        gridWidth++;
+        document.getElementById("column-count").innerHTML = gridWidth;
+    });
+}
+
 window.onload = function () {
     'use strict';
     // Clear local storage
@@ -1752,8 +1808,7 @@ window.onload = function () {
     // Initialize with a gridsize of 29 and 5 layers
     canvas = document.getElementById("canvas");
     ctx = canvas.getContext("2d");
-    //makeLayeredGrid(gridsize, gridsize);
-    layeredGrid = new LayeredGrid(gridsize, gridsize, cursors.length);
+    layeredGrid = new LayeredGrid(gridWidth, gridHeight, cursors.length);
 
     // Canvas mouse event listeners.
     canvasContainer.addEventListener("mousedown", canvasMouseDownHandler);
@@ -1822,6 +1877,8 @@ window.onload = function () {
     // Set the CONTACT layer on the VDD and GND cells.
     layeredGrid.set(vddCell.x, vddCell.y, CONTACT);
     layeredGrid.set(gndCell.x, gndCell.y, CONTACT);
+
+    setUpControls();
 
     refreshCanvas();
     // 60 fps
