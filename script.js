@@ -227,7 +227,7 @@ class LayeredGrid {
             }
         }
 
-        this.shiftTerminals();
+        this.shiftTerminals(xOffset, yOffset);
     }
 
     // Shift the terminals by a given offset
