@@ -116,7 +116,7 @@ canvas {
     transform: translate(0, -50%);
 }
 
-.sidebar half-width {
+.sidebar .half-width {
     width: 49%;
 }
 
