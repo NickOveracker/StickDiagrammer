@@ -207,6 +207,22 @@ class LayeredGrid {
             }
         }
     }
+
+    // Shift the grid by a given offset
+    shift(xOffset, yOffset) {
+        let oldGrid = this.grid;
+        this.grid = new Array(this.width * this.height * this.layers);
+
+        for(let layer = 0; layer < this.layers; layer++) {
+            for(let y = 0; y < this.height; y++) {
+                for(let x = 0; x < this.width; x++) {
+                    if(x - xOffset >= 0 && x - xOffset < this.width && y - yOffset >= 0 && y - yOffset < this.height) {
+                        this.grid[this.convertFromCoordinates(x, y, layer)] = oldGrid[this.convertFromCoordinates(x - xOffset, y - yOffset, layer)];
+                    }
+                }
+            }
+        }
+    }
 }
 
 // Graph class to represent CMOS circuitry.
