@@ -1781,21 +1781,25 @@ function setUpControls() {
     removeRowButton.addEventListener("click", function() {
         layeredGrid.resize(layeredGrid.width, layeredGrid.height - 1);
         document.getElementById("row-count").innerHTML = layeredGrid.height;
+        drawGrid();
     });
 
     addRowButton.addEventListener("click", function() {
         layeredGrid.resize(layeredGrid.width, layeredGrid.height + 1);
         document.getElementById("row-count").innerHTML = layeredGrid.height;
+        drawGrid();
     });
 
     removeColumnButton.addEventListener("click", function() {
         layeredGrid.resize(layeredGrid.width - 1, layeredGrid.height);
         document.getElementById("column-count").innerHTML = layeredGrid.width;
+        drawGrid();
     });
 
     addColumnButton.addEventListener("click", function() {
         layeredGrid.resize(layeredGrid.width + 1, layeredGrid.height);
         document.getElementById("column-count").innerHTML = layeredGrid.width;
+        drawGrid();
     });
 }
 
