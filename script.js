@@ -182,6 +182,10 @@ class LayeredGrid {
 
     // Change the height of the grid
     resize(width, height) {
+        if(width < 0 || height < 0) {
+            return;
+        }
+
         let oldGrid = this.grid;
         let oldWidth = this.width;
         let oldHeight = this.height;
@@ -221,6 +225,43 @@ class LayeredGrid {
                     }
                 }
             }
+        }
+
+        this.shiftTerminals();
+    }
+
+    // Shift the terminals by a given offset
+    shiftTerminals(xOffset, yOffset) {
+        inputs.forEach(function(input) {
+            if(input.x + xOffset >= 0 && input.x + xOffset < this.width) {
+                input.x += xOffset;
+            }
+            if(input.y + yOffset >= 0 && input.y + yOffset < this.height) {
+                input.y += yOffset;
+            }
+        });
+
+        outputs.forEach(function(output) {
+            if(output.x + xOffset >= 0 && output.x + xOffset < this.width) {
+                output.x += xOffset;
+            }
+            if(output.y + yOffset >= 0 && output.y + yOffset < this.height) {
+                output.y += yOffset;
+            }
+        });
+
+        if(vddCell.x + xOffset >= 0 && vddCell.x + xOffset < this.width) {
+            vddCell.x += xOffset;
+        }
+        if(vddCell.y + yOffset >= 0 && vddCell.y + yOffset < this.height) {
+            vddCell.y += yOffset;
+        }
+
+        if(gndCell.x + xOffset >= 0 && gndCell.x + xOffset < this.width) {
+            gndCell.x += xOffset;
+        }
+        if(gndCell.y + yOffset >= 0 && gndCell.y + yOffset < this.height) {
+            gndCell.y += yOffset;
         }
     }
 }
