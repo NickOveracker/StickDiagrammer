@@ -21,7 +21,6 @@
 ## Feature Wishlist
 * Warn user when pulling up with NMOS or pulling down with PMOS.
 * Arbitrary number of I/O.
-* Arbitrary width/height.
 * HTML button interface for those who prefer not to use a keyboard.
 * Mobile interface.
 * Student/Teacher modes with generating/grading homework, practice problems, etc.
@@ -29,6 +28,7 @@
 * Record user input sequence in debug mode for the testbench.
 * Draw CMOS circuit schematic corresponding to the painted topology.
 * Export netlist for use in electronics design software.
+* ~~Arbitrary width/height.~~ *Resolved 2021/11/28*
 * ~~More efficient data structure for the grid.~~ *Resolved 2021/11/25**
 * ~~Foolproof usage instructions.~~ *Resolved 2021/11/21*
 * ~~More metal layers.~~ *Resolved 2021/11/21*
