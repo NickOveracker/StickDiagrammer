@@ -181,12 +181,11 @@ class LayeredGrid {
     }
 
     // Change the height of the grid
-    resize(width, height, layers) {
+    resize(width, height) {
         let oldGrid = this.grid;
         this.width = width;
         this.height = height;
-        this.layers = layers;
-        this.grid = new Array(width * height * layers);
+        this.grid = new Array(width * height * this.layers);
 
         // Copy the old grid into the new grid
         let bounds = {
@@ -195,7 +194,7 @@ class LayeredGrid {
             top: 0,
             bottom: Math.min(this.height - 1, oldGrid.length - 1),
             lowLayer: 0,
-            highLayer: Math.min(this.layers - 1, oldGrid.length - 1),
+            highLayer: this.layers - 1,
         };
         this.map(bounds, function(cell) {
             this.grid[cell] = oldGrid[cell];
@@ -1774,23 +1773,23 @@ function setUpControls() {
     let addColumnButton = document.getElementById("add-column");
 
     removeRowButton.addEventListener("click", function() {
-        gridHeight--;
-        document.getElementById("row-count").innerHTML = gridHeight;
+        layeredGrid.resize(layeredGrid.width, layeredGrid.height - 1);
+        document.getElementById("row-count").innerHTML = layeredGrid.height;
     });
 
     addRowButton.addEventListener("click", function() {
-        gridHeight++;
-        document.getElementById("row-count").innerHTML = gridHeight;
+        layeredGrid.resize(layeredGrid.width, layeredGrid.height + 1);
+        document.getElementById("row-count").innerHTML = layeredGrid.height;
     });
 
     removeColumnButton.addEventListener("click", function() {
-        gridWidth--;
-        document.getElementById("column-count").innerHTML = gridWidth;
+        layeredGrid.resize(layeredGrid.width - 1, layeredGrid.height);
+        document.getElementById("column-count").innerHTML = layeredGrid.width;
     });
 
     addColumnButton.addEventListener("click", function() {
-        gridWidth++;
-        document.getElementById("column-count").innerHTML = gridWidth;
+        layeredGrid.resize(layeredGrid.width + 1, layeredGrid.height);
+        document.getElementById("column-count").innerHTML = layeredGrid.width;
     });
 }
 
