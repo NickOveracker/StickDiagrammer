@@ -13,7 +13,7 @@
 </head>
 <body>
     <div id="instructions" class="sidebar left open">
-        <div id="instructions-text">
+        <div id="instructions-text" class="sidebar-contents">
             <h1>Instructions</h1>
             <ul>
                 <li>Left-click to paint a cell with the selected layer.
@@ -50,48 +50,50 @@
         <div id="dashboard-close" class="toggle-button">
             <i id="dashboard-close-label" class="fas fa-chevron-right toggle-button-label"></i>
         </div>
-        <div id="controls">
-            &nbsp;<hr>
-            <div id="row-controls">
-                <button id="add-row" class="control-button">
-                    <i class="fas fa-plus"></i>
-                </button>
-                Rows: <span id="row-count">29</span>
-                <button id="remove-row" class="control-button">
-                    <i class="fas fa-minus"></i>
-                </button>
+        <div class="sidebar-contents">
+            <div id="controls">
+                &nbsp;<hr>
+                <div id="row-controls">
+                    <button id="add-row" class="control-button">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    Rows: <span id="row-count">29</span>
+                    <button id="remove-row" class="control-button">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+                <hr>&nbsp;<hr>
+                <div id="column-controls">
+                    <button id="add-column" class="control-button">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    Columns: <span id="column-count">29</span>
+                    <button id="remove-column" class="control-button">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+                <hr>&nbsp;<hr>
+                <div id="shift-controls">
+                    Shift grid:
+                    <button id="shift-up" class="control-button">
+                        <i class="fas fa-arrow-up"></i>
+                    </button>
+                    <button id="shift-left" class="half-width control-button">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <button id="shift-right" class="half-width control-button">
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                    <button id="shift-down" class="control-button">
+                        <i class="fas fa-arrow-down"></i>
+                    </button>
+                <hr>&nbsp;<hr>
+                </div>
             </div>
-            <hr>&nbsp;<hr>
-            <div id="column-controls">
-                <button id="add-column" class="control-button">
-                    <i class="fas fa-plus"></i>
-                </button>
-                Columns: <span id="column-count">29</span>
-                <button id="remove-column" class="control-button">
-                    <i class="fas fa-minus"></i>
-                </button>
+            <div id="truth-table-container">
+                <button id="generate-truth-table">Evaluate</button>
+                <table id="truth-table"></table>
             </div>
-            <hr>&nbsp;<hr>
-            <div id="shift-controls">
-                Shift grid:
-                <button id="shift-up" class="control-button">
-                    <i class="fas fa-arrow-up"></i>
-                </button>
-                <button id="shift-left" class="half-width control-button">
-                    <i class="fas fa-arrow-left"></i>
-                </button>
-                <button id="shift-right" class="half-width control-button">
-                    <i class="fas fa-arrow-right"></i>
-                </button>
-                <button id="shift-down" class="control-button">
-                    <i class="fas fa-arrow-down"></i>
-                </button>
-            <hr>&nbsp;<hr>
-            </div>
-        </div>
-        <div id="truth-table-container">
-            <button id="generate-truth-table">Evaluate</button>
-            <table id="truth-table"></table>
         </div>
     </div>
 </body>

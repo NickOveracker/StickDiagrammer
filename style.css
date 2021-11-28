@@ -85,12 +85,15 @@ canvas {
     top: 0;
 }
 
-.sidebar.left {
+.sidebar.right {
+    text-align: center;
+}
+
+.left .sidebar-contents {
     margin-right: 30px;
 }
 
-.sidebar.right {
-    text-align: center;
+.right .sidebar-contents {
     margin-left: 30px;
 }
 
