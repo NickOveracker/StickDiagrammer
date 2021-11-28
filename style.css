@@ -48,7 +48,6 @@ canvas {
     text-align: center;
     margin-top: 30px;
     width: 90%;
-    top: 0;
     right: 0;
     position: absolute;
     overflow-y: auto;
@@ -84,6 +83,10 @@ canvas {
     height: 100%;
     width: 300px;
     top: 0;
+}
+
+.sidebar.right {
+    text-align: center;
 }
 
 .sidebar.left.open {
