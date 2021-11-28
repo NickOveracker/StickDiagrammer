@@ -190,9 +190,9 @@ class LayeredGrid {
         // Copy the old grid into the new grid
         let bounds = {
             left: 0,
-            right: Math.min(this.width - 1, oldGrid.length - 1),
+            right: Math.min(this.width - 1, oldGrid.width - 1),
             top: 0,
-            bottom: Math.min(this.height - 1, oldGrid.length - 1),
+            bottom: Math.min(this.height - 1, oldGrid.height - 1),
             lowLayer: 0,
             highLayer: this.layers - 1,
         };
