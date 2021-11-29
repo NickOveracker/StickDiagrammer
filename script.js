@@ -249,36 +249,15 @@ class LayeredGrid {
         }.bind(this);
 
         inputs.forEach(function(input) {
-            if(input.x + xOffset >= 0 && input.x + xOffset < this.width) {
-                input.x += xOffset;
-            }
-            if(input.y + yOffset >= 0 && input.y + yOffset < this.height) {
-                input.y += yOffset;
-            }
+            shiftTerminal(input);
         }.bind(this));
 
         outputs.forEach(function(output) {
-            if(output.x + xOffset >= 0 && output.x + xOffset < this.width) {
-                output.x += xOffset;
-            }
-            if(output.y + yOffset >= 0 && output.y + yOffset < this.height) {
-                output.y += yOffset;
-            }
+            shiftTerminal(output);
         }.bind(this));
 
-        if(vddCell.x + xOffset >= 0 && vddCell.x + xOffset < this.width) {
-            vddCell.x += xOffset;
-        } else { this.set(vddCell.x, vddCell.y, CONTACT); }
-        if(vddCell.y + yOffset >= 0 && vddCell.y + yOffset < this.height) {
-            vddCell.y += yOffset;
-        } else { this.set(vddCell.x, vddCell.y, CONTACT); }
-
-        if(gndCell.x + xOffset >= 0 && gndCell.x + xOffset < this.width) {
-            gndCell.x += xOffset;
-        } else { this.set(gndCell.x, gndCell.y, CONTACT); }
-        if(gndCell.y + yOffset >= 0 && gndCell.y + yOffset < this.height) {
-            gndCell.y += yOffset;
-        } else { this.set(gndCell.x, gndCell.y, CONTACT); }
+        shiftTerminal(vddCell);
+        shiftTerminal(gndCell);
     }
 }
 
