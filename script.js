@@ -1525,8 +1525,8 @@ function inBounds(event) {
     let y = event.clientY;
 
     if(x === undefined) {
-        x = changedTouches[0].clientX;
-        y = changedTouches[0].clientY;
+        x = event.changedTouches[0].clientX;
+        y = event.changedTouches[0].clientY;
     }
 
     return x > canvas.offsetLeft + cellWidth &&
@@ -1566,8 +1566,8 @@ function cellClickHandler(event) {
         // If in the canvas and over a colored cell, erase it.
         // Otherwise, change the layer.
         if(event.clientX === undefined) {
-            clientX = changedTouches[0].clientX;
-            clientY = changedTouches[0].clientY;
+            clientX = event.changedTouches[0].clientX;
+            clientY = event.changedTouches[0].clientY;
         } else {
             clientX = event.clientX;
             clientY = event.clientY;
@@ -1587,8 +1587,8 @@ function canvasMouseUpHandler(event) {
     let clientX, clientY;
 
     if(event.clientX === undefined) {
-        clientX = changedTouches[0].clientX;
-        clientY = changedTouches[0].clientY;
+        clientX = event.changedTouches[0].clientX;
+        clientY = event.changedTouches[0].clientY;
     } else {
         clientX = event.clientX;
         clientY = event.clientY;
@@ -1643,8 +1643,8 @@ function mousemoveHandler(event) {
     let clientX, clientY;
 
     if(event.clientX === undefined) {
-        clientX = changedTouches[0].clientX;
-        clientY = changedTouches[0].clientY;
+        clientX = event.changedTouches[0].clientX;
+        clientY = event.changedTouches[0].clientY;
     } else {
         clientX = event.clientX;
         clientY = event.clientY;
@@ -1874,8 +1874,8 @@ function canvasMouseDownHandler(event) {
     let clientX, clientY;
 
     if(event.clientX === undefined) {
-        clientX = changedTouches[0].clientX;
-        clientY = changedTouches[0].clientY;
+        clientX = event.changedTouches[0].clientX;
+        clientY = event.changedTouches[0].clientY;
     } else {
         clientX = event.clientX;
         clientY = event.clientY;
