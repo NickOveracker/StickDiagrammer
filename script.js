@@ -235,6 +235,19 @@ class LayeredGrid {
 
     // Shift the terminals by a given offset
     shiftTerminals(xOffset, yOffset) {
+        let shiftTerminal = function(terminal) {
+            if(terminal.x + xOffset >= 0 && terminal.x + xOffset < this.width) {
+                terminal.x += xOffset;
+            }
+            if(terminal.y + yOffset >= 0 && terminal.y + yOffset < this.height) {
+                terminal.y += yOffset;
+            }
+
+            // Make sure there is still a CONTACT at the new coordinates
+            // (may have shifted off the screen)
+            this.set(terminal.x, terminal.y, CONTACT);
+        }.bind(this);
+
         inputs.forEach(function(input) {
             if(input.x + xOffset >= 0 && input.x + xOffset < this.width) {
                 input.x += xOffset;
@@ -255,17 +268,17 @@ class LayeredGrid {
 
         if(vddCell.x + xOffset >= 0 && vddCell.x + xOffset < this.width) {
             vddCell.x += xOffset;
-        }
+        } else { this.set(vddCell.x, vddCell.y, CONTACT); }
         if(vddCell.y + yOffset >= 0 && vddCell.y + yOffset < this.height) {
             vddCell.y += yOffset;
-        }
+        } else { this.set(vddCell.x, vddCell.y, CONTACT); }
 
         if(gndCell.x + xOffset >= 0 && gndCell.x + xOffset < this.width) {
             gndCell.x += xOffset;
-        }
+        } else { this.set(gndCell.x, gndCell.y, CONTACT); }
         if(gndCell.y + yOffset >= 0 && gndCell.y + yOffset < this.height) {
             gndCell.y += yOffset;
-        }
+        } else { this.set(gndCell.x, gndCell.y, CONTACT); }
     }
 }
 
