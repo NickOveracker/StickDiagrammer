@@ -1553,7 +1553,7 @@ function cellClickHandler(event) {
     'use strict';
     // Just fill in or delete the cell at the start coordinates.
     // If there is no cell at the start coordinates, change the cursor color.
-    if (event.button === 0) {
+    if (event.button === 0 || event.type === "touchend") {
         if (!layeredGrid.get(startX, startY, cursorIndex).isSet) { saveCurrentState(); }
         layeredGrid.set(startX, startY, cursorIndex);
     } else if(event.button === 2) {
@@ -1572,7 +1572,7 @@ function canvasMouseUpHandler(event) {
     'use strict';
     event.preventDefault();
 
-    if (event.button === 0 || event.button === 2) {
+    if (event.button === 0 || event.button === 2 || event.type === "touchend") {
         // If not between cells 1 and gridsize - 1, undo and return.
         if (dragging && inBounds(event)) {
             let endX = Math.floor((event.clientX - canvas.offsetLeft - cellWidth) / cellWidth);
@@ -1590,7 +1590,7 @@ function canvasMouseUpHandler(event) {
 
             // For primary (i.e. left) mouse button:
             // If the mouse moved more horizontally than vertically, draw a horizontal line.
-            if (event.button === 0) {
+            if (event.button === 0 || event.type === "touchend") {
                 draw(bounds);
             } else {
                 // For secondary (i.e. right) mouse button:
@@ -1655,7 +1655,7 @@ function mousemoveHandler(event) {
     let currentCell = getCell(currentX, currentY);
 
     // If the mouse is pressed and the mouse is between cells 1 and gridsize - 1,
-    if (event.buttons === 1 || event.buttons === 2) {
+    if (event.buttons === 1 || event.buttons === 2 || event.type === "touchmove") {
         // Ignore if not inside the canvas
         if (inBounds(event)) {
             if (startX === -1 || startY === -1) {
@@ -1689,7 +1689,7 @@ function mousemoveHandler(event) {
             };
 
             // Primary mouse button (i.e. left click)
-            if (event.buttons === 1) {
+            if (event.buttons === 1 || event.type === "touchmove") {
                 leftMouseMoveHandler(bounds);
             } else {
                 rightMouseMoveHandler(bounds);
@@ -1840,7 +1840,7 @@ function contextmenuHandler(event) {
 function canvasMouseDownHandler(event) {
     'use strict';
     event.preventDefault();
-    if (event.button === 0 || event.button === 2) {
+    if (event.button === 0 || event.button === 2 || event.type === 'touchstart') {
         // Return if not between cells 1 and gridsize - 1
         if (inBounds(event)) {
             startX = Math.floor((event.clientX - canvas.offsetLeft - cellWidth) / cellWidth);
