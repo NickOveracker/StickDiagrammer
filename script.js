@@ -1482,10 +1482,14 @@ function getCell(clientX, clientY) {
 }
 
 // Table is a 2D array of single character strings.
-function refreshTruthTable(table) {
+function refreshTruthTable() {
     'use strict';
+    // Update the netlist.
+    setNets();
+
     // Create a table with the correct number of rows and columns.
     // The first row should be a header.
+    let table = buildTruthTable();
     let tableElement = document.getElementById("truth-table");
     tableElement.innerHTML = "";
 
@@ -1791,6 +1795,29 @@ function keyupHandler(event) {
     if (event.keyCode === 70) {
         useFlatColors = !useFlatColors;
     }
+
+    // Shift the LayeredGrid by pressing the arrow keys.
+    if (event.keyCode === 37) {
+        // Left
+        layeredGrid.shift(-1, 0);
+    }
+    if (event.keyCode === 38) {
+        // Up
+        layeredGrid.shift(0, -1);
+    }
+    if (event.keyCode === 39) {
+        // Right
+        layeredGrid.shift(1, 0);
+    }
+    if (event.keyCode === 40) {
+        // Down
+        layeredGrid.shift(0, 1);
+    }
+
+    // Update the truth table by pressing enter.
+    if (event.keyCode === 13) {
+        refreshTruthTable();
+    }
 }
 
 // Don't show a context-menu when right-clicking
@@ -1900,8 +1927,7 @@ window.onload = function () {
     // Set up the evaluate button.
     button = document.getElementById("generate-truth-table");
     button.onclick = function () {
-        setNets();
-        refreshTruthTable(buildTruthTable());
+        refreshTruthTable();
     };
 
     // Set up the instructions close button.
