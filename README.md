@@ -11,7 +11,8 @@
 * A proper source-available or open-source license will be added at some point.
 
 ## Dogma of Development
-* Above all else, the code must work.
+* Everything we do will be excellent.
+* Above all else, above the following points, code in main must work.
 * Javascript errors or warnings must not be tolerated on the live page.
 * All functions must be in strict mode.
 * Live code must always clear JSHint with no errors or warnings.
