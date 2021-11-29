@@ -220,7 +220,7 @@ class LayeredGrid {
         for(let layer = 0; layer < this.layers; layer++) {
             for(let y = 0; y < this.height; y++) {
                 for(let x = 0; x < this.width; x++) {
-                    if(x - offset < 0 || x - offset >= this.width || y - offset < 0 || y - offset >= this.height) {
+                    if(x - xOffset < 0 || x - xOffset >= this.width || y - yOffset < 0 || y - yOffset >= this.height) {
                         continue;
                     }
                     if(oldGrid[x - xOffset + ((y - yOffset) * this.width) + (layer * this.width * this.height)]) {
