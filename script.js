@@ -1903,6 +1903,7 @@ function setUpControls() {
     let shiftRightButton = document.getElementById("shift-right");
     let shiftUpButton = document.getElementById("shift-up");
     let shiftDownButton = document.getElementById("shift-down");
+    let changeLayerButton = document.getElementById("change-layer");
 
     removeRowButton.addEventListener("click", function() {
         layeredGrid.resize(layeredGrid.width, layeredGrid.height - 1);
@@ -1942,6 +1943,10 @@ function setUpControls() {
 
     shiftDownButton.addEventListener("click", function() {
         layeredGrid.shift(0, 1);
+    });
+
+    changeLayerButton.addEventListener("click", function() {
+        changeLayer();
     });
 }
 
