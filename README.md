@@ -19,6 +19,7 @@
 * Software entropy must not increase.
 
 ## Feature Wishlist
+* Colorblind-friendly mode
 * Warn user when pulling up with NMOS or pulling down with PMOS.
 * Arbitrary number of I/O.
 * HTML button interface for those who prefer not to use a keyboard.
@@ -36,6 +37,7 @@
 * ~~Show every layer in a cell, not just the top.~~ *Resolved 2021/11/21*
 
 ## Absolute Pie in the Sky
+* Alternate braille display???
 * Allow users to save designs, and use their outputs as inputs to other designs to produce complex, modular circuitry.
 * Generate Magic files (todo: check legality) from design for a given technology.
 * Nobel Peace Prize
