@@ -1524,6 +1524,11 @@ function inBounds(event) {
     let x = event.clientX;
     let y = event.clientY;
 
+    if(x === undefined) {
+        x = touches[0].clientX;
+        y = touches[0].clientY;
+    }
+
     return x > canvas.offsetLeft + cellWidth &&
         x < canvas.offsetLeft + canvas.width - cellWidth &&
         y > canvas.offsetTop + cellHeight &&
@@ -1551,6 +1556,7 @@ function draw(bounds) {
 
 function cellClickHandler(event) {
     'use strict';
+    let clientX, clientY;
     // Just fill in or delete the cell at the start coordinates.
     // If there is no cell at the start coordinates, change the cursor color.
     if (event.button === 0 || event.type === "touchend") {
@@ -1559,7 +1565,14 @@ function cellClickHandler(event) {
     } else if(event.button === 2) {
         // If in the canvas and over a colored cell, erase it.
         // Otherwise, change the layer.
-        if (!clearIfPainted(event.clientX, event.clientY)) {
+        if(event.clientX === undefined) {
+            clientX = touches[0].clientX;
+            clientY = touches[0].clientY;
+        } else {
+            clientX = event.clientX;
+            clientY = event.clientY;
+        }
+        if (!clearIfPainted(clientX, clientY)) {
             changeLayer();
         }
     }
@@ -1571,12 +1584,21 @@ function cellClickHandler(event) {
 function canvasMouseUpHandler(event) {
     'use strict';
     event.preventDefault();
+    let clientX, clientY;
+
+    if(event.clientX === undefined) {
+        clientX = touches[0].clientX;
+        clientY = touches[0].clientY;
+    } else {
+        clientX = event.clientX;
+        clientY = event.clientY;
+    }
 
     if (event.button === 0 || event.button === 2 || event.type === "touchend") {
         // If not between cells 1 and gridsize - 1, undo and return.
         if (dragging && inBounds(event)) {
-            let endX = Math.floor((event.clientX - canvas.offsetLeft - cellWidth) / cellWidth);
-            let endY = Math.floor((event.clientY - canvas.offsetTop - cellHeight) / cellHeight);
+            let endX = Math.floor((clientX - canvas.offsetLeft - cellWidth) / cellWidth);
+            let endY = Math.floor((clientY - canvas.offsetTop - cellHeight) / cellHeight);
             let bounds = {
                 left: Math.min(startX, endX),
                 right: Math.max(startX, endX),
@@ -1618,6 +1640,15 @@ function canvasMouseUpHandler(event) {
 function mousemoveHandler(event) {
     'use strict';
     event.preventDefault();
+    let clientX, clientY;
+
+    if(event.clientX === undefined) {
+        clientX = touches[0].clientX;
+        clientY = touches[0].clientY;
+    } else {
+        clientX = event.clientX;
+        clientY = event.clientY;
+    }
 
     function leftMouseMoveHandler(bounds) {
         // If the mouse moved more horizontally than vertically,
@@ -1650,8 +1681,8 @@ function mousemoveHandler(event) {
     }
 
     // Save the current X and Y coordinates.
-    currentX = event.clientX;
-    currentY = event.clientY;
+    currentX = clientX;
+    currentY = clientY;
     let currentCell = getCell(currentX, currentY);
 
     // If the mouse is pressed and the mouse is between cells 1 and gridsize - 1,
@@ -1678,8 +1709,8 @@ function mousemoveHandler(event) {
                 saveCurrentState();
             }
 
-            let endX = Math.floor((event.clientX - canvas.offsetLeft - cellWidth) / cellWidth);
-            let endY = Math.floor((event.clientY - canvas.offsetTop - cellHeight) / cellHeight);
+            let endX = Math.floor((clientX - canvas.offsetLeft - cellWidth) / cellWidth);
+            let endY = Math.floor((clientY - canvas.offsetTop - cellHeight) / cellHeight);
 
             let bounds = {
                 left: Math.min(startX, endX),
@@ -1839,12 +1870,22 @@ function contextmenuHandler(event) {
 // Store the m in startX and startY.
 function canvasMouseDownHandler(event) {
     'use strict';
+    
+    let clientX, clientY;
+
+    if(event.clientX === undefined) {
+        clientX = touches[0].clientX;
+        clientY = touches[0].clientY;
+    } else {
+        clientX = event.clientX;
+        clientY = event.clientY;
+    }
     event.preventDefault();
     if (event.button === 0 || event.button === 2 || event.type === 'touchstart') {
         // Return if not between cells 1 and gridsize - 1
         if (inBounds(event)) {
-            startX = Math.floor((event.clientX - canvas.offsetLeft - cellWidth) / cellWidth);
-            startY = Math.floor((event.clientY - canvas.offsetTop - cellHeight) / cellHeight);
+            startX = Math.floor((clientX - canvas.offsetLeft - cellWidth) / cellWidth);
+            startY = Math.floor((clientY - canvas.offsetTop - cellHeight) / cellHeight);
         } else {
             startX = -1;
             startY = -1;
