@@ -1922,7 +1922,6 @@ window.onload = function () {
 
     // Canvas mouse event listeners.
     canvasContainer.addEventListener("touchstart", canvasMouseDownHandler);
-    canvasContainer.addEventListener("touchmove", canvasMouseMoveHandler);
     canvasContainer.addEventListener("touchend", canvasMouseUpHandler);
     canvasContainer.addEventListener("mousedown", canvasMouseDownHandler);
     canvasContainer.addEventListener("mouseup", canvasMouseUpHandler);
@@ -1930,6 +1929,7 @@ window.onload = function () {
 
     // Some of these pertain the the canvas, but we don't know whether
     // it will be selected.
+    window.addEventListener("touchmove", mouseMoveHandler);
     window.addEventListener("keydown", keydownHandler);
     window.addEventListener("keyup", keyupHandler);
     window.addEventListener("mousemove", mousemoveHandler);
