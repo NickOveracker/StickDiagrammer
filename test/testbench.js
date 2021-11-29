@@ -36,6 +36,7 @@
            cursorIndex: false,
            vddCell: false,
            gndCell: false,
+           refreshTruthTable: false,
 */
 
 function runTestbench(runTo) {
@@ -1469,6 +1470,7 @@ function runTestbench(runTo) {
         }
     }
     endTime = Date.now();
+    refreshTruthTable();
 
     // Only overwrite the results if all tests were run.
     if(runTo < testCases.length) {
