@@ -1929,7 +1929,7 @@ window.onload = function () {
 
     // Some of these pertain the the canvas, but we don't know whether
     // it will be selected.
-    window.addEventListener("touchmove", mouseMoveHandler);
+    window.addEventListener("touchmove", mousemoveHandler);
     window.addEventListener("keydown", keydownHandler);
     window.addEventListener("keyup", keyupHandler);
     window.addEventListener("mousemove", mousemoveHandler);
