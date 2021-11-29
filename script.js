@@ -1570,6 +1570,8 @@ function cellClickHandler(event) {
 // If the right (or secondary) button, use the same coordinates to delete a line of cells.
 function canvasMouseUpHandler(event) {
     'use strict';
+    event.preventDefault();
+
     if (event.button === 0 || event.button === 2) {
         // If not between cells 1 and gridsize - 1, undo and return.
         if (dragging && inBounds(event)) {
@@ -1615,6 +1617,7 @@ function canvasMouseUpHandler(event) {
 // Show a preview line when the user is dragging the mouse.
 function mousemoveHandler(event) {
     'use strict';
+    event.preventDefault();
 
     function leftMouseMoveHandler(bounds) {
         // If the mouse moved more horizontally than vertically,
@@ -1836,6 +1839,7 @@ function contextmenuHandler(event) {
 // Store the m in startX and startY.
 function canvasMouseDownHandler(event) {
     'use strict';
+    event.preventDefault();
     if (event.button === 0 || event.button === 2) {
         // Return if not between cells 1 and gridsize - 1
         if (inBounds(event)) {
@@ -1917,6 +1921,9 @@ window.onload = function () {
     layeredGrid = new LayeredGrid(gridWidth, gridHeight, cursors.length);
 
     // Canvas mouse event listeners.
+    canvasContainer.addEventListener("touchstart", canvasMouseDownHandler);
+    canvasContainer.addEventListener("touchmove", canvasMouseMoveHandler);
+    canvasContainer.addEventListener("touchend", canvasMouseUpHandler);
     canvasContainer.addEventListener("mousedown", canvasMouseDownHandler);
     canvasContainer.addEventListener("mouseup", canvasMouseUpHandler);
     canvasContainer.addEventListener("contextmenu", contextmenuHandler);
