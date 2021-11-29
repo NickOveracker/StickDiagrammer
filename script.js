@@ -1796,22 +1796,25 @@ function keyupHandler(event) {
         useFlatColors = !useFlatColors;
     }
 
-    // Shift the LayeredGrid by pressing the arrow keys.
-    if (event.keyCode === 37) {
-        // Left
-        layeredGrid.shift(-1, 0);
-    }
-    if (event.keyCode === 38) {
-        // Up
-        layeredGrid.shift(0, -1);
-    }
-    if (event.keyCode === 39) {
-        // Right
-        layeredGrid.shift(1, 0);
-    }
-    if (event.keyCode === 40) {
-        // Down
-        layeredGrid.shift(0, 1);
+    // Only do the following if CTRL is pressed.
+    if (event.ctrlKey) {
+        // Shift the LayeredGrid by pressing the arrow keys.
+        if (event.keyCode === 37) {
+            // Left
+            layeredGrid.shift(-1, 0);
+        }
+        if (event.keyCode === 38) {
+            // Up
+            layeredGrid.shift(0, -1);
+        }
+        if (event.keyCode === 39) {
+            // Right
+            layeredGrid.shift(1, 0);
+        }
+        if (event.keyCode === 40) {
+            // Down
+            layeredGrid.shift(0, 1);
+        }
     }
 
     // Update the truth table by pressing enter.
