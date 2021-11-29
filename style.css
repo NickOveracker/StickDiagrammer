@@ -21,7 +21,7 @@ html, body {
     color: #eee;
 }
 
-.dark-accent .toggle-button {
+.dark-accent .toggle-button, .dark-accent .control-button {
     background-color: #888;
     color: #fff;
 }
@@ -31,7 +31,7 @@ html, body {
     color: #333;
 }
 
-.light-accent .toggle-button {
+.light-accent .toggle-button, .light-accent .control-button {
     background-color: #aaa;
     color: #000;
 }
