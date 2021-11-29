@@ -1,4 +1,4 @@
-/***************************************************************************************************
+/**************************************************************************************************
  * 
  * ## Legal Stuff
  * All rights are reserved by Nick Overacker.
@@ -178,6 +178,86 @@ class LayeredGrid {
         this.map(bounds, function(cell) {
             this.grid[cell] = null;
         });
+    }
+
+    // Change the height of the grid
+    resize(width, height) {
+        if(width < 0 || height < 0) {
+            return;
+        }
+
+        let oldGrid = this.grid;
+        let oldWidth = this.width;
+        let oldHeight = this.height;
+        this.width = width;
+        this.height = height;
+        this.grid = new Array(width * height * this.layers);
+
+        // Copy the old grid into the new grid
+        let bounds = {
+            left: 0,
+            right: Math.min(this.width - 1, oldWidth - 1),
+            top: 0,
+            bottom: Math.min(this.height - 1, oldHeight - 1),
+            lowLayer: 0,
+            highLayer: this.layers - 1,
+        };
+
+        for(let layer = bounds.lowLayer; layer <= bounds.highLayer; layer++) {
+            for(let y = bounds.top; y <= bounds.bottom; y++) {
+                for(let x = bounds.left; x <= bounds.right; x++) {
+                    this.grid[this.convertFromCoordinates(x, y, layer)] = oldGrid[x + (y * oldWidth) + (layer * oldWidth * oldHeight)];
+                }
+            }
+        }
+    }
+
+    // Shift the grid by a given offset
+    shift(xOffset, yOffset) {
+        let oldGrid = this.grid;
+        this.grid = new Array(this.width * this.height * this.layers);
+
+        for(let layer = 0; layer < this.layers; layer++) {
+            for(let y = 0; y < this.height; y++) {
+                for(let x = 0; x < this.width; x++) {
+                    if(x - xOffset < 0 || x - xOffset >= this.width || y - yOffset < 0 || y - yOffset >= this.height) {
+                        continue;
+                    }
+                    if(oldGrid[x - xOffset + ((y - yOffset) * this.width) + (layer * this.width * this.height)]) {
+                        this.set(x, y, layer);
+                    }
+                }
+            }
+        }
+
+        this.shiftTerminals(xOffset, yOffset);
+    }
+
+    // Shift the terminals by a given offset
+    shiftTerminals(xOffset, yOffset) {
+        let shiftTerminal = function(terminal) {
+            if(terminal.x + xOffset >= 0 && terminal.x + xOffset < this.width) {
+                terminal.x += xOffset;
+            }
+            if(terminal.y + yOffset >= 0 && terminal.y + yOffset < this.height) {
+                terminal.y += yOffset;
+            }
+
+            // Make sure there is still a CONTACT at the new coordinates
+            // (may have shifted off the screen)
+            this.set(terminal.x, terminal.y, CONTACT);
+        }.bind(this);
+
+        inputs.forEach(function(input) {
+            shiftTerminal(input);
+        }.bind(this));
+
+        outputs.forEach(function(output) {
+            shiftTerminal(output);
+        }.bind(this));
+
+        shiftTerminal(vddCell);
+        shiftTerminal(gndCell);
     }
 }
 
@@ -359,11 +439,12 @@ let ctx;
 let darkMode;
 let cellHeight;
 let cellWidth;
-let gridsize = 29;
+let gridWidth = 29;
+let gridHeight = 29;
 let firstSaveState = 0;
 let saveState = 0;
 let lastSaveState = 0;
-let maxSaveState = 5;
+let maxSaveState = 10;
 let dragging = false;
 let startX;
 let startY;
@@ -414,7 +495,7 @@ let graph;
 // VDD and GND are the two terminals of the grid.
 // The terminals are always at the top and bottom of the grid.
 let vddCell = {x: 1, y: 1,};
-let gndCell = {x: 1, y: gridsize - 2,};
+let gndCell = {x: 1, y: gridHeight - 2,};
 
 // Nodes
 let vddNode;
@@ -752,11 +833,7 @@ function buildTruthTable() {
     table[0][header.length] = "Y";
     for (let ii = 0; ii < inputVals.length; ii++) {
         // Reverse the input row.
-        let inputRow = [];
-        for (let jj = 0; jj < inputVals[ii].length; jj++) {
-            inputRow[jj] = inputVals[ii][inputVals[ii].length - 1 - jj];
-        }
-        table[ii + 1] = inputRow.concat(outputVals[ii]);
+        table[ii + 1] = inputVals[ii].reverse().concat(outputVals[ii]);
     }
 
     return table;
@@ -782,7 +859,7 @@ function drawBorder() {
 
     // For the middle 11 cells of the upper border, fill with the grid color.
     ctx.fillStyle = darkMode ? "#ffffff" : "#000000";
-    let startCell = Math.floor(gridsize / 2) - 4;
+    let startCell = Math.floor(layeredGrid.width / 2) - 4;
     ctx.fillRect(startCell * cellWidth, 0, cellWidth * 11, cellHeight);
 
     // Write the cursor color name in the middle of the upper border of the canvas.
@@ -813,26 +890,24 @@ function resizeCanvas() {
     let windowWidth = window.innerWidth;
     let windowHeight = window.innerHeight;
     let windowSize = Math.min(windowWidth, windowHeight);
+    let sizeChanged = canvas.width !== windowSize || canvas.height !== windowSize;
+
     canvas.width = windowSize;
     canvas.height = windowSize;
+
+    if(sizeChanged) {
+        drawGrid();
+    }
 }
 
 // Draw a faint grid on the canvas.
 // Add an extra 2 units to the width and height for a border.
-function drawGrid(size) {
+function drawGrid() {
     'use strict';
     // Check if gridCanvas is defined.
     if (gridCanvas === undefined) {
         gridCanvas = document.createElement('canvas');
         document.body.appendChild(gridCanvas);
-    }
-
-    // Return if the size has not changed.
-    if (gridCanvas.width      === canvas.width - 1         &&
-        gridCanvas.height     === canvas.height - 1        &&
-        gridCanvas.style.left === canvas.offsetLeft + 'px' &&
-        gridCanvas.style.top  === canvas.offsetTop  + 'px') {
-        return;
     }
 
     // Place gridCanvas behind the canvas.
@@ -846,8 +921,8 @@ function drawGrid(size) {
 
     // Set the gridCanvas context.
     let gridCtx = gridCanvas.getContext('2d');
-    cellWidth = canvas.width / (size + 2);
-    cellHeight = canvas.height / (size + 2);
+    cellWidth = canvas.width / (layeredGrid.width + 2);
+    cellHeight = canvas.height / (layeredGrid.height + 2);
 
     // Clear the grid canvas.
     gridCanvas.getContext('2d').clearRect(0, 0, gridCanvas.width, gridCanvas.height);
@@ -860,15 +935,19 @@ function drawGrid(size) {
         gridCtx.strokeStyle = lightModeGridColor;
     }
 
-    for (let ii = 0; ii < size + 2; ii++) {
-        gridCtx.beginPath();
-        gridCtx.moveTo(ii * cellWidth, 0);
-        gridCtx.lineTo(ii * cellWidth, gridCanvas.height);
-        gridCtx.stroke();
-        gridCtx.beginPath();
-        gridCtx.moveTo(0, ii * cellHeight);
-        gridCtx.lineTo(gridCanvas.width, ii * cellHeight);
-        gridCtx.stroke();
+    for (let ii = 0; ii < Math.max(layeredGrid.width, layeredGrid.height) + 2; ii++) {
+        if(ii < layeredGrid.width + 2) {
+            gridCtx.beginPath();
+            gridCtx.moveTo(ii * cellWidth, 0);
+            gridCtx.lineTo(ii * cellWidth, gridCanvas.height);
+            gridCtx.stroke();
+        }
+        if(ii < layeredGrid.height + 2) {
+            gridCtx.beginPath();
+            gridCtx.moveTo(0, ii * cellHeight);
+            gridCtx.lineTo(gridCanvas.width, ii * cellHeight);
+            gridCtx.stroke();
+        }
     }
 }
 
@@ -1224,11 +1303,11 @@ function setRecursively(cell, net) {
 
     // Check the cells above and below.
     if (cell.y > 0) { setAdjacent(0, -1); }
-    if (cell.y < gridsize - 1) { setAdjacent(0, 1); }
+    if (cell.y < layeredGrid.height - 1) { setAdjacent(0, 1); }
 
     // Check the cells to the left and right.
     if (cell.x > 0) { setAdjacent(-1, 0); }
-    if (cell.x < gridsize - 1) { setAdjacent(1, 0); }
+    if (cell.x < layeredGrid.width - 1) { setAdjacent(1, 0); }
 }
 
 function decorateContact(x, y) {
@@ -1273,9 +1352,6 @@ function refreshCanvas() {
     'use strict';
     resizeCanvas();
 
-    // Draw the grid.
-    drawGrid(gridsize);
-
     // Check the layers of the grid, and draw cells as needed.
     function drawCell(i, j, layer) {
         if (layeredGrid.get(i, j, layer).isSet) {
@@ -1287,11 +1363,11 @@ function refreshCanvas() {
     // Draw each layer in order.
     let bounds = {
         left: 0,
-        right: gridsize - 1,
+        right: layeredGrid.width - 1,
         top: 0,
-        bottom: gridsize - 1,
+        bottom: layeredGrid.height - 1,
         lowLayer: 0,
-        highLayer: cursors.length - 1,
+        highLayer: layeredGrid.layers - 1,
     };
 
     layeredGrid.map(bounds, function (x, y, layer) {
@@ -1318,7 +1394,6 @@ function refreshCanvas() {
     // set the outer border of the canvas to the cursor color
     drawBorder();
     drawLabels();
-    drawGrid(gridsize); // Not sure why but gotta draw this twice.
 }
 
 // Save function to save the current state of the grid and the canvas.
@@ -1477,7 +1552,7 @@ function cellClickHandler(event) {
     if (event.button === 0) {
         if (!layeredGrid.get(startX, startY, cursorIndex).isSet) { saveCurrentState(); }
         layeredGrid.set(startX, startY, cursorIndex);
-    } else {
+    } else if(event.button === 2) {
         // If in the canvas and over a colored cell, erase it.
         // Otherwise, change the layer.
         if (!clearIfPainted(event.clientX, event.clientY)) {
@@ -1743,6 +1818,58 @@ function canvasMouseDownHandler(event) {
     }
 }
 
+function setUpControls() {
+    'use strict';
+    let removeRowButton = document.getElementById("remove-row");
+    let addRowButton = document.getElementById("add-row");
+    let removeColumnButton = document.getElementById("remove-column");
+    let addColumnButton = document.getElementById("add-column");
+    let shiftLeftButton = document.getElementById("shift-left");
+    let shiftRightButton = document.getElementById("shift-right");
+    let shiftUpButton = document.getElementById("shift-up");
+    let shiftDownButton = document.getElementById("shift-down");
+
+    removeRowButton.addEventListener("click", function() {
+        layeredGrid.resize(layeredGrid.width, layeredGrid.height - 1);
+        document.getElementById("row-count").innerHTML = layeredGrid.height;
+        drawGrid();
+    });
+
+    addRowButton.addEventListener("click", function() {
+        layeredGrid.resize(layeredGrid.width, layeredGrid.height + 1);
+        document.getElementById("row-count").innerHTML = layeredGrid.height;
+        drawGrid();
+    });
+
+    removeColumnButton.addEventListener("click", function() {
+        layeredGrid.resize(layeredGrid.width - 1, layeredGrid.height);
+        document.getElementById("column-count").innerHTML = layeredGrid.width;
+        drawGrid();
+    });
+
+    addColumnButton.addEventListener("click", function() {
+        layeredGrid.resize(layeredGrid.width + 1, layeredGrid.height);
+        document.getElementById("column-count").innerHTML = layeredGrid.width;
+        drawGrid();
+    });
+
+    shiftLeftButton.addEventListener("click", function() {
+        layeredGrid.shift(-1, 0);
+    });
+
+    shiftRightButton.addEventListener("click", function() {
+        layeredGrid.shift(1, 0);
+    });
+
+    shiftUpButton.addEventListener("click", function() {
+        layeredGrid.shift(0, -1);
+    });
+
+    shiftDownButton.addEventListener("click", function() {
+        layeredGrid.shift(0, 1);
+    });
+}
+
 window.onload = function () {
     'use strict';
     // Clear local storage
@@ -1757,8 +1884,7 @@ window.onload = function () {
     // Initialize with a gridsize of 29 and 5 layers
     canvas = document.getElementById("canvas");
     ctx = canvas.getContext("2d");
-    //makeLayeredGrid(gridsize, gridsize);
-    layeredGrid = new LayeredGrid(gridsize, gridsize, cursors.length);
+    layeredGrid = new LayeredGrid(gridWidth, gridHeight, cursors.length);
 
     // Canvas mouse event listeners.
     canvasContainer.addEventListener("mousedown", canvasMouseDownHandler);
@@ -1827,6 +1953,8 @@ window.onload = function () {
     // Set the CONTACT layer on the VDD and GND cells.
     layeredGrid.set(vddCell.x, vddCell.y, CONTACT);
     layeredGrid.set(gndCell.x, gndCell.y, CONTACT);
+
+    setUpControls();
 
     refreshCanvas();
     // 60 fps

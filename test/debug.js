@@ -44,16 +44,16 @@ function printGrid(netNum) {
     let grid = [];
     let net = netlist[netNum];
     let name = "X";
-    for(let ii = 0; ii < gridsize; ii++) {
+    for(let ii = 0; ii < layeredGrid.height; ii++) {
         grid[ii] = [];
-        for(let jj = 0; jj < gridsize; jj++) {
+        for(let jj = 0; jj < layeredGrid.width; jj++) {
             grid[ii][jj] = "_";
             // If any of the layers are in netA, set the cell to "A".
             for(let kk = 0; kk < numLayers; kk++) {
-                if(layeredGrid[ii][jj][kk].isSet && net.containsCell(layeredGrid[ii][jj][kk])) {
+                if(layeredGrid.get(ii, jj, kk).isSet && net.containsCell(layeredGrid.get(ii, jj, kk))) {
                     grid[ii][jj] = name;
                 }
-                else if(pmos.has(layeredGrid[ii][jj][kk]) || nmos.has(layeredGrid[ii][jj][kk])) {
+                else if(pmos.has(layeredGrid.get(ii, jj, kk)) || nmos.has(layeredGrid.get(ii, jj, kk))) {
                     grid[ii][jj] = "T";
                 }
             }

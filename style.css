@@ -21,7 +21,7 @@ html, body {
     color: #eee;
 }
 
-.dark-accent .toggle-button {
+.dark-accent .toggle-button, .dark-accent .control-button {
     background-color: #888;
     color: #fff;
 }
@@ -31,7 +31,7 @@ html, body {
     color: #333;
 }
 
-.light-accent .toggle-button {
+.light-accent .toggle-button, .light-accent .control-button {
     background-color: #aaa;
     color: #000;
 }
@@ -48,7 +48,6 @@ canvas {
     text-align: center;
     margin-top: 30px;
     width: 90%;
-    top: 0;
     right: 0;
     position: absolute;
     overflow-y: auto;
@@ -86,6 +85,18 @@ canvas {
     top: 0;
 }
 
+.sidebar.right {
+    text-align: center;
+}
+
+.left .sidebar-contents {
+    margin-right: 30px;
+}
+
+.right .sidebar-contents {
+    margin-left: 30px;
+}
+
 .sidebar.left.open {
     left: 0;
 }
@@ -106,6 +117,10 @@ canvas {
     position: absolute;
     top: 50%;
     transform: translate(0, -50%);
+}
+
+.sidebar .half-width {
+    width: 49%;
 }
 
 .sidebar.right .toggle-button-label {
