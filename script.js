@@ -1033,7 +1033,7 @@ class Diagram {
         'use strict';
         // Just fill in or delete the cell at the start coordinates.
         // If there is no cell at the start coordinates, change the cursor color.
-        if (event.button === 0) {
+        if (event.button === 0 || event.type === 'touchend') {
             if (!this.layeredGrid.get(startX, startY, cursorIndex).isSet) { this.saveCurrentState(); }
             this.layeredGrid.set(startX, startY, cursorIndex);
         } else if(event.button === 2) {
@@ -1050,11 +1050,21 @@ class Diagram {
     // If the right (or secondary) button, use the same coordinates to delete a line of cells.
     canvasMouseUpHandler(event) {
         'use strict';
-        if (event.button === 0 || event.button === 2) {
+        let clientX, clientY;
+
+        if(event.clientX === undefined) {
+            clientX = event.changedTouches[0].clientX;
+            clientY = event.changedTouches[0].clientY;
+        } else {
+            clientX = event.clientX;
+            clientY = event.clientY;
+        }
+      
+        if (event.button === 0 || event.button === 2 || event.type === 'touchend') {
             // If not between cells 1 and gridsize - 1, undo and return.
             if (dragging && this.inBounds(event)) {
-                let endX = Math.floor((event.clientX - this.canvas.offsetLeft - this.cellWidth) / this.cellWidth);
-                let endY = Math.floor((event.clientY - this.canvas.offsetTop - this.cellHeight) / this.cellHeight);
+                let endX = Math.floor((clientX - this.canvas.offsetLeft - this.cellWidth) / this.cellWidth);
+                let endY = Math.floor((clientY - this.canvas.offsetTop - this.cellHeight) / this.cellHeight);
                 let bounds = {
                     left: Math.min(startX, endX),
                     right: Math.max(startX, endX),
@@ -1068,7 +1078,7 @@ class Diagram {
 
                 // For primary (i.e. left) mouse button:
                 // If the mouse moved more horizontally than vertically, draw a horizontal line.
-                if (event.button === 0) {
+                if (event.button === 0 || event.type === 'touchend') {
                     this.draw(bounds);
                 } else {
                     // For secondary (i.e. right) mouse button:
@@ -1095,6 +1105,15 @@ class Diagram {
     // Show a preview line when the user is dragging the mouse.
     mousemoveHandler(event) {
         'use strict';
+        let clientX, clientY;
+
+        if(event.clientX === undefined) {
+            clientX = event.changedTouches[0].clientX;
+            clientY = event.changedTouches[0].clientY;
+        } else {
+            clientX = event.clientX;
+            clientY = event.clientY;
+        }
 
         let leftMouseMoveHandler = function(bounds) {
             // If the mouse moved more horizontally than vertically,
@@ -1127,12 +1146,12 @@ class Diagram {
         }.bind(this);
 
         // Save the current X and Y coordinates.
-        currentX = event.clientX;
-        currentY = event.clientY;
+        currentX = clientX;
+        currentY = clientY;
         let currentCell = this.getCell(currentX, currentY);
 
         // If the mouse is pressed and the mouse is between cells 1 and gridsize - 1,
-        if (event.buttons === 1 || event.buttons === 2) {
+        if (event.buttons === 1 || event.buttons === 2 || event.type === 'touchmove') {
             // Ignore if not inside the canvas
             if (this.inBounds(event)) {
                 if (startX === -1 || startY === -1) {
@@ -1166,7 +1185,7 @@ class Diagram {
                 };
 
                 // Primary mouse button (i.e. left click)
-                if (event.buttons === 1) {
+                if (event.buttons === 1 || event.type === 'touchmove') {
                     leftMouseMoveHandler(bounds);
                 } else {
                     rightMouseMoveHandler(bounds);
@@ -1232,11 +1251,21 @@ class Diagram {
     // Store the m in startX and startY.
     canvasMouseDownHandler(event) {
         'use strict';
-        if (event.button === 0 || event.button === 2) {
+        let clientX, clientY;
+
+        if(event.clientX === undefined) {
+            clientX = event.changedTouches[0].clientX;
+            clientY = event.changedTouches[0].clientY;
+        } else {
+            clientX = event.clientX;
+            clientY = event.clientY;
+        }
+        event.preventDefault();
+        if (event.button === 0 || event.button === 2 || event.type === 'touchstart') {
             // Return if not between cells 1 and gridsize - 1
             if (this.inBounds(event)) {
-                startX = Math.floor((event.clientX - this.canvas.offsetLeft - this.cellWidth) / this.cellWidth);
-                startY = Math.floor((event.clientY - this.canvas.offsetTop - this.cellHeight) / this.cellHeight);
+                startX = Math.floor((clientX - this.canvas.offsetLeft - this.cellWidth) / this.cellWidth);
+                startY = Math.floor((clientY - this.canvas.offsetTop - this.cellHeight) / this.cellHeight);
             } else {
                 startX = -1;
                 startY = -1;
@@ -1842,6 +1871,7 @@ function setUpControls() {
     let shiftRightButton = document.getElementById("shift-right");
     let shiftUpButton = document.getElementById("shift-up");
     let shiftDownButton = document.getElementById("shift-down");
+    let changeLayerButton = document.getElementById("change-layer");
 
     removeRowButton.addEventListener("click", function() {
         this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height - 1);
@@ -1882,6 +1912,10 @@ function setUpControls() {
     shiftDownButton.addEventListener("click", function() {
         this.layeredGrid.shift(0, 1);
     }.bind(diagram));
+
+    changeLayerButton.addEventListener("click", function() {
+        this.changeLayer();
+    }.bind(diagram));
 }
 
 window.onload = function () {
@@ -1902,12 +1936,15 @@ window.onload = function () {
     diagram.layeredGrid = new LayeredGrid(diagram.gridWidth, diagram.gridHeight, cursors.length);
 
     // Canvas mouse event listeners.
+    canvasContainer.addEventListener("touchstart", function(e) { this.canvasMouseDownHandler(e); }.bind(diagram));
+    canvasContainer.addEventListener("touchend", function(e) { this.canvasMouseUpHandler(e); }.bind(diagram));
     canvasContainer.addEventListener("mousedown", function(e) { this.canvasMouseDownHandler(e); }.bind(diagram));
     canvasContainer.addEventListener("mouseup", function(e) { this.canvasMouseUpHandler(e); }.bind(diagram));
     canvasContainer.addEventListener("contextmenu", function(e) { this.contextmenuHandler(e); }.bind(diagram));
 
     // Some of these pertain the the canvas, but we don't know whether
     // it will be selected.
+    window.addEventListener("touchmove", function(e) { this.mousemoveHandler(e); }.bind(diagram));
     window.addEventListener("keydown", function(e) { this.keydownHandler(e); }.bind(diagram));
     window.addEventListener("keyup", function(e) { this.keyupHandler(e); }.bind(diagram));
     window.addEventListener("mousemove", function(e) { this.mousemoveHandler(e); }.bind(diagram));
