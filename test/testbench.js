@@ -22,6 +22,7 @@
 /* jshint varstmt: true */
 /* jshint browser: true */
 /* globals diagram: false,
+           Diagram: false,
            refreshTruthTable: false,
 */
 
