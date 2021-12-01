@@ -1031,7 +1031,18 @@ class Diagram {
 
     cellClickHandler(event) {
         'use strict';
-        // Just fill in or delete the cell at the start coordinates.
+
+        let clientX, clientY;
+
+        if(event.clientX === undefined) {
+            clientX = event.changedTouches[0].clientX;
+            clientY = event.changedTouches[0].clientY;
+        } else {
+            clientX = event.clientX;
+            clientY = event.clientY;
+        }
+
+       // Just fill in or delete the cell at the start coordinates.
         // If there is no cell at the start coordinates, change the cursor color.
         if (event.button === 0 || event.type === 'touchend') {
             if (!this.layeredGrid.get(startX, startY, cursorIndex).isSet) { this.saveCurrentState(); }
@@ -1039,7 +1050,7 @@ class Diagram {
         } else if(event.button === 2) {
             // If in the canvas and over a colored cell, erase it.
             // Otherwise, change the layer.
-            if (!this.clearIfPainted(event.clientX, event.clientY)) {
+            if (!this.clearIfPainted(clientX, clientY)) {
                 this.changeLayer();
             }
         }
@@ -1176,8 +1187,8 @@ class Diagram {
                     this.saveCurrentState();
                 }
 
-                let endX = Math.floor((event.clientX - this.canvas.offsetLeft - this.cellWidth) / this.cellWidth);
-                let endY = Math.floor((event.clientY - this.canvas.offsetTop - this.cellHeight) / this.cellHeight);
+                let endX = Math.floor((clientX - this.canvas.offsetLeft - this.cellWidth) / this.cellWidth);
+                let endY = Math.floor((clientY - this.canvas.offsetTop - this.cellHeight) / this.cellHeight);
 
                 let bounds = {
                     left: Math.min(startX, endX),
