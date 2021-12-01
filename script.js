@@ -1543,6 +1543,8 @@ class LayeredGrid {
         } else if(cell.y > bounds.bottom) {
             cell.y = bounds.bottom;
         }
+
+        this.set(cell.x, cell.y, Diagram.CONTACT);
     }
 
     // Change the height of the grid
