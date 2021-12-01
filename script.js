@@ -1972,7 +1972,7 @@ window.onload = function () {
 
     diagram.refreshCanvas();
     // 60 fps
-    setInterval(diagram.refreshCanvas, 16);
+    setInterval(refreshCanvas.bind(diagram), 16);
 
     if(window.runTestbench) {
         runTestbench();
