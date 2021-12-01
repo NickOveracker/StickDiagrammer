@@ -622,25 +622,7 @@ class Diagram {
         }
         return null;
     }
-
-    // If there are any nodes at this cell, add them to the net.
-    addNodeByCellToNet(cell, net) {
-        'use strict';
-
-        let node = this.graph.getNode(cell);
-
-        if(node !== null) {
-            let nodeIterator = net.nodes.values();
-
-            // Loop through net's nodes.
-            for (let node2 = nodeIterator.next(); !node2.done; node2 = nodeIterator.next()) {
-                node.addEdge(node2.value);
-            }
-
-            net.addNode(node);
-        }
-    }
-    
+   
     // Helper function to set the terminals of transistors.
     setTerminals(transistor, x, y, layer) {
         'use strict';
@@ -724,7 +706,7 @@ class Diagram {
     setRecursively(cell, net) {
         'use strict';
 
-        this.addNodeByCellToNet(cell, net);
+        net.addNode(this.graph.getNode(cell));
 
         // Return if this cell is in this.pmos or this.nmos already.
         if (this.nmos.has(cell) || this.pmos.has(cell)) {
@@ -1747,7 +1729,16 @@ class Net {
     }
 
     addNode(node) {
-        this.nodes.add(node);
+        if(node !== null && !this.containsNode(node)) {
+            let nodeIterator = this.nodes.values();
+
+            // Loop through net's nodes.
+            for (let node2 = nodeIterator.next(); !node2.done; node2 = nodeIterator.next()) {
+                node.addEdge(node2.value);
+            }
+
+            this.nodes.add(node);
+        }
     }
 
     removeNode(node) {
