@@ -895,6 +895,14 @@ class DiagramController {
         return ret;
     }
 
+    isPrimaryInput(event) {
+        'use strict';
+        let isTouch      = event.type.includes('touch');
+        let isLeftButton = (event.type === 'mousedown' || event.type === 'mouseup') && event.button === 0;
+        isLeftButton     = isLeftButton || (event.type === 'mousemove' && event.buttons === 1);
+        return isLeftButton || isTouch;
+    }
+
     cellClickHandler(event) {
         'use strict';
         let clientX, clientY;
@@ -905,7 +913,7 @@ class DiagramController {
 
         // Just fill in or delete the cell at the start coordinates.
         // If there is no cell at the start coordinates, change the cursor color.
-        if (event.button === 0 || event.type === 'touchend') {
+        if (this.isPrimaryInput(event)) {
             if (!this.diagram.layeredGrid.get(this.startX, this.startY, this.cursorIndex).isSet) { this.saveCurrentState(); }
             this.diagram.layeredGrid.set(this.startX, this.startY, this.cursorIndex);
         } else if(event.button === 2) {
@@ -915,14 +923,6 @@ class DiagramController {
                 this.changeLayer();
             }
         }
-    }
-
-    isPrimaryInput(event) {
-        'use strict';
-        let isTouch      = event.type.includes('touch');
-        let isLeftButton = (event.type === 'mousedown' || event.type === 'mouseup') && event.button === 0;
-        isLeftButton     = isLeftButton || (event.type === 'mousemove' && event.buttons === 1);
-        return isLeftButton || isTouch;
     }
 
     // Note the grid coordinates when the left or right mouse button is released.
