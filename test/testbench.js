@@ -62,7 +62,7 @@ function runTestbench(runTo) {
     runTo = runTo || testCases.length;
 
     // Set up the testbench
-    while(diagram.layers[diagram.controller.cursorIndex].name !== "metal1") {
+    while(Diagram.layers[diagram.controller.cursorIndex].name !== "metal1") {
         diagram.controller.changeLayer();
     }
 
@@ -169,7 +169,7 @@ function runTestbench(runTo) {
 
         0,
 
-        // diagram.CONTACTS
+        // Diagram.CONTACTS
         // METAL1 to METAL2
         ["mousedown", {button:  0, clientX: mapX(2),   clientY: mapY(2)}],
         ["mouseup",   {button:  0, clientX: mapX(2),   clientY: mapY(2)}],
@@ -465,7 +465,7 @@ function runTestbench(runTo) {
         0, // Metal2
         0,
 
-        // diagram.CONTACTS
+        // Diagram.CONTACTS
         ["mousedown", {button:  0, clientX: mapX(7),  clientY: mapY(25)}],
         ["mouseup",   {button:  0, clientX: mapX(7),  clientY: mapY(25)}],
 
@@ -527,7 +527,7 @@ function runTestbench(runTo) {
         ["mousemove", {buttons: 2, clientX: mapX(24),   clientY: mapY(27)}],
         ["mouseup",   {button:  2, clientX: mapX(24),   clientY: mapY(27)}],
 
-        // diagram.CONTACTS
+        // Diagram.CONTACTS
         ["mousedown", {button:  0, clientX: mapX(6),   clientY: mapY(5)}],
         ["mouseup",   {button:  0, clientX: mapX(6),   clientY: mapY(5)}],
 
@@ -618,7 +618,7 @@ function runTestbench(runTo) {
         0, // Metal2
         0,
 
-        // diagram.CONTACTS
+        // Diagram.CONTACTS
         ["mousedown", {button:  0, clientX: mapX(29), clientY: mapY(5)}],
         ["mouseup",   {button:  0, clientX: mapX(29), clientY: mapY(5)}],
 
@@ -867,7 +867,7 @@ function runTestbench(runTo) {
         ["mouseup",   {button:  0, clientX: mapX(29), clientY: mapY(24)}],
 
         0,
-        // diagram.CONTACTS
+        // Diagram.CONTACTS
         ["mousedown", {button:  0, clientX: mapX(1),  clientY: mapY(5)}],
         ["mouseup",   {button:  0, clientX: mapX(1),  clientY: mapY(5)}],
 
@@ -1198,7 +1198,7 @@ function runTestbench(runTo) {
 
         0,
 
-        // diagram.CONTACT
+        // Diagram.CONTACT
         ["mousedown", {button:  0, clientX: mapX(1), clientY: mapY(14)}],
         ["mouseup",   {button:  0, clientX: mapX(1), clientY: mapY(14)}],
 
@@ -1427,17 +1427,17 @@ function runTestbench(runTo) {
         }
 
         if(assertNext) {
-            // Set diagram.CONTACT at the coordinates of each input and output.
+            // Set Diagram.CONTACT at the coordinates of each input and output.
             diagram.inputs.forEach(function(input) {
-                diagram.layeredGrid.set(input.x, input.y, diagram.CONTACT);
+                diagram.layeredGrid.set(input.x, input.y, Diagram.CONTACT);
             });
             diagram.outputs.forEach(function(output) {
-                diagram.layeredGrid.set(output.x, output.y, diagram.CONTACT);
+                diagram.layeredGrid.set(output.x, output.y, Diagram.CONTACT);
             });
 
-            // Set the diagram.CONTACT layer on the VDD and GND cells.
-            diagram.layeredGrid.set(diagram.vddCell.x, diagram.vddCell.y, diagram.CONTACT);
-            diagram.layeredGrid.set(diagram.gndCell.x, diagram.gndCell.y, diagram.CONTACT);
+            // Set the Diagram.CONTACT layer on the VDD and GND cells.
+            diagram.layeredGrid.set(diagram.vddCell.x, diagram.vddCell.y, Diagram.CONTACT);
+            diagram.layeredGrid.set(diagram.gndCell.x, diagram.gndCell.y, Diagram.CONTACT);
 
             // Do it.
             diagram.setNets();
