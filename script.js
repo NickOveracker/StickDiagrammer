@@ -1922,7 +1922,7 @@ function setUpControls() {
     let shiftUpButton = document.getElementById("shift-up");
     let shiftDownButton = document.getElementById("shift-down");
     let changeLayerButton = document.getElementById("change-layer");
-    let eraserButton = document.getElementById("eraser");
+    let eraseToggleButton = document.getElementById("erase-toggle");
 
     removeRowButton.addEventListener("click", function() {
         this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height - 1);
@@ -1968,8 +1968,15 @@ function setUpControls() {
         this.controller.changeLayer();
     }.bind(diagram));
 
-    eraserButton.addEventListener("click", function() {
+    eraseToggleButton.addEventListener("click", function() {
         this.controller.toggleEraseMode();
+        if(this.controller.eraseMode) {
+            label.classList.remove('fa-paint-brush');
+            label.classList.add('fa-eraser');
+        } else {
+            label.classList.remove('fa-eraser');
+            label.classList.add('fa-paint-brush');
+        }
     }.bind(diagram));
 }
 
