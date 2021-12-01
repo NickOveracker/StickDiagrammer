@@ -1080,8 +1080,14 @@ class DiagramController {
 
     placeTerminal(event, terminal) {
         'use strict';
-        let cell = this.getCellAtCursor(this.currentX, this.currentY);
+        let cell;
         let oldX, oldY;
+
+        if(event.type.includes('touch')) {
+            cell = this.getCellAtCursor(event.changedTouches[0].clientX, event.changedTouches[0].clientY);
+        } else {
+            cell = this.getCellAtCursor(this.currentX, this.currentY);
+        }
 
         if (cell !== null && !event.ctrlKey) {
             // First, note the current coordinates.
