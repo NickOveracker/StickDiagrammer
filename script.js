@@ -1089,7 +1089,7 @@ class DiagramController {
         this.cursorIndex = tempIndex;
 
         // set the outer border of the canvas to the new cursor color
-        this.drawBorder();
+        this.view.drawBorder();
     }
 
     ctrlCommandHandler(event) {
