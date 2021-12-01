@@ -762,7 +762,7 @@ class DiagramController {
         let terminals = this.diagram.inputs.concat(this.diagram.outputs, this.diagram.vddCell, this.diagram.gndCell);
 
         this.placeTermMode = true;
-        this.selectedTerminal = terminals[parseInt(terminalNumber)];
+        this.selectedTerminal = terminals[terminalNumber];
     }
 
 
@@ -2086,7 +2086,7 @@ function setUpControls() {
     }.bind(diagram));
 
     terminalSelectButton.addEventListener("click", function() {
-        this.controller.setPlaceTerminalMode(terminalSelect.value);
+        this.controller.setPlaceTerminalMode(parseInt(terminalSelect.value));
     }.bind(diagram));
 }
 
