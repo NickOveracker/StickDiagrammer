@@ -919,8 +919,9 @@ class DiagramController {
 
     isPrimaryInput(event) {
         'use strict';
-        let isLeftButton = event.button === 0 || event.buttons === 1;
-        let isTouch = event.type.includes('touch');
+        let isTouch      = event.type.includes('touch');
+        let isLeftButton = (event.type === 'mousedown' || event.type === 'mouseup') && event.button === 0;
+        isLeftButton     = isLeftButton || (event.type === 'mousemove' && event.buttons === 1);
         return isLeftButton || isTouch;
     }
 
