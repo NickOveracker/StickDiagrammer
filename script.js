@@ -762,7 +762,7 @@ class DiagramController {
         let terminals = this.diagram.inputs.concat(this.diagram.outputs, this.diagram.vddCell, this.diagram.gndCell);
 
         this.placeTermMode = true;
-        this.selectedTerminal = terminals[terminalNumber];
+        this.selectedTerminal = terminals[parseInt(terminalNumber)];
     }
 
 
