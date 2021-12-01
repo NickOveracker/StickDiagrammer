@@ -1071,9 +1071,9 @@ class DiagramController {
             terminal.x = cell.x;
             terminal.y = cell.y;
             // Set the Diagram.CONTACT layer at the new coordinates.
-            this.diagram.layeredGrid.set(cell.x, cell.y, this.diagram.Diagram.CONTACT);
+            this.diagram.layeredGrid.set(cell.x, cell.y, this.Diagram.CONTACT);
             // Unset the Diagram.CONTACT layer at the old coordinates.
-            this.diagram.layeredGrid.clear(oldX, oldY, this.diagram.Diagram.CONTACT);
+            this.diagram.layeredGrid.clear(oldX, oldY, this.Diagram.CONTACT);
         }
     }
 
@@ -1357,7 +1357,7 @@ class DiagramView {
             drawCell(x, y, layer);
 
             // For the last layer, fill each filled cell with a cross.
-            if (layer === this.diagram.Diagram.CONTACT) {
+            if (layer === this.Diagram.CONTACT) {
                 if (this.diagram.layeredGrid.get(x, y, layer).isSet) {
                     this.decorateContact(x, y);
                 }
@@ -1438,11 +1438,11 @@ class LayeredGrid {
         let isTerminal = false;
 
         // Loop through inputs, outputs, and VDD/GND
-        isTerminal = layer === this.diagram.Diagram.CONTACT && this.diagram.inputs.some(function(input) {
+        isTerminal = layer === this.Diagram.CONTACT && this.diagram.inputs.some(function(input) {
             return input.x === x && input.y === y;
         });
 
-        isTerminal = isTerminal || layer === this.diagram.Diagram.CONTACT && this.diagram.outputs.some(function(output) {
+        isTerminal = isTerminal || layer === this.Diagram.CONTACT && this.diagram.outputs.some(function(output) {
             return output.x === x && output.y === y;
         });
 
@@ -1458,7 +1458,7 @@ class LayeredGrid {
     clear(x, y, layer) {
         let outOfBounds = x < 0 || x >= this.width || y < 0 || y >= this.height || layer < 0 || layer >= this.layers;
 
-        if(outOfBounds || layer === this.diagram.Diagram.CONTACT && this.isTerminal(x, y, layer)) {
+        if(outOfBounds || layer === this.Diagram.CONTACT && this.isTerminal(x, y, layer)) {
             return;
         }
 
@@ -1584,7 +1584,7 @@ class LayeredGrid {
 
             // Make sure there is still a Diagram.CONTACT at the new coordinates
             // (may have shifted off the screen)
-            this.set(terminal.x, terminal.y, this.diagram.Diagram.CONTACT);
+            this.set(terminal.x, terminal.y, this.Diagram.CONTACT);
         }.bind(this);
 
         this.diagram.inputs.forEach(function(input) {
@@ -2037,15 +2037,15 @@ window.onload = function () {
 
     // Set Diagram.CONTACT at the coordinates of each input and output.
     diagram.inputs.forEach(function(input) {
-        diagram.layeredGrid.set(input.x, input.y, diagram.Diagram.CONTACT);
+        diagram.layeredGrid.set(input.x, input.y, Diagram.CONTACT);
     });
     diagram.outputs.forEach(function(output) {
-        diagram.layeredGrid.set(output.x, output.y, diagram.Diagram.CONTACT);
+        diagram.layeredGrid.set(output.x, output.y, Diagram.CONTACT);
     });
 
     // Set the Diagram.CONTACT layer on the VDD and GND cells.
-    diagram.layeredGrid.set(diagram.vddCell.x, diagram.vddCell.y, diagram.Diagram.CONTACT);
-    diagram.layeredGrid.set(diagram.gndCell.x, diagram.gndCell.y, diagram.Diagram.CONTACT);
+    diagram.layeredGrid.set(diagram.vddCell.x, diagram.vddCell.y, Diagram.CONTACT);
+    diagram.layeredGrid.set(diagram.gndCell.x, diagram.gndCell.y, Diagram.CONTACT);
 
     setUpControls();
 
