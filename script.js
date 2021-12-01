@@ -970,7 +970,7 @@ class Diagram {
         let anyLayerSet = false;
 
         // Ignore if not inside the canvas
-        if (this.inBounds({ clientX: clientX, clientY: clientY, }, this.canvas)) {
+        if (this.inBounds({ clientX: clientX, clientY: clientY, })) {
             let x = Math.floor((clientX - this.canvas.offsetLeft - this.cellWidth) / this.cellWidth);
             let y = Math.floor((clientY - this.canvas.offsetTop - this.cellHeight) / this.cellHeight);
 
@@ -990,7 +990,7 @@ class Diagram {
     getCell(clientX, clientY) {
         'use strict';
         // Ignore if not inside the canvas
-        if (this.inBounds({ clientX: clientX, clientY: clientY, }, this.canvas)) {
+        if (this.inBounds({ clientX: clientX, clientY: clientY, })) {
 
             let x = Math.floor((clientX - this.canvas.offsetLeft - this.cellWidth) / this.cellWidth);
             let y = Math.floor((clientY - this.canvas.offsetTop - this.cellHeight) / this.cellHeight);
@@ -1062,7 +1062,7 @@ class Diagram {
       
         if (event.button === 0 || event.button === 2 || event.type === 'touchend') {
             // If not between cells 1 and gridsize - 1, undo and return.
-            if (dragging && this.inBounds(event)) {
+            if (dragging && this.inBounds({ clientX: clientX, clientY: clientY, })) {
                 let endX = Math.floor((clientX - this.canvas.offsetLeft - this.cellWidth) / this.cellWidth);
                 let endY = Math.floor((clientY - this.canvas.offsetTop - this.cellHeight) / this.cellHeight);
                 let bounds = {
@@ -1087,7 +1087,7 @@ class Diagram {
                         this.layeredGrid.clear(x, y, layer);
                     }.bind(this));
                 }
-            } else if (this.inBounds(event)) {
+            } else if (this.inBounds({ clientX: clientX, clientY: clientY, })) {
                 this.cellClickHandler(event);
             }
             // If the mouse was released outside the canvas, undo and return.
@@ -1153,7 +1153,7 @@ class Diagram {
         // If the mouse is pressed and the mouse is between cells 1 and gridsize - 1,
         if (event.buttons === 1 || event.buttons === 2 || event.type === 'touchmove') {
             // Ignore if not inside the canvas
-            if (this.inBounds(event)) {
+            if (this.inBounds({ clientX: clientX, clientY: clientY, })) {
                 if (startX === -1 || startY === -1) {
                     let temp = this.getCell(currentX, currentY);
                     startX = temp.x;
@@ -1263,7 +1263,7 @@ class Diagram {
         event.preventDefault();
         if (event.button === 0 || event.button === 2 || event.type === 'touchstart') {
             // Return if not between cells 1 and gridsize - 1
-            if (this.inBounds(event)) {
+            if (this.inBounds({ clientX: clientX, clientY: clientY, })) {
                 startX = Math.floor((clientX - this.canvas.offsetLeft - this.cellWidth) / this.cellWidth);
                 startY = Math.floor((clientY - this.canvas.offsetTop - this.cellHeight) / this.cellHeight);
             } else {
