@@ -908,8 +908,8 @@ class DiagramController {
         let clientX, clientY;
         let coords = this.getCoordsFromEvent(event);
 
-        clientX = coords.clientX;
-        clientY = coords.clientY;
+        clientX = coords.x;
+        clientY = coords.y;
 
         // Just fill in or delete the cell at the start coordinates.
         // If there is no cell at the start coordinates, change the cursor color.
