@@ -1972,7 +1972,7 @@ function setUpControls() {
         let child = document.getElementById("erase-toggle").children[0];
         this.controller.toggleEraseMode();
         if(this.controller.eraseMode) {
-            child.firstChild.classList.remove('fa-paint-brush');
+            child.classList.remove('fa-paint-brush');
             child.classList.add('fa-eraser');
         } else {
             child.classList.remove('fa-eraser');
