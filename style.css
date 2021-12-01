@@ -124,6 +124,11 @@ canvas {
     display: inline-block;
 }
 
+.full-width {
+    width: 100%;
+    display: inline-block;
+}
+
 .sidebar.right .toggle-button-label {
     left: 25%;
 }
