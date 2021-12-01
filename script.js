@@ -739,20 +739,20 @@ class Diagram {
 class DiagramController {
     constructor(diagram, view) {
         'use strict';
-        this.diagram        = diagram;
-        this.view           = view;
-        this.firstSaveState = 0;
-        this.lastSaveState  = 0;
-        this.maxSaveState   = 10;
-        this.saveState      = 0;
-        this.dragging       = false;
-        this.startX         = -1;
-        this.startY         = -1;
-        this.currentX       = -1;
-        this.currentY       = -1;
-        this.cursorIndex    = 0;
-        this.eraseMode      = false;
-        this.placeTerminal  = false;
+        this.diagram          = diagram;
+        this.view             = view;
+        this.firstSaveState   = 0;
+        this.lastSaveState    = 0;
+        this.maxSaveState     = 10;
+        this.saveState        = 0;
+        this.dragging         = false;
+        this.startX           = -1;
+        this.startY           = -1;
+        this.currentX         = -1;
+        this.currentY         = -1;
+        this.cursorIndex      = 0;
+        this.eraseMode        = false;
+        this.placeTermMode    = false;
         this.selectedTerminal = null;
     }
 
@@ -761,7 +761,7 @@ class DiagramController {
         // Concatenate diagram.inputs, diagram.outputs, diagram.vddCell, and diagram.gndCell.
         let terminals = this.diagram.inputs.concat(this.diagram.outputs, this.diagram.vddCell, this.diagram.gndCell);
 
-        this.placeTerminal = true;
+        this.placeTermMode = true;
         this.selectedTerminal = terminals[terminalNumber];
     }
 
@@ -919,9 +919,9 @@ class DiagramController {
         clientX = coords.x;
         clientY = coords.y;
 
-        if(this.placeTerminal) {
-            this.placeTerminal = false;
-            this.diagram.placeTerminal(event, this.selectedTerminal);
+        if(this.placeTermMode) {
+            this.placeTermMode = false;
+            this.placeTerminal(event, this.selectedTerminal);
         } else if (!this.isEraseEvent(event)) {
             // Just fill in or delete the cell at the start coordinates.
             // If there is no cell at the start coordinates, change the cursor color.
