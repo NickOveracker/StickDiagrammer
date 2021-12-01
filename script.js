@@ -1844,44 +1844,44 @@ function setUpControls() {
     let shiftDownButton = document.getElementById("shift-down");
 
     removeRowButton.addEventListener("click", function() {
-        diagram.layeredGrid.resize(diagram.layeredGrid.width, diagram.layeredGrid.height - 1);
-        document.getElementById("row-count").innerHTML = diagram.layeredGrid.height;
-        diagram.drawGrid();
-    });
+        this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height - 1);
+        document.getElementById("row-count").innerHTML = this.layeredGrid.height;
+        this.drawGrid();
+    }.bind(this));
 
     addRowButton.addEventListener("click", function() {
-        diagram.layeredGrid.resize(diagram.layeredGrid.width, diagram.layeredGrid.height + 1);
-        document.getElementById("row-count").innerHTML = diagram.layeredGrid.height;
-        diagram.drawGrid();
-    });
+        this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height + 1);
+        document.getElementById("row-count").innerHTML = this.layeredGrid.height;
+        this.drawGrid();
+    }.bind(diagram));
 
     removeColumnButton.addEventListener("click", function() {
-        diagram.layeredGrid.resize(diagram.layeredGrid.width - 1, diagram.layeredGrid.height);
-        document.getElementById("column-count").innerHTML = diagram.layeredGrid.width;
-        diagram.drawGrid();
-    });
+        this.layeredGrid.resize(this.layeredGrid.width - 1, this.layeredGrid.height);
+        document.getElementById("column-count").innerHTML = this.layeredGrid.width;
+        this.drawGrid();
+    }.bind(diagram));
 
     addColumnButton.addEventListener("click", function() {
-        diagram.layeredGrid.resize(diagram.layeredGrid.width + 1, diagram.layeredGrid.height);
-        document.getElementById("column-count").innerHTML = diagram.layeredGrid.width;
-        diagram.drawGrid();
-    });
+        this.layeredGrid.resize(this.layeredGrid.width + 1, this.layeredGrid.height);
+        document.getElementById("column-count").innerHTML = this.layeredGrid.width;
+        this.drawGrid();
+    }.bind(diagram));
 
     shiftLeftButton.addEventListener("click", function() {
-        diagram.layeredGrid.shift(-1, 0);
-    });
+        this.layeredGrid.shift(-1, 0);
+    }.bind(diagram));
 
     shiftRightButton.addEventListener("click", function() {
-        diagram.layeredGrid.shift(1, 0);
-    });
+        this.layeredGrid.shift(1, 0);
+    }.bind(diagram));
 
     shiftUpButton.addEventListener("click", function() {
-        diagram.layeredGrid.shift(0, -1);
-    });
+        this.layeredGrid.shift(0, -1);
+    }.bind(diagram));
 
     shiftDownButton.addEventListener("click", function() {
-        diagram.layeredGrid.shift(0, 1);
-    });
+        this.layeredGrid.shift(0, 1);
+    }.bind(diagram));
 }
 
 window.onload = function () {
@@ -1902,15 +1902,15 @@ window.onload = function () {
     diagram.layeredGrid = new LayeredGrid(diagram.gridWidth, diagram.gridHeight, cursors.length);
 
     // Canvas mouse event listeners.
-    canvasContainer.addEventListener("mousedown", diagram.canvasMouseDownHandler);
-    canvasContainer.addEventListener("mouseup", diagram.canvasMouseUpHandler);
-    canvasContainer.addEventListener("contextmenu", diagram.contextmenuHandler);
+    canvasContainer.addEventListener("mousedown", function() { this.canvasMouseDownHandler(); }.bind(diagram));
+    canvasContainer.addEventListener("mouseup", function() { this.canvasMouseUpHandler(); }.bind(diagram));
+    canvasContainer.addEventListener("contextmenu", function() { this.contextmenuHandler(); }.bind(diagram));
 
     // Some of these pertain the the canvas, but we don't know whether
     // it will be selected.
-    window.addEventListener("keydown", diagram.keydownHandler);
-    window.addEventListener("keyup", diagram.keyupHandler);
-    window.addEventListener("mousemove", diagram.mousemoveHandler);
+    window.addEventListener("keydown", function() { this.keydownHandler(); }.bind(diagram));
+    window.addEventListener("keyup", function() { this.keyupHandler(); }.bind(diagram));
+    window.addEventListener("mousemove", function() { this.mousemoveHandler(); }.bind(diagram));
 
     // Set up the evaluate button.
     button = document.getElementById("generate-truth-table");
@@ -1972,7 +1972,7 @@ window.onload = function () {
 
     diagram.refreshCanvas();
     // 60 fps
-    setInterval(refreshCanvas.bind(diagram), 16);
+    setInterval(diagram.refreshCanvas.bind(diagram), 16);
 
     if(window.runTestbench) {
         runTestbench();
