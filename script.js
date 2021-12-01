@@ -756,6 +756,11 @@ class DiagramController {
         this.eraseMode = !this.eraseMode;
     }
 
+    isEraseEvent(event) {
+        'use strict';
+        return this.eraseMode || event.button === 2 || event.buttons === 2;
+    }
+
     // Save function to save the current state of the grid and the canvas.
     // Increment save state so we can maintain an undo buffer.
     saveCurrentState() {
@@ -901,10 +906,10 @@ class DiagramController {
 
         // Just fill in or delete the cell at the start coordinates.
         // If there is no cell at the start coordinates, change the cursor color.
-        if (this.isPrimaryInput(event) && !this.eraseMode) {
+        if (!this.isEraseEvent(event)) {
             if (!this.diagram.layeredGrid.get(this.startX, this.startY, this.cursorIndex).isSet) { this.saveCurrentState(); }
             this.diagram.layeredGrid.set(this.startX, this.startY, this.cursorIndex);
-        } else if(event.button === 2 || this.eraseMode) {
+        } else {
             // If in the canvas and over a colored cell, erase it.
             // Otherwise, change the layer.
             if (!this.clearIfPainted(clientX, clientY)) {
@@ -943,7 +948,7 @@ class DiagramController {
 
                 // For primary (i.e. left) mouse button:
                 // If the mouse moved more horizontally than vertically, draw a horizontal line.
-                if (this.isPrimaryInput(event) && !this.eraseMode) {
+                if (!this.isEraseEvent(event)) {
                     this.draw(bounds);
                 } else {
                     // For secondary (i.e. right) mouse button:
@@ -959,7 +964,7 @@ class DiagramController {
             else if (this.dragging) {
                 this.undo();
             }
-            else if(event.button === 2 || this.eraseMode) {
+            else if(this.isEraseEvent(event)) {
                 this.changeLayer();
             }
         }
@@ -1046,7 +1051,7 @@ class DiagramController {
                 };
 
                 // Primary mouse button (i.e. left click)
-                if (this.isPrimaryInput(event) && !this.eraseMode) {
+                if (!this.isEraseEvent(event)) {
                     leftMouseMoveHandler(bounds);
                 } else {
                     rightMouseMoveHandler(bounds);
@@ -1117,7 +1122,7 @@ class DiagramController {
     // Don't show a context-menu when right-clicking
     contextmenuHandler(event) {
         'use strict';
-        if (event.button === 2 || this.eraseMode) {
+        if (event.button === 2) {
             // Don't show a context menu.
             event.preventDefault();
         }
