@@ -748,6 +748,12 @@ class DiagramController {
         this.currentX       = -1;
         this.currentY       = -1;
         this.cursorIndex    = 0;
+        this.eraseMode      = false;
+    }
+
+    toggleEraseMode() {
+        'use strict';
+        this.eraseMode = !this.eraseMode;
     }
 
     // Save function to save the current state of the grid and the canvas.
@@ -895,10 +901,10 @@ class DiagramController {
 
         // Just fill in or delete the cell at the start coordinates.
         // If there is no cell at the start coordinates, change the cursor color.
-        if (this.isPrimaryInput(event)) {
+        if (this.isPrimaryInput(event) && !this.eraseMode) {
             if (!this.diagram.layeredGrid.get(this.startX, this.startY, this.cursorIndex).isSet) { this.saveCurrentState(); }
             this.diagram.layeredGrid.set(this.startX, this.startY, this.cursorIndex);
-        } else if(event.button === 2) {
+        } else if(event.button === 2 || this.eraseMode) {
             // If in the canvas and over a colored cell, erase it.
             // Otherwise, change the layer.
             if (!this.clearIfPainted(clientX, clientY)) {
@@ -937,7 +943,7 @@ class DiagramController {
 
                 // For primary (i.e. left) mouse button:
                 // If the mouse moved more horizontally than vertically, draw a horizontal line.
-                if (this.isPrimaryInput(event)) {
+                if (this.isPrimaryInput(event) && !this.eraseMode) {
                     this.draw(bounds);
                 } else {
                     // For secondary (i.e. right) mouse button:
@@ -953,7 +959,7 @@ class DiagramController {
             else if (this.dragging) {
                 this.undo();
             }
-            else if(event.button === 2) {
+            else if(event.button === 2 || this.eraseMode) {
                 this.changeLayer();
             }
         }
@@ -1040,7 +1046,7 @@ class DiagramController {
                 };
 
                 // Primary mouse button (i.e. left click)
-                if (this.isPrimaryInput(event)) {
+                if (this.isPrimaryInput(event) && !this.eraseMode) {
                     leftMouseMoveHandler(bounds);
                 } else {
                     rightMouseMoveHandler(bounds);
@@ -1111,7 +1117,7 @@ class DiagramController {
     // Don't show a context-menu when right-clicking
     contextmenuHandler(event) {
         'use strict';
-        if (event.button === 2) {
+        if (event.button === 2 || this.eraseMode) {
             // Don't show a context menu.
             event.preventDefault();
         }
@@ -1916,6 +1922,7 @@ function setUpControls() {
     let shiftUpButton = document.getElementById("shift-up");
     let shiftDownButton = document.getElementById("shift-down");
     let changeLayerButton = document.getElementById("change-layer");
+    let eraserButton = document.getElementById("eraser");
 
     removeRowButton.addEventListener("click", function() {
         this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height - 1);
@@ -1959,6 +1966,10 @@ function setUpControls() {
 
     changeLayerButton.addEventListener("click", function() {
         this.controller.changeLayer();
+    }.bind(diagram));
+
+    eraserButton.addEventListener("click", function() {
+        this.controller.toggleEraseMode();
     }.bind(diagram));
 }
 
