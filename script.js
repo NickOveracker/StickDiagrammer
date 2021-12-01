@@ -1902,15 +1902,15 @@ window.onload = function () {
     diagram.layeredGrid = new LayeredGrid(diagram.gridWidth, diagram.gridHeight, cursors.length);
 
     // Canvas mouse event listeners.
-    canvasContainer.addEventListener("mousedown", function() { this.canvasMouseDownHandler(); }.bind(diagram));
-    canvasContainer.addEventListener("mouseup", function() { this.canvasMouseUpHandler(); }.bind(diagram));
-    canvasContainer.addEventListener("contextmenu", function() { this.contextmenuHandler(); }.bind(diagram));
+    canvasContainer.addEventListener("mousedown", function(e) { this.canvasMouseDownHandler(e); }.bind(diagram));
+    canvasContainer.addEventListener("mouseup", function(e) { this.canvasMouseUpHandler(e); }.bind(diagram));
+    canvasContainer.addEventListener("contextmenu", function(e) { this.contextmenuHandler(e); }.bind(diagram));
 
     // Some of these pertain the the canvas, but we don't know whether
     // it will be selected.
-    window.addEventListener("keydown", function() { this.keydownHandler(); }.bind(diagram));
-    window.addEventListener("keyup", function() { this.keyupHandler(); }.bind(diagram));
-    window.addEventListener("mousemove", function() { this.mousemoveHandler(); }.bind(diagram));
+    window.addEventListener("keydown", function(e) { this.keydownHandler(e); }.bind(diagram));
+    window.addEventListener("keyup", function(e) { this.keyupHandler(e); }.bind(diagram));
+    window.addEventListener("mousemove", function(e) { this.mousemoveHandler(e); }.bind(diagram));
 
     // Set up the evaluate button.
     button = document.getElementById("generate-truth-table");
