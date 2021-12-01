@@ -880,20 +880,30 @@ class DiagramController {
         }
     }
 
-    cellClickHandler(event) {
+    getCoordsFromEvent(event) {
         'use strict';
-
-        let clientX, clientY;
+        let ret = {};
 
         if(event.clientX === undefined) {
-            clientX = event.changedTouches[0].clientX;
-            clientY = event.changedTouches[0].clientY;
+            ret.x = event.changedTouches[0].clientX;
+            ret.y = event.changedTouches[0].clientY;
         } else {
-            clientX = event.clientX;
-            clientY = event.clientY;
+            ret.x = event.clientX;
+            ret.y = event.clientY;
         }
 
-       // Just fill in or delete the cell at the start coordinates.
+        return ret;
+    }
+
+    cellClickHandler(event) {
+        'use strict';
+        let clientX, clientY;
+        let coords = this.getCoordsFromEvent(event);
+
+        clientX = coords.clientX;
+        clientY = coords.clientY;
+
+        // Just fill in or delete the cell at the start coordinates.
         // If there is no cell at the start coordinates, change the cursor color.
         if (event.button === 0 || event.type === 'touchend') {
             if (!this.diagram.layeredGrid.get(this.startX, this.startY, this.cursorIndex).isSet) { this.saveCurrentState(); }
@@ -907,6 +917,13 @@ class DiagramController {
         }
     }
 
+    isPrimaryInput(event) {
+        'use strict';
+        let isLeftButton = event.button === 0 || event.buttons === 1;
+        let isTouch = event.type.includes('touch');
+        return isLeftButton || isTouch;
+    }
+
     // Note the grid coordinates when the left or right mouse button is released.
     // If the left (or primary) button, use the start and end coordinates to make either a horizontal or vertical line.
     // If the right (or secondary) button, use the same coordinates to delete a line of cells.
@@ -914,16 +931,12 @@ class DiagramController {
         'use strict';
         event.preventDefault();
         let clientX, clientY;
+        let coords = this.getCoordsFromEvent(event);
 
-        if(event.clientX === undefined) {
-            clientX = event.changedTouches[0].clientX;
-            clientY = event.changedTouches[0].clientY;
-        } else {
-            clientX = event.clientX;
-            clientY = event.clientY;
-        }
-      
-        if (event.button === 0 || event.button === 2 || event.type === 'touchend') {
+        clientX = coords.x;
+        clientY = coords.y;
+     
+        if (this.isPrimaryInput(event) || event.button === 2) {
             // If not between cells 1 and gridsize - 1, undo and return.
             if (this.dragging && this.inBounds(clientX, clientY)) {
                 let endX = Math.floor((clientX - this.view.canvas.offsetLeft - this.view.cellWidth) / this.view.cellWidth);
@@ -941,7 +954,7 @@ class DiagramController {
 
                 // For primary (i.e. left) mouse button:
                 // If the mouse moved more horizontally than vertically, draw a horizontal line.
-                if (event.button === 0 || event.type === 'touchend') {
+                if (this.isPrimaryInput(event)) {
                     this.draw(bounds);
                 } else {
                     // For secondary (i.e. right) mouse button:
@@ -970,14 +983,10 @@ class DiagramController {
         'use strict';
         event.preventDefault();
         let clientX, clientY;
+        let coords = this.getCoordsFromEvent(event);
 
-        if(event.clientX === undefined) {
-            clientX = event.changedTouches[0].clientX;
-            clientY = event.changedTouches[0].clientY;
-        } else {
-            clientX = event.clientX;
-            clientY = event.clientY;
-        }
+        clientX = coords.x;
+        clientY = coords.y;
 
         let leftMouseMoveHandler = function(bounds) {
             // If the mouse moved more horizontally than vertically,
@@ -1015,7 +1024,7 @@ class DiagramController {
         let currentCell = this.getCellAtCursor(this.currentX, this.currentY);
 
         // If the mouse is pressed and the mouse is between cells 1 and gridsize - 1,
-        if (event.buttons === 1 || event.buttons === 2 || event.type === 'touchmove') {
+        if (this.isPrimaryInput(event) || event.buttons === 2) {
             // Ignore if not inside the canvas
             if (this.inBounds(clientX, clientY)) {
                 if (this.startX === -1 || this.startY === -1) {
@@ -1023,7 +1032,6 @@ class DiagramController {
                     this.startX = temp.x;
                     this.startY = temp.y;
                 }
-
 
                 if (!this.dragging) {
                     // don't start dragging unless the mouse has moved outside the cell
@@ -1049,7 +1057,7 @@ class DiagramController {
                 };
 
                 // Primary mouse button (i.e. left click)
-                if (event.buttons === 1 || event.type === 'touchmove') {
+                if (this.isPrimaryInput(event)) {
                     leftMouseMoveHandler(bounds);
                 } else {
                     rightMouseMoveHandler(bounds);
@@ -1132,15 +1140,12 @@ class DiagramController {
         'use strict';
         event.preventDefault();
         let clientX, clientY;
+        let coords = this.getCoordsFromEvent(event);
 
-        if(event.clientX === undefined) {
-            clientX = event.changedTouches[0].clientX;
-            clientY = event.changedTouches[0].clientY;
-        } else {
-            clientX = event.clientX;
-            clientY = event.clientY;
-        }
-        if (event.button === 0 || event.button === 2 || event.type === 'touchstart') {
+        clientX = coords.x;
+        clientY = coords.y;
+
+        if (this.isPrimaryInput(event) || event.button === 2) {
             // Return if not between cells 1 and gridsize - 1
             if (this.inBounds(clientX, clientY)) {
                 this.startX = Math.floor((clientX - this.view.canvas.offsetLeft - this.view.cellWidth) / this.view.cellWidth);
