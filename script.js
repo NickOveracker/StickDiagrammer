@@ -1385,7 +1385,7 @@ class LayeredGrid {
         this.diagram = diagram;
         this.width = width;
         this.height = height;
-        Diagram.layers = layers;
+        this.layers = layers;
         this.grid = new Array(width * height * layers);
         this.defaultCell = { isSet: false, };
     }
@@ -1396,7 +1396,7 @@ class LayeredGrid {
     get(x, y, layer) {
         let cell;
 
-        if(x < 0 || x >= this.width || y < 0 || y >= this.height || layer < 0 || layer >= Diagram.layers) {
+        if(x < 0 || x >= this.width || y < 0 || y >= this.height || layer < 0 || layer >= this.layers) {
             return null;
         }
 
@@ -1412,7 +1412,7 @@ class LayeredGrid {
     // Set the value at a given coordinate
     // If it's out of bounds, do nothing
     set(x, y, layer) {
-        if(x < 0 || x >= this.width || y < 0 || y >= this.height || layer < 0 || layer >= Diagram.layers) {
+        if(x < 0 || x >= this.width || y < 0 || y >= this.height || layer < 0 || layer >= this.layers) {
             return;
         }
 
@@ -1456,7 +1456,7 @@ class LayeredGrid {
     // If it's out of bounds, do nothing
     // Do not clear Diagram.CONTACT for inputs, outputs, or VDD/GND
     clear(x, y, layer) {
-        let outOfBounds = x < 0 || x >= this.width || y < 0 || y >= this.height || layer < 0 || layer >= Diagram.layers;
+        let outOfBounds = x < 0 || x >= this.width || y < 0 || y >= this.height || layer < 0 || layer >= this.layers;
 
         if(outOfBounds || layer === this.diagram.Diagram.CONTACT && this.isTerminal(x, y, layer)) {
             return;
@@ -1486,7 +1486,7 @@ class LayeredGrid {
         let outOfGrid = function(x, y, layer) {
             return x < 0     || x >= this.width  ||
                    y < 0     || y >= this.height || 
-                   layer < 0 || layer >= Diagram.layers;
+                   layer < 0 || layer >= this.layers;
         }.bind(this);
 
         for(let layer = bounds.lowLayer; layer <= bounds.highLayer; layer++) {
@@ -1512,7 +1512,7 @@ class LayeredGrid {
             top: 0,
             bottom: this.height - 1,
             lowLayer: 0,
-            highLayer: Diagram.layers - 1,
+            highLayer: this.layers - 1,
         };
         this.map(bounds, function(cell) {
             this.grid[cell] = null;
@@ -1530,7 +1530,7 @@ class LayeredGrid {
         let oldHeight = this.height;
         this.width = width;
         this.height = height;
-        this.grid = new Array(width * height * Diagram.layers);
+        this.grid = new Array(width * height * this.layers);
 
         // Copy the old grid into the new grid
         let bounds = {
@@ -1539,7 +1539,7 @@ class LayeredGrid {
             top: 0,
             bottom: Math.min(this.height - 1, oldHeight - 1),
             lowLayer: 0,
-            highLayer: Diagram.layers - 1,
+            highLayer: this.layers - 1,
         };
 
         for(let layer = bounds.lowLayer; layer <= bounds.highLayer; layer++) {
@@ -1554,9 +1554,9 @@ class LayeredGrid {
     // Shift the grid by a given offset
     shift(xOffset, yOffset) {
         let oldGrid = this.grid;
-        this.grid = new Array(this.width * this.height * Diagram.layers);
+        this.grid = new Array(this.width * this.height * this.layers);
 
-        for(let layer = 0; layer < Diagram.layers; layer++) {
+        for(let layer = 0; layer < this.layers; layer++) {
             for(let y = 0; y < this.height; y++) {
                 for(let x = 0; x < this.width; x++) {
                     if(x - xOffset < 0 || x - xOffset >= this.width || y - yOffset < 0 || y - yOffset >= this.height) {
