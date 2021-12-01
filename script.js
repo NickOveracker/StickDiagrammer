@@ -1969,13 +1969,14 @@ function setUpControls() {
     }.bind(diagram));
 
     eraseToggleButton.addEventListener("click", function() {
+        let child = document.getElementById("erase-toggle").children[0];
         this.controller.toggleEraseMode();
         if(this.controller.eraseMode) {
-            label.classList.remove('fa-paint-brush');
-            label.classList.add('fa-eraser');
+            child.firstChild.classList.remove('fa-paint-brush');
+            child.classList.add('fa-eraser');
         } else {
-            label.classList.remove('fa-eraser');
-            label.classList.add('fa-paint-brush');
+            child.classList.remove('fa-eraser');
+            child.classList.add('fa-paint-brush');
         }
     }.bind(diagram));
 }
