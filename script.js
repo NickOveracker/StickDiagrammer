@@ -1518,6 +1518,23 @@ class LayeredGrid {
         });
     }
 
+    moveWithinBounds(cell, bounds) {
+        let x = cell.x;
+        let y = cell.y;
+
+        if(x < bounds.left) {
+            x = bounds.left;
+        } else if(x > bounds.right) {
+            x = bounds.right;
+        }
+
+        if(y < bounds.top) {
+            y = bounds.top;
+        } else if(y > bounds.bottom) {
+            y = bounds.bottom;
+        }
+    }
+
     // Change the height of the grid
     resize(width, height) {
         if(width < 0 || height < 0) {
@@ -1540,6 +1557,16 @@ class LayeredGrid {
             lowLayer: 0,
             highLayer: this.layers - 1,
         };
+
+        // Move inputs, outputs, and VDD/GND if they are outside the new grid
+        this.diagram.inputs.forEach(function(input) {
+            this.moveWithinBounds(input, bounds);
+        }.bind(this));
+        this.diagram.outputs.forEach(function(output) {
+            this.moveWithinBounds(output, bounds);
+        }.bind(this));
+        this.moveWithinBounds(this.diagram.vddCell, bounds);
+        this.moveWithinBounds(this.diagram.gndCell, bounds);
 
         for(let layer = bounds.lowLayer; layer <= bounds.highLayer; layer++) {
             for(let y = bounds.top; y <= bounds.bottom; y++) {
