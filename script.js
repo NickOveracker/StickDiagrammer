@@ -1577,6 +1577,14 @@ class LayeredGrid {
             top: 0,
             bottom: this.height - 1,
         }; // layer information unneeded
+    
+        for(let layer = oldBounds.lowLayer; layer <= oldBounds.highLayer; layer++) {
+            for(let y = oldBounds.top; y <= oldBounds.bottom; y++) {
+                for(let x = oldBounds.left; x <= oldBounds.right; x++) {
+                    this.grid[this.convertFromCoordinates(x, y, layer)] = oldGrid[x + (y * oldWidth) + (layer * oldWidth * oldHeight)];
+                }
+            }
+        }
 
         // Move inputs, outputs, and VDD/GND if they are outside the new grid
         this.diagram.inputs.forEach(function(input) {
@@ -1587,14 +1595,6 @@ class LayeredGrid {
         }.bind(this));
         this.moveWithinBounds(this.diagram.vddCell, newBounds);
         this.moveWithinBounds(this.diagram.gndCell, newBounds);
-
-        for(let layer = oldBounds.lowLayer; layer <= oldBounds.highLayer; layer++) {
-            for(let y = oldBounds.top; y <= oldBounds.bottom; y++) {
-                for(let x = oldBounds.left; x <= oldBounds.right; x++) {
-                    this.grid[this.convertFromCoordinates(x, y, layer)] = oldGrid[x + (y * oldWidth) + (layer * oldWidth * oldHeight)];
-                }
-            }
-        }
     }
 
     // Shift the grid by a given offset
