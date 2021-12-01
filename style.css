@@ -121,6 +121,12 @@ canvas {
 
 .sidebar .half-width {
     width: 48%;
+    display: inline-block;
+}
+
+.full-width {
+    width: 100%;
+    display: inline-block;
 }
 
 .sidebar.right .toggle-button-label {

@@ -739,20 +739,32 @@ class Diagram {
 class DiagramController {
     constructor(diagram, view) {
         'use strict';
-        this.diagram        = diagram;
-        this.view           = view;
-        this.firstSaveState = 0;
-        this.lastSaveState  = 0;
-        this.maxSaveState   = 10;
-        this.saveState      = 0;
-        this.dragging       = false;
-        this.startX         = -1;
-        this.startY         = -1;
-        this.currentX       = -1;
-        this.currentY       = -1;
-        this.cursorIndex    = 0;
-        this.eraseMode      = false;
+        this.diagram          = diagram;
+        this.view             = view;
+        this.firstSaveState   = 0;
+        this.lastSaveState    = 0;
+        this.maxSaveState     = 10;
+        this.saveState        = 0;
+        this.dragging         = false;
+        this.startX           = -1;
+        this.startY           = -1;
+        this.currentX         = -1;
+        this.currentY         = -1;
+        this.cursorIndex      = 0;
+        this.eraseMode        = false;
+        this.placeTermMode    = false;
+        this.selectedTerminal = null;
     }
+
+    setPlaceTerminalMode(terminalNumber) {
+        'use strict';
+        // Concatenate diagram.inputs, diagram.outputs, diagram.vddCell, and diagram.gndCell.
+        let terminals = this.diagram.inputs.concat(this.diagram.outputs, this.diagram.vddCell, this.diagram.gndCell);
+
+        this.placeTermMode = true;
+        this.selectedTerminal = terminals[terminalNumber];
+    }
+
 
     toggleEraseMode() {
         'use strict';
@@ -907,9 +919,12 @@ class DiagramController {
         clientX = coords.x;
         clientY = coords.y;
 
-        // Just fill in or delete the cell at the start coordinates.
-        // If there is no cell at the start coordinates, change the cursor color.
-        if (!this.isEraseEvent(event)) {
+        if(this.placeTermMode) {
+            this.placeTermMode = false;
+            this.placeTerminal(event, this.selectedTerminal);
+        } else if (!this.isEraseEvent(event)) {
+            // Just fill in or delete the cell at the start coordinates.
+            // If there is no cell at the start coordinates, change the cursor color.
             if (!this.diagram.layeredGrid.get(this.startX, this.startY, this.cursorIndex).isSet) { this.saveCurrentState(); }
             this.diagram.layeredGrid.set(this.startX, this.startY, this.cursorIndex);
         } else {
@@ -2011,6 +2026,8 @@ function setUpControls() {
     let shiftDownButton = document.getElementById("shift-down");
     let changeLayerButton = document.getElementById("change-layer");
     let eraseToggleButton = document.getElementById("erase-toggle");
+    let terminalSelect = document.getElementById("terminal-select");
+    let terminalSelectButton = document.getElementById("terminal-select-button");
 
     removeRowButton.addEventListener("click", function() {
         this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height - 1);
@@ -2066,6 +2083,10 @@ function setUpControls() {
             child.classList.remove('fa-eraser');
             child.classList.add('fa-paint-brush');
         }
+    }.bind(diagram));
+
+    terminalSelectButton.addEventListener("click", function() {
+        this.controller.setPlaceTerminalMode(terminalSelect.value);
     }.bind(diagram));
 }
 
