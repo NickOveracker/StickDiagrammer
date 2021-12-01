@@ -1560,7 +1560,7 @@ class LayeredGrid {
         this.grid = new Array(width * height * this.layers);
 
         // Copy the old grid into the new grid
-        let bounds = {
+        let oldBounds = {
             left: 0,
             right: Math.min(this.width - 1, oldWidth - 1),
             top: 0,
@@ -1569,19 +1569,26 @@ class LayeredGrid {
             highLayer: this.layers - 1,
         };
 
+        let newBounds = {
+            left: 0,
+            right: this.width - 1,
+            top: 0,
+            bottom: this.height - 1,
+        }; // layer information unneeded
+
         // Move inputs, outputs, and VDD/GND if they are outside the new grid
         this.diagram.inputs.forEach(function(input) {
-            this.moveWithinBounds(input, bounds);
+            this.moveWithinBounds(input, newBounds);
         }.bind(this));
         this.diagram.outputs.forEach(function(output) {
-            this.moveWithinBounds(output, bounds);
+            this.moveWithinBounds(output, newBounds);
         }.bind(this));
-        this.moveWithinBounds(this.diagram.vddCell, bounds);
-        this.moveWithinBounds(this.diagram.gndCell, bounds);
+        this.moveWithinBounds(this.diagram.vddCell, newBounds);
+        this.moveWithinBounds(this.diagram.gndCell, newBounds);
 
-        for(let layer = bounds.lowLayer; layer <= bounds.highLayer; layer++) {
-            for(let y = bounds.top; y <= bounds.bottom; y++) {
-                for(let x = bounds.left; x <= bounds.right; x++) {
+        for(let layer = oldBounds.lowLayer; layer <= oldBounds.highLayer; layer++) {
+            for(let y = oldBounds.top; y <= oldBounds.bottom; y++) {
+                for(let x = oldBounds.left; x <= oldBounds.right; x++) {
                     this.grid[this.convertFromCoordinates(x, y, layer)] = oldGrid[x + (y * oldWidth) + (layer * oldWidth * oldHeight)];
                 }
             }
@@ -1616,9 +1623,17 @@ class LayeredGrid {
         let shiftTerminal = function(terminal) {
             if(terminal.x + xOffset >= 0 && terminal.x + xOffset < this.width) {
                 terminal.x += xOffset;
+            } else if(terminal.x + xOffset < 0) {
+                terminal.x = 0;
+            } else {
+                terminal.x = this.width - 1;
             }
             if(terminal.y + yOffset >= 0 && terminal.y + yOffset < this.height) {
                 terminal.y += yOffset;
+            } else if(terminal.y + yOffset < 0) {
+                terminal.y = 0;
+            } else {
+                terminal.y = this.height - 1;
             }
 
             // Make sure there is still a Diagram.CONTACT at the new coordinates
