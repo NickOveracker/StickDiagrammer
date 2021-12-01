@@ -21,21 +21,9 @@
 /* jshint unused: false */
 /* jshint varstmt: true */
 /* jshint browser: true */
-/* globals cellWidth: false,
-           canvas: false,
-           cellHeight: false,
-           inputs: false,
-           outputs: false,
-           changeLayer: false,
-           setNets: false,
-           computeOutput: false,
-           outputNodes: false,
-           layeredGrid: false,
-           cursors: false,
-           CONTACT: false,
-           cursorIndex: false,
-           vddCell: false,
-           gndCell: false,
+/* globals diagram: false,
+           Diagram: false,
+           refreshTruthTable: false,
 */
 
 function runTestbench(runTo) {
@@ -75,12 +63,12 @@ function runTestbench(runTo) {
     runTo = runTo || testCases.length;
 
     // Set up the testbench
-    while(cursors[cursorIndex].name !== "metal1") {
-        changeLayer();
+    while(Diagram.layers[diagram.controller.cursorIndex].name !== "metal1") {
+        diagram.controller.changeLayer();
     }
 
-    function mapX(x) {return x*cellWidth + canvas.offsetLeft + cellWidth;}
-    function mapY(y) {return y*cellHeight + canvas.offsetTop + cellHeight;}
+    function mapX(x) {return x*diagram.view.cellWidth + diagram.view.canvas.offsetLeft + diagram.view.cellWidth;}
+    function mapY(y) {return y*diagram.view.cellHeight + diagram.view.canvas.offsetTop + diagram.view.cellHeight;}
 
     let events = [
         // Clear the canvas
@@ -182,7 +170,7 @@ function runTestbench(runTo) {
 
         0,
 
-        // CONTACTS
+        // Diagram.CONTACTS
         // METAL1 to METAL2
         ["mousedown", {button:  0, clientX: mapX(2),   clientY: mapY(2)}],
         ["mouseup",   {button:  0, clientX: mapX(2),   clientY: mapY(2)}],
@@ -382,15 +370,15 @@ function runTestbench(runTo) {
 
         // Place terminals
         function() {
-            inputs[0].x = 3;
-            inputs[0].y = 14;
+            diagram.inputs[0].x = 3;
+            diagram.inputs[0].y = 14;
 
-            outputs[0].x = 28;
-            outputs[0].y = 14;
+            diagram.outputs[0].x = 28;
+            diagram.outputs[0].y = 14;
 
-            for(let ii = 1; ii < inputs.length; ii++) {
-                inputs[ii].x = 0;
-                inputs[ii].y = 0;
+            for(let ii = 1; ii < diagram.inputs.length; ii++) {
+                diagram.inputs[ii].x = 0;
+                diagram.inputs[ii].y = 0;
             }
         },
 
@@ -408,8 +396,8 @@ function runTestbench(runTo) {
 
         // Place terminals
         function() {
-            outputs[0].x = 23;
-            outputs[0].y = 14;
+            diagram.outputs[0].x = 23;
+            diagram.outputs[0].y = 14;
         },
 
         2,
@@ -478,7 +466,7 @@ function runTestbench(runTo) {
         0, // Metal2
         0,
 
-        // CONTACTS
+        // Diagram.CONTACTS
         ["mousedown", {button:  0, clientX: mapX(7),  clientY: mapY(25)}],
         ["mouseup",   {button:  0, clientX: mapX(7),  clientY: mapY(25)}],
 
@@ -492,15 +480,15 @@ function runTestbench(runTo) {
 
         // Place terminals
         function() {
-            inputs[1].x = 3;
-            inputs[1].y = 14;
+            diagram.inputs[1].x = 3;
+            diagram.inputs[1].y = 14;
 
-            outputs[0].x = 28;
-            outputs[0].y = 14;
+            diagram.outputs[0].x = 28;
+            diagram.outputs[0].y = 14;
 
-            for(let ii = 1; ii < inputs.length; ii++) {
-                inputs[ii].x = 3 + 6 * ii;
-                inputs[ii].y = 14;
+            for(let ii = 1; ii < diagram.inputs.length; ii++) {
+                diagram.inputs[ii].x = 3 + 6 * ii;
+                diagram.inputs[ii].y = 14;
             }
         },
 
@@ -512,8 +500,8 @@ function runTestbench(runTo) {
 
         // Place terminals
         function() {
-            outputs[0].x = 25;
-            outputs[0].y = 14;
+            diagram.outputs[0].x = 25;
+            diagram.outputs[0].y = 14;
         },
 
         2,
@@ -540,7 +528,7 @@ function runTestbench(runTo) {
         ["mousemove", {buttons: 2, clientX: mapX(24),   clientY: mapY(27)}],
         ["mouseup",   {button:  2, clientX: mapX(24),   clientY: mapY(27)}],
 
-        // CONTACTS
+        // Diagram.CONTACTS
         ["mousedown", {button:  0, clientX: mapX(6),   clientY: mapY(5)}],
         ["mouseup",   {button:  0, clientX: mapX(6),   clientY: mapY(5)}],
 
@@ -592,8 +580,8 @@ function runTestbench(runTo) {
 
         // Place terminals
         function() {
-            outputs[0].x = 28;
-            outputs[0].y = 14;
+            diagram.outputs[0].x = 28;
+            diagram.outputs[0].y = 14;
         },
 
         2,
@@ -631,7 +619,7 @@ function runTestbench(runTo) {
         0, // Metal2
         0,
 
-        // CONTACTS
+        // Diagram.CONTACTS
         ["mousedown", {button:  0, clientX: mapX(29), clientY: mapY(5)}],
         ["mouseup",   {button:  0, clientX: mapX(29), clientY: mapY(5)}],
 
@@ -733,8 +721,8 @@ function runTestbench(runTo) {
 
         // Place terminal A
         function() {
-            inputs[0].x = 8;
-            inputs[0].y = 4;
+            diagram.inputs[0].x = 8;
+            diagram.inputs[0].y = 4;
         },
 
         2,
@@ -744,8 +732,8 @@ function runTestbench(runTo) {
 
         // Place terminal B
         function() {
-            inputs[1].x = 20;
-            inputs[1].y = 4;
+            diagram.inputs[1].x = 20;
+            diagram.inputs[1].y = 4;
         },
 
         2,
@@ -755,8 +743,8 @@ function runTestbench(runTo) {
 
         // Place terminal C
         function() {
-            inputs[2].x = 8;
-            inputs[2].y = 24;
+            diagram.inputs[2].x = 8;
+            diagram.inputs[2].y = 24;
         },
 
         2,
@@ -766,8 +754,8 @@ function runTestbench(runTo) {
 
         // Place terminal D
         function() {
-            inputs[3].x = 20;
-            inputs[3].y = 24;
+            diagram.inputs[3].x = 20;
+            diagram.inputs[3].y = 24;
         },
 
         2,
@@ -776,16 +764,16 @@ function runTestbench(runTo) {
         /** A & B & (C | D) **/
         1,
         function() {
-            inputs[0].x  = 2;
-            inputs[0].y  = 13;
-            inputs[1].x  = 6;
-            inputs[1].y  = 13;
-            inputs[2].x  = 16;
-            inputs[2].y  = 13;
-            inputs[3].x  = 20;
-            inputs[3].y  = 13;
-            outputs[0].x = 28;
-            outputs[0].y = 13;
+            diagram.inputs[0].x  = 2;
+            diagram.inputs[0].y  = 13;
+            diagram.inputs[1].x  = 6;
+            diagram.inputs[1].y  = 13;
+            diagram.inputs[2].x  = 16;
+            diagram.inputs[2].y  = 13;
+            diagram.inputs[3].x  = 20;
+            diagram.inputs[3].y  = 13;
+            diagram.outputs[0].x = 28;
+            diagram.outputs[0].y = 13;
         },
 
         ["mousedown", {button:  2, clientX: mapX(1),   clientY: mapY(1)}],
@@ -880,7 +868,7 @@ function runTestbench(runTo) {
         ["mouseup",   {button:  0, clientX: mapX(29), clientY: mapY(24)}],
 
         0,
-        // CONTACTS
+        // Diagram.CONTACTS
         ["mousedown", {button:  0, clientX: mapX(1),  clientY: mapY(5)}],
         ["mouseup",   {button:  0, clientX: mapX(1),  clientY: mapY(5)}],
 
@@ -1089,16 +1077,16 @@ function runTestbench(runTo) {
         /** AOI4 **/
         1,
         function() {
-            inputs[0].x  = 5;
-            inputs[0].y  = 8;
-            inputs[1].x  = 9;
-            inputs[1].y  = 8;
-            inputs[2].x  = 15;
-            inputs[2].y  = 8;
-            inputs[3].x  = 19;
-            inputs[3].y  = 8;
-            outputs[0].x = 3;
-            outputs[0].y = 21;
+            diagram.inputs[0].x  = 5;
+            diagram.inputs[0].y  = 8;
+            diagram.inputs[1].x  = 9;
+            diagram.inputs[1].y  = 8;
+            diagram.inputs[2].x  = 15;
+            diagram.inputs[2].y  = 8;
+            diagram.inputs[3].x  = 19;
+            diagram.inputs[3].y  = 8;
+            diagram.outputs[0].x = 3;
+            diagram.outputs[0].y = 21;
         },
 
         ["mousedown", {button:  2, clientX: mapX(1),   clientY: mapY(1)}],
@@ -1211,7 +1199,7 @@ function runTestbench(runTo) {
 
         0,
 
-        // CONTACT
+        // Diagram.CONTACT
         ["mousedown", {button:  0, clientX: mapX(1), clientY: mapY(14)}],
         ["mouseup",   {button:  0, clientX: mapX(1), clientY: mapY(14)}],
 
@@ -1412,7 +1400,7 @@ function runTestbench(runTo) {
     startTime = Date.now();
     for(let ii = 0; ii < events.length && testVector < runTo; ii++) {
         if(events[ii] === 0) {
-            changeLayer();
+            diagram.controller.changeLayer();
             continue;
         }
 
@@ -1440,25 +1428,25 @@ function runTestbench(runTo) {
         }
 
         if(assertNext) {
-            // Set CONTACT at the coordinates of each input and output.
-            inputs.forEach(function(input) {
-                layeredGrid.set(input.x, input.y, CONTACT);
+            // Set Diagram.CONTACT at the coordinates of each input and output.
+            diagram.inputs.forEach(function(input) {
+                diagram.layeredGrid.set(input.x, input.y, Diagram.CONTACT);
             });
-            outputs.forEach(function(output) {
-                layeredGrid.set(output.x, output.y, CONTACT);
+            diagram.outputs.forEach(function(output) {
+                diagram.layeredGrid.set(output.x, output.y, Diagram.CONTACT);
             });
 
-            // Set the CONTACT layer on the VDD and GND cells.
-            layeredGrid.set(vddCell.x, vddCell.y, CONTACT);
-            layeredGrid.set(gndCell.x, gndCell.y, CONTACT);
+            // Set the Diagram.CONTACT layer on the VDD and GND cells.
+            diagram.layeredGrid.set(diagram.vddCell.x, diagram.vddCell.y, Diagram.CONTACT);
+            diagram.layeredGrid.set(diagram.gndCell.x, diagram.gndCell.y, Diagram.CONTACT);
 
             // Do it.
-            setNets();
+            diagram.setNets();
             tv = "";
             
-            for(let ii = 0; ii < outputs.length; ii++) {
-                for(let jj = 0; jj < Math.pow(2, inputs.length); jj++) {
-                    tv += computeOutput(jj, outputNodes[ii]);
+            for(let ii = 0; ii < diagram.outputs.length; ii++) {
+                for(let jj = 0; jj < Math.pow(2, diagram.inputs.length); jj++) {
+                    tv += diagram.computeOutput(jj, diagram.outputNodes[ii]);
                 }
             }
         
@@ -1469,6 +1457,7 @@ function runTestbench(runTo) {
         }
     }
     endTime = Date.now();
+    refreshTruthTable();
 
     // Only overwrite the results if all tests were run.
     if(runTo < testCases.length) {
