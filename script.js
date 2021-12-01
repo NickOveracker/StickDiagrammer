@@ -182,6 +182,7 @@ class Diagram {
     }
 
     computeOutputRecursive(node, targetNode, inputVals) {
+        'use strict';
         let hasPath;
         let hasNullPath;
         let pathFound;
@@ -262,6 +263,7 @@ class Diagram {
     }
 
     evaluate(node, inputVals) {
+        'use strict';
         let gateNet = node.cell.gate;
         let gateNodeIterator;
         let hasNullPath;
@@ -314,6 +316,7 @@ class Diagram {
     }
 
     reconcileOutput(pOut, nOut, dIn) {
+        'use strict';
         let out;
 
         // Reconcile (this.nmos and this.pmos step)
@@ -1381,6 +1384,7 @@ class DiagramView {
 
 class LayeredGrid {
     constructor(diagram, width, height, layers) {
+        'use strict';
         this.diagram = diagram;
         this.width = width;
         this.height = height;
@@ -1393,6 +1397,7 @@ class LayeredGrid {
     // If it isn't set, return the default value
     // If it's out of bounds, return null
     get(x, y, layer) {
+        'use strict';
         let cell;
 
         if(x < 0 || x >= this.width || y < 0 || y >= this.height || layer < 0 || layer >= this.layers) {
@@ -1411,6 +1416,7 @@ class LayeredGrid {
     // Set the value at a given coordinate
     // If it's out of bounds, do nothing
     set(x, y, layer) {
+        'use strict';
         if(x < 0 || x >= this.width || y < 0 || y >= this.height || layer < 0 || layer >= this.layers) {
             return;
         }
@@ -1434,6 +1440,7 @@ class LayeredGrid {
     }
 
     isTerminal(x, y, layer) {
+        'use strict';
         let isTerminal = false;
 
         // Loop through inputs, outputs, and VDD/GND
@@ -1455,6 +1462,7 @@ class LayeredGrid {
     // If it's out of bounds, do nothing
     // Do not clear Diagram.CONTACT for inputs, outputs, or VDD/GND
     clear(x, y, layer) {
+        'use strict';
         let outOfBounds = x < 0 || x >= this.width || y < 0 || y >= this.height || layer < 0 || layer >= this.layers;
 
         if(outOfBounds || layer === Diagram.CONTACT && this.isTerminal(x, y, layer)) {
@@ -1467,11 +1475,13 @@ class LayeredGrid {
     // The grid is implemented as a flat array, so this function
     // returns the index of the cell at a given coordinate
     convertFromCoordinates(x, y, layer) {
+        'use strict';
         return x + (y * this.width) + (layer * this.width * this.height);
     }
 
     // Convert the index of a cell to its coordinates
     convertToCoordinates(index) {
+        'use strict';
         let layer = Math.floor(index / (this.width * this.height));
         let y = Math.floor((index - (layer * this.width * this.height)) / this.width);
         let x = index - (layer * this.width * this.height) - (y * this.width);
@@ -1480,6 +1490,7 @@ class LayeredGrid {
 
     // Map a function to all set values in the grid
     map(bounds, func, includeEmpty) {
+        'use strict';
         let cell;
 
         let outOfGrid = function(x, y, layer) {
@@ -1505,6 +1516,7 @@ class LayeredGrid {
 
     // Clear all values in the grid
     clearAll() {
+        'use strict';
         let bounds = {
             left: 0,
             right: this.width - 1,
@@ -1519,24 +1531,23 @@ class LayeredGrid {
     }
 
     moveWithinBounds(cell, bounds) {
-        let x = cell.x;
-        let y = cell.y;
-
-        if(x < bounds.left) {
-            x = bounds.left;
-        } else if(x > bounds.right) {
-            x = bounds.right;
+        'use strict';
+        if(cell.x < bounds.left) {
+            cell.x = bounds.left;
+        } else if(cell.x > bounds.right) {
+            cell.x = bounds.right;
         }
 
-        if(y < bounds.top) {
-            y = bounds.top;
-        } else if(y > bounds.bottom) {
-            y = bounds.bottom;
+        if(cell.y < bounds.top) {
+            cell.y = bounds.top;
+        } else if(cell.y > bounds.bottom) {
+            cell.y = bounds.bottom;
         }
     }
 
     // Change the height of the grid
     resize(width, height) {
+        'use strict';
         if(width < 0 || height < 0) {
             return;
         }
@@ -1579,6 +1590,7 @@ class LayeredGrid {
 
     // Shift the grid by a given offset
     shift(xOffset, yOffset) {
+        'use strict';
         let oldGrid = this.grid;
         this.grid = new Array(this.width * this.height * this.layers);
 
@@ -1600,6 +1612,7 @@ class LayeredGrid {
 
     // Shift the terminals by a given offset
     shiftTerminals(xOffset, yOffset) {
+        'use strict';
         let shiftTerminal = function(terminal) {
             if(terminal.x + xOffset >= 0 && terminal.x + xOffset < this.width) {
                 terminal.x += xOffset;
@@ -1629,11 +1642,13 @@ class LayeredGrid {
 // Graph class to represent CMOS circuitry.
 class Graph {
     constructor() {
+        'use strict';
         this.nodes = [];
     }
 
     // Clear the diagram.graph.
     clear() {
+        'use strict';
         // Destroy all nodes.
         for (let ii = 0; ii < this.nodes.length; ii++) {
             this.nodes[ii].destroy();
@@ -1644,6 +1659,7 @@ class Graph {
 
    // Add a node to the diagram.graph.
     addNode(cell) {
+        'use strict';
         let node = new Node(cell);
         this.nodes.push(node);
         return node;
@@ -1651,6 +1667,7 @@ class Graph {
 
     // Return the node with the given cell.
     getNode(cell) {
+        'use strict';
         for (let node of this.nodes) {
             if (node.cell === cell) {
                 return node;
@@ -1660,6 +1677,7 @@ class Graph {
     }
 
     getIndexByNode(node) {
+        'use strict';
         for (let ii = 0; ii < this.nodes.length; ii++) {
             if (this.nodes[ii] === node) {
                 return ii;
@@ -1672,6 +1690,7 @@ class Graph {
 // Each diagram.graph node is a transistor, VDD, GND, or an output.
 class Node {
     constructor(cell) {
+        'use strict';
         this.cell = cell;
         this.edges = [];
         this.isPmos = diagram.layeredGrid.get(cell.x, cell.y, Diagram.PDIFF).isSet;
@@ -1680,6 +1699,7 @@ class Node {
 
     // Destructor
     destroy() {
+        'use strict';
         this.edges.forEach((edge) => {edge.destroy();});
         this.cell = undefined;
         this.edges.length = 0;
@@ -1687,6 +1707,7 @@ class Node {
 
     // Check if two nodes are connected.
     isConnected(otherNode) {
+        'use strict';
         for (let ii = 0; ii < this.edges.length; ii++) {
             if (this.edges[ii].getNode1() === otherNode || this.edges[ii].getNode2() === otherNode) {
                 return true;
@@ -1696,16 +1717,19 @@ class Node {
     }
  
     isTransistor() {
+        'use strict';
         return this.isPmos || this.isNmos;
     }
 
     addEdge(node) {
+        'use strict';
         let edge = new Edge(this, node);
         this.edges.push(edge);
         node.edges.push(edge);
     }
 
     removeEdge(edge) {
+        'use strict';
         let index = this.edges.indexOf(edge);
         if (index > -1) {
             this.edges.splice(index, 1);
@@ -1713,6 +1737,7 @@ class Node {
     }
 
     getName() {
+        'use strict';
         return this.cell.gate.name;
     }
 }
@@ -1720,25 +1745,30 @@ class Node {
 // Each edge is a connection between two diagram.graph nodes.
 class Edge {
     constructor(node1, node2) {
+        'use strict';
         this.node1 = node1;
         this.node2 = node2;
     }
 
     // Destructor
     destroy() {
+        'use strict';
         this.node1 = undefined;
         this.node2 = undefined;
     }
 
     getNode1() {
+        'use strict';
         return this.node1;
     }
 
     getNode2() {
+        'use strict';
         return this.node2;
     }
 
     getOtherNode(node) {
+        'use strict';
         if (this.node1 === node) {
             return this.node2;
         } else if (this.node2 === node) {
@@ -1752,6 +1782,7 @@ class Edge {
 // Set of cells that are electrically connected to one another.
 class Net {
     constructor(name, isInput) {
+        'use strict';
         this.name = name;
         this.cells = new Set();
         this.nodes = new Set();
@@ -1759,6 +1790,7 @@ class Net {
     }
 
     isIdentical(net) {
+        'use strict';
         // Two nets are identical if they have the same set of cells.
         // By design, if two nets share even one cell, then they share all cells.
         // So, we can just check a single cell.
@@ -1767,6 +1799,7 @@ class Net {
     }
 
     addNode(node) {
+        'use strict';
         if(node !== null && !this.containsNode(node)) {
             let nodeIterator = this.nodes.values();
 
@@ -1780,27 +1813,33 @@ class Net {
     }
 
     removeNode(node) {
+        'use strict';
         this.nodes.delete(node);
     }
 
     containsNode(node) {
+        'use strict';
         return this.nodes.has(node);
     }
 
     clear() {
+        'use strict';
         this.cells.clear();
         this.nodes.clear();
     }
 
     addCell(cell) {
+        'use strict';
         this.cells.add(cell);
     }
 
     containsCell(cell) {
+        'use strict';
         return this.cells.has(cell);
     }
 
     size() {
+        'use strict';
         return this.nodes.size;
     }
 }
