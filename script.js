@@ -3,8 +3,8 @@
  * ## Legal Stuff
  * All rights are reserved by Nick Overacker.
  *
- * Free for (personal ∧ non-professional ∧ non-commercial) use.
- * For (professional ⋁ commercial ⋁ institutional) use, please contact: nick.overacker@okstate.edu
+ * Free for AND(personal, non-professional, non-commercial) use.
+ * For OR(professional, commercial, institutional) use, please contact: nick.overacker@okstate.edu
  *
  * ## Stipulations for updates
  *    - All builds must pass JSHint with no warnings (https://jshint.com/)
@@ -42,16 +42,35 @@
 /* jshint browser: true */
 /* globals runTestbench: false */
 let darkMode;
-let dragging = false;
-let startX;
-let startY;
-let currentX;
-let currentY;
 let button;
 let diagram;
 
 class Diagram {
-    constructor() {
+    // Cycle through the following cursor colors by pressing space: Diagram.PDIFF, Diagram.NDIFF, Diagram.POLY, METAL1, Diagram.CONTACT
+    // Additional colors: Diagram.DELETE at index (numLayers + 0)
+    static get layers() {
+        return [
+            {name: 'pdiff',   color: 'rgba(118,   0, 181,   1)', flatColor: 'rgb(118,   0, 181)', selectable: true, },
+            {name: 'ndiff',   color: 'rgba(50,  205,  50,   1)', flatColor: 'rgb(50,  205,  50)', selectable: true, },
+            {name: 'poly',    color: 'rgba(255,   0,   0, 0.5)', flatColor: 'rgb(255,   0,   0)', selectable: true, },
+            {name: 'metal1',  color: 'rgba(0,   255, 255, 0.5)', flatColor: 'rgb(0,   255, 255)', selectable: true, },
+            {name: 'metal2',  color: 'rgba(255,   0, 204, 0.5)', flatColor: 'rgb(255,   0, 204)', selectable: true, },
+            {name: 'contact', color: 'rgba(204, 204, 204, 0.5)', flatColor: 'rgb(204, 204, 204)', selectable: true, },
+            {name: 'delete',  color: 'rgba(208, 160,  32, 0.5)', flatColor: 'rgb(208, 160,  32)', selectable: false,},
+        ];
+    }
+    static get PDIFF()   { return 0; }
+    static get NDIFF()   { return 1; }
+    static get POLY()    { return 2; }
+    static get METAL1()  { return 3; }
+    static get METAL2()  { return 4; }
+    static get CONTACT() { return 5; }
+    static get DELETE()  { return 6; } // always make this the last layer
+
+    constructor(mainCanvas, gridCanvas) {
+        'use strict';
+        let startWidth  = 29;
+        let startHeight = 29;
         this.inputs = [
             { x: 2, y: 8,  }, // A
             { x: 2, y: 12, }, // B
@@ -61,24 +80,13 @@ class Diagram {
         this.outputs = [
             { x: 26, y: 14, }, // Y
         ];
-        this.gridWidth = 29;
-        this.gridHeight = 29;
-        this.canvas = document.getElementById("canvas");
-        this.ctx = this.canvas.getContext("2d");
-        this.layeredGrid = new LayeredGrid(this.gridWidth, this.gridHeight, cursors.length);
-        this.cellWidth  = this.canvas.width  / (this.layeredGrid.width  + 2);
-        this.cellHeight = this.canvas.height / (this.layeredGrid.height + 2);
-        this.firstSaveState = 0;
-        this.saveState = 0;
-        this.lastSaveState = 0;
-        this.maxSaveState = 10;
-        this.gridCanvas = document.getElementById("grid-canvas");
-        this.gridCtx = this.gridCanvas.getContext('2d');
+
+        this.layeredGrid = new LayeredGrid(this, startWidth, startHeight, Diagram.layers.length);
         this.nodeNodeMap = [];
         this.netlist = [];
         this.graph = new Graph();
         this.vddCell = {x: 1, y: 1,};
-        this.gndCell = {x: 1, y: this.gridHeight - 2,};
+        this.gndCell = {x: 1, y: startHeight - 2,};
         this.vddNode = null;
         this.gndNode = null;
         this.outputNodes = [];
@@ -88,7 +96,7 @@ class Diagram {
         this.netGND = new Net("GND", false);
         this.inputNets = [];
         this.outputNets = [];
-        this.useFlatColors = false;
+        this.triggers = [];
 
         for (let ii = 0; ii < this.inputs.length; ii++) {
             this.inputNets.push(new Net(String.fromCharCode(65 + ii), true));
@@ -97,283 +105,245 @@ class Diagram {
             this.outputNets.push(new Net(String.fromCharCode(89 - ii), false));
         }
 
+        this.view = new DiagramView(this, mainCanvas, gridCanvas);
+        this.controller = new DiagramController(this, this.view, mainCanvas);
     }
-    
-    // Draw a faint grid on the canvas.
-    // Add an extra 2 units to the width and height for a border.
-    drawGrid() {
+
+    pathExists(node1, node2) {
         'use strict';
-        // Place the grid canvas behind the main canvas.
-        // Same size as the canvas.
-        this.gridCanvas.width = this.canvas.width - 1;
-        this.gridCanvas.height = this.canvas.height - 1;
-        this.gridCanvas.style.position = 'absolute';
-        this.gridCanvas.style.left = this.canvas.offsetLeft + 'px';
-        this.gridCanvas.style.top = this.canvas.offsetTop + 'px';
-        this.gridCanvas.style.zIndex = -1;
+        return this.nodeNodeMap[this.graph.getIndexByNode(node1)][this.graph.getIndexByNode(node2)];
+    }
 
-        // Set the gridCanvas context.
-        this.cellWidth = this.canvas.width / (this.layeredGrid.width + 2);
-        this.cellHeight = this.canvas.height / (this.layeredGrid.height + 2);
+    mapNodes(node1, node2, isPath, inputVals) {
+        'use strict';
+        let currentMapping = this.pathExists(node1, node2);
 
-        // Clear the grid canvas.
-        this.gridCtx.clearRect(0, 0, this.gridCanvas.width, this.gridCanvas.height);
-
-        // Set stroke color depending on whether the dark mode is on or off.
-        // Should be faintly visible in both modes.
-        if (darkMode) {
-            this.gridCtx.strokeStyle = darkModeGridColor;
-        } else {
-            this.gridCtx.strokeStyle = lightModeGridColor;
+        if (currentMapping !== undefined && currentMapping !== null) {
+            return;
         }
 
-        for (let ii = 0; ii < Math.max(this.layeredGrid.width, this.layeredGrid.height) + 2; ii++) {
-            if(ii < this.layeredGrid.width + 2) {
-                this.gridCtx.beginPath();
-                this.gridCtx.moveTo(ii * this.cellWidth, 0);
-                this.gridCtx.lineTo(ii * this.cellWidth, this.gridCanvas.height);
-                this.gridCtx.stroke();
+        this.nodeNodeMap[this.graph.getIndexByNode(node1)][this.graph.getIndexByNode(node2)] = isPath;
+        this.nodeNodeMap[this.graph.getIndexByNode(node2)][this.graph.getIndexByNode(node1)] = isPath;
+
+        if (isPath === null) { return; }
+
+        // Map the path to node2 appropriately for all nodes mapped to node1.
+        for (let ii = 0; ii < this.nodeNodeMap.length; ii++) {
+            if (this.nodeNodeMap[ii][this.graph.getIndexByNode(node1)] === true) {
+                this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] = isPath;
+                this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = isPath;
             }
-            if(ii < this.layeredGrid.height + 2) {
-                this.gridCtx.beginPath();
-                this.gridCtx.moveTo(0, ii * this.cellHeight);
-                this.gridCtx.lineTo(this.gridCanvas.width, ii * this.cellHeight);
-                this.gridCtx.stroke();
+        }
+        // Now do the inverse.
+        for (let ii = 0; ii < this.nodeNodeMap.length; ii++) {
+            if (this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] === true) {
+                this.nodeNodeMap[ii][this.graph.getIndexByNode(node1)] = isPath;
+                this.nodeNodeMap[this.graph.getIndexByNode(node1)][ii] = isPath;
+            }
+        }
+
+        if(isPath !== undefined) {
+            this.executeTriggers(node1, node2, inputVals);
+        }
+    }
+
+    executeTriggers(node, targetNode, inputVals) {
+        'use strict';
+        let triggerList = this.triggers[this.graph.getIndexByNode(node)];
+        if (triggerList === undefined) { return; }
+        triggerList = triggerList[this.graph.getIndexByNode(targetNode)];
+        if (triggerList === undefined) { return; }
+        for (let ii = 0; ii < triggerList.length; ii++) {
+            let pathEval = this.pathExists(triggerList[ii].node, triggerList[ii].targetNode);
+            if(pathEval === undefined || pathEval === null) {
+                this.mapNodes(node, targetNode, undefined, inputVals);
+                this.computeOutputRecursive(triggerList[ii].node, triggerList[ii].targetNode, inputVals);
             }
         }
     }
-    
+
+    registerTrigger(triggerNode1, triggerNode2, callNode1, callNode2) {
+        'use strict';
+        let triggerIndex1 = this.graph.getIndexByNode(triggerNode1);
+        let triggerIndex2 = this.graph.getIndexByNode(triggerNode2);
+
+        if(this.triggers[triggerIndex1] === undefined) {
+            this.triggers[triggerIndex1] = [];
+        }
+        if(this.triggers[triggerIndex2] === undefined) {
+            this.triggers[triggerIndex2] = [];
+        }
+        if(this.triggers[triggerIndex1][triggerIndex2] === undefined) {
+            this.triggers[triggerIndex1][triggerIndex2] = [];
+            this.triggers[triggerIndex2][triggerIndex1] = [];
+        }
+        this.triggers[triggerIndex1][triggerIndex2].push({node: callNode1, targetNode: callNode2,});
+        this.triggers[triggerIndex2][triggerIndex1].push({node: callNode1, targetNode: callNode2,});
+    }
+
+    computeOutputRecursive(node, targetNode, inputVals) {
+        let hasPath;
+        let hasNullPath;
+        let pathFound;
+
+        // We found it?
+        if (node === targetNode) {
+            return true;
+        }
+
+        hasPath = this.pathExists(node, targetNode);
+        // Prevent too much recursion.
+        // If this is already being checked, the path will be null.
+        if (hasPath === null) {
+            return null;
+        } else if (hasPath !== undefined) {
+        // Avoid infinite loops.
+            return hasPath;
+        }
+
+        // Initialize to null.
+        this.mapNodes(node, targetNode, null, inputVals);
+
+        // Only proceed if the input is activated.
+        // Ignore in case of output or supply, since these don't have
+        // gates to evaluate. Simply arriving at them means they are active.
+        if (node.isTransistor()) {
+            let evalResult = this.evaluate(node, inputVals);
+            if (evalResult === false) {
+                this.graph.nodes.forEach(function(otherNode) {
+                    if(node === otherNode) {
+                        return;
+                    }
+                    this.mapNodes(node, otherNode, false, inputVals);
+                }.bind(this));
+                return false;
+            } else if (evalResult === null) {
+                this.registerTrigger(node, this.vddNode, node, targetNode);
+                this.registerTrigger(node, this.gndNode, node, targetNode);
+                this.mapNodes(node, targetNode, undefined, inputVals);
+                return null;
+            }
+        }
+
+        // Recurse on all edges.
+        hasNullPath = false;
+        pathFound = false;
+        /*jshint -W093 */
+        node.edges.some(function(edge) {
+            let otherNode = edge.getOtherNode(node);
+            let hasPath = this.pathExists(otherNode, targetNode);
+            if (hasPath) {
+                this.mapNodes(node, targetNode, true, inputVals);
+                this.mapNodes(node, edge.getOtherNode(node), true, inputVals);
+                return pathFound = true;
+            }
+            let result = hasPath !== false && this.computeOutputRecursive(otherNode, targetNode, inputVals);
+            if (result) {
+                this.mapNodes(node, targetNode, true, inputVals);
+                this.mapNodes(node, edge.getOtherNode(node), true, inputVals);
+                return pathFound = true;
+            }
+
+            if(result === null || hasPath === null) {
+                hasNullPath = true;
+                this.registerTrigger(targetNode, edge.getOtherNode(node), node, targetNode);
+            }
+        }.bind(this));
+        /*jshint +W093 */
+
+        if(pathFound) {
+            return true;
+        } else if(hasNullPath) {
+            return null;
+        } else {
+            this.mapNodes(node, targetNode, false, inputVals);
+            return false;
+        }
+    }
+
+    evaluate(node, inputVals) {
+        let gateNet = node.cell.gate;
+        let gateNodeIterator;
+        let hasNullPath;
+
+        if (gateNet.isInput) {
+            /*jslint bitwise: true */
+            let inputNum = node.getName().charCodeAt(0) - 65;
+
+            // Pass-through positive for NMOS.
+            let evalInput = !!((inputVals >> inputNum) & 1);
+            return !(node.isNmos ^ evalInput);
+            /*jslint bitwise: false */
+        }
+
+        // Otherwise, recurse and see if this is active.
+        gateNodeIterator = gateNet.nodes.values();
+        hasNullPath = false;
+
+        for (let gateNode = gateNodeIterator.next(); !gateNode.done; gateNode = gateNodeIterator.next()) {
+            gateNode = gateNode.value;
+            let gateToGnd = this.pathExists(gateNode, this.gndNode);
+            let gateToVdd = this.pathExists(gateNode, this.vddNode);
+            let relevantPathExists;
+            let relevantNode;
+
+            if(gateToGnd === null || gateToVdd === null) {
+                hasNullPath = true;
+            }
+            
+            if(node.isPmos) {
+                relevantNode = this.gndNode;
+            } else {
+                relevantNode = this.vddNode;
+            }
+
+            relevantPathExists = this.computeOutputRecursive(gateNode, relevantNode, inputVals);
+            if (relevantPathExists === null) {
+                hasNullPath = true;
+                this.registerTrigger(gateNode, relevantNode, node, this.vddNode);
+                this.registerTrigger(gateNode, relevantNode, node, this.gndNode);
+            } else if(relevantPathExists) {
+                return true;
+            }
+        }
+
+        if(hasNullPath) {
+            return null;
+        }
+        return false;
+    }
+
+    reconcileOutput(pOut, nOut, dIn) {
+        let out;
+
+        // Reconcile (this.nmos and this.pmos step)
+        if (pOut === "Z") {
+            out = nOut;
+        } else if (nOut === "Z") {
+            out = pOut;
+        } else {
+            out = "X";
+        }
+
+        // Handle direct connection between input and output.
+        if(dIn !== undefined) {
+            if(out === "Z") {
+                out = dIn;
+            }
+            else if(out !== dIn) {
+                out = "X";
+            }
+        }
+        
+        return out;
+    }
+
     computeOutput(inputVals, outputNode) {
         'use strict';
         let pmosOut;
         let nmosOut;
         let directInput;
-        let triggers = [];
-
-        let mapNodes = function(node1, node2, isPath) {
-            let currentMapping = pathExists(node1, node2);
-
-            if (currentMapping !== undefined && currentMapping !== null) {
-                return;
-            }
-
-            this.nodeNodeMap[this.graph.getIndexByNode(node1)][this.graph.getIndexByNode(node2)] = isPath;
-            this.nodeNodeMap[this.graph.getIndexByNode(node2)][this.graph.getIndexByNode(node1)] = isPath;
-
-            if (isPath === null) { return; }
-
-            // Map the path to node2 appropriately for all nodes mapped to node1.
-            for (let ii = 0; ii < this.nodeNodeMap.length; ii++) {
-                if (this.nodeNodeMap[ii][this.graph.getIndexByNode(node1)] === true) {
-                    this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] = isPath;
-                    this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = isPath;
-                }
-            }
-            // Now do the inverse.
-            for (let ii = 0; ii < this.nodeNodeMap.length; ii++) {
-                if (this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] === true) {
-                    this.nodeNodeMap[ii][this.graph.getIndexByNode(node1)] = isPath;
-                    this.nodeNodeMap[this.graph.getIndexByNode(node1)][ii] = isPath;
-                }
-            }
-
-            if(isPath !== undefined) {
-                executeTriggers(node1, node2);
-            }
-        }.bind(this);
-
-        let pathExists = function(node1, node2) {
-            return this.nodeNodeMap[this.graph.getIndexByNode(node1)][this.graph.getIndexByNode(node2)];
-        }.bind(this);
-
-        let executeTriggers = function(node, targetNode) {
-            let triggerList = triggers[this.graph.getIndexByNode(node)];
-            if (triggerList === undefined) { return; }
-            triggerList = triggerList[this.graph.getIndexByNode(targetNode)];
-            if (triggerList === undefined) { return; }
-            for (let ii = 0; ii < triggerList.length; ii++) {
-                let pathEval = pathExists(triggerList[ii].node, triggerList[ii].targetNode);
-                if(pathEval === undefined || pathEval === null) {
-                    mapNodes(node, targetNode, undefined);
-                    computeOutputRecursive(triggerList[ii].node, triggerList[ii].targetNode);
-                }
-            }
-        }.bind(this);
-
-        let registerTrigger = function(triggerNode1, triggerNode2, callNode1, callNode2) {
-            let triggerIndex1 = this.graph.getIndexByNode(triggerNode1);
-            let triggerIndex2 = this.graph.getIndexByNode(triggerNode2);
-
-            if(triggers[triggerIndex1] === undefined) {
-                triggers[triggerIndex1] = [];
-            }
-            if(triggers[triggerIndex2] === undefined) {
-                triggers[triggerIndex2] = [];
-            }
-            if(triggers[triggerIndex1][triggerIndex2] === undefined) {
-                triggers[triggerIndex1][triggerIndex2] = [];
-                triggers[triggerIndex2][triggerIndex1] = [];
-            }
-            triggers[triggerIndex1][triggerIndex2].push({node: callNode1, targetNode: callNode2,});
-            triggers[triggerIndex2][triggerIndex1].push({node: callNode1, targetNode: callNode2,});
-        }.bind(this);
-
-        let computeOutputRecursive = function(node, targetNode) {
-            let hasPath;
-            let hasNullPath;
-            let pathFound;
-
-            // We found it?
-            if (node === targetNode) {
-                return true;
-            }
-
-            hasPath = pathExists(node, targetNode);
-            // Prevent too much recursion.
-            // If this is already being checked, the path will be null.
-            if (hasPath === null) {
-                return null;
-            } else if (hasPath !== undefined) {
-            // Avoid infinite loops.
-                return hasPath;
-            }
-
-            // Initialize to null.
-            mapNodes(node, targetNode, null);
-
-            // Only proceed if the input is activated.
-            // Ignore in case of output or supply, since these don't have
-            // gates to evaluate. Simply arriving at them means they are active.
-            if (node.isTransistor()) {
-                let evalResult = evaluate(node);
-                if (evalResult === false) {
-                    this.graph.nodes.forEach(function(otherNode) {
-                        if(node === otherNode) {
-                            return;
-                        }
-                        mapNodes(node, otherNode, false);
-                    }.bind(this));
-                    return false;
-                } else if (evalResult === null) {
-                    registerTrigger(node, this.vddNode, node, targetNode);
-                    registerTrigger(node, this.gndNode, node, targetNode);
-                    mapNodes(node, targetNode, undefined);
-                    return null;
-                }
-            }
-
-            // Recurse on all edges.
-            hasNullPath = false;
-            pathFound = false;
-            /*jshint -W093 */
-            node.edges.some(function(edge) {
-                let otherNode = edge.getOtherNode(node);
-                let hasPath = pathExists(otherNode, targetNode);
-                if (hasPath) {
-                    mapNodes(node, targetNode, true);
-                    mapNodes(node, edge.getOtherNode(node), true);
-                    return pathFound = true;
-                }
-                let result = hasPath !== false && computeOutputRecursive(otherNode, targetNode);
-                if (result) {
-                    mapNodes(node, targetNode, true);
-                    mapNodes(node, edge.getOtherNode(node), true);
-                    return pathFound = true;
-                }
-
-                if(result === null || hasPath === null) {
-                    hasNullPath = true;
-                    registerTrigger(targetNode, edge.getOtherNode(node), node, targetNode);
-                }
-            }.bind(this));
-            /*jshint +W093 */
-
-            if(pathFound) {
-                return true;
-            } else if(hasNullPath) {
-                return null;
-            } else {
-                mapNodes(node, targetNode, false);
-                return false;
-            }
-        }.bind(this);
-
-        let evaluate = function(node) {
-            let gateNet = node.cell.gate;
-            let gateNodeIterator;
-            let hasNullPath;
-
-            if (gateNet.isInput) {
-                /*jslint bitwise: true */
-                let inputNum = node.getName().charCodeAt(0) - 65;
-
-                // Pass-through positive for NMOS.
-                let evalInput = !!((inputVals >> inputNum) & 1);
-                return !(node.isNmos ^ evalInput);
-                /*jslint bitwise: false */
-            }
-
-            // Otherwise, recurse and see if this is active.
-            gateNodeIterator = gateNet.nodes.values();
-            hasNullPath = false;
-
-            for (let gateNode = gateNodeIterator.next(); !gateNode.done; gateNode = gateNodeIterator.next()) {
-                gateNode = gateNode.value;
-                let gateToGnd = pathExists(gateNode, this.gndNode);
-                let gateToVdd = pathExists(gateNode, this.vddNode);
-                let relevantPathExists;
-                let relevantNode;
-
-                if(gateToGnd === null || gateToVdd === null) {
-                    hasNullPath = true;
-                }
-                
-                if(node.isPmos) {
-                    relevantNode = this.gndNode;
-                } else {
-                    relevantNode = this.vddNode;
-                }
-
-                relevantPathExists = computeOutputRecursive(gateNode, relevantNode);
-                if (relevantPathExists === null) {
-                    hasNullPath = true;
-                    registerTrigger(gateNode, relevantNode, node, this.vddNode);
-                    registerTrigger(gateNode, relevantNode, node, this.gndNode);
-                } else if(relevantPathExists) {
-                    return true;
-                }
-            }
-
-            if(hasNullPath) {
-                return null;
-            }
-            return false;
-        }.bind(this);
-
-        let reconcileOutput = function(pOut, nOut, dIn) {
-            let out;
-
-            // Reconcile (this.nmos and this.pmos step)
-            if (pOut === "Z") {
-                out = nOut;
-            } else if (nOut === "Z") {
-                out = pOut;
-            } else {
-                out = "X";
-            }
-
-            // Handle direct connection between input and output.
-            if(dIn !== undefined) {
-                if(out === "Z") {
-                    out = dIn;
-                }
-                else if(out !== dIn) {
-                    out = "X";
-                }
-            }
-            
-            return out;
-        }.bind(this);
+        this.triggers.length = 0;
 
         // Get this.pmos output.
         this.nodeNodeMap.length = 0;
@@ -381,7 +351,7 @@ class Diagram {
             this.nodeNodeMap[ii] = [];
             this.nodeNodeMap[ii][ii] = true;
         }
-        pmosOut = computeOutputRecursive(this.vddNode, outputNode) ? 1 : "Z";
+        pmosOut = this.computeOutputRecursive(this.vddNode, outputNode, inputVals) ? 1 : "Z";
 
         // Get this.nmos output.
         this.nodeNodeMap.length = 0;
@@ -389,8 +359,8 @@ class Diagram {
             this.nodeNodeMap[ii] = [];
             this.nodeNodeMap[ii][ii] = true;
         }
-        triggers.length = 0;
-        nmosOut = computeOutputRecursive(this.gndNode, outputNode) ? 0 : "Z";
+        this.triggers.length = 0;
+        nmosOut = this.computeOutputRecursive(this.gndNode, outputNode, inputVals) ? 0 : "Z";
 
         // Finally, see if an input is directly connected to the output.
         for (let ii = 0; ii < this.inputNets.length; ii++) {
@@ -407,66 +377,7 @@ class Diagram {
             }
         }
 
-        return reconcileOutput(pmosOut, nmosOut, directInput);
-    }
-    
-    // Draw the outer border of the canvas.
-    drawBorder() {
-        'use strict';
-        this.ctx.strokeStyle = this.useFlatColors? cursors[cursorIndex].flatColor : cursors[cursorIndex].color;
-        this.ctx.lineWidth = this.cellWidth;
-        this.ctx.strokeRect(this.cellWidth / 2, this.cellWidth / 2, this.canvas.width - this.cellWidth, this.canvas.height - this.cellWidth);
-
-        // Draw a thick border on the edge of the border drawn above.
-        this.ctx.lineWidth = this.cellWidth / 4;
-        this.ctx.strokeStyle = darkMode ? "#ffffff" : "#000000";
-        this.ctx.strokeRect(1 + this.cellWidth - this.ctx.lineWidth / 2,
-            1 + this.cellHeight - this.ctx.lineWidth / 2,
-            this.canvas.width - 2 * this.cellWidth + this.ctx.lineWidth / 2,
-            this.canvas.height - 2 * this.cellHeight + this.ctx.lineWidth / 2
-        );
-
-        // For the middle 11 cells of the upper border, fill with the grid color.
-        this.ctx.fillStyle = darkMode ? "#ffffff" : "#000000";
-        let startCell = Math.floor(this.layeredGrid.width / 2) - 4;
-        this.ctx.fillRect(startCell * this.cellWidth, 0, this.cellWidth * 11, this.cellHeight);
-
-        // Write the cursor color name in the middle of the upper border of the canvas.
-        this.ctx.fillStyle = darkMode ? '#000000' : '#ffffff';
-        this.ctx.font = '20px Arial';
-        this.ctx.textAlign = 'center';
-        this.ctx.fillText(cursors[cursorIndex].name, this.canvas.width / 2, this.cellHeight * 3 / 4);
-    }
-
-    // Change the layer/cursor color
-    changeLayer() {
-        'use strict';
-        // Go to the next selectable index.
-        let tempIndex = cursorIndex + 1;
-
-        while(tempIndex >= cursors.length || !cursors[tempIndex].selectable) {
-            tempIndex = tempIndex >= cursors.length - 1 ? 0 : tempIndex + 1;
-        }
-        cursorIndex = tempIndex;
-
-        // set the outer border of the canvas to the new cursor color
-        this.drawBorder();
-    }
-
-    // Resize the canvas to the largest square that fits in the window.
-    resizeCanvas() {
-        'use strict';
-        let windowWidth = window.innerWidth;
-        let windowHeight = window.innerHeight;
-        let windowSize = Math.min(windowWidth, windowHeight);
-        let sizeChanged = this.canvas.width !== windowSize || this.canvas.height !== windowSize;
-
-        this.canvas.width = windowSize;
-        this.canvas.height = windowSize;
-
-        if(sizeChanged) {
-            this.drawGrid();
-        }
+        return this.reconcileOutput(pmosOut, nmosOut, directInput);
     }
 
     // Map a function to every transistor terminal.
@@ -529,21 +440,24 @@ class Diagram {
         this.outputNets.forEach(function (net) { net.clear(); });
 
         // Add rail nodes to the this.graph.
-        this.vddNode = this.graph.addNode(this.layeredGrid.get(this.vddCell.x, this.vddCell.y, CONTACT));
-        this.gndNode = this.graph.addNode(this.layeredGrid.get(this.gndCell.x, this.gndCell.y, CONTACT));
+        this.vddNode = this.graph.addNode(this.layeredGrid.get(this.vddCell.x, this.vddCell.y, Diagram.CONTACT));
+        this.gndNode = this.graph.addNode(this.layeredGrid.get(this.gndCell.x, this.gndCell.y, Diagram.CONTACT));
 
         this.netVDD.addNode(this.vddNode);
         this.netGND.addNode(this.gndNode);
 
         // Add the VDD and GND nets.
         // Loop through every VDD cell and add to the VDD net.
-        this.setRecursively(this.layeredGrid.get(this.vddCell.x, this.vddCell.y, CONTACT), this.netVDD);
+        this.setRecursively(this.layeredGrid.get(this.vddCell.x, this.vddCell.y, Diagram.CONTACT), this.netVDD);
 
         // Loop through every GND cell and add to the GND net.
-        this.setRecursively(this.layeredGrid.get(this.gndCell.x, this.gndCell.y, CONTACT), this.netGND);
+        this.setRecursively(this.layeredGrid.get(this.gndCell.x, this.gndCell.y, Diagram.CONTACT), this.netGND);
 
         // Loop through the terminals and set their respective nets.
-        cursors.forEach(function (_, layer) {
+        Diagram.layers.forEach(function (_, layer) {
+            if(layer === Diagram.DELETE) {
+                return;
+            }
             this.inputs.forEach(function(input, index) {
                 if (this.layeredGrid.get(input.x, input.y, layer).isSet) {
                     this.setRecursively(this.layeredGrid.get(input.x, input.y, layer), this.inputNets[index]);
@@ -562,7 +476,7 @@ class Diagram {
         // Add output nodes to the this.graph.
         this.outputNodes.length = 0;
         this.outputs.forEach(function(output, index) {
-            this.outputNodes[index] = this.graph.addNode(this.layeredGrid.get(output.x, output.y, CONTACT));
+            this.outputNodes[index] = this.graph.addNode(this.layeredGrid.get(output.x, output.y, Diagram.CONTACT));
             this.outputNets[index].addNode(this.outputNodes[index]);
         }.bind(this));
 
@@ -652,7 +566,7 @@ class Diagram {
         }.bind(this));
 
         this.linkIdenticalNets();
-    } // end function (this.setNets)
+    } // end function setNets
 
     linkIdenticalNets() {
         'use strict';
@@ -726,6 +640,86 @@ class Diagram {
             net.addNode(node);
         }
     }
+    
+    // Helper function to set the terminals of transistors.
+    setTerminals(transistor, x, y, layer) {
+        'use strict';
+        let cell = this.layeredGrid.get(x, y, layer);
+        if (cell.isSet) {
+            if (transistor.term1 === undefined) {
+                transistor.term1 = cell;
+            } else {
+                transistor.term2 = cell;
+            }
+        }
+    }
+
+    // If the cell is Diagram.NDIFF or Diagram.PDIFF intersected by Diagram.POLY, create a transistor.
+    // Exception for Diagram.CONTACT.
+    // Returns true if the cell is a transistor.
+    // Side effect: Adds a transistor (if found) to this.nmos or this.pmos.
+    checkTransistor(cell, layer, transistorArray) {
+        'use strict';
+
+        // If the layer is Diagram.NDIFF or Diagram.PDIFF and there is also a Diagram.POLY at the same location,
+        // add the cell to transistors.
+        if (cell.layer === layer && cell.isSet) {
+            if (this.layeredGrid.get(cell.x, cell.y, Diagram.POLY).isSet && !this.layeredGrid.get(cell.x, cell.y, Diagram.CONTACT).isSet) {
+                transistorArray.add(cell);
+                this.graph.addNode(cell);
+                // Set the gate to the poly cell.
+                cell.gate = this.layeredGrid.get(cell.x, cell.y, Diagram.POLY);
+
+                // Check adjacent cells for Diagram.NDIFF.
+                // Set term1 to the first one found.
+                // Set term2 to the second one found.
+                cell.term1 = undefined;
+                cell.term2 = undefined;
+
+                // TODO: Account for wide poly.
+                // Check the cells above and below.
+                this.setTerminals(cell, cell.x, cell.y - 1, layer);
+                this.setTerminals(cell, cell.x, cell.y + 1, layer);
+
+                // Check the cells to the left and right.
+                this.setTerminals(cell, cell.x - 1, cell.y, layer);
+                this.setTerminals(cell, cell.x + 1, cell.y, layer);
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    // For each layer of the cell in the net, recurse with all adjacent cells in the layer.
+    // Generic function for the above code.
+    setAdjacent(deltaX, deltaY, net, cell) {
+        'use strict';
+        if (net.containsCell(this.layeredGrid.get(cell.x, cell.y, cell.layer)) && this.layeredGrid.get(cell.x + deltaX, cell.y + deltaY, cell.layer).isSet) {
+            if (net.containsCell(this.layeredGrid.get(cell.x + deltaX, cell.y + deltaY, cell.layer)) === false) {
+                this.setRecursively(this.layeredGrid.get(cell.x + deltaX, cell.y + deltaY, cell.layer), net);
+            }
+        }
+    }
+
+    handleContact(cell, net) {
+        'use strict';
+        if (this.layeredGrid.get(cell.x, cell.y, Diagram.CONTACT).isSet) {
+            Diagram.layers.forEach(function(_, layer) {
+                if(layer === Diagram.DELETE) {
+                    return;
+                }
+                if (!this.layeredGrid.get(cell.x, cell.y, layer).isSet) {
+                    return;
+                }
+                if (net.containsCell(this.layeredGrid.get(cell.x, cell.y, layer)) === false) {
+                    net.addCell(this.layeredGrid.get(cell.x, cell.y, layer));
+                    this.setRecursively(this.layeredGrid.get(cell.x, cell.y, layer), net);
+                }
+            }.bind(this));
+        }
+    }
 
     setRecursively(cell, net) {
         'use strict';
@@ -737,95 +731,566 @@ class Diagram {
             return;
         }
 
-        // If the cell is NDIFF or PDIFF intersected by POLY, create a transistor.
-        // Exception for CONTACT.
-        // Returns true if the cell is a transistor.
-        let checkTransistor = function(cell, layer, transistorArray) {
-
-            // Helper function to set the terminals of transistors.
-            let setTerminals = function(x, y, layer) {
-                let getCell = this.layeredGrid.get(x, y, layer);
-                if (getCell.isSet) {
-                    if (cell.term1 === undefined) {
-                        cell.term1 = getCell;
-                    } else {
-                        cell.term2 = getCell;
-                    }
-                }
-            }.bind(this);
-
-            // If the layer is NDIFF or PDIFF and there is also a POLY at the same location,
-            // add the cell to transistors.
-            if (cell.layer === layer && cell.isSet) {
-                if (this.layeredGrid.get(cell.x, cell.y, POLY).isSet && !this.layeredGrid.get(cell.x, cell.y, CONTACT).isSet) {
-                    transistorArray.add(cell);
-                    this.graph.addNode(cell);
-                    // Set the gate to the poly cell.
-                    cell.gate = this.layeredGrid.get(cell.x, cell.y, POLY);
-
-                    // Check adjacent cells for NDIFF.
-                    // Set term1 to the first one found.
-                    // Set term2 to the second one found.
-                    cell.term1 = undefined;
-                    cell.term2 = undefined;
-
-                    // TODO: Account for wide poly.
-                    // Check the cells above and below.
-                    setTerminals(cell.x, cell.y - 1, layer);
-                    setTerminals(cell.x, cell.y + 1, layer);
-
-                    // Check the cells to the left and right.
-                    setTerminals(cell.x - 1, cell.y, layer);
-                    setTerminals(cell.x + 1, cell.y, layer);
-
-                    return true;
-                }
-            }
-
-            return false;
-        }.bind(this);
-
-        // For each layer of the cell in the net, recurse with all adjacent cells in the layer.
-        // Generic function for the above code.
-        let setAdjacent = function(deltaX, deltaY) {
-            if (net.containsCell(this.layeredGrid.get(cell.x, cell.y, cell.layer)) && this.layeredGrid.get(cell.x + deltaX, cell.y + deltaY, cell.layer).isSet) {
-                if (net.containsCell(this.layeredGrid.get(cell.x + deltaX, cell.y + deltaY, cell.layer)) === false) {
-                    this.setRecursively(this.layeredGrid.get(cell.x + deltaX, cell.y + deltaY, cell.layer), net);
-                }
-            }
-        }.bind(this);
-
-        let handleContact = function(cell, net) {
-            if (this.layeredGrid.get(cell.x, cell.y, CONTACT).isSet) {
-                cursors.forEach(function(_, layer) {
-                    if (!this.layeredGrid.get(cell.x, cell.y, layer).isSet) {
-                        return;
-                    }
-                    if (net.containsCell(this.layeredGrid.get(cell.x, cell.y, layer)) === false) {
-                        net.addCell(this.layeredGrid.get(cell.x, cell.y, layer));
-                        this.setRecursively(this.layeredGrid.get(cell.x, cell.y, layer), net);
-                    }
-                }.bind(this));
-            }
-        }.bind(this);
-
         // Check the cell for a transistor.
-        if (checkTransistor(cell, NDIFF, this.nmos)) { return; }
-        if (checkTransistor(cell, PDIFF, this.pmos)) { return; }
+        if (this.checkTransistor(cell, Diagram.NDIFF, this.nmos)) { return; }
+        if (this.checkTransistor(cell, Diagram.PDIFF, this.pmos)) { return; }
 
         // Add the cell to the net.
         net.addCell(cell);
 
-        // If CONTACT is set, add add all layers to the net.
-        handleContact(cell, net);
+        // If Diagram.CONTACT is set, add add all layers to the net.
+        this.handleContact(cell, net);
 
         // Check the cells above and below.
-        if (cell.y > 0) { setAdjacent(0, -1); }
-        if (cell.y < this.layeredGrid.height - 1) { setAdjacent(0, 1); }
+        if (cell.y > 0) { this.setAdjacent(0, -1, net, cell); }
+        if (cell.y < this.layeredGrid.height - 1) { this.setAdjacent(0, 1, net, cell); }
 
         // Check the cells to the left and right.
-        if (cell.x > 0) { setAdjacent(-1, 0); }
-        if (cell.x < this.layeredGrid.width - 1) { setAdjacent(1, 0); }
+        if (cell.x > 0) { this.setAdjacent(-1, 0, net, cell); }
+        if (cell.x < this.layeredGrid.width - 1) { this.setAdjacent(1, 0, net, cell); }
+    }
+}
+
+class DiagramController {
+    constructor(diagram, view) {
+        'use strict';
+        this.diagram        = diagram;
+        this.view           = view;
+        this.firstSaveState = 0;
+        this.lastSaveState  = 0;
+        this.maxSaveState   = 10;
+        this.saveState      = 0;
+        this.dragging       = false;
+        this.startX         = -1;
+        this.startY         = -1;
+        this.currentX       = -1;
+        this.currentY       = -1;
+        this.cursorIndex    = 0;
+    }
+
+    // Save function to save the current state of the grid and the canvas.
+    // Increment save state so we can maintain an undo buffer.
+    saveCurrentState() {
+        'use strict';
+        // Save both the grid and the drawing.
+        localStorage.setItem('layeredGrid' + this.saveState, JSON.stringify(this.diagram.layeredGrid.grid));
+
+        // Increment the save state.
+        this.saveState++;
+
+        // Delete all save states after the current one.
+        for (let ii = this.saveState; ii < this.lastSaveState; ii++) {
+            localStorage.removeItem('layeredGrid' + ii);
+        }
+
+        // Update the max save state.
+        this.lastSaveState = this.saveState;
+
+        // If we've reached the max save state, delete the oldest one.
+        if (this.maxSaveState === this.saveState) {
+            localStorage.removeItem('layeredGrid' + this.firstSaveState);
+
+            this.firstSaveState++;
+            this.maxSaveState++;
+        }
+    }
+
+    // Undo by going back to the previous save state (if there is one) and redrawing the canvas.
+    undo() {
+        'use strict';
+        if (this.saveState === this.lastSaveState) {
+            this.saveCurrentState();
+            this.saveState--;
+        }
+        if (this.saveState > this.firstSaveState) {
+            this.saveState--;
+            this.diagram.layeredGrid.grid = JSON.parse(localStorage.getItem('layeredGrid' + this.saveState));
+        }
+    }
+
+    // Redo by going forward to the next save state (if there is one) and redrawing the canvas.
+    redo() {
+        'use strict';
+        if (this.saveState < this.lastSaveState - 1) {
+            this.saveState++;
+            this.diagram.layeredGrid.grid = JSON.parse(localStorage.getItem('layeredGrid' + this.saveState));
+        }
+    }
+
+    inBounds(screenX, screenY) {
+        'use strict';
+        return screenX > this.view.canvas.offsetLeft + this.view.cellWidth &&
+               screenX < this.view.canvas.offsetLeft + this.view.canvas.width - this.view.cellWidth &&
+               screenY > this.view.canvas.offsetTop + this.view.cellHeight &&
+               screenY < this.view.canvas.offsetTop + this.view.canvas.height - this.view.cellHeight;
+    }
+
+    getCellAtCursor(screenX, screenY) {
+        'use strict';
+        // Ignore if not inside the canvas
+        if (this.inBounds(screenX, screenY)) {
+
+            let x = Math.floor((screenX - this.view.canvas.offsetLeft - this.view.cellWidth) / this.view.cellWidth);
+            let y = Math.floor((screenY - this.view.canvas.offsetTop - this.view.cellHeight) / this.view.cellHeight);
+            return { x: x, y: y, };
+        }
+        return null;
+    }
+
+    clearIfPainted(clientX, clientY) {
+        'use strict';
+
+        // Set a variable to true if any of the layers are set.
+        let anyLayerSet = false;
+
+        // Ignore if not inside the canvas
+        if (this.inBounds(clientX, clientY)) {
+            let x = Math.floor((clientX - this.view.canvas.offsetLeft - this.view.cellWidth) / this.view.cellWidth);
+            let y = Math.floor((clientY - this.view.canvas.offsetTop - this.view.cellHeight) / this.view.cellHeight);
+
+            // Erase all layers of the cell.
+            Diagram.layers.forEach(function (_, layer) {
+                if (this.diagram.layeredGrid.get(x, y, layer).isSet) {
+                    if (!anyLayerSet) { this.saveCurrentState(); }
+                    anyLayerSet = true;
+                    this.diagram.layeredGrid.clear(x, y, layer);
+                }
+            }.bind(this));
+        }
+
+        return anyLayerSet;
+    }
+
+    draw(bounds) {
+        'use strict';
+        if (Math.abs(bounds.endX - this.startX) > Math.abs(bounds.endY - this.startY)) {
+            bounds.lowLayer = bounds.highLayer = this.cursorIndex;
+            bounds.bottom = bounds.top = this.startY;
+            this.diagram.layeredGrid.map(bounds, function (x, y, layer) {
+                this.diagram.layeredGrid.set(x, y, layer);
+            }.bind(this), true);
+        }
+        // If the mouse moved more vertically than horizontally, draw a vertical line.
+        else {
+            bounds.lowLayer = bounds.highLayer = this.cursorIndex;
+            bounds.right = bounds.left = this.startX;
+            this.diagram.layeredGrid.map(bounds, function (x, y, layer) {
+                this.diagram.layeredGrid.set(x, y, layer);
+            }.bind(this), true);
+        }
+    }
+
+    cellClickHandler(event) {
+        'use strict';
+
+        let clientX, clientY;
+
+        if(event.clientX === undefined) {
+            clientX = event.changedTouches[0].clientX;
+            clientY = event.changedTouches[0].clientY;
+        } else {
+            clientX = event.clientX;
+            clientY = event.clientY;
+        }
+
+       // Just fill in or delete the cell at the start coordinates.
+        // If there is no cell at the start coordinates, change the cursor color.
+        if (event.button === 0 || event.type === 'touchend') {
+            if (!this.diagram.layeredGrid.get(this.startX, this.startY, this.cursorIndex).isSet) { this.saveCurrentState(); }
+            this.diagram.layeredGrid.set(this.startX, this.startY, this.cursorIndex);
+        } else if(event.button === 2) {
+            // If in the canvas and over a colored cell, erase it.
+            // Otherwise, change the layer.
+            if (!this.clearIfPainted(clientX, clientY)) {
+                this.changeLayer();
+            }
+        }
+    }
+
+    // Note the grid coordinates when the left or right mouse button is released.
+    // If the left (or primary) button, use the start and end coordinates to make either a horizontal or vertical line.
+    // If the right (or secondary) button, use the same coordinates to delete a line of cells.
+    mouseupHandler(event) {
+        'use strict';
+        event.preventDefault();
+        let clientX, clientY;
+
+        if(event.clientX === undefined) {
+            clientX = event.changedTouches[0].clientX;
+            clientY = event.changedTouches[0].clientY;
+        } else {
+            clientX = event.clientX;
+            clientY = event.clientY;
+        }
+      
+        if (event.button === 0 || event.button === 2 || event.type === 'touchend') {
+            // If not between cells 1 and gridsize - 1, undo and return.
+            if (this.dragging && this.inBounds(clientX, clientY)) {
+                let endX = Math.floor((clientX - this.view.canvas.offsetLeft - this.view.cellWidth) / this.view.cellWidth);
+                let endY = Math.floor((clientY - this.view.canvas.offsetTop - this.view.cellHeight) / this.view.cellHeight);
+                let bounds = {
+                    left: Math.min(this.startX, endX),
+                    right: Math.max(this.startX, endX),
+                    top: Math.min(this.startY, endY),
+                    bottom: Math.max(this.startY, endY),
+                    lowLayer: 0,
+                    highLayer: Diagram.layers.length - 1,
+                    endX: endX,
+                    endY: endY,
+                };
+
+                // For primary (i.e. left) mouse button:
+                // If the mouse moved more horizontally than vertically, draw a horizontal line.
+                if (event.button === 0 || event.type === 'touchend') {
+                    this.draw(bounds);
+                } else {
+                    // For secondary (i.e. right) mouse button:
+                    // Delete a rectangle of squares
+                    this.diagram.layeredGrid.map(bounds, function (x, y, layer) {
+                        this.diagram.layeredGrid.clear(x, y, layer);
+                    }.bind(this));
+                }
+            } else if (this.inBounds(clientX, clientY)) {
+                this.cellClickHandler(event);
+            }
+            // If the mouse was released outside the canvas, undo and return.
+            else if (this.dragging) {
+                this.undo();
+            }
+            else if(event.button === 2) {
+                this.changeLayer();
+            }
+        }
+
+        this.dragging = false;
+    }
+
+    // Show a preview line when the user is dragging the mouse.
+    mousemoveHandler(event) {
+        'use strict';
+        event.preventDefault();
+        let clientX, clientY;
+
+        if(event.clientX === undefined) {
+            clientX = event.changedTouches[0].clientX;
+            clientY = event.changedTouches[0].clientY;
+        } else {
+            clientX = event.clientX;
+            clientY = event.clientY;
+        }
+
+        let leftMouseMoveHandler = function(bounds) {
+            // If the mouse moved more horizontally than vertically,
+            // draw a horizontal line.
+            if (bounds.right - bounds.left > bounds.bottom - bounds.top) {
+                bounds.lowLayer = bounds.highLayer = this.cursorIndex;
+                bounds.bottom = bounds.top = this.startY;
+                this.diagram.layeredGrid.map(bounds, function (x, y, layer) {
+                    this.diagram.layeredGrid.set(x, y, layer);
+                }.bind(this), true);
+            }
+            // If the mouse moved more vertically than horizontally,
+            // draw a vertical line.
+            else {
+                bounds.lowLayer = bounds.highLayer = this.cursorIndex;
+                bounds.right = bounds.left = this.startX;
+                this.diagram.layeredGrid.map(bounds, function (x, y, layer) {
+                    this.diagram.layeredGrid.set(x, y, layer);
+                }.bind(this), true);
+            }
+        }.bind(this);
+
+        let rightMouseMoveHandler = function(bounds) {
+            // Secondary mouse button (i.e. right click)
+            // Highlight a rectangle of squares for deletion.
+            bounds.lowLayer = bounds.highLayer = Diagram.DELETE;
+            this.diagram.layeredGrid.map(bounds, function (x, y, layer) {
+                this.diagram.layeredGrid.set(x, y, layer);
+            }.bind(this), true);
+        }.bind(this);
+
+        // Save the current X and Y coordinates.
+        this.currentX = clientX;
+        this.currentY = clientY;
+        let currentCell = this.getCellAtCursor(this.currentX, this.currentY);
+
+        // If the mouse is pressed and the mouse is between cells 1 and gridsize - 1,
+        if (event.buttons === 1 || event.buttons === 2 || event.type === 'touchmove') {
+            // Ignore if not inside the canvas
+            if (this.inBounds(clientX, clientY)) {
+                if (this.startX === -1 || this.startY === -1) {
+                    let temp = this.getCellAtCursor(this.currentX, this.currentY);
+                    this.startX = temp.x;
+                    this.startY = temp.y;
+                }
+
+
+                if (!this.dragging) {
+                    // don't start dragging unless the mouse has moved outside the cell
+                    if(currentCell.x === this.startX && currentCell.y === this.startY) {
+                        return;
+                    }
+                    this.dragging = true;
+                    this.saveCurrentState();
+                } else {
+                    // Continuously refresh to update the preview line.
+                    this.undo();
+                    this.saveCurrentState();
+                }
+
+                let endX = Math.floor((clientX - this.view.canvas.offsetLeft - this.view.cellWidth) / this.view.cellWidth);
+                let endY = Math.floor((clientY - this.view.canvas.offsetTop - this.view.cellHeight) / this.view.cellHeight);
+
+                let bounds = {
+                    left: Math.min(this.startX, endX),
+                    right: Math.max(this.startX, endX),
+                    top: Math.min(this.startY, endY),
+                    bottom: Math.max(this.startY, endY),
+                };
+
+                // Primary mouse button (i.e. left click)
+                if (event.buttons === 1 || event.type === 'touchmove') {
+                    leftMouseMoveHandler(bounds);
+                } else {
+                    rightMouseMoveHandler(bounds);
+                }
+            }
+        }
+    }
+
+    placeTerminal(event, terminal) {
+        'use strict';
+        let cell = this.getCellAtCursor(this.currentX, this.currentY);
+        let oldX, oldY;
+
+        if (cell !== null && !event.ctrlKey) {
+            // First, note the current coordinates.
+            oldX = terminal.x;
+            oldY = terminal.y;
+            // Then, set the new coordinates.
+            terminal.x = cell.x;
+            terminal.y = cell.y;
+            // Set the Diagram.CONTACT layer at the new coordinates.
+            this.diagram.layeredGrid.set(cell.x, cell.y, this.diagram.Diagram.CONTACT);
+            // Unset the Diagram.CONTACT layer at the old coordinates.
+            this.diagram.layeredGrid.clear(oldX, oldY, this.diagram.Diagram.CONTACT);
+        }
+    }
+
+    // Change the layer/cursor color
+    changeLayer() {
+        'use strict';
+        // Go to the next selectable index.
+        let tempIndex = this.cursorIndex + 1;
+
+        while(tempIndex >= Diagram.layers.length || !Diagram.layers[tempIndex].selectable) {
+            tempIndex = tempIndex >= Diagram.layers.length - 1 ? 0 : tempIndex + 1;
+        }
+        this.cursorIndex = tempIndex;
+
+        // set the outer border of the canvas to the new cursor color
+        this.drawBorder();
+    }
+
+    ctrlCommandHandler(event) {
+        'use strict';
+        if (event.keyCode === 90) {
+            // z
+            this.undo();
+        } else if (event.keyCode === 89) {
+            // y
+            this.redo();
+        }
+    }
+
+    keydownHandler(event) {
+        'use strict';
+        let isInput  = (keyCode) => { return (keyCode >= 65) && (keyCode < 65 + this.diagram.inputs.length );    }; // Y, X, W, ...
+        let isOutput = (keyCode) => { return (keyCode <= 89) && (keyCode > 89 - this.diagram.outputs.length);    }; // A, B, C, ...
+        let isVDD    = (keyCode) => { return keyCode === 61 || keyCode === 187 || keyCode === 107;  }; // + key
+        let isGND    = (keyCode) => { return keyCode === 173 || keyCode === 189 || keyCode === 109; }; // - key
+
+        if      (event.ctrlKey)           { this.ctrlCommandHandler(event); }
+        else if (isInput(event.keyCode))  { this.placeTerminal(event, this.diagram.inputs[event.keyCode - 65]); }
+        else if (isOutput(event.keyCode)) { this.placeTerminal(event, this.diagram.outputs[89 - event.keyCode]); }
+        else if (isVDD(event.keyCode))    { this.placeTerminal(event, this.diagram.vddCell); }
+        else if (isGND(event.keyCode))    { this.placeTerminal(event, this.diagram.gndCell); }
+    }
+
+    // Don't show a context-menu when right-clicking
+    contextmenuHandler(event) {
+        'use strict';
+        if (event.button === 2) {
+            // Don't show a context menu.
+            event.preventDefault();
+        }
+    }
+
+    // Note the grid coordinates when the left mouse button is pressed.
+    // Store the m in startX and startY.
+    mousedownHandler(event) {
+        'use strict';
+        event.preventDefault();
+        let clientX, clientY;
+
+        if(event.clientX === undefined) {
+            clientX = event.changedTouches[0].clientX;
+            clientY = event.changedTouches[0].clientY;
+        } else {
+            clientX = event.clientX;
+            clientY = event.clientY;
+        }
+        if (event.button === 0 || event.button === 2 || event.type === 'touchstart') {
+            // Return if not between cells 1 and gridsize - 1
+            if (this.inBounds(clientX, clientY)) {
+                this.startX = Math.floor((clientX - this.view.canvas.offsetLeft - this.view.cellWidth) / this.view.cellWidth);
+                this.startY = Math.floor((clientY - this.view.canvas.offsetTop - this.view.cellHeight) / this.view.cellHeight);
+            } else {
+                this.startX = -1;
+                this.startY = -1;
+            }
+        }
+    }
+
+    // Only change dark/light mode on keyup to avoid seizure-inducing flashes from holding down space.
+    keyupHandler(event) {
+        'use strict';
+        // Toggle dark mode by pressing space
+        if (event.keyCode === 32) {
+            toggleDarkMode();
+        }
+        // Toggle useFlatColors by pressing 'f'
+        if (event.keyCode === 70) {
+            this.view.useFlatColors = !this.view.useFlatColors;
+        }
+
+        // Only do the following if CTRL is pressed.
+        if (event.ctrlKey) {
+            // Shift the LayeredGrid by pressing the arrow keys.
+            if (event.keyCode === 37) {
+                // Left
+                this.diagram.layeredGrid.shift(-1, 0);
+            }
+            if (event.keyCode === 38) {
+                // Up
+                this.diagram.layeredGrid.shift(0, -1);
+            }
+            if (event.keyCode === 39) {
+                // Right
+                this.diagram.layeredGrid.shift(1, 0);
+            }
+            if (event.keyCode === 40) {
+                // Down
+                this.diagram.layeredGrid.shift(0, 1);
+            }
+        }
+
+        // Update the truth table by pressing enter.
+        if (event.keyCode === 13) {
+            refreshTruthTable();
+        }
+    }
+}
+
+class DiagramView {
+    constructor(diagram, mainCanvas, gridCanvas) {
+        'use strict';
+        this.diagram = diagram;
+        this.canvas = mainCanvas;
+        this.gridCanvas = gridCanvas;
+        this.ctx = this.canvas.getContext("2d");
+        this.gridCtx = this.gridCanvas.getContext('2d');
+        this.cellWidth  = this.canvas.width  / (this.diagram.layeredGrid.width  + 2);
+        this.cellHeight = this.canvas.height / (this.diagram.layeredGrid.height + 2);
+        this.useFlatColors = false;
+    }
+    
+    // Draw a faint grid on the canvas.
+    // Add an extra 2 units to the width and height for a border.
+    drawGrid() {
+        'use strict';
+        // Place the grid canvas behind the main canvas.
+        // Same size as the canvas.
+        this.gridCanvas.width = this.canvas.width - 1;
+        this.gridCanvas.height = this.canvas.height - 1;
+        this.gridCanvas.style.position = 'absolute';
+        this.gridCanvas.style.left = this.canvas.offsetLeft + 'px';
+        this.gridCanvas.style.top = this.canvas.offsetTop + 'px';
+        this.gridCanvas.style.zIndex = -1;
+
+        // Set the gridCanvas context.
+        this.cellWidth = this.canvas.width / (this.diagram.layeredGrid.width + 2);
+        this.cellHeight = this.canvas.height / (this.diagram.layeredGrid.height + 2);
+
+        // Clear the grid canvas.
+        this.gridCtx.clearRect(0, 0, this.gridCanvas.width, this.gridCanvas.height);
+
+        // Set stroke color depending on whether the dark mode is on or off.
+        // Should be faintly visible in both modes.
+        if (darkMode) {
+            this.gridCtx.strokeStyle = darkModeGridColor;
+        } else {
+            this.gridCtx.strokeStyle = lightModeGridColor;
+        }
+
+        for (let ii = 0; ii < Math.max(this.diagram.layeredGrid.width, this.diagram.layeredGrid.height) + 2; ii++) {
+            if(ii < this.diagram.layeredGrid.width + 2) {
+                this.gridCtx.beginPath();
+                this.gridCtx.moveTo(ii * this.cellWidth, 0);
+                this.gridCtx.lineTo(ii * this.cellWidth, this.gridCanvas.height);
+                this.gridCtx.stroke();
+            }
+            if(ii < this.diagram.layeredGrid.height + 2) {
+                this.gridCtx.beginPath();
+                this.gridCtx.moveTo(0, ii * this.cellHeight);
+                this.gridCtx.lineTo(this.gridCanvas.width, ii * this.cellHeight);
+                this.gridCtx.stroke();
+            }
+        }
+    }
+    
+    // Draw the outer border of the canvas.
+    drawBorder() {
+        'use strict';
+        this.ctx.strokeStyle = this.useFlatColors? Diagram.layers[this.cursorIndex].flatColor : Diagram.layers[this.cursorIndex].color;
+        this.ctx.lineWidth = this.cellWidth;
+        this.ctx.strokeRect(this.cellWidth / 2, this.cellWidth / 2, this.canvas.width - this.cellWidth, this.canvas.height - this.cellWidth);
+
+        // Draw a thick border on the edge of the border drawn above.
+        this.ctx.lineWidth = this.cellWidth / 4;
+        this.ctx.strokeStyle = darkMode ? "#ffffff" : "#000000";
+        this.ctx.strokeRect(1 + this.cellWidth - this.ctx.lineWidth / 2,
+            1 + this.cellHeight - this.ctx.lineWidth / 2,
+            this.canvas.width - 2 * this.cellWidth + this.ctx.lineWidth / 2,
+            this.canvas.height - 2 * this.cellHeight + this.ctx.lineWidth / 2
+        );
+
+        // For the middle 11 cells of the upper border, fill with the grid color.
+        this.ctx.fillStyle = darkMode ? "#ffffff" : "#000000";
+        let startCell = Math.floor(this.diagram.layeredGrid.width / 2) - 4;
+        this.ctx.fillRect(startCell * this.cellWidth, 0, this.cellWidth * 11, this.cellHeight);
+
+        // Write the cursor color name in the middle of the upper border of the canvas.
+        this.ctx.fillStyle = darkMode ? '#000000' : '#ffffff';
+        this.ctx.font = '20px Arial';
+        this.ctx.textAlign = 'center';
+        this.ctx.fillText(Diagram.layers[this.cursorIndex].name, this.canvas.width / 2, this.cellHeight * 3 / 4);
+    }
+
+    // Resize the canvas to the largest square that fits in the window.
+    resizeCanvas() {
+        'use strict';
+        let windowWidth = window.innerWidth;
+        let windowHeight = window.innerHeight;
+        let windowSize = Math.min(windowWidth, windowHeight);
+        let sizeChanged = this.canvas.width !== windowSize || this.canvas.height !== windowSize;
+
+        this.canvas.width = windowSize;
+        this.canvas.height = windowSize;
+
+        if(sizeChanged) {
+            this.drawGrid();
+        }
     }
 
     decorateContact(x, y) {
@@ -849,20 +1314,20 @@ class Diagram {
         this.ctx.font = "bold 18px Arial";
         this.ctx.fillStyle = darkMode ? "#ffffff" : "#000000";
 
-        this.inputs.forEach(function(input, index) {
+        this.diagram.inputs.forEach(function(input, index) {
             this.ctx.fillText(String.fromCharCode(65 + index),
                 this.cellWidth * (input.x + 1.5),
                 this.cellHeight * (input.y + 0.75));
         }.bind(this));
-        this.outputs.forEach(function(output, index) {
+        this.diagram.outputs.forEach(function(output, index) {
             this.ctx.fillText(String.fromCharCode(89 - index),
                 this.cellWidth * (output.x + 1.5),
                 this.cellHeight * (output.y + 0.75));
         }.bind(this));
 
         // Same for VDD and GND
-        this.ctx.fillText("VDD", this.cellWidth * (this.vddCell.x + 1.5), this.cellHeight * (this.vddCell.y + 0.75));
-        this.ctx.fillText("GND", this.cellWidth * (this.gndCell.x + 1.5), this.cellHeight * (this.gndCell.y + 0.75));
+        this.ctx.fillText("VDD", this.cellWidth * (this.diagram.vddCell.x + 1.5), this.cellHeight * (this.diagram.vddCell.y + 0.75));
+        this.ctx.fillText("GND", this.cellWidth * (this.diagram.gndCell.x + 1.5), this.cellHeight * (this.diagram.gndCell.y + 0.75));
     }
 
     // Initialize everything
@@ -872,8 +1337,8 @@ class Diagram {
 
         // Check the layers of the grid, and draw cells as needed.
         let drawCell = function(i, j, layer) {
-            if (this.layeredGrid.get(i, j, layer).isSet) {
-                this.ctx.fillStyle = this.useFlatColors? cursors[layer].flatColor : cursors[layer].color;
+            if (this.diagram.layeredGrid.get(i, j, layer).isSet) {
+                this.ctx.fillStyle = this.useFlatColors? Diagram.layers[layer].flatColor : Diagram.layers[layer].color;
                 this.ctx.fillRect((i+1) * this.cellWidth, (j+1) * this.cellHeight - 1, this.cellWidth + 1, this.cellHeight + 2);
             }
         }.bind(this);
@@ -881,456 +1346,46 @@ class Diagram {
         // Draw each layer in order.
         let bounds = {
             left: 0,
-            right: this.layeredGrid.width - 1,
+            right: this.diagram.layeredGrid.width - 1,
             top: 0,
-            bottom: this.layeredGrid.height - 1,
+            bottom: this.diagram.layeredGrid.height - 1,
             lowLayer: 0,
-            highLayer: this.layeredGrid.layers - 1,
+            highLayer: this.diagram.layeredGrid.layers - 1,
         };
 
-        this.layeredGrid.map(bounds, function (x, y, layer) {
+        this.diagram.layeredGrid.map(bounds, function (x, y, layer) {
             drawCell(x, y, layer);
 
             // For the last layer, fill each filled cell with a cross.
-            if (layer === CONTACT) {
-                if (this.layeredGrid.get(x, y, layer).isSet) {
+            if (layer === this.diagram.Diagram.CONTACT) {
+                if (this.diagram.layeredGrid.get(x, y, layer).isSet) {
                     this.decorateContact(x, y);
                 }
             }
 
             // Set the terminals of the cell to null.
             // TODO: Move this side-effect somewhere else.
-            this.layeredGrid.get(x, y, NDIFF).term1 = null;
-            this.layeredGrid.get(x, y, NDIFF).term2 = null;
-            this.layeredGrid.get(x, y, NDIFF).gate  = null;
+            this.diagram.layeredGrid.get(x, y, Diagram.NDIFF).term1 = null;
+            this.diagram.layeredGrid.get(x, y, Diagram.NDIFF).term2 = null;
+            this.diagram.layeredGrid.get(x, y, Diagram.NDIFF).gate  = null;
 
-            this.layeredGrid.get(x, y, PDIFF).term1 = null;
-            this.layeredGrid.get(x, y, PDIFF).term2 = null;
-            this.layeredGrid.get(x, y, PDIFF).gate  = null;
+            this.diagram.layeredGrid.get(x, y, Diagram.PDIFF).term1 = null;
+            this.diagram.layeredGrid.get(x, y, Diagram.PDIFF).term2 = null;
+            this.diagram.layeredGrid.get(x, y, Diagram.PDIFF).gate  = null;
         }.bind(this));
 
         // set the outer border of the canvas to the cursor color
         this.drawBorder();
         this.drawLabels();
     }
-
-    // Save function to save the current state of the grid and the canvas.
-    // Increment save state so we can maintain an undo buffer.
-    saveCurrentState() {
-        'use strict';
-        // Save both the grid and the drawing.
-        localStorage.setItem('this.layeredGrid' + this.saveState, JSON.stringify(this.layeredGrid.grid));
-
-        // Increment the save state.
-        this.saveState++;
-
-        // Delete all save states after the current one.
-        for (let ii = this.saveState; ii < this.lastSaveState; ii++) {
-            localStorage.removeItem('this.layeredGrid' + ii);
-        }
-
-        // Update the max save state.
-        this.lastSaveState = this.saveState;
-
-        // If we've reached the max save state, delete the oldest one.
-        if (this.maxSaveState === this.saveState) {
-            localStorage.removeItem('this.layeredGrid' + this.firstSaveState);
-
-            this.firstSaveState++;
-            this.maxSaveState++;
-        }
-    }
-
-    // Undo by going back to the previous save state (if there is one) and redrawing the canvas.
-    undo() {
-        'use strict';
-        if (this.saveState === this.lastSaveState) {
-            this.saveCurrentState();
-            this.saveState--;
-        }
-        if (this.saveState > this.firstSaveState) {
-            this.saveState--;
-            this.layeredGrid.grid = JSON.parse(localStorage.getItem('this.layeredGrid' + this.saveState));
-        }
-    }
-
-    // Redo by going forward to the next save state (if there is one) and redrawing the canvas.
-    redo() {
-        'use strict';
-        if (this.saveState < this.lastSaveState - 1) {
-            this.saveState++;
-            this.layeredGrid.grid = JSON.parse(localStorage.getItem('this.layeredGrid' + this.saveState));
-        }
-    }
-
-    clearIfPainted(clientX, clientY) {
-        'use strict';
-
-        // Set a variable to true if any of the layers are set.
-        let anyLayerSet = false;
-
-        // Ignore if not inside the canvas
-        if (this.inBounds({ clientX: clientX, clientY: clientY, })) {
-            let x = Math.floor((clientX - this.canvas.offsetLeft - this.cellWidth) / this.cellWidth);
-            let y = Math.floor((clientY - this.canvas.offsetTop - this.cellHeight) / this.cellHeight);
-
-            // Erase all layers of the cell.
-            cursors.forEach(function (_, layer) {
-                if (this.layeredGrid.get(x, y, layer).isSet) {
-                    if (!anyLayerSet) { this.saveCurrentState(); }
-                    anyLayerSet = true;
-                    this.layeredGrid.clear(x, y, layer);
-                }
-            }.bind(this));
-        }
-
-        return anyLayerSet;
-    }
-
-    getCell(clientX, clientY) {
-        'use strict';
-        // Ignore if not inside the canvas
-        if (this.inBounds({ clientX: clientX, clientY: clientY, })) {
-
-            let x = Math.floor((clientX - this.canvas.offsetLeft - this.cellWidth) / this.cellWidth);
-            let y = Math.floor((clientY - this.canvas.offsetTop - this.cellHeight) / this.cellHeight);
-            return { x: x, y: y, };
-        }
-        return null;
-    }
-
-    inBounds(event) {
-        'use strict';
-        let x = event.clientX;
-        let y = event.clientY;
-
-        return x > this.canvas.offsetLeft + this.cellWidth &&
-            x < this.canvas.offsetLeft + this.canvas.width - this.cellWidth &&
-            y > this.canvas.offsetTop + this.cellHeight &&
-            y < this.canvas.offsetTop + this.canvas.height - this.cellHeight;
-    }
-
-    draw(bounds) {
-        'use strict';
-        if (Math.abs(bounds.endX - startX) > Math.abs(bounds.endY - startY)) {
-            bounds.lowLayer = bounds.highLayer = cursorIndex;
-            bounds.bottom = bounds.top = startY;
-            this.layeredGrid.map(bounds, function (x, y, layer) {
-                this.layeredGrid.set(x, y, layer);
-            }.bind(this), true);
-        }
-        // If the mouse moved more vertically than horizontally, draw a vertical line.
-        else {
-            bounds.lowLayer = bounds.highLayer = cursorIndex;
-            bounds.right = bounds.left = startX;
-            this.layeredGrid.map(bounds, function (x, y, layer) {
-                this.layeredGrid.set(x, y, layer);
-            }.bind(this), true);
-        }
-    }
-
-    cellClickHandler(event) {
-        'use strict';
-
-        let clientX, clientY;
-
-        if(event.clientX === undefined) {
-            clientX = event.changedTouches[0].clientX;
-            clientY = event.changedTouches[0].clientY;
-        } else {
-            clientX = event.clientX;
-            clientY = event.clientY;
-        }
-
-       // Just fill in or delete the cell at the start coordinates.
-        // If there is no cell at the start coordinates, change the cursor color.
-        if (event.button === 0 || event.type === 'touchend') {
-            if (!this.layeredGrid.get(startX, startY, cursorIndex).isSet) { this.saveCurrentState(); }
-            this.layeredGrid.set(startX, startY, cursorIndex);
-        } else if(event.button === 2) {
-            // If in the canvas and over a colored cell, erase it.
-            // Otherwise, change the layer.
-            if (!this.clearIfPainted(clientX, clientY)) {
-                this.changeLayer();
-            }
-        }
-    }
-
-    // Note the grid coordinates when the left or right mouse button is released.
-    // If the left (or primary) button, use the start and end coordinates to make either a horizontal or vertical line.
-    // If the right (or secondary) button, use the same coordinates to delete a line of cells.
-    canvasMouseUpHandler(event) {
-        'use strict';
-        event.preventDefault();
-        let clientX, clientY;
-
-        if(event.clientX === undefined) {
-            clientX = event.changedTouches[0].clientX;
-            clientY = event.changedTouches[0].clientY;
-        } else {
-            clientX = event.clientX;
-            clientY = event.clientY;
-        }
-      
-        if (event.button === 0 || event.button === 2 || event.type === 'touchend') {
-            // If not between cells 1 and gridsize - 1, undo and return.
-            if (dragging && this.inBounds({ clientX: clientX, clientY: clientY, })) {
-                let endX = Math.floor((clientX - this.canvas.offsetLeft - this.cellWidth) / this.cellWidth);
-                let endY = Math.floor((clientY - this.canvas.offsetTop - this.cellHeight) / this.cellHeight);
-                let bounds = {
-                    left: Math.min(startX, endX),
-                    right: Math.max(startX, endX),
-                    top: Math.min(startY, endY),
-                    bottom: Math.max(startY, endY),
-                    lowLayer: 0,
-                    highLayer: cursors.length - 1,
-                    endX: endX,
-                    endY: endY,
-                };
-
-                // For primary (i.e. left) mouse button:
-                // If the mouse moved more horizontally than vertically, draw a horizontal line.
-                if (event.button === 0 || event.type === 'touchend') {
-                    this.draw(bounds);
-                } else {
-                    // For secondary (i.e. right) mouse button:
-                    // Delete a rectangle of squares
-                    this.layeredGrid.map(bounds, function (x, y, layer) {
-                        this.layeredGrid.clear(x, y, layer);
-                    }.bind(this));
-                }
-            } else if (this.inBounds({ clientX: clientX, clientY: clientY, })) {
-                this.cellClickHandler(event);
-            }
-            // If the mouse was released outside the canvas, undo and return.
-            else if (dragging) {
-                this.undo();
-            }
-            else if(event.button === 2) {
-                this.changeLayer();
-            }
-        }
-
-        dragging = false;
-    }
-
-    // Show a preview line when the user is dragging the mouse.
-    mousemoveHandler(event) {
-        'use strict';
-        event.preventDefault();
-        let clientX, clientY;
-
-        if(event.clientX === undefined) {
-            clientX = event.changedTouches[0].clientX;
-            clientY = event.changedTouches[0].clientY;
-        } else {
-            clientX = event.clientX;
-            clientY = event.clientY;
-        }
-
-        let leftMouseMoveHandler = function(bounds) {
-            // If the mouse moved more horizontally than vertically,
-            // draw a horizontal line.
-            if (bounds.right - bounds.left > bounds.bottom - bounds.top) {
-                bounds.lowLayer = bounds.highLayer = cursorIndex;
-                bounds.bottom = bounds.top = startY;
-                this.layeredGrid.map(bounds, function (x, y, layer) {
-                    this.layeredGrid.set(x, y, layer);
-                }.bind(this), true);
-            }
-            // If the mouse moved more vertically than horizontally,
-            // draw a vertical line.
-            else {
-                bounds.lowLayer = bounds.highLayer = cursorIndex;
-                bounds.right = bounds.left = startX;
-                this.layeredGrid.map(bounds, function (x, y, layer) {
-                    this.layeredGrid.set(x, y, layer);
-                }.bind(this), true);
-            }
-        }.bind(this);
-
-        let rightMouseMoveHandler = function(bounds) {
-            // Secondary mouse button (i.e. right click)
-            // Highlight a rectangle of squares for deletion.
-            bounds.lowLayer = bounds.highLayer = DELETE;
-            this.layeredGrid.map(bounds, function (x, y, layer) {
-                this.layeredGrid.set(x, y, layer);
-            }.bind(this), true);
-        }.bind(this);
-
-        // Save the current X and Y coordinates.
-        currentX = clientX;
-        currentY = clientY;
-        let currentCell = this.getCell(currentX, currentY);
-
-        // If the mouse is pressed and the mouse is between cells 1 and gridsize - 1,
-        if (event.buttons === 1 || event.buttons === 2 || event.type === 'touchmove') {
-            // Ignore if not inside the canvas
-            if (this.inBounds({ clientX: clientX, clientY: clientY, })) {
-                if (startX === -1 || startY === -1) {
-                    let temp = this.getCell(currentX, currentY);
-                    startX = temp.x;
-                    startY = temp.y;
-                }
-
-
-                if (!dragging) {
-                    // don't start dragging unless the mouse has moved outside the cell
-                    if(currentCell.x === startX && currentCell.y === startY) {
-                        return;
-                    }
-                    dragging = true;
-                    this.saveCurrentState();
-                } else {
-                    // Continuously refresh to update the preview line.
-                    this.undo();
-                    this.saveCurrentState();
-                }
-
-                let endX = Math.floor((clientX - this.canvas.offsetLeft - this.cellWidth) / this.cellWidth);
-                let endY = Math.floor((clientY - this.canvas.offsetTop - this.cellHeight) / this.cellHeight);
-
-                let bounds = {
-                    left: Math.min(startX, endX),
-                    right: Math.max(startX, endX),
-                    top: Math.min(startY, endY),
-                    bottom: Math.max(startY, endY),
-                };
-
-                // Primary mouse button (i.e. left click)
-                if (event.buttons === 1 || event.type === 'touchmove') {
-                    leftMouseMoveHandler(bounds);
-                } else {
-                    rightMouseMoveHandler(bounds);
-                }
-            }
-        }
-    }
-
-    placeTerminal(event, terminal) {
-        'use strict';
-        let cell = this.getCell(currentX, currentY);
-        let oldX, oldY;
-
-        if (cell !== null && !event.ctrlKey) {
-            // First, note the current coordinates.
-            oldX = terminal.x;
-            oldY = terminal.y;
-            // Then, set the new coordinates.
-            terminal.x = cell.x;
-            terminal.y = cell.y;
-            // Set the CONTACT layer at the new coordinates.
-            this.layeredGrid.set(cell.x, cell.y, CONTACT);
-            // Unset the CONTACT layer at the old coordinates.
-            this.layeredGrid.clear(oldX, oldY, CONTACT);
-        }
-    }
-
-    ctrlCommandHandler(event) {
-        'use strict';
-        if (event.keyCode === 90) {
-            // z
-            this.undo();
-        } else if (event.keyCode === 89) {
-            // y
-            this.redo();
-        }
-    }
-
-    keydownHandler(event) {
-        'use strict';
-        let isInput  = (keyCode) => { return (keyCode >= 65) && (keyCode < 65 + this.inputs.length );    }; // Y, X, W, ...
-        let isOutput = (keyCode) => { return (keyCode <= 89) && (keyCode > 89 - this.outputs.length);    }; // A, B, C, ...
-        let isVDD    = (keyCode) => { return keyCode === 61 || keyCode === 187 || keyCode === 107;  }; // + key
-        let isGND    = (keyCode) => { return keyCode === 173 || keyCode === 189 || keyCode === 109; }; // - key
-
-        if      (event.ctrlKey)           { this.ctrlCommandHandler(event); }
-        else if (isInput(event.keyCode))  { this.placeTerminal(event, this.inputs[event.keyCode - 65]); }
-        else if (isOutput(event.keyCode)) { this.placeTerminal(event, this.outputs[89 - event.keyCode]); }
-        else if (isVDD(event.keyCode))    { this.placeTerminal(event, this.vddCell); }
-        else if (isGND(event.keyCode))    { this.placeTerminal(event, this.gndCell); }
-    }
-
-    // Don't show a context-menu when right-clicking
-    contextmenuHandler(event) {
-        'use strict';
-        if (event.button === 2) {
-            // Don't show a context menu.
-            event.preventDefault();
-        }
-    }
-
-    // Note the grid coordinates when the left mouse button is pressed.
-    // Store the m in startX and startY.
-    canvasMouseDownHandler(event) {
-        'use strict';
-        event.preventDefault();
-        let clientX, clientY;
-
-        if(event.clientX === undefined) {
-            clientX = event.changedTouches[0].clientX;
-            clientY = event.changedTouches[0].clientY;
-        } else {
-            clientX = event.clientX;
-            clientY = event.clientY;
-        }
-        if (event.button === 0 || event.button === 2 || event.type === 'touchstart') {
-            // Return if not between cells 1 and gridsize - 1
-            if (this.inBounds({ clientX: clientX, clientY: clientY, })) {
-                startX = Math.floor((clientX - this.canvas.offsetLeft - this.cellWidth) / this.cellWidth);
-                startY = Math.floor((clientY - this.canvas.offsetTop - this.cellHeight) / this.cellHeight);
-            } else {
-                startX = -1;
-                startY = -1;
-            }
-        }
-    }
-
-    // Only change dark/light mode on keyup to avoid seizure-inducing flashes from holding down space.
-    keyupHandler(event) {
-        'use strict';
-        // Toggle dark mode by pressing space
-        if (event.keyCode === 32) {
-            toggleDarkMode();
-        }
-        // Toggle useFlatColors by pressing 'f'
-        if (event.keyCode === 70) {
-            this.useFlatColors = !this.useFlatColors;
-        }
-
-        // Only do the following if CTRL is pressed.
-        if (event.ctrlKey) {
-            // Shift the LayeredGrid by pressing the arrow keys.
-            if (event.keyCode === 37) {
-                // Left
-                this.layeredGrid.shift(-1, 0);
-            }
-            if (event.keyCode === 38) {
-                // Up
-                this.layeredGrid.shift(0, -1);
-            }
-            if (event.keyCode === 39) {
-                // Right
-                this.layeredGrid.shift(1, 0);
-            }
-            if (event.keyCode === 40) {
-                // Down
-                this.layeredGrid.shift(0, 1);
-            }
-        }
-
-        // Update the truth table by pressing enter.
-        if (event.keyCode === 13) {
-            refreshTruthTable();
-        }
-    }
 }
 
 class LayeredGrid {
-    constructor(width, height, layers) {
+    constructor(diagram, width, height, layers) {
+        this.diagram = diagram;
         this.width = width;
         this.height = height;
-        this.layers = layers;
+        Diagram.layers = layers;
         this.grid = new Array(width * height * layers);
         this.defaultCell = { isSet: false, };
     }
@@ -1341,7 +1396,7 @@ class LayeredGrid {
     get(x, y, layer) {
         let cell;
 
-        if(x < 0 || x >= this.width || y < 0 || y >= this.height || layer < 0 || layer >= this.layers) {
+        if(x < 0 || x >= this.width || y < 0 || y >= this.height || layer < 0 || layer >= Diagram.layers) {
             return null;
         }
 
@@ -1357,7 +1412,7 @@ class LayeredGrid {
     // Set the value at a given coordinate
     // If it's out of bounds, do nothing
     set(x, y, layer) {
-        if(x < 0 || x >= this.width || y < 0 || y >= this.height || layer < 0 || layer >= this.layers) {
+        if(x < 0 || x >= this.width || y < 0 || y >= this.height || layer < 0 || layer >= Diagram.layers) {
             return;
         }
 
@@ -1371,11 +1426,11 @@ class LayeredGrid {
             gate: null,
         };
 
-        // Only allow one of NDIFF or PDIFF to be set
-        if(layer === PDIFF) {
-            this.clear(x, y, NDIFF);
-        } else if(layer === NDIFF) {
-            this.clear(x, y, PDIFF);
+        // Only allow one of Diagram.NDIFF or Diagram.PDIFF to be set
+        if(layer === Diagram.PDIFF) {
+            this.clear(x, y, Diagram.NDIFF);
+        } else if(layer === Diagram.NDIFF) {
+            this.clear(x, y, Diagram.PDIFF);
         }
     }
 
@@ -1383,27 +1438,27 @@ class LayeredGrid {
         let isTerminal = false;
 
         // Loop through inputs, outputs, and VDD/GND
-        isTerminal = layer === CONTACT && diagram.inputs.some(function(input) {
+        isTerminal = layer === this.diagram.Diagram.CONTACT && this.diagram.inputs.some(function(input) {
             return input.x === x && input.y === y;
         });
 
-        isTerminal = isTerminal || layer === CONTACT && diagram.outputs.some(function(output) {
+        isTerminal = isTerminal || layer === this.diagram.Diagram.CONTACT && this.diagram.outputs.some(function(output) {
             return output.x === x && output.y === y;
         });
 
-        isTerminal = isTerminal || diagram.vddCell.x === x && diagram.vddCell.y === y;
-        isTerminal = isTerminal || diagram.gndCell.x === x && diagram.gndCell.y === y;
+        isTerminal = isTerminal || this.diagram.vddCell.x === x && this.diagram.vddCell.y === y;
+        isTerminal = isTerminal || this.diagram.gndCell.x === x && this.diagram.gndCell.y === y;
 
         return isTerminal;
     }
 
     // Clear the value at a given coordinate
     // If it's out of bounds, do nothing
-    // Do not clear CONTACT for inputs, outputs, or VDD/GND
+    // Do not clear Diagram.CONTACT for inputs, outputs, or VDD/GND
     clear(x, y, layer) {
-        let outOfBounds = x < 0 || x >= this.width || y < 0 || y >= this.height || layer < 0 || layer >= this.layers;
+        let outOfBounds = x < 0 || x >= this.width || y < 0 || y >= this.height || layer < 0 || layer >= Diagram.layers;
 
-        if(outOfBounds || layer === CONTACT && this.isTerminal(x, y, layer)) {
+        if(outOfBounds || layer === this.diagram.Diagram.CONTACT && this.isTerminal(x, y, layer)) {
             return;
         }
 
@@ -1431,7 +1486,7 @@ class LayeredGrid {
         let outOfGrid = function(x, y, layer) {
             return x < 0     || x >= this.width  ||
                    y < 0     || y >= this.height || 
-                   layer < 0 || layer >= this.layers;
+                   layer < 0 || layer >= Diagram.layers;
         }.bind(this);
 
         for(let layer = bounds.lowLayer; layer <= bounds.highLayer; layer++) {
@@ -1457,7 +1512,7 @@ class LayeredGrid {
             top: 0,
             bottom: this.height - 1,
             lowLayer: 0,
-            highLayer: this.layers - 1,
+            highLayer: Diagram.layers - 1,
         };
         this.map(bounds, function(cell) {
             this.grid[cell] = null;
@@ -1475,7 +1530,7 @@ class LayeredGrid {
         let oldHeight = this.height;
         this.width = width;
         this.height = height;
-        this.grid = new Array(width * height * this.layers);
+        this.grid = new Array(width * height * Diagram.layers);
 
         // Copy the old grid into the new grid
         let bounds = {
@@ -1484,7 +1539,7 @@ class LayeredGrid {
             top: 0,
             bottom: Math.min(this.height - 1, oldHeight - 1),
             lowLayer: 0,
-            highLayer: this.layers - 1,
+            highLayer: Diagram.layers - 1,
         };
 
         for(let layer = bounds.lowLayer; layer <= bounds.highLayer; layer++) {
@@ -1499,9 +1554,9 @@ class LayeredGrid {
     // Shift the grid by a given offset
     shift(xOffset, yOffset) {
         let oldGrid = this.grid;
-        this.grid = new Array(this.width * this.height * this.layers);
+        this.grid = new Array(this.width * this.height * Diagram.layers);
 
-        for(let layer = 0; layer < this.layers; layer++) {
+        for(let layer = 0; layer < Diagram.layers; layer++) {
             for(let y = 0; y < this.height; y++) {
                 for(let x = 0; x < this.width; x++) {
                     if(x - xOffset < 0 || x - xOffset >= this.width || y - yOffset < 0 || y - yOffset >= this.height) {
@@ -1527,21 +1582,21 @@ class LayeredGrid {
                 terminal.y += yOffset;
             }
 
-            // Make sure there is still a CONTACT at the new coordinates
+            // Make sure there is still a Diagram.CONTACT at the new coordinates
             // (may have shifted off the screen)
-            this.set(terminal.x, terminal.y, CONTACT);
+            this.set(terminal.x, terminal.y, this.diagram.Diagram.CONTACT);
         }.bind(this);
 
-        diagram.inputs.forEach(function(input) {
+        this.diagram.inputs.forEach(function(input) {
             shiftTerminal(input);
         }.bind(this));
 
-        diagram.outputs.forEach(function(output) {
+        this.diagram.outputs.forEach(function(output) {
             shiftTerminal(output);
         }.bind(this));
 
-        shiftTerminal(diagram.vddCell);
-        shiftTerminal(diagram.gndCell);
+        shiftTerminal(this.diagram.vddCell);
+        shiftTerminal(this.diagram.gndCell);
     }
 }
 
@@ -1593,8 +1648,8 @@ class Node {
     constructor(cell) {
         this.cell = cell;
         this.edges = [];
-        this.isPmos = diagram.layeredGrid.get(cell.x, cell.y, PDIFF).isSet;
-        this.isNmos = diagram.layeredGrid.get(cell.x, cell.y, NDIFF).isSet;
+        this.isPmos = diagram.layeredGrid.get(cell.x, cell.y, Diagram.PDIFF).isSet;
+        this.isNmos = diagram.layeredGrid.get(cell.x, cell.y, Diagram.NDIFF).isSet;
     }
 
     // Destructor
@@ -1714,27 +1769,6 @@ class Net {
         return this.nodes.size;
     }
 }
-
-// Cycle through the following cursor colors by pressing space: PDIFF, NDIFF, POLY, METAL1, CONTACT
-// Additional colors: DELETE at index (numLayers + 0)
-let cursors = [
-    {name: 'pdiff',   color: 'rgba(118,   0, 181,   1)', flatColor: 'rgb(118,   0, 181)', selectable: true, },
-    {name: 'ndiff',   color: 'rgba(50,  205,  50,   1)', flatColor: 'rgb(50,  205,  50)', selectable: true, },
-    {name: 'poly',    color: 'rgba(255,   0,   0, 0.5)', flatColor: 'rgb(255,   0,   0)', selectable: true, },
-    {name: 'metal1',  color: 'rgba(0,   255, 255, 0.5)', flatColor: 'rgb(0,   255, 255)', selectable: true, },
-    {name: 'metal2',  color: 'rgba(255,   0, 204, 0.5)', flatColor: 'rgb(255,   0, 204)', selectable: true, },
-    {name: 'contact', color: 'rgba(204, 204, 204, 0.5)', flatColor: 'rgb(204, 204, 204)', selectable: true, },
-    {name: 'delete',  color: 'rgba(208, 160,  32, 0.5)', flatColor: 'rgb(208, 160,  32)', selectable: false,},
-];
-let numLayers = cursors.length - 1;
-let PDIFF   = 0;
-let NDIFF   = PDIFF + 1;
-let POLY    = NDIFF + 1;
-let METAL1  = POLY + 1;
-let METAL2  = METAL1 + 1;
-let CONTACT = METAL2 + 1;
-let DELETE  = numLayers;
-let cursorIndex = 0;
 
 // Grid color
 let darkModeGridColor = '#cccccc';
@@ -1889,25 +1923,25 @@ function setUpControls() {
     removeRowButton.addEventListener("click", function() {
         this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height - 1);
         document.getElementById("row-count").innerHTML = this.layeredGrid.height;
-        this.drawGrid();
-    }.bind(this));
+        this.view.drawGrid();
+    }.bind(diagram));
 
     addRowButton.addEventListener("click", function() {
         this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height + 1);
         document.getElementById("row-count").innerHTML = this.layeredGrid.height;
-        this.drawGrid();
+        this.view.drawGrid();
     }.bind(diagram));
 
     removeColumnButton.addEventListener("click", function() {
         this.layeredGrid.resize(this.layeredGrid.width - 1, this.layeredGrid.height);
         document.getElementById("column-count").innerHTML = this.layeredGrid.width;
-        this.drawGrid();
+        this.view.drawGrid();
     }.bind(diagram));
 
     addColumnButton.addEventListener("click", function() {
         this.layeredGrid.resize(this.layeredGrid.width + 1, this.layeredGrid.height);
         document.getElementById("column-count").innerHTML = this.layeredGrid.width;
-        this.drawGrid();
+        this.view.drawGrid();
     }.bind(diagram));
 
     shiftLeftButton.addEventListener("click", function() {
@@ -1927,7 +1961,7 @@ function setUpControls() {
     }.bind(diagram));
 
     changeLayerButton.addEventListener("click", function() {
-        this.changeLayer();
+        this.controller.changeLayer();
     }.bind(diagram));
 }
 
@@ -1935,7 +1969,7 @@ window.onload = function () {
     'use strict';
     // Clear local storage
     localStorage.clear();
-    diagram = new Diagram();
+    diagram = new Diagram(document.getElementById("canvas"), document.getElementById("grid-canvas"));
 
     // Get the canvas div to attach listeners to.
     let canvasContainer = document.getElementById("canvas-container");
@@ -1943,24 +1977,19 @@ window.onload = function () {
     // Set to dark mode if it is night time
     setDarkMode(new Date().getHours() > 19 || new Date().getHours() < 7);
 
-    // Initialize with a gridsize of 29 and 5 layers
-    diagram.canvas = document.getElementById("canvas");
-    diagram.ctx = diagram.canvas.getContext("2d");
-    diagram.layeredGrid = new LayeredGrid(diagram.gridWidth, diagram.gridHeight, cursors.length);
-
     // Canvas mouse event listeners.
-    canvasContainer.addEventListener("touchstart", function(e) { this.canvasMouseDownHandler(e); }.bind(diagram));
-    canvasContainer.addEventListener("touchend", function(e) { this.canvasMouseUpHandler(e); }.bind(diagram));
-    canvasContainer.addEventListener("mousedown", function(e) { this.canvasMouseDownHandler(e); }.bind(diagram));
-    canvasContainer.addEventListener("mouseup", function(e) { this.canvasMouseUpHandler(e); }.bind(diagram));
-    canvasContainer.addEventListener("contextmenu", function(e) { this.contextmenuHandler(e); }.bind(diagram));
+    canvasContainer.addEventListener("touchstart",  function(e) { this.mousedownHandler(e);   }.bind(diagram.controller));
+    canvasContainer.addEventListener("touchend",    function(e) { this.mouseupHandler(e);     }.bind(diagram.controller));
+    canvasContainer.addEventListener("mousedown",   function(e) { this.mousedownHandler(e);   }.bind(diagram.controller));
+    canvasContainer.addEventListener("mouseup",     function(e) { this.mouseupHandler(e);     }.bind(diagram.controller));
+    canvasContainer.addEventListener("contextmenu", function(e) { this.contextmenuHandler(e); }.bind(diagram.controller));
 
     // Some of these pertain the the canvas, but we don't know whether
     // it will be selected.
-    window.addEventListener("touchmove", function(e) { this.mousemoveHandler(e); }.bind(diagram));
-    window.addEventListener("keydown", function(e) { this.keydownHandler(e); }.bind(diagram));
-    window.addEventListener("keyup", function(e) { this.keyupHandler(e); }.bind(diagram));
-    window.addEventListener("mousemove", function(e) { this.mousemoveHandler(e); }.bind(diagram));
+    window.addEventListener("touchmove", function(e) { this.mousemoveHandler(e); }.bind(diagram.controller));
+    window.addEventListener("mousemove", function(e) { this.mousemoveHandler(e); }.bind(diagram.controller));
+    window.addEventListener("keydown",   function(e) { this.keydownHandler(e);   }.bind(diagram.controller));
+    window.addEventListener("keyup",     function(e) { this.keyupHandler(e);     }.bind(diagram.controller));
 
     // Set up the evaluate button.
     button = document.getElementById("generate-truth-table");
@@ -2006,23 +2035,23 @@ window.onload = function () {
         }
     };
 
-    // Set CONTACT at the coordinates of each input and output.
+    // Set Diagram.CONTACT at the coordinates of each input and output.
     diagram.inputs.forEach(function(input) {
-        diagram.layeredGrid.set(input.x, input.y, CONTACT);
+        diagram.layeredGrid.set(input.x, input.y, diagram.Diagram.CONTACT);
     });
     diagram.outputs.forEach(function(output) {
-        diagram.layeredGrid.set(output.x, output.y, CONTACT);
+        diagram.layeredGrid.set(output.x, output.y, diagram.Diagram.CONTACT);
     });
 
-    // Set the CONTACT layer on the VDD and GND cells.
-    diagram.layeredGrid.set(diagram.vddCell.x, diagram.vddCell.y, CONTACT);
-    diagram.layeredGrid.set(diagram.gndCell.x, diagram.gndCell.y, CONTACT);
+    // Set the Diagram.CONTACT layer on the VDD and GND cells.
+    diagram.layeredGrid.set(diagram.vddCell.x, diagram.vddCell.y, diagram.Diagram.CONTACT);
+    diagram.layeredGrid.set(diagram.gndCell.x, diagram.gndCell.y, diagram.Diagram.CONTACT);
 
     setUpControls();
 
-    diagram.refreshCanvas();
+    diagram.view.refreshCanvas();
     // 60 fps
-    setInterval(diagram.refreshCanvas.bind(diagram), 16);
+    setInterval(diagram.view.refreshCanvas.bind(diagram.view), 16);
 
     if(window.runTestbench) {
         runTestbench();

@@ -66,14 +66,14 @@ function runTestbench(runTo) {
 
     // Set up the testbench
     while(cursors[cursorIndex].name !== "metal1") {
-        diagram.changeLayer();
+        diagram.controller.changeLayer();
     }
 
-    function mapX(x) {return x*diagram.cellWidth + diagram.canvas.offsetLeft + diagram.cellWidth;}
-    function mapY(y) {return y*diagram.cellHeight + diagram.canvas.offsetTop + diagram.cellHeight;}
+    function mapX(x) {return x*diagram.view.cellWidth + diagram.view.canvas.offsetLeft + diagram.view.cellWidth;}
+    function mapY(y) {return y*diagram.view.cellHeight + diagram.view.canvas.offsetTop + diagram.view.cellHeight;}
 
     let events = [
-        // Clear the diagram.canvas
+        // Clear the canvas
         ["mousedown", {button:  2, clientX: mapX(1),   clientY: mapY(1)}],
         ["mousemove", {buttons: 2, clientX: mapX(29),  clientY: mapY(29)}],
         ["mouseup",   {button:  2, clientX: mapX(29),  clientY: mapY(29)}],
@@ -1402,7 +1402,7 @@ function runTestbench(runTo) {
     startTime = Date.now();
     for(let ii = 0; ii < events.length && testVector < runTo; ii++) {
         if(events[ii] === 0) {
-            diagram.changeLayer();
+            diagram.controller.changeLayer();
             continue;
         }
 
