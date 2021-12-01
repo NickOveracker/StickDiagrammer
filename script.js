@@ -910,7 +910,7 @@ class Diagram {
         }.bind(this));
 
         // set the outer border of the canvas to the cursor color
-        this.this.drawBorder();
+        this.drawBorder();
         this.drawLabels();
     }
 
