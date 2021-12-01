@@ -1050,6 +1050,7 @@ class Diagram {
     // If the right (or secondary) button, use the same coordinates to delete a line of cells.
     canvasMouseUpHandler(event) {
         'use strict';
+        event.preventDefault();
         let clientX, clientY;
 
         if(event.clientX === undefined) {
@@ -1105,6 +1106,7 @@ class Diagram {
     // Show a preview line when the user is dragging the mouse.
     mousemoveHandler(event) {
         'use strict';
+        event.preventDefault();
         let clientX, clientY;
 
         if(event.clientX === undefined) {
@@ -1251,6 +1253,7 @@ class Diagram {
     // Store the m in startX and startY.
     canvasMouseDownHandler(event) {
         'use strict';
+        event.preventDefault();
         let clientX, clientY;
 
         if(event.clientX === undefined) {
@@ -1260,7 +1263,6 @@ class Diagram {
             clientX = event.clientX;
             clientY = event.clientY;
         }
-        event.preventDefault();
         if (event.button === 0 || event.button === 2 || event.type === 'touchstart') {
             // Return if not between cells 1 and gridsize - 1
             if (this.inBounds({ clientX: clientX, clientY: clientY, })) {
