@@ -621,11 +621,22 @@ class Diagram {
     setTerminals(transistor, x, y, layer) {
         'use strict';
         let cell = this.layeredGrid.get(x, y, layer);
+        
         if (cell.isSet) {
-            if (transistor.term1 === undefined) {
-                transistor.term1 = cell;
+            if(this.layeredGrid.get(x, y, Diagram.POLY).isSet) {
+                // If the foolish user set a wide poly, then skip this cell and move on.
+                // This will help us get to the other side of the poly.
+                let newX, newY;
+                newX = (x - transistor.x) + x;
+                newY = (y - transistor.y) + y;
+                this.setTerminals(transistor, newX, newY, layer);
             } else {
-                transistor.term2 = cell;
+                // Set this cell as the terminal.
+                if (transistor.term1 === undefined) {
+                    transistor.term1 = cell;
+                } else {
+                    transistor.term2 = cell;
+                }
             }
         }
     }
