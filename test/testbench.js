@@ -1450,6 +1450,8 @@ function runTestbench(runTo) {
             diagram.outputs[0].x = 13;
             diagram.outputs[0].y = 7;
         },
+
+        2,
         "110Z110Z110Z110Z",
    ];
 
