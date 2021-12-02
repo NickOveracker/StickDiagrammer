@@ -53,12 +53,13 @@ function runTestbench(runTo) {
                     "Open-circuit #1",
                     "Open-circuit #2",
                     "Open-circuit #3",
-                    "Direct input #1:",
-                    "Direct input #2:",
-                    "Direct input #3:",
-                    "Direct input #4:",
+                    "Direct input #1",
+                    "Direct input #2",
+                    "Direct input #3",
+                    "Direct input #4",
                     "A*B*(C+D)",
-                    "AOI4"
+                    "AOI4",
+                    "Between transistors",
     ];
     runTo = runTo || testCases.length;
 
@@ -1394,6 +1395,16 @@ function runTestbench(runTo) {
 
         2,
         "1110111011100000",
+
+        /** Between transistors **/
+        1,
+        function() {
+            diagram.outputs[0].x = 15;
+            diagram.outputs[0].y = 24;
+        },
+
+        2,
+        "000000000000111Z",
    ];
 
     /** RUN TESTBENCH **/
