@@ -20,6 +20,7 @@
 * Software entropy must not increase.
 
 ## Feature Wishlist
+* Logical effort calculations (allow user to set constants)
 * Colorblind-friendly mode
 * Warn user when pulling up with NMOS or pulling down with PMOS.
 * Arbitrary number of I/O.
