@@ -60,6 +60,7 @@ function runTestbench(runTo) {
                     "A*B*(C+D)",
                     "AOI4",
                     "Between transistors",
+                    "SR latch Q"
     ];
     runTo = runTo || testCases.length;
 
@@ -1405,6 +1406,42 @@ function runTestbench(runTo) {
 
         2,
         "000000000000111Z",
+
+        /** SR Latch **/
+        1,
+        function() {
+            diagram.inputs[1].x  = 19;
+            diagram.inputs[1].y  = 8;
+            diagram.inputs[2].x  = 25;
+            diagram.inputs[2].y  = 8;
+            diagram.inputs[3].x  = 25;
+            diagram.inputs[3].y  = 8;
+            diagram.outputs[0].x = 11;
+            diagram.outputs[0].y = 8;
+        },
+
+        // POLY
+        ["mousedown", {button:  0, clientX: mapX(9),  clientY: mapY(3)}],
+        ["mousemove", {buttons: 1, clientX: mapX(13), clientY: mapY(3)}],
+        ["mouseup",   {button:  0, clientX: mapX(13), clientY: mapY(3)}],
+
+        ["mousedown", {button:  0, clientX: mapX(13), clientY: mapY(4)}],
+        ["mouseup",   {button:  0, clientX: mapX(13), clientY: mapY(4)}],
+
+        ["mousedown", {button:  0, clientX: mapX(11), clientY: mapY(9)}],
+        ["mousemove", {buttons: 1, clientX: mapX(15), clientY: mapY(9)}],
+        ["mouseup",   {button:  0, clientX: mapX(15), clientY: mapY(9)}],
+
+        0,
+        0,
+        0,
+
+        // CONTACT
+        ["mousedown", {button:  0, clientX: mapX(11), clientY: mapY(9)}],
+        ["mouseup",   {button:  0, clientX: mapX(11), clientY: mapY(9)}],
+
+        2,
+        "110Z110Z110Z110Z"
    ];
 
     /** RUN TESTBENCH **/
