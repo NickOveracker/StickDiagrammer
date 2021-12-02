@@ -418,22 +418,22 @@ class Diagram {
         // Unset all transistor terminals
         let bounds = {
             left: 0,
-            right: this.diagram.layeredGrid.width - 1,
+            right: this.layeredGrid.width - 1,
             top: 0,
-            bottom: this.diagram.layeredGrid.height - 1,
-            lowLayer: 0,
-            highLayer: this.diagram.layeredGrid.layers - 1,
+            bottom: this.layeredGrid.height - 1,
+            lowLayer:  Math.min(Diagram.PDIFF, Diagram.NDIFF),
+            highLayer: Math.max(Diagram.PDIFF, Diagram.NDIFF),
         };
 
         this.layeredGrid.map(bounds, function (x, y, layer) {
             // Set the terminals of the cell to null.
-            this.layeredGrid.get(x, y, Diagram.NDIFF).term1 = null;
-            this.layeredGrid.get(x, y, Diagram.NDIFF).term2 = null;
-            this.layeredGrid.get(x, y, Diagram.NDIFF).gate  = null;
+            this.layeredGrid.get(x, y, layer).term1 = null;
+            this.layeredGrid.get(x, y, layer).term2 = null;
+            this.layeredGrid.get(x, y, layer).gate  = null;
 
-            this.layeredGrid.get(x, y, Diagram.PDIFF).term1 = null;
-            this.layeredGrid.get(x, y, Diagram.PDIFF).term2 = null;
-            this.layeredGrid.get(x, y, Diagram.PDIFF).gate  = null;
+            this.layeredGrid.get(x, y, layer).term1 = null;
+            this.layeredGrid.get(x, y, layer).term2 = null;
+            this.layeredGrid.get(x, y, layer).gate  = null;
         }.bind(this));
     }
 
