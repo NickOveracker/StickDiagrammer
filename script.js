@@ -414,6 +414,27 @@ class Diagram {
         this.gndNet.clear();
         this.nmos.clear();
         this.pmos.clear();
+
+        // Unset all transistor terminals
+        let bounds = {
+            left: 0,
+            right: this.layeredGrid.width - 1,
+            top: 0,
+            bottom: this.layeredGrid.height - 1,
+            lowLayer:  Math.min(Diagram.PDIFF, Diagram.NDIFF),
+            highLayer: Math.max(Diagram.PDIFF, Diagram.NDIFF),
+        };
+
+        this.layeredGrid.map(bounds, function (x, y, layer) {
+            // Set the terminals of the cell to null.
+            this.layeredGrid.get(x, y, layer).term1 = null;
+            this.layeredGrid.get(x, y, layer).term2 = null;
+            this.layeredGrid.get(x, y, layer).gate  = null;
+
+            this.layeredGrid.get(x, y, layer).term1 = null;
+            this.layeredGrid.get(x, y, layer).term2 = null;
+            this.layeredGrid.get(x, y, layer).gate  = null;
+        }.bind(this));
     }
 
     // Push all terminal nets to the this.netlist.
@@ -663,7 +684,6 @@ class Diagram {
                 cell.term1 = undefined;
                 cell.term2 = undefined;
 
-                // TODO: Account for wide poly.
                 // Check the cells above and below.
                 this.setTerminals(cell, cell.x, cell.y - 1, layer);
                 this.setTerminals(cell, cell.x, cell.y + 1, layer);
@@ -1387,16 +1407,6 @@ class DiagramView {
                     this.decorateContact(x, y);
                 }
             }
-
-            // Set the terminals of the cell to null.
-            // TODO: Move this side-effect somewhere else.
-            this.diagram.layeredGrid.get(x, y, Diagram.NDIFF).term1 = null;
-            this.diagram.layeredGrid.get(x, y, Diagram.NDIFF).term2 = null;
-            this.diagram.layeredGrid.get(x, y, Diagram.NDIFF).gate  = null;
-
-            this.diagram.layeredGrid.get(x, y, Diagram.PDIFF).term1 = null;
-            this.diagram.layeredGrid.get(x, y, Diagram.PDIFF).term2 = null;
-            this.diagram.layeredGrid.get(x, y, Diagram.PDIFF).gate  = null;
         }.bind(this));
 
         // set the outer border of the canvas to the cursor color
