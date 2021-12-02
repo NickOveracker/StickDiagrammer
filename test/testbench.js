@@ -60,7 +60,8 @@ function runTestbench(runTo) {
                     "A*B*(C+D)",
                     "AOI4",
                     "Between transistors",
-                    "SR latch Q"
+                    "SR latch Q",
+                    "SR latch Q'",
     ];
     runTo = runTo || testCases.length;
 
@@ -1421,27 +1422,35 @@ function runTestbench(runTo) {
         },
 
         // POLY
-        ["mousedown", {button:  0, clientX: mapX(9),  clientY: mapY(3)}],
-        ["mousemove", {buttons: 1, clientX: mapX(13), clientY: mapY(3)}],
-        ["mouseup",   {button:  0, clientX: mapX(13), clientY: mapY(3)}],
+        ["mousedown", {button:  0, clientX: mapX(10), clientY: mapY(4)}],
+        ["mousemove", {buttons: 1, clientX: mapX(14), clientY: mapY(4)}],
+        ["mouseup",   {button:  0, clientX: mapX(14), clientY: mapY(4)}],
 
-        ["mousedown", {button:  0, clientX: mapX(13), clientY: mapY(4)}],
-        ["mouseup",   {button:  0, clientX: mapX(13), clientY: mapY(4)}],
+        ["mousedown", {button:  0, clientX: mapX(14), clientY: mapY(5)}],
+        ["mouseup",   {button:  0, clientX: mapX(14), clientY: mapY(5)}],
 
-        ["mousedown", {button:  0, clientX: mapX(11), clientY: mapY(9)}],
-        ["mousemove", {buttons: 1, clientX: mapX(15), clientY: mapY(9)}],
-        ["mouseup",   {button:  0, clientX: mapX(15), clientY: mapY(9)}],
+        ["mousedown", {button:  0, clientX: mapX(12), clientY: mapY(10)}],
+        ["mousemove", {buttons: 1, clientX: mapX(16), clientY: mapY(10)}],
+        ["mouseup",   {button:  0, clientX: mapX(16), clientY: mapY(10)}],
 
         0,
         0,
         0,
 
         // CONTACT
-        ["mousedown", {button:  0, clientX: mapX(11), clientY: mapY(9)}],
-        ["mouseup",   {button:  0, clientX: mapX(11), clientY: mapY(9)}],
+        ["mousedown", {button:  0, clientX: mapX(12), clientY: mapY(10)}],
+        ["mouseup",   {button:  0, clientX: mapX(12), clientY: mapY(10)}],
 
         2,
-        "110Z110Z110Z110Z"
+        "101Z101Z101Z101Z",
+
+        /** SR Latch Q' **/
+        1,
+        function() {
+            diagram.outputs[0].x = 13;
+            diagram.outputs[0].y = 7;
+        },
+        "110Z110Z110Z110Z",
    ];
 
     /** RUN TESTBENCH **/
