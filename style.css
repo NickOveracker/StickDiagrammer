@@ -6,6 +6,10 @@ html, body {
     overflow: hidden;
 } /* just to be sure these are full screen*/
 
+select {
+    text-align: center;
+}
+
 .dark {
     background-color: #000;
     color: #fff;

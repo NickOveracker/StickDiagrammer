@@ -92,8 +92,8 @@ class Diagram {
         this.outputNodes = [];
         this.nmos = new Set();
         this.pmos = new Set();
-        this.netVDD = new Net("VDD", false);
-        this.netGND = new Net("GND", false);
+        this.vddNet = new Net("VDD", false);
+        this.gndNet = new Net("GND", false);
         this.inputNets = [];
         this.outputNets = [];
         this.triggers = [];
@@ -410,8 +410,8 @@ class Diagram {
         this.graph.clear();
 
         // Clear the net sets.
-        this.netVDD.clear();
-        this.netGND.clear();
+        this.vddNet.clear();
+        this.gndNet.clear();
         this.nmos.clear();
         this.pmos.clear();
     }
@@ -423,8 +423,8 @@ class Diagram {
         this.netlist.length = 0;
 
         // Add all terminal nets.
-        this.netlist.push(this.netVDD);
-        this.netlist.push(this.netGND);
+        this.netlist.push(this.vddNet);
+        this.netlist.push(this.gndNet);
 
         this.inputNets.forEach(function(net) {
             this.netlist.push(net);
@@ -443,35 +443,30 @@ class Diagram {
         this.outputNets.forEach(function (net) { net.clear(); });
 
         // Add rail nodes to the this.graph.
-        this.vddNode = this.graph.addNode(this.layeredGrid.get(this.vddCell.x, this.vddCell.y, Diagram.CONTACT));
-        this.gndNode = this.graph.addNode(this.layeredGrid.get(this.gndCell.x, this.gndCell.y, Diagram.CONTACT));
+        this.vddNode = this.graph.addNode(this.layeredGrid.get(this.vddCell.x, this.vddCell.y, Diagram.CONTACT), true);
+        this.gndNode = this.graph.addNode(this.layeredGrid.get(this.gndCell.x, this.gndCell.y, Diagram.CONTACT), true);
 
-        this.netVDD.addNode(this.vddNode);
-        this.netGND.addNode(this.gndNode);
+        this.vddNet.addNode(this.vddNode);
+        this.gndNet.addNode(this.gndNode);
 
         // Add the VDD and GND nets.
         // Loop through every VDD cell and add to the VDD net.
-        this.setRecursively(this.layeredGrid.get(this.vddCell.x, this.vddCell.y, Diagram.CONTACT), this.netVDD);
+        this.setRecursively(this.layeredGrid.get(this.vddCell.x, this.vddCell.y, Diagram.CONTACT), this.vddNet);
 
         // Loop through every GND cell and add to the GND net.
-        this.setRecursively(this.layeredGrid.get(this.gndCell.x, this.gndCell.y, Diagram.CONTACT), this.netGND);
+        this.setRecursively(this.layeredGrid.get(this.gndCell.x, this.gndCell.y, Diagram.CONTACT), this.gndNet);
 
         // Loop through the terminals and set their respective nets.
-        Diagram.layers.forEach(function (_, layer) {
-            if(layer === Diagram.DELETE) {
-                return;
+        this.inputs.forEach(function(input, index) {
+            if (this.layeredGrid.get(input.x, input.y, layer).isSet) {
+                this.setRecursively(this.layeredGrid.get(input.x, input.y, Diagram.CONTACT), this.inputNets[index]);
             }
-            this.inputs.forEach(function(input, index) {
-                if (this.layeredGrid.get(input.x, input.y, layer).isSet) {
-                    this.setRecursively(this.layeredGrid.get(input.x, input.y, layer), this.inputNets[index]);
-                }
-            }.bind(this));
+        }.bind(this));
 
-            this.outputs.forEach(function(output, index) {
-                if (this.layeredGrid.get(output.x, output.y, layer).isSet) {
-                    this.setRecursively(this.layeredGrid.get(output.x, output.y, layer), this.outputNets[index]);
-                }
-            }.bind(this));
+        this.outputs.forEach(function(output, index) {
+            if (this.layeredGrid.get(output.x, output.y, layer).isSet) {
+                this.setRecursively(this.layeredGrid.get(output.x, output.y, Diagram.CONTACT), this.outputNets[index]);
+            }
         }.bind(this));
 
         this.resetNetlist();
@@ -479,7 +474,7 @@ class Diagram {
         // Add output nodes to the this.graph.
         this.outputNodes.length = 0;
         this.outputs.forEach(function(output, index) {
-            this.outputNodes[index] = this.graph.addNode(this.layeredGrid.get(output.x, output.y, Diagram.CONTACT));
+            this.outputNodes[index] = this.graph.addNode(this.layeredGrid.get(output.x, output.y, Diagram.CONTACT), true);
             this.outputNets[index].addNode(this.outputNodes[index]);
         }.bind(this));
 
@@ -538,13 +533,13 @@ class Diagram {
 
             let net = transistor.cell[termA];
 
-            // If net is this.netVDD, add an edge to this.vddNode.
-            if (net === this.netVDD) {
+            // If net is this.vddNet, add an edge to this.vddNode.
+            if (net === this.vddNet) {
                 transistor.addEdge(this.vddNode);
             }
 
-            // If net is this.netGND, add an edge to this.gndNode.
-            if (net === this.netGND) {
+            // If net is this.gndNet, add an edge to this.gndNode.
+            if (net === this.gndNet) {
                 transistor.addEdge(this.gndNode);
             }
 
@@ -1696,9 +1691,9 @@ class Graph {
     }
 
    // Add a node to the diagram.graph.
-    addNode(cell) {
+    addNode(cell, suppressTransistor) {
         'use strict';
-        let node = new Node(cell);
+        let node = new Node(cell, suppressTransistor);
         this.nodes.push(node);
         return node;
     }
@@ -1727,12 +1722,12 @@ class Graph {
 
 // Each diagram.graph node is a transistor, VDD, GND, or an output.
 class Node {
-    constructor(cell) {
+    constructor(cell, suppressTransistor) {
         'use strict';
         this.cell = cell;
         this.edges = [];
-        this.isPmos = diagram.layeredGrid.get(cell.x, cell.y, Diagram.PDIFF).isSet;
-        this.isNmos = diagram.layeredGrid.get(cell.x, cell.y, Diagram.NDIFF).isSet;
+        this.isPmos = !suppressTransistor && diagram.layeredGrid.get(cell.x, cell.y, Diagram.PDIFF).isSet;
+        this.isNmos = !suppressTransistor && diagram.layeredGrid.get(cell.x, cell.y, Diagram.NDIFF).isSet;
     }
 
     // Destructor
