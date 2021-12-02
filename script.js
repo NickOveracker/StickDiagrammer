@@ -458,15 +458,11 @@ class Diagram {
 
         // Loop through the terminals and set their respective nets.
         this.inputs.forEach(function(input, index) {
-            if (this.layeredGrid.get(input.x, input.y, Diagram.CONTACT).isSet) {
-                this.setRecursively(this.layeredGrid.get(input.x, input.y, Diagram.CONTACT), this.inputNets[index]);
-            }
+            this.setRecursively(this.layeredGrid.get(input.x, input.y, Diagram.CONTACT), this.inputNets[index]);
         }.bind(this));
 
         this.outputs.forEach(function(output, index) {
-            if (this.layeredGrid.get(output.x, output.y, layer).isSet) {
-                this.setRecursively(this.layeredGrid.get(output.x, output.y, Diagram.CONTACT), this.outputNets[index]);
-            }
+            this.setRecursively(this.layeredGrid.get(output.x, output.y, Diagram.CONTACT), this.outputNets[index]);
         }.bind(this));
 
         this.resetNetlist();
