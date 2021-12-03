@@ -1474,7 +1474,23 @@ function runTestbench(runTo) {
         ["mousedown", {button:  2, clientX: mapX(1),   clientY: mapY(1)}],
         ["mousemove", {buttons: 2, clientX: mapX(29),  clientY: mapY(29)}],
         ["mouseup",   {button:  2, clientX: mapX(29),  clientY: mapY(29)}],
-   
+
+        0,
+        function() {
+            diagram.inputs[-1].x  = 26;
+            diagram.inputs[-1].y  = 6;
+            diagram.inputs[0].x  = 7;
+            diagram.inputs[0].y  = 6;
+            diagram.inputs[1].x  = 28;
+            diagram.inputs[1].y  = 28;
+            diagram.inputs[2].x  = 28;
+            diagram.inputs[2].y  = 28;
+            diagram.outputs[-1].x = 12;
+            diagram.outputs[-1].y = 16;
+            diagram.gndCell.x    = 0;
+            diagram.gndCell.y    = 24;
+        },
+
         ["mousedown",{"button":0,"clientX":mapX(2),"clientY":mapY(5)}],
         ["mouseup",{"button":0,"clientX":mapX(2),"clientY":mapY(5)}],
         ["mousedown",{"button":0,"clientX":mapX(2),"clientY":mapY(6)}],
@@ -1792,22 +1808,6 @@ function runTestbench(runTo) {
         ["mousedown",{"button":0,"clientX":mapX(6),"clientY":mapY(9)}],
         ["mousemove",{"buttons":1,"clientX":mapX(25),"clientY":mapY(9)}],
         ["mouseup",{"button":0,"clientX":mapX(25),"clientY":mapY(9)}],
-
-        1,
-        function() {
-            diagram.inputs[0].x  = 26;
-            diagram.inputs[0].y  = 6;
-            diagram.inputs[1].x  = 7;
-            diagram.inputs[1].y  = 6;
-            diagram.inputs[2].x  = 28;
-            diagram.inputs[2].y  = 28;
-            diagram.inputs[3].x  = 28;
-            diagram.inputs[3].y  = 28;
-            diagram.outputs[0].x = 12;
-            diagram.outputs[0].y = 16;
-            diagram.gndCell.x    = 1;
-            diagram.gndCell.y    = 25;
-        },
 
         2,
         "ZZ01ZZ01ZZ01ZZ01",
