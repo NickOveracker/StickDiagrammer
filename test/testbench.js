@@ -1422,13 +1422,13 @@ function runTestbench(runTo) {
             diagram.outputs[0].y = 8;
         },
 
-        ["mousedown", {button:  2, clientX: mapX(1),  clientY: mapY(14)}],
-        ["mousemove", {buttons: 2, clientX: mapX(28), clientY: mapY(28)}],
-        ["mouseup",   {button:  2, clientX: mapX(28), clientY: mapY(28)}],
+        ["mousedown", {button:  2, clientX: mapX(2),  clientY: mapY(15)}],
+        ["mousemove", {buttons: 2, clientX: mapX(29), clientY: mapY(29)}],
+        ["mouseup",   {button:  2, clientX: mapX(29), clientY: mapY(29)}],
 
-        ["mousedown", {button:  2, clientX: mapX(22), clientY: mapY(0)}],
-        ["mousemove", {buttons: 2, clientX: mapX(28), clientY: mapY(13)}],
-        ["mouseup",   {button:  2, clientX: mapX(28), clientY: mapY(13)}],
+        ["mousedown", {button:  2, clientX: mapX(23), clientY: mapY(1)}],
+        ["mousemove", {buttons: 2, clientX: mapX(29), clientY: mapY(14)}],
+        ["mouseup",   {button:  2, clientX: mapX(29), clientY: mapY(14)}],
 
         // POLY
         ["mousedown", {button:  0, clientX: mapX(10), clientY: mapY(4)}],
