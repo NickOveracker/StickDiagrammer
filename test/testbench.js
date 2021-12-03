@@ -1756,7 +1756,7 @@ function runTestbench(runTo) {
         ["mouseup",{"button":2,"clientX":746,"clientY":637},],
         ["mousedown",{"button":0,"clientX":819,"clientY":465},],
         ["mousemove",{"buttons":1,"clientX":812,"clientY":134},],
-        ["mouseup",{"button":0,"clientX":812,"clientY":134}]
+        ["mouseup",{"button":0,"clientX":812,"clientY":134},],
 
         2,
         "ZZZZZZZZZZZZZZZZ",
