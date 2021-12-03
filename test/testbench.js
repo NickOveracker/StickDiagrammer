@@ -1475,7 +1475,7 @@ function runTestbench(runTo) {
         ["mousemove", {buttons: 2, clientX: mapX(29),  clientY: mapY(29)}],
         ["mouseup",   {button:  2, clientX: mapX(29),  clientY: mapY(29)}],
 
-        0,
+        1,
         function() {
             diagram.inputs[0].x  = 26;
             diagram.inputs[0].y  = 6;
