@@ -384,6 +384,11 @@ function runTestbench(runTo) {
                 diagram.inputs[ii].x = 0;
                 diagram.inputs[ii].y = 0;
             }
+
+            diagram.vddCell.x    = 1;
+            diagram.vddCell.y    = 1;
+            diagram.gndCell.x    = 1;
+            diagram.gndCell.y    = 27;
         },
 
         // Clean up old contacts from terminals
