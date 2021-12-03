@@ -117,10 +117,16 @@ function recordEvent(event) {
     }
 }
 
-// Record these events.
-document.getElementById("canvas-container").addEventListener("mousedown", recordEvent);
-document.getElementById("canvas-container").addEventListener("mouseup", recordEvent);
-window.addEventListener("touchmove", recordEvent);
-window.addEventListener("mousemove", recordEvent);
-window.addEventListener("keydown", recordEvent);
-window.addEventListener("keyup", recordEvent);
+
+let oldOnload = window.onload;
+window.onload = function() {
+    oldOnload();
+
+    // Record these events.
+    document.getElementById("canvas-container").addEventListener("mousedown", recordEvent);
+    document.getElementById("canvas-container").addEventListener("mouseup", recordEvent);
+    window.addEventListener("touchmove", recordEvent);
+    window.addEventListener("mousemove", recordEvent);
+    window.addEventListener("keydown", recordEvent);
+    window.addEventListener("keyup", recordEvent);
+};
