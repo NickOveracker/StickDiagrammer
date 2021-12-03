@@ -132,7 +132,8 @@ function getRecording() {
             outArr[outArr.length - 1][1].button = event.button;
         }
     });
-    return JSON.stringify(outArr);
+    str = JSON.stringify(outArr);
+    console.log(str.replace(/^\[(\[.*\])\]$/, "$1").replaceAll("}],", "}],\n") + ",");
 }
 
 
