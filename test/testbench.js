@@ -1422,6 +1422,14 @@ function runTestbench(runTo) {
             diagram.outputs[0].y = 8;
         },
 
+        ["mousedown", {button:  2, clientX: mapX(1),  clientY: mapY(14)}],
+        ["mousemove", {buttons: 2, clientX: mapX(28), clientY: mapY(28)}],
+        ["mouseup",   {button:  2, clientX: mapX(28), clientY: mapY(28)}],
+
+        ["mousedown", {button:  2, clientX: mapX(22), clientY: mapY(0)}],
+        ["mousemove", {buttons: 2, clientX: mapX(28), clientY: mapY(13)}],
+        ["mouseup",   {button:  2, clientX: mapX(28), clientY: mapY(13)}],
+
         // POLY
         ["mousedown", {button:  0, clientX: mapX(10), clientY: mapY(4)}],
         ["mousemove", {buttons: 1, clientX: mapX(14), clientY: mapY(4)}],
@@ -1758,8 +1766,24 @@ function runTestbench(runTo) {
         ["mousemove",{"buttons":1,"clientX":812,"clientY":134},],
         ["mouseup",{"button":0,"clientX":812,"clientY":134},],
 
+        1,
+        function() {
+            diagram.inputs[0].x  = 26;
+            diagram.inputs[0].y  = 6;
+            diagram.inputs[1].x  = 7;
+            diagram.inputs[1].y  = 6;
+            diagram.inputs[2].x  = 28;
+            diagram.inputs[2].y  = 28;
+            diagram.inputs[3].x  = 28;
+            diagram.inputs[3].y  = 28;
+            diagram.outputs[0].x = 12;
+            diagram.outputs[0].y = 16;
+            diagram.gndCell.x    = 1;
+            diagram.gndCell.y    = 25;
+        },
+
         2,
-        "ZZZZZZZZZZZZZZZZ",
+        "ZZ01ZZ01ZZ01ZZ01",
    ];
 
     /** RUN TESTBENCH **/
