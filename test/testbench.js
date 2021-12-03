@@ -1748,14 +1748,14 @@ function runTestbench(runTo) {
 		["mousemove",{"buttons":1,"clientX":486,"clientY":613},],
 		["mouseup",{"button":0,"clientX":486,"clientY":613},],
 		["mousedown",{"button":2,"clientX":549,"clientY":629},],
-		["mouseup",{"button":2,"clientX":549,"clientY":629},],
+		["mouseup",{"button":2,"clientX":549,"clientY":629},],/*
 		["mousedown",{"button":0,"clientX":496,"clientY":615},],
 		["mousedown",{"button":0,"clientX":824,"clientY":390},],
 		["mousemove",{"buttons":1,"clientX":818,"clientY":461},],
 		["mouseup",{"button":0,"clientX":818,"clientY":461},],
 		["mousedown",{"button":0,"clientX":811,"clientY":131},],
 		["mousemove",{"buttons":1,"clientX":817,"clientY":390},],
-		["mouseup",{"button":0,"clientX":817,"clientY":390},],
+		["mouseup",{"button":0,"clientX":817,"clientY":390},],*/
 
         2,
         "ZZZZZZZZZZZZZZZZ",
