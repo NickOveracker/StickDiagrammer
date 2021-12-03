@@ -122,8 +122,8 @@ function getRecording() {
     userInput.forEach(function(event) {
         outArr.push([
             event.type, {
-                clientX: event.clientX,
-                clientY: event.clientY,
+                clientX: Math.ceil((event.clientX - diagram.view.canvas.offsetLeft - diagram.view.cellWidth)  / diagram.view.cellWidth),
+                clientY: Math.ceil((event.clientY - diagram.view.canvas.offsetTop  - diagram.view.cellHeight) / diagram.view.cellHeight),
             },
         ]);
         if(outArr[outArr.length - 1][0].includes("move")) {
