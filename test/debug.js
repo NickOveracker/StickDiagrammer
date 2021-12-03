@@ -117,6 +117,24 @@ function recordEvent(event) {
     }
 }
 
+function getRecording() {
+    outArr = [];
+    userInput.forEach(function(event) {
+        outArr.push([
+            event.type, {
+                clientX: event.clientX,
+                clientY: event.clientY,
+            },
+        ]);
+        if(outArr[outArr.length - 1][0].includes("move")) {
+            outArr[outArr.length - 1][1].buttons = event.buttons;
+        } else {
+            outArr[outArr.length - 1][1].button = event.button;
+        }
+    });
+    return JSON.stringify(outArr);
+}
+
 
 let oldOnload = window.onload;
 window.onload = function() {
