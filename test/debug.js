@@ -12,22 +12,22 @@ Graph.prototype.print = function() {
     console.log('}');
 }
 
-function printNodeNodeMap() {
+Diagram.prototype.printNodeNodeMap = function() {
     let str = "   ";
-    for(let ii = 0; ii < nodeNodeMap.length; ii++) {
+    for(let ii = 0; ii < this.nodeNodeMap.length; ii++) {
         str += ii + " ";
         if(ii < 9) str += " ";
     }
     str += "\n";
-    for(let ii = 0; ii < nodeNodeMap.length; ii++) {
+    for(let ii = 0; ii < this.nodeNodeMap.length; ii++) {
         str += ii + " ";
         if(ii <= 9) str += " ";
-        for(let jj = 0; jj < nodeNodeMap.length; jj++) {
-            if(nodeNodeMap[ii][jj] === null) {
+        for(let jj = 0; jj < this.nodeNodeMap.length; jj++) {
+            if(this.nodeNodeMap[ii][jj] === null) {
                 str += "?  ";
-            } else if(nodeNodeMap[ii][jj] === undefined) {
+            } else if(this.nodeNodeMap[ii][jj] === undefined) {
                 str += "   ";
-            } else if(nodeNodeMap[ii][jj] === true) {
+            } else if(this.nodeNodeMap[ii][jj] === true) {
                 str += "1  ";
             } else {
                 str += "0  ";
@@ -40,9 +40,9 @@ function printNodeNodeMap() {
 }
 
 // Print a grid with in all cells that are in a given net.
-function printGrid(netNum) {
+Diagram.prototype.printGrid = function(netNum) {
     let grid = [];
-    let net = netlist[netNum];
+    let net = this.netlist[netNum];
     let name = "X";
     for(let ii = 0; ii < layeredGrid.height; ii++) {
         grid[ii] = [];
@@ -72,17 +72,15 @@ function printGrid(netNum) {
     console.log(str);
 }
 
-getCell = function(clientX, clientY) {
+DiagramController.prototype.getCellAtCursor = function(screenX, screenY) {
+    'use strict';
     // Ignore if not inside the canvas
-    if (clientX > canvas.offsetLeft + cellWidth &&
-        clientX < canvas.offsetLeft + canvas.width - cellWidth &&
-        clientY > canvas.offsetTop + cellHeight &&
-        clientY < canvas.offsetTop + canvas.height - cellHeight)
-    {
-        let x = Math.floor((clientX - canvas.offsetLeft - cellWidth) / cellWidth);
-        let y = Math.floor((clientY - canvas.offsetTop - cellHeight) / cellHeight);
+    if (this.inBounds(screenX, screenY)) {
+
+        let x = Math.floor((screenX - this.view.canvas.offsetLeft - this.view.cellWidth) / this.view.cellWidth);
+        let y = Math.floor((screenY - this.view.canvas.offsetTop - this.view.cellHeight) / this.view.cellHeight);
         PRINT_MOUSE_POS && console.log(x, y);
-        return {x: x, y: y};
+        return { x: x, y: y, };
     }
     return null;
 }
@@ -101,3 +99,53 @@ Node.prototype.getName = function() {
 
     return name;
 }
+
+window.userInput = [];
+window.recordMode = false;
+
+function recordEvent(event) {
+    if(window.recordMode) {
+        if(event.type === "mousemove") {
+            if(!diagram.controller.dragging) {
+                return;
+            }
+            else if(userInput[userInput.length - 1].type === event.type) {
+                userInput.pop();
+            }
+        }
+        userInput.push(event);
+    }
+}
+
+function getRecording() {
+    outArr = [];
+    userInput.forEach(function(event) {
+        outArr.push([
+            event.type, {
+                clientX: Math.ceil((event.clientX - diagram.view.canvas.offsetLeft - diagram.view.cellWidth)  / diagram.view.cellWidth),
+                clientY: Math.ceil((event.clientY - diagram.view.canvas.offsetTop  - diagram.view.cellHeight) / diagram.view.cellHeight),
+            },
+        ]);
+        if(outArr[outArr.length - 1][0].includes("move")) {
+            outArr[outArr.length - 1][1].buttons = event.buttons;
+        } else {
+            outArr[outArr.length - 1][1].button = event.button;
+        }
+    });
+    str = JSON.stringify(outArr);
+    console.log(str.replace(/^\[(\[.*\])\]$/, "$1").replaceAll("}],", "}],\n") + ",");
+}
+
+
+let oldOnload = window.onload;
+window.onload = function() {
+    oldOnload();
+
+    // Record these events.
+    document.getElementById("canvas-container").addEventListener("mousedown", recordEvent);
+    document.getElementById("canvas-container").addEventListener("mouseup", recordEvent);
+    window.addEventListener("touchmove", recordEvent);
+    window.addEventListener("mousemove", recordEvent);
+    window.addEventListener("keydown", recordEvent);
+    window.addEventListener("keyup", recordEvent);
+};
