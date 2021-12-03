@@ -62,6 +62,7 @@ function runTestbench(runTo) {
                     "Between transistors",
                     "SR latch Q",
                     "SR latch Q'",
+                    "D flip-flop",
     ];
     runTo = runTo || testCases.length;
 
@@ -1754,6 +1755,9 @@ function runTestbench(runTo) {
         ["mousedown",{"button":0,"buttons":1,"clientX":811,"clientY":131},],
         ["mousemove",{"button":0,"buttons":1,"clientX":817,"clientY":390},],
         ["mouseup",{"button":0,"buttons":0,"clientX":817,"clientY":390},],
+
+        2,
+        "ZZZZZZZZZZZZZZZZ",
    ];
 
     /** RUN TESTBENCH **/
