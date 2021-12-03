@@ -1477,16 +1477,16 @@ function runTestbench(runTo) {
 
         0,
         function() {
-            diagram.inputs[-1].x  = 26;
-            diagram.inputs[-1].y  = 6;
-            diagram.inputs[0].x  = 7;
+            diagram.inputs[0].x  = 26;
             diagram.inputs[0].y  = 6;
-            diagram.inputs[1].x  = 28;
-            diagram.inputs[1].y  = 28;
+            diagram.inputs[1].x  = 7;
+            diagram.inputs[1].y  = 6;
             diagram.inputs[2].x  = 28;
             diagram.inputs[2].y  = 28;
-            diagram.outputs[-1].x = 12;
-            diagram.outputs[-1].y = 16;
+            diagram.inputs[3].x  = 28;
+            diagram.inputs[3].y  = 28;
+            diagram.outputs[0].x = 12;
+            diagram.outputs[0].y = 16;
             diagram.gndCell.x    = 0;
             diagram.gndCell.y    = 24;
         },
