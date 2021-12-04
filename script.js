@@ -1256,8 +1256,8 @@ class DiagramView {
         'use strict';
         // Place the grid canvas behind the main canvas.
         // Same size as the canvas.
-        this.gridCanvas.style.width = this.canvas.style.width;
-        this.gridCanvas.style.height = this.canvas.style.height;
+        this.gridCanvas.width = this.canvas.width;
+        this.gridCanvas.height = this.canvas.height;
         this.gridCanvas.style.position = 'absolute';
         this.gridCanvas.style.left = this.canvas.offsetLeft + 'px';
         this.gridCanvas.style.top = this.canvas.offsetTop + 'px';
@@ -1325,13 +1325,13 @@ class DiagramView {
     // Resize the canvas to the largest square that fits in the window.
     resizeCanvas() {
         'use strict';
-        let windowWidth = window.innerWidth;
-        let windowHeight = window.innerHeight;
-        let windowSize = Math.min(windowWidth, windowHeight);
-        let sizeChanged = this.canvas.style.width !== windowSize || this.canvas.style.height !== windowSize;
+        let containerWidth = document.getElementById('canvas-container').clientWidth;
+        let containerHeight = document.getElementById('canvas-container').clientHeight;
+        let containerSize = Math.min(containerWidth, containerHeight);
+        let sizeChanged = this.canvas.width !== containerSize || this.canvas.height !== containerSize;
 
-        this.canvas.width = windowSize;
-        this.canvas.height = windowSize;
+        this.canvas.width = containerSize;
+        this.canvas.height = containerSize;
 
         if(sizeChanged) {
             this.drawGrid();
