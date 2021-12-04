@@ -1126,18 +1126,23 @@ class DiagramController {
     }
 
     // Change the layer/cursor color
-    changeLayer() {
+    // layerIndex is optional; if not provided, the next layer is used
+    changeLayer(layerIndex) {
         'use strict';
-        // Go to the next selectable index.
-        let tempIndex = this.cursorIndex + 1;
+        if(layerIndex === undefined) {
+            // Go to the next selectable index.
+            let tempIndex = this.cursorIndex + 1;
 
-        while(tempIndex >= Diagram.layers.length || !Diagram.layers[tempIndex].selectable) {
-            tempIndex = tempIndex >= Diagram.layers.length - 1 ? 0 : tempIndex + 1;
+            while(tempIndex >= Diagram.layers.length || !Diagram.layers[tempIndex].selectable) {
+                tempIndex = tempIndex >= Diagram.layers.length - 1 ? 0 : tempIndex + 1;
+            }
+            this.cursorIndex = tempIndex;
+
+            // set the outer border of the canvas to the new cursor color
+            this.view.drawBorder();
+        } else {
+            this.cursorIndex = layerIndex;
         }
-        this.cursorIndex = tempIndex;
-
-        // set the outer border of the canvas to the new cursor color
-        this.view.drawBorder();
     }
 
     ctrlCommandHandler(event) {
@@ -2106,9 +2111,12 @@ function setUpControls() {
         this.layeredGrid.shift(0, 1);
     }.bind(diagram);
 
-    /*changeLayerButton.addEventListener("onmouseup", function() {
-        this.controller.changeLayer();
-    }.bind(diagram));*/
+    document.getElementById("colorChange").children.forEach(function(element) {
+        element.onmouseup = function(event, index) {
+            event.preventDefault();
+            diagram.controller.changeLayer(index);
+        }
+    }.bind(diagram));
 
     eraseModeButton.onmouseup = function(event) {
         event.preventDefault();
