@@ -1256,8 +1256,8 @@ class DiagramView {
         'use strict';
         // Place the grid canvas behind the main canvas.
         // Same size as the canvas.
-        this.gridCanvas.style.width = this.canvas.width;
-        this.gridCanvas.style.height = this.canvas.height;
+        this.gridCanvas.style.width = this.canvas.style.width;
+        this.gridCanvas.style.height = this.canvas.style.height;
         this.gridCanvas.style.position = 'absolute';
         this.gridCanvas.style.left = this.canvas.offsetLeft + 'px';
         this.gridCanvas.style.top = this.canvas.offsetTop + 'px';
@@ -1328,7 +1328,7 @@ class DiagramView {
         let windowWidth = window.innerWidth;
         let windowHeight = window.innerHeight;
         let windowSize = Math.min(windowWidth, windowHeight);
-        let sizeChanged = this.canvas.width !== windowSize || this.canvas.height !== windowSize;
+        let sizeChanged = this.canvas.style.width !== windowSize || this.canvas.style.height !== windowSize;
 
         this.canvas.width = windowSize;
         this.canvas.height = windowSize;
