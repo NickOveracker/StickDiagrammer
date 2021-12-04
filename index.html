@@ -9,42 +9,8 @@
     <script src="script.js"></script>
     <link rel="stylesheet" href="style2.css">
 </head>
+
 <body>
-   <!---------<div id="instructions" class="sidebar left open">
-        <div id="instructions-text" class="sidebar-contents">
-            <h1>Instructions</h1>
-            <ul>
-                <li>Left-click to paint a cell with the selected layer.
-                    <ul><li>Left-click and drag to draw a line.</li></ul>
-                </li>
-
-                <li>Right-click to clear all layers on the selected cell.
-                <ul><li>Right-click and drag to clear all cells in the selected area.</li></ul>
-                </li>
-
-                <li>Right-click without dragging away from any painted cell to change layers.</li>
-                
-                <li>Point at a cell and type "=" or "+" to move the VDD contact to that cell.</li>
-
-                <li>Point at a cell and type "-" to move the GND contact to that cell.</li>
-
-                <li>Point at a cell and type "A", "B", "C", "D", or "Y" to move the chosen contact to that cell.</li>
-
-                <li>Click "Evaluate" to generate a truth table for the painted diagram.</li>
-
-                <li>Press the Spacebar to toggle dark mode.</li>
-
-                <li><a href="https://ko-fi.com/twentynine">Toss a coin to your Witcher.</a></li>
-            </ul>
-        </div>
-        <div id="instructions-close" class="toggle-button">
-            <i id="instructions-close-label" class="fas fa-chevron-left toggle-button-label"></i>
-        </div>
-    </div>
-
-    ---------->
-
-
 
 	<!-----Header------------>
 	<div class="header">
@@ -55,206 +21,108 @@
 	</div>
 	<!-----Header-END-------->
 
-    
-
 	<section class="main">
 	<div class="main-1">
 
-<!------------hide-canvas----------
-    <div id="canvas-container">
-        <canvas id="grid-canvas"></canvas>
-        <canvas id="canvas"></canvas>
-    </div>
 
-    ---------->
+	
+	<!---------canvas-sample (width:600px height 600px--------->
+	<div class="sample">
+		<div class="sample-content"></div>
+	</div>
+	<!-------cancas end--------->
+	</div>
 
-<!-----------------
-    <div id="dashboard" class="sidebar right open">
-        <div id="dashboard-close" class="toggle-button">
-            <i id="dashboard-close-label" class="fas fa-chevron-right toggle-button-label"></i>
-        </div>
-        <div class="sidebar-contents">
-            <div id="controls">
-                &nbsp;<hr>
-                <div id="row-controls" class="half-width">
-                    <button id="add-row" class="control-button" tabindex="-1">
-                        <i class="fas fa-plus"></i>
-                    </button>
-                    Rows: <span id="row-count">29</span>
-                    <button id="remove-row" class="control-button" tabindex="-1">
-                        <i class="fas fa-minus"></i>
-                    </button>
-                </div>
-                <div id="column-controls" class="half-width">
-                    <button id="add-column" class="control-button" tabindex="-1">
-                        <i class="fas fa-plus"></i>
-                    </button>
-                    Columns: <span id="column-count">29</span>
-                    <button id="remove-column" class="control-button" tabindex="-1">
-                        <i class="fas fa-minus"></i>
-                    </button>
-                </div>
-                <hr>&nbsp;<hr>
-                <div id="shift-controls">
-                    Shift grid:
-                    <button id="shift-up" class="control-button" tabindex="-1">
-                        <i class="fas fa-arrow-up"></i>
-                    </button>
-                    <button id="shift-left" class="half-width control-button" tabindex="-1">
-                        <i class="fas fa-arrow-left"></i>
-                    </button>
-                    <button id="shift-right" class="half-width control-button" tabindex="-1">
-                        <i class="fas fa-arrow-right"></i>
-                    </button>
-                    <button id="shift-down" class="control-button" tabindex="-1">
-                        <i class="fas fa-arrow-down"></i>
-                    </button>
-                </div>
-                <hr>&nbsp;<hr>
-                <div id="layer-controls" class="half-width">
-                    Change layer:
-                    <button id="change-layer" class="control-button" tabindex="-1">
-                        <i class="fas fa-layer-group"></i>
-                    </button>
-                </div>
-                <div id="mode-controls" class="half-width">
-                    Current mode:
-                    <button id="erase-toggle" class="control-button" tabindex="-1">
-                        <i class="fas fa-paint-brush"></i>
-                    </button>
-                </div>
-                <hr>&nbsp;<hr>
-                <div id="terminal-dropdown">
-                    <label for="terminal-select" class="full-width">Place terminal:</label>
+	<!-------Right-side-------->
+	
 
-                    <div id="terminal-dropdown-list" class="half-width">
-                        <select id="terminal-select" class="control-button full-width" tabindex="-1" name="terminal-select">
-                            <option value="0">A</option>
-                            <option value="1">B</option>
-                            <option value="2">C</option>
-                            <option value="3">D</option>
-                            <option value="4">Y</option>
-                            <option value="5">VDD</option>
-                            <option value="6">GND</option>
-                        </select>
-                    </div>
-                    <div id="terminal-dropdown-button" class="half-width">
-                        <button id="terminal-select-button" class="control-button" tabindex="-1">
-                            <i class="fas fa-map-pin"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div id="truth-table-container">
-                <button id="generate-truth-table" class="control-button" tabindex="-1">Evaluate</button>
-                <table id="truth-table"></table>
-            </div>
-        </div>
-    </div>
-    ---------->
-	<section class="main">
-        <div class="main-1">
-    
-    
-        
-        <!---------canvas-sample (width:600px height 600px--------->
-        <div class="sample">
-            <div class="sample-content"></div>
-        </div>
-        <!-------cancas end--------->
-        </div>
-    
-        <!-------Right-side-------->
-        
-    
-        <section class="controls">
-            
-            <div class="rowBtn-1">
-            <!---row-btn--->
-            <div class="rowBtn">
-                <div class="row-content">
-                    <h3>Row <span id="row-number">30</span></h3>
-                    
-                </div>
-                <div class="row-icon">
-                    <i class="fas fa-plus icon-back"></i>
-                    <i class="fas fa-minus icon-back"></i>
-                </div>
-            </div>
-            <!------>
-            <!---colum-btn--->
-            <div class="rowBtn">
-                <div class="row-content">
-                    <h3>Columns <span id="row-number">30</span></h3>
-                    
-                </div>
-                <div class="row-icon">
-                    <i class="fas fa-plus icon-back"></i>
-                    <i class="fas fa-minus icon-back"></i>
-                </div>
-            </div>
-            <!------>
-            </div>
-    
-    
-            <!---Shift grid-btn--->
-            <div class="rowBtn-2">
-                <div class="row-content">
-                    <h3>Shift grid</h3>
-                </div>
-                <div class="row-icon">
-                    <i class="fas fa-chevron-up icon-back"></i>
-                    <i class="fas fa-chevron-right icon-back"></i>
-                    <i class="fas fa-chevron-left icon-back"></i>
-                    <i class="fas fa-chevron-down icon-back"></i>
-                </div>
-            </div>
-            <!------>
-    
-            <!---colorBtn----->
-        <div class="colorChange" id="colorChange">
-            <i class="fas fa-circle"></i>
-            <i class="fas fa-circle"></i>
-            <i class="fas fa-circle"></i>
-            <i class="fas fa-circle"></i>
-            <i class="fas fa-circle"></i>
-        </div>
-    
-        <!---colorBtn END----->
-    
-        <!-----Edit-section----->
-        <div class="edit-btn">
-            <div class="edit-btn-content">
-                <i class="fas fa-paint-brush edit-back"></i>
-                <h5>Paint</h5>
-            </div>
-            <div class="edit-btn-content">
-                <i class="fas fa-eraser edit-back"></i>
-                <h5>Erace</h5>
-            </div>
-            <div class="edit-btn-content">
-                <i class="fas fa-edit edit-back"></i>
-                <h5>Edit</h5>
-            </div>
-        </div>
-    
-        <!-----Edit-section-END----->
-    
-        <div class="evaluate-btn" id="evaluate-btn">Evaluate</div>
-    
-    
-        </section>
-    
-    
-    
-    
-    
-    
-        <!-------Right-side-END-------->
-    
-        </section>
+	<section class="controls">
+		
+		<div class="rowBtn-1">
+		<!---row-btn--->
+		<div class="rowBtn">
+			<div class="row-content">
+				<h3>Row <span id="row-number">30</span></h3>
+				
+			</div>
+			<div class="row-icon">
+				<i class="fas fa-plus icon-back"></i>
+				<i class="fas fa-minus icon-back"></i>
+			</div>
+		</div>
+		<!------>
+		<!---colum-btn--->
+		<div class="rowBtn">
+			<div class="row-content">
+				<h3>Columns <span id="row-number">30</span></h3>
+				
+			</div>
+			<div class="row-icon">
+				<i class="fas fa-plus icon-back"></i>
+				<i class="fas fa-minus icon-back"></i>
+			</div>
+		</div>
+		<!------>
+		</div>
 
 
+		<!---Shift grid-btn--->
+		<div class="rowBtn-2">
+			<div class="row-content">
+				<h3>Shift grid</h3>
+			</div>
+			<div class="row-icon">
+				<i class="fas fa-chevron-up icon-back"></i>
+				<i class="fas fa-chevron-right icon-back"></i>
+				<i class="fas fa-chevron-left icon-back"></i>
+				<i class="fas fa-chevron-down icon-back"></i>
+			</div>
+		</div>
+		<!------>
+
+		<!---colorBtn----->
+	<div class="colorChange" id="colorChange">
+		<i class="fas fa-circle"></i>
+		<i class="fas fa-circle"></i>
+		<i class="fas fa-circle"></i>
+		<i class="fas fa-circle"></i>
+		<i class="fas fa-circle"></i>
+	</div>
+
+	<!---colorBtn END----->
+
+	<!-----Edit-section----->
+	<div class="edit-btn">
+		<div class="edit-btn-content">
+			<i class="fas fa-paint-brush edit-back"></i>
+			<h5>Paint</h5>
+		</div>
+		<div class="edit-btn-content">
+			<i class="fas fa-eraser edit-back"></i>
+			<h5>Erace</h5>
+		</div>
+		<div class="edit-btn-content">
+			<i class="fas fa-edit edit-back"></i>
+			<h5>Edit</h5>
+		</div>
+	</div>
+
+	<!-----Edit-section-END----->
+
+	<div class="evaluate-btn" id="evaluate-btn">Evaluate</div>
+
+
+	</section>
+
+
+
+
+
+
+	<!-------Right-side-END-------->
+
+	</section>
 
 </body>
+
 </html>
