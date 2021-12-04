@@ -2059,28 +2059,28 @@ function setUpControls() {
     removeRowButton.onmouseup = function(event) {
         event.preventDefault();
         this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height - 1);
-        document.getElementById("row-number").innerHTML = this.layeredGrid.height;
+        document.getElementById("num-rows").innerHTML = this.layeredGrid.height;
         this.view.drawGrid();
     }.bind(diagram);
 
     addRowButton.onmouseup = function(event) {
         event.preventDefault();
         this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height + 1);
-        document.getElementById("row-number").innerHTML = this.layeredGrid.height;
+        document.getElementById("num-rows").innerHTML = this.layeredGrid.height;
         this.view.drawGrid();
     }.bind(diagram);
 
     removeColumnButton.onmouseup = function(event) {
         event.preventDefault();
         this.layeredGrid.resize(this.layeredGrid.width - 1, this.layeredGrid.height);
-        document.getElementById("col-number").innerHTML = this.layeredGrid.width;
+        document.getElementById("num-cols").innerHTML = this.layeredGrid.width;
         this.view.drawGrid();
     }.bind(diagram);
 
     addColumnButton.onmouseup = function(event) {
         event.preventDefault();
         this.layeredGrid.resize(this.layeredGrid.width + 1, this.layeredGrid.height);
-        document.getElementById("col-number").innerHTML = this.layeredGrid.width;
+        document.getElementById("num-cols").innerHTML = this.layeredGrid.width;
         this.view.drawGrid();
     }.bind(diagram);
 
@@ -2205,8 +2205,8 @@ window.onload = function () {
     diagram.layeredGrid.set(diagram.vddCell.x, diagram.vddCell.y, Diagram.CONTACT);
     diagram.layeredGrid.set(diagram.gndCell.x, diagram.gndCell.y, Diagram.CONTACT);
 
-    document.getElementById("row-number").innerHTML = diagram.layeredGrid.height;
-    document.getElementById("row-number").innerHTML = diagram.layeredGrid.width;
+    document.getElementById("num-rows").innerHTML = diagram.layeredGrid.height;
+    document.getElementById("num-cols").innerHTML = diagram.layeredGrid.width;
     setUpControls();
 
     diagram.view.refreshCanvas();
