@@ -2111,7 +2111,7 @@ function setUpControls() {
         this.layeredGrid.shift(0, 1);
     }.bind(diagram);
 
-    document.getElementById("colorChange").children.forEach(function(element) {
+    Array.from(document.getElementById("colorChange").children).forEach(function(element) {
         element.onmouseup = function(event, index) {
             event.preventDefault();
             diagram.controller.changeLayer(index);
