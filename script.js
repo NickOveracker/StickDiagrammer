@@ -2205,8 +2205,8 @@ window.onload = function () {
     diagram.layeredGrid.set(diagram.vddCell.x, diagram.vddCell.y, Diagram.CONTACT);
     diagram.layeredGrid.set(diagram.gndCell.x, diagram.gndCell.y, Diagram.CONTACT);
 
-    document.getElementById("row-number").innerHTML = this.layeredGrid.height;
-    document.getElementById("row-number").innerHTML = this.layeredGrid.width;
+    document.getElementById("row-number").innerHTML = diagram.layeredGrid.height;
+    document.getElementById("row-number").innerHTML = diagram.layeredGrid.width;
     setUpControls();
 
     diagram.view.refreshCanvas();
