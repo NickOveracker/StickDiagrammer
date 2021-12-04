@@ -1256,6 +1256,8 @@ class DiagramView {
         'use strict';
         // Place the grid canvas behind the main canvas.
         // Same size as the canvas.
+        this.gridCanvas.width = this.canvas.width;
+        this.gridCanvas.height = this.canvas.height;
         this.gridCanvas.style.width = this.canvas.width + 'px';
         this.gridCanvas.style.height = this.canvas.height + 'px';
         this.gridCanvas.style.position = 'absolute';
@@ -1278,7 +1280,7 @@ class DiagramView {
             this.gridCtx.strokeStyle = lightModeGridColor;
         }
 
-        for (let ii = 2; ii <= Math.max(this.diagram.layeredGrid.width, this.diagram.layeredGrid.height); ii++) {
+        for (let ii = 1; ii <= Math.max(this.diagram.layeredGrid.width, this.diagram.layeredGrid.height); ii++) {
             if(ii <= this.diagram.layeredGrid.width) {
                 this.gridCtx.beginPath();
                 this.gridCtx.moveTo(ii * this.cellWidth, 0);
