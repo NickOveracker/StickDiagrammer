@@ -2116,6 +2116,7 @@ function setUpControls() {
             event.preventDefault();
             diagram.controller.changeLayer(index);
         }
+        element.style.color = Diagram.layers[index].flatColor;
     }.bind(diagram));
 
     eraseModeButton.onmouseup = function(event) {

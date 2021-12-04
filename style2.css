@@ -188,29 +188,11 @@
 .fa-circle{
 	font-size: 30px;
 	margin: 10px;
-	color: #9400D3;
-
 }
 
 .fa-circle:hover{
 	opacity: .7;
 	transition: .5;
-}
-
-.fa-circle:nth-child(2n){
-	color: #32CD32;
-}
-
-.fa-circle:nth-child(3n){
-	color: #FF0000;
-}
-
-.fa-circle:nth-child(4n){
-	color: #00FFFF;
-}
-
-.fa-circle:nth-child(5n){
-	color: #FF00CC;
 }
 
 /*-------Right-side-END--------*/
