@@ -1283,14 +1283,14 @@ class DiagramView {
         for (let ii = 1; ii <= Math.max(this.diagram.layeredGrid.width, this.diagram.layeredGrid.height); ii++) {
             if(ii <= this.diagram.layeredGrid.width) {
                 this.gridCtx.beginPath();
-                this.gridCtx.moveTo(ii * this.cellWidth, 0);
-                this.gridCtx.lineTo(ii * this.cellWidth, this.gridCanvas.height);
+                this.gridCtx.moveTo(ii * this.cellWidth, this.cellHeight);
+                this.gridCtx.lineTo(ii * this.cellWidth, this.gridCanvas.height - this.cellHeight);
                 this.gridCtx.stroke();
             }
             if(ii <= this.diagram.layeredGrid.height) {
                 this.gridCtx.beginPath();
-                this.gridCtx.moveTo(0, ii * this.cellHeight);
-                this.gridCtx.lineTo(this.gridCanvas.width, ii * this.cellHeight);
+                this.gridCtx.moveTo(this.cellWidth, ii * this.cellHeight);
+                this.gridCtx.lineTo(this.gridCanvas.width - this.cellWidth, ii * this.cellHeight);
                 this.gridCtx.stroke();
             }
         }
