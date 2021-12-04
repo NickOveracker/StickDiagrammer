@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@600&display=swap');
+
 * { margin:0; padding:0; } /* to remove the top and left whitespace */
 
 html, body {
@@ -232,7 +234,7 @@ canvas {
 	display: flex;
 	justify-content: center;
 	position: fixed;
-	top: 20px;
+	top: 10px;
 	
 }
 
@@ -260,16 +262,16 @@ canvas {
 
 .logo{
 	position: fixed;
-	left: 72%;
+	left: 80%;
 	font-family: 'Josefin Sans', sans-serif;
 	right: 30px;
-	font-size: 25px;
+	font-size: 22px;
 	margin-top: 10px;
 }
 
 #menu-bar{
 	position: fixed;
-	left: 90%;
+	left: 95%;
 
 
 }
@@ -290,3 +292,5 @@ canvas {
 
 
 /*--------Header-end----------*/
+
+
