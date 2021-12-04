@@ -291,6 +291,169 @@ canvas {
 
 
 
+
 /*--------Header-end----------*/
 
 
+/*-------Right-side--------*/
+
+.controls{
+	width:500px;
+	position: absolute;
+	left: 60%;
+	top: 25%;
+	justify-content: center;
+	text-align: center;
+	display: flex;
+	flex-direction: column;
+}
+
+.rowBtn-1{
+	
+	display: flex;
+	justify-content: center;
+	text-align: center;
+}
+
+
+.rowBtn{
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	text-align: center;
+}
+
+.row-content{
+	display: flex;
+	justify-content:center;
+	text-align: center;
+	margin-bottom: 20px;
+	font-size: 20px;
+	font-weight: bold;
+	font-family: 'Josefin Sans', sans-serif;
+}
+
+
+
+#row-number{
+	margin-left: 10px;
+	padding: 10px;
+	box-shadow: rgba(9, 30, 66, 0.25) 0px 1px 1px, rgba(9, 30, 66, 0.13) 0px 0px 1px 1px;
+}
+
+.icon-back{
+	font-size: 18px;
+	padding: 10px;
+	color: #FFFFFF;
+	background:#221D1D;
+	width: 20px;
+	height: 20px;
+	justify-content: center;
+	text-align: center;
+	border-radius: 10%;
+}
+
+.icon-back:hover{
+	background:#4C26B8;
+	transition: .5s;
+
+}
+
+.rowBtn-2{
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	text-align: center;
+	margin-top: 10px;
+}
+
+
+.colorChange{
+	display: flex;
+	justify-content: center;
+	text-align: center;
+	width: 200px;
+	position: absolute;
+	left: 30%;
+	top: 200px;
+}
+
+.fa-circle{
+	font-size: 30px;
+	margin: 10px;
+	color: #9400D3;
+
+}
+
+.fa-circle:hover{
+	opacity: .7;
+	transition: .5;
+}
+
+.fa-circle:nth-child(2n){
+	color: #32CD32;
+}
+
+.fa-circle:nth-child(3n){
+	color: #FF0000;
+}
+
+.fa-circle:nth-child(4n){
+	color: #00FFFF;
+}
+
+.fa-circle:nth-child(5n){
+	color: #FF00CC;
+}
+
+/*-------Right-side-END--------*/
+
+/*-----Edit-section-------*/
+
+.edit-btn{
+	display: flex;
+	position: absolute;
+	top: 300px;
+	left: 20%;
+	width: 300px;
+}
+
+.edit-back{
+	font-size: 30px;
+	height: 35px;
+	width: 35px;
+	border:solid 2px;
+	padding: 10px;
+	border-radius: 100%;
+}
+
+.edit-btn-content h5{
+	font-size: 15px;
+	font-weight: bold;
+	margin-top: 5px;
+}
+/*-----Edit-section-end-------*/
+
+
+.evaluate-btn{
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+	position: absolute;
+	top: 450px;
+	font-size: 20px;
+	font-weight: bold;
+	font-family: 'Josefin Sans', sans-serif;
+	width: 300px;
+	height: 50px;
+	left: 20%;
+	background-color: #221D1D;
+	color: #FFFFFF;
+
+}
+
+.evaluate-btn:hover{
+	background-color: #4C26B8;
+	transition: 1s;
+}
