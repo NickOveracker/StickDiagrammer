@@ -2050,59 +2050,59 @@ function setUpControls() {
     //let terminalSelect = document.getElementById("terminal-select");
     //let terminalSelectButton = document.getElementById("terminal-select-button");
 
-    removeRowButton.addEventListener("click", function() {
+    removeRowButton.addEventListener("onmouseup", function() {
         this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height - 1);
         document.getElementById("row-number").innerHTML = this.layeredGrid.height;
         this.view.drawGrid();
     }.bind(diagram));
 
-    addRowButton.addEventListener("click", function() {
+    addRowButton.addEventListener("onmouseup", function() {
         this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height + 1);
         document.getElementById("row-number").innerHTML = this.layeredGrid.height;
         this.view.drawGrid();
     }.bind(diagram));
 
-    removeColumnButton.addEventListener("click", function() {
+    removeColumnButton.addEventListener("onmouseup", function() {
         this.layeredGrid.resize(this.layeredGrid.width - 1, this.layeredGrid.height);
         document.getElementById("col-number").innerHTML = this.layeredGrid.width;
         this.view.drawGrid();
     }.bind(diagram));
 
-    addColumnButton.addEventListener("click", function() {
+    addColumnButton.addEventListener("onmouseup", function() {
         this.layeredGrid.resize(this.layeredGrid.width + 1, this.layeredGrid.height);
         document.getElementById("col-number").innerHTML = this.layeredGrid.width;
         this.view.drawGrid();
     }.bind(diagram));
 
-    shiftLeftButton.addEventListener("click", function() {
+    shiftLeftButton.addEventListener("onmouseup", function() {
         this.layeredGrid.shift(-1, 0);
     }.bind(diagram));
 
-    shiftRightButton.addEventListener("click", function() {
+    shiftRightButton.addEventListener("onmouseup", function() {
         this.layeredGrid.shift(1, 0);
     }.bind(diagram));
 
-    shiftUpButton.addEventListener("click", function() {
+    shiftUpButton.addEventListener("onmouseup", function() {
         this.layeredGrid.shift(0, -1);
     }.bind(diagram));
 
-    shiftDownButton.addEventListener("click", function() {
+    shiftDownButton.addEventListener("onmouseup", function() {
         this.layeredGrid.shift(0, 1);
     }.bind(diagram));
 
-    /*changeLayerButton.addEventListener("click", function() {
+    /*changeLayerButton.addEventListener("onmouseup", function() {
         this.controller.changeLayer();
     }.bind(diagram));*/
 
-    eraseModeButton.addEventListener("click", function() {
+    eraseModeButton.addEventListener("onmouseup", function() {
         this.controller.setEraseMode(true);
     }.bind(diagram));
 
-    paintModeButton.addEventListener("click", function() {
+    paintModeButton.addEventListener("onmouseup", function() {
         this.controller.setEraseMode(false);
     }.bind(diagram));
 
-    /*terminalSelectButton.addEventListener("click", function() {
+    /*terminalSelectButton.addEventListener("onmouseup", function() {
         this.controller.setPlaceTerminalMode(parseInt(terminalSelect.value));
     }.bind(diagram));*/
 }
