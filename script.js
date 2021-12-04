@@ -2064,13 +2064,13 @@ function setUpControls() {
 
     removeColumnButton.addEventListener("click", function() {
         this.layeredGrid.resize(this.layeredGrid.width - 1, this.layeredGrid.height);
-        document.getElementById("column-count").innerHTML = this.layeredGrid.width;
+        document.getElementById("col-number").innerHTML = this.layeredGrid.width;
         this.view.drawGrid();
     }.bind(diagram));
 
     addColumnButton.addEventListener("click", function() {
         this.layeredGrid.resize(this.layeredGrid.width + 1, this.layeredGrid.height);
-        document.getElementById("column-count").innerHTML = this.layeredGrid.width;
+        document.getElementById("col-number").innerHTML = this.layeredGrid.width;
         this.view.drawGrid();
     }.bind(diagram));
 
