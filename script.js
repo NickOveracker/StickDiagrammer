@@ -1966,12 +1966,8 @@ function refreshTruthTable() {
     // Create a table with the correct number of rows and columns.
     // The first row should be a header.
     let table = buildTruthTable();
-    // create a div
-    let tableElement = document.createElement('div'); //document.getElementById("truth-table");
-    try {
-        document.appendChild(tableElement);
-    } catch (e) {
-    }
+    let tableElement = document.getElementById("truth-table");
+
     tableElement.innerHTML = "";
 
     let header = tableElement.createTHead();
