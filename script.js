@@ -1204,6 +1204,10 @@ class DiagramController {
         if (event.keyCode === 32) {
             toggleDarkMode();
         }
+        // Toggle pink mode by pressing p
+        if (event.keyCode === 80) {
+            togglePinkMode();
+        }
         // Toggle useFlatColors by pressing 'f'
         if (event.keyCode === 70) {
             this.view.useFlatColors = !this.view.useFlatColors;
@@ -2029,6 +2033,37 @@ function toggleDarkMode() {
         dd.classList.remove('dark-accent');
         td.classList.remove('dark-accent');
         id.classList.remove('dark-accent');
+    }
+}
+
+function togglePinkMode() {
+    'use strict';
+    let dd = document.getElementById("dashboard");
+    let td = document.getElementById("truth-table");
+    let id = document.getElementById("instructions");
+
+    pinkMode = !pinkMode;
+
+    if (pinkMode) {
+        document.body.classList.add('pink');
+        document.body.classList.remove('light');
+
+        dd.classList.add('pink-accent');
+        td.classList.add('pink-accent');
+        id.classList.add('pink-accent');
+        dd.classList.remove('light-accent');
+        td.classList.remove('light-accent');
+        id.classList.remove('light-accent');
+    } else {
+        document.body.classList.add('light');
+        document.body.classList.remove('pink');
+
+        dd.classList.add('light-accent');
+        td.classList.add('light-accent');
+        id.classList.add('light-accent');
+        dd.classList.remove('pink-accent');
+        td.classList.remove('pink-accent');
+        id.classList.remove('pink-accent');
     }
 }
 

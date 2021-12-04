@@ -15,6 +15,11 @@ select {
     color: #fff;
 }
 
+.pink {
+    background-color: #ff00ff;
+    color: #fff;
+}
+
 .light {
     background-color: #fff;
     color: #000;
@@ -22,6 +27,11 @@ select {
 
 .dark-accent {
     background-color: #333;
+    color: #eee;
+}
+
+.pink-accent {
+    background-color: #aa00aa;
     color: #eee;
 }
 
