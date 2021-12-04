@@ -1261,10 +1261,10 @@ class DiagramView {
         'use strict';
         // Place the grid canvas behind the main canvas.
         // Same size as the canvas.
-        this.gridCanvas.width = this.canvas.width;
-        this.gridCanvas.height = this.canvas.height;
-        this.gridCanvas.style.width = this.canvas.width + 'px';
-        this.gridCanvas.style.height = this.canvas.height + 'px';
+        this.gridCanvas.width = this.canvas.clientWidth;
+        this.gridCanvas.height = this.canvas.clientHeight;
+        this.gridCanvas.style.width = this.canvas.clientWidth + 'px';
+        this.gridCanvas.style.height = this.canvas.clientHeight + 'px';
         this.gridCanvas.style.position = 'absolute';
         this.gridCanvas.style.left = this.canvas.offsetLeft + 'px';
         this.gridCanvas.style.top = this.canvas.offsetTop + 'px';
