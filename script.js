@@ -2056,50 +2056,50 @@ function setUpControls() {
     //let terminalSelect = document.getElementById("terminal-select");
     //let terminalSelectButton = document.getElementById("terminal-select-button");
 
-    removeRowButton.onmouseup = function() {
+    removeRowButton.onmouseup = function(event) {
         event.preventDefault();
         this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height - 1);
         document.getElementById("row-number").innerHTML = this.layeredGrid.height;
         this.view.drawGrid();
     }.bind(diagram);
 
-    addRowButton.onmouseup = function() {
+    addRowButton.onmouseup = function(event) {
         event.preventDefault();
         this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height + 1);
         document.getElementById("row-number").innerHTML = this.layeredGrid.height;
         this.view.drawGrid();
     }.bind(diagram);
 
-    removeColumnButton.onmouseup = function() {
+    removeColumnButton.onmouseup = function(event) {
         event.preventDefault();
         this.layeredGrid.resize(this.layeredGrid.width - 1, this.layeredGrid.height);
         document.getElementById("col-number").innerHTML = this.layeredGrid.width;
         this.view.drawGrid();
     }.bind(diagram);
 
-    addColumnButton.onmouseup = function() {
+    addColumnButton.onmouseup = function(event) {
         event.preventDefault();
         this.layeredGrid.resize(this.layeredGrid.width + 1, this.layeredGrid.height);
         document.getElementById("col-number").innerHTML = this.layeredGrid.width;
         this.view.drawGrid();
     }.bind(diagram);
 
-    shiftLeftButton.onmouseup = function() {
+    shiftLeftButton.onmouseup = function(event) {
         event.preventDefault();
         this.layeredGrid.shift(-1, 0);
     }.bind(diagram);
 
-    shiftRightButton.onmouseup = function() {
+    shiftRightButton.onmouseup = function(event) {
         event.preventDefault();
         this.layeredGrid.shift(1, 0);
     }.bind(diagram);
 
-    shiftUpButton.onmouseup = function() {
+    shiftUpButton.onmouseup = function(event) {
         event.preventDefault();
         this.layeredGrid.shift(0, -1);
     }.bind(diagram);
 
-    shiftDownButton.onmouseup = function() {
+    shiftDownButton.onmouseup = function(event) {
         event.preventDefault();
         this.layeredGrid.shift(0, 1);
     }.bind(diagram);
@@ -2108,12 +2108,12 @@ function setUpControls() {
         this.controller.changeLayer();
     }.bind(diagram));*/
 
-    eraseModeButton.onmouseup = function() {
+    eraseModeButton.onmouseup = function(event) {
         event.preventDefault();
         this.controller.setEraseMode(true);
     }.bind(diagram);
 
-    paintModeButton.onmouseup = function() {
+    paintModeButton.onmouseup = function(event) {
         event.preventDefault();
         this.controller.setEraseMode(false);
     }.bind(diagram);
