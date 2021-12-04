@@ -1,0 +1,27 @@
+
+.header{
+	
+	display: flex;
+	justify-content: center;
+	position: fixed;
+	top: 20px;
+	
+}
+
+
+
+.instructions{
+	width: auto;
+	padding: 10px;
+	color: #FFFFFF;
+	justify-content: center;
+	text-align: center;
+	position: relative;
+	left: 30px;
+	font-size: 25px;
+	font-family: 'Josefin Sans', sans-serif;
+	background: #4C26B8;
+
+}
+
+
