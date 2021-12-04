@@ -42,6 +42,7 @@
 /* jshint browser: true */
 /* globals runTestbench: false */
 let darkMode;
+let pinkMode = false;
 let button;
 let diagram;
 
