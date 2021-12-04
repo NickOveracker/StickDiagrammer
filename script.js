@@ -1950,6 +1950,7 @@ function buildTruthTable() {
 }
 
 // Table is a 2D array of single character strings.
+// TODO
 function refreshTruthTable() {
     'use strict';
     // Update the diagram.netlist.
@@ -1960,7 +1961,10 @@ function refreshTruthTable() {
     let table = buildTruthTable();
     // create a div
     let tableElement = document.createElement('div'); //document.getElementById("truth-table");
-    document.appendChild(tableElement);
+    try {
+        document.appendChild(tableElement);
+    } catch (e) {
+    }
     tableElement.innerHTML = "";
 
     let header = tableElement.createTHead();
