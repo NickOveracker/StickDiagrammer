@@ -6,6 +6,16 @@
 	width: 100%;
 }
 
+body.dark {
+	background: #000000;
+	color: #ffffff;
+}
+
+body.light {
+	background: #ffffff;
+	color: #000000;
+}
+
 .clickable{
 	cursor: pointer;
 }

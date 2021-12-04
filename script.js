@@ -2014,12 +2014,12 @@ function setDarkMode(setToDark) {
     }
 }
 
+// TODO
 function toggleDarkMode() {
     'use strict';
-    return;
-    let dd = document.getElementById("dashboard");
-    let td = document.getElementById("truth-table");
-    let id = document.getElementById("instructions");
+    //let dd = document.getElementById("dashboard");
+    //let td = document.getElementById("truth-table");
+    //let id = document.getElementById("instructions");
 
     darkMode = !darkMode;
 
@@ -2027,22 +2027,22 @@ function toggleDarkMode() {
         document.body.classList.add('dark');
         document.body.classList.remove('light');
 
-        dd.classList.add('dark-accent');
-        td.classList.add('dark-accent');
-        id.classList.add('dark-accent');
-        dd.classList.remove('light-accent');
-        td.classList.remove('light-accent');
-        id.classList.remove('light-accent');
+        //dd.classList.add('dark-accent');
+        //td.classList.add('dark-accent');
+        //id.classList.add('dark-accent');
+        //dd.classList.remove('light-accent');
+        //td.classList.remove('light-accent');
+        //id.classList.remove('light-accent');
     } else {
         document.body.classList.add('light');
         document.body.classList.remove('dark');
 
-        dd.classList.add('light-accent');
-        td.classList.add('light-accent');
-        id.classList.add('light-accent');
-        dd.classList.remove('dark-accent');
-        td.classList.remove('dark-accent');
-        id.classList.remove('dark-accent');
+        //dd.classList.add('light-accent');
+        //td.classList.add('light-accent');
+        //id.classList.add('light-accent');
+        //dd.classList.remove('dark-accent');
+        //td.classList.remove('dark-accent');
+        //id.classList.remove('dark-accent');
     }
 }
 
@@ -2062,76 +2062,70 @@ function setUpControls() {
     let eraseModeButton = document.getElementById("erase-btn");
     //let terminalSelect = document.getElementById("terminal-select");
     //let terminalSelectButton = document.getElementById("terminal-select-button");
+    let darkModeButton = document.getElementById("dark-mode-btn");
 
-    removeRowButton.onmouseup = function(event) {
-        event.preventDefault();
+    removeRowButton.onclick = function(event) {
         this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height - 1);
         document.getElementById("num-rows").innerHTML = this.layeredGrid.height;
         this.view.drawGrid();
     }.bind(diagram);
 
-    addRowButton.onmouseup = function(event) {
-        event.preventDefault();
+    addRowButton.onclick = function(event) {
         this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height + 1);
         document.getElementById("num-rows").innerHTML = this.layeredGrid.height;
         this.view.drawGrid();
     }.bind(diagram);
 
-    removeColumnButton.onmouseup = function(event) {
-        event.preventDefault();
+    removeColumnButton.onclick = function(event) {
         this.layeredGrid.resize(this.layeredGrid.width - 1, this.layeredGrid.height);
         document.getElementById("num-cols").innerHTML = this.layeredGrid.width;
         this.view.drawGrid();
     }.bind(diagram);
 
-    addColumnButton.onmouseup = function(event) {
-        event.preventDefault();
+    addColumnButton.onclick = function(event) {
         this.layeredGrid.resize(this.layeredGrid.width + 1, this.layeredGrid.height);
         document.getElementById("num-cols").innerHTML = this.layeredGrid.width;
         this.view.drawGrid();
     }.bind(diagram);
 
-    shiftLeftButton.onmouseup = function(event) {
-        event.preventDefault();
+    shiftLeftButton.onclick = function(event) {
         this.layeredGrid.shift(-1, 0);
     }.bind(diagram);
 
-    shiftRightButton.onmouseup = function(event) {
-        event.preventDefault();
+    shiftRightButton.onclick = function(event) {
         this.layeredGrid.shift(1, 0);
     }.bind(diagram);
 
-    shiftUpButton.onmouseup = function(event) {
-        event.preventDefault();
+    shiftUpButton.onclick = function(event) {
         this.layeredGrid.shift(0, -1);
     }.bind(diagram);
 
-    shiftDownButton.onmouseup = function(event) {
-        event.preventDefault();
+    shiftDownButton.onclick = function(event) {
         this.layeredGrid.shift(0, 1);
     }.bind(diagram);
 
     Array.from(document.getElementById("colorChange").children).forEach(function(element, index) {
-        element.onmouseup = function(event) {
-            event.preventDefault();
+        element.onclick = function(event) {
             diagram.controller.changeLayer(index);
         }
         element.style.color = Diagram.layers[index].flatColor;
     }.bind(diagram));
 
-    eraseModeButton.onmouseup = function(event) {
-        event.preventDefault();
+    eraseModeButton.onclick = function(event) {
         this.controller.setEraseMode(true);
     }.bind(diagram);
 
-    paintModeButton.onmouseup = function(event) {
-        event.preventDefault();
+    paintModeButton.onclick = function(event) {
         this.controller.setEraseMode(false);
     }.bind(diagram);
 
-    /*terminalSelectButton.addEventListener("onmouseup", function() {
+    /*terminalSelectButton.addEventListener("onclick", function() {
         this.controller.setPlaceTerminalMode(parseInt(terminalSelect.value));
     }.bind(diagram));*/
+
+    darkModeButton.onclick = function(event) {
+        toggleDarkMode();
+    }
 }
 
 window.onload = function () {
