@@ -2135,7 +2135,7 @@ window.onload = function () {
     window.addEventListener("keyup",     function(e) { this.keyupHandler(e);     }.bind(diagram.controller));
 
     // Set up the evaluate button.
-    button = document.getElementById("generate-truth-table");
+    /*button = document.getElementById("generate-truth-table");
     button.onclick = function () {
         refreshTruthTable();
     };
@@ -2190,7 +2190,7 @@ window.onload = function () {
     diagram.layeredGrid.set(diagram.vddCell.x, diagram.vddCell.y, Diagram.CONTACT);
     diagram.layeredGrid.set(diagram.gndCell.x, diagram.gndCell.y, Diagram.CONTACT);
 
-    setUpControls();
+    setUpControls();*/
 
     diagram.view.refreshCanvas();
     // 60 fps
