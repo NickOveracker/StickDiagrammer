@@ -788,9 +788,9 @@ class DiagramController {
     }
 
 
-    toggleEraseMode() {
+    setEraseMode(mode) {
         'use strict';
-        this.eraseMode = !this.eraseMode;
+        this.eraseMode = mode;
     }
 
     isEraseEvent(event) {
@@ -1958,7 +1958,9 @@ function refreshTruthTable() {
     // Create a table with the correct number of rows and columns.
     // The first row should be a header.
     let table = buildTruthTable();
-    let tableElement = document.getElementById("truth-table");
+    // create a div
+    let tableElement = document.createElement('div'); //document.getElementById("truth-table");
+    document.appendChild(tableElement);
     tableElement.innerHTML = "";
 
     let header = tableElement.createTHead();
@@ -2042,20 +2044,21 @@ function setUpControls() {
     let shiftRightButton = document.getElementById("shift-right");
     let shiftUpButton = document.getElementById("shift-up");
     let shiftDownButton = document.getElementById("shift-down");
-    let changeLayerButton = document.getElementById("change-layer");
-    let eraseToggleButton = document.getElementById("erase-toggle");
-    let terminalSelect = document.getElementById("terminal-select");
-    let terminalSelectButton = document.getElementById("terminal-select-button");
+    //let changeLayerButton = document.getElementById("change-layer");
+    let paintModeButton = document.getElementById("paint-btn");
+    let eraseModeButton = document.getElementById("erase-btn");
+    //let terminalSelect = document.getElementById("terminal-select");
+    //let terminalSelectButton = document.getElementById("terminal-select-button");
 
     removeRowButton.addEventListener("click", function() {
         this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height - 1);
-        document.getElementById("row-count").innerHTML = this.layeredGrid.height;
+        document.getElementById("row-number").innerHTML = this.layeredGrid.height;
         this.view.drawGrid();
     }.bind(diagram));
 
     addRowButton.addEventListener("click", function() {
         this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height + 1);
-        document.getElementById("row-count").innerHTML = this.layeredGrid.height;
+        document.getElementById("row-number").innerHTML = this.layeredGrid.height;
         this.view.drawGrid();
     }.bind(diagram));
 
@@ -2087,25 +2090,21 @@ function setUpControls() {
         this.layeredGrid.shift(0, 1);
     }.bind(diagram));
 
-    changeLayerButton.addEventListener("click", function() {
+    /*changeLayerButton.addEventListener("click", function() {
         this.controller.changeLayer();
+    }.bind(diagram));*/
+
+    eraseModeButton.addEventListener("click", function() {
+        this.controller.setEraseMode(true);
     }.bind(diagram));
 
-    eraseToggleButton.addEventListener("click", function() {
-        let child = document.getElementById("erase-toggle").children[0];
-        this.controller.toggleEraseMode();
-        if(this.controller.eraseMode) {
-            child.classList.remove('fa-paint-brush');
-            child.classList.add('fa-eraser');
-        } else {
-            child.classList.remove('fa-eraser');
-            child.classList.add('fa-paint-brush');
-        }
+    paintModeButton.addEventListener("click", function() {
+        this.controller.setEraseMode(false);
     }.bind(diagram));
 
-    terminalSelectButton.addEventListener("click", function() {
+    /*terminalSelectButton.addEventListener("click", function() {
         this.controller.setPlaceTerminalMode(parseInt(terminalSelect.value));
-    }.bind(diagram));
+    }.bind(diagram));*/
 }
 
 window.onload = function () {
@@ -2135,13 +2134,13 @@ window.onload = function () {
     window.addEventListener("keyup",     function(e) { this.keyupHandler(e);     }.bind(diagram.controller));
 
     // Set up the evaluate button.
-    /*button = document.getElementById("generate-truth-table");
+    button = document.getElementById("evaluate-btn");
     button.onclick = function () {
         refreshTruthTable();
     };
 
     // Set up the instructions close button.
-    button = document.getElementById("instructions-close");
+    /*button = document.getElementById("instructions-close");
     button.onclick = function () {
         let label  = document.getElementById("instructions-close-label");
         let div = document.getElementById("instructions");
@@ -2176,7 +2175,7 @@ window.onload = function () {
             label.classList.remove('fa-chevron-left');
             label.classList.add('fa-chevron-right');
         }
-    };
+    };*/
 
     // Set Diagram.CONTACT at the coordinates of each input and output.
     diagram.inputs.forEach(function(input) {
@@ -2190,7 +2189,7 @@ window.onload = function () {
     diagram.layeredGrid.set(diagram.vddCell.x, diagram.vddCell.y, Diagram.CONTACT);
     diagram.layeredGrid.set(diagram.gndCell.x, diagram.gndCell.y, Diagram.CONTACT);
 
-    setUpControls();*/
+    setUpControls();
 
     diagram.view.refreshCanvas();
     // 60 fps
