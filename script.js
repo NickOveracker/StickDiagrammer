@@ -2005,6 +2005,7 @@ function setDarkMode(setToDark) {
 
 function toggleDarkMode() {
     'use strict';
+    return;
     let dd = document.getElementById("dashboard");
     let td = document.getElementById("truth-table");
     let id = document.getElementById("instructions");
@@ -2034,6 +2035,7 @@ function toggleDarkMode() {
     }
 }
 
+// TODO
 function setUpControls() {
     'use strict';
     let removeRowButton = document.getElementById("remove-row");
