@@ -2099,8 +2099,11 @@ function setUpControls() {
 
     Array.from(document.getElementById("colorChange").children).forEach(function(element, index) {
         element.onclick = function() {
+            let paintModeButton = document.getElementById("paint-mode-btn");
+
             diagram.controller.changeLayer(index);
 
+            // Set the icon.
             if (this.controller.eraseMode) {
                 paintModeButton.classList.remove('fa-eraser');
                 paintModeButton.classList.add('fa-paint-brush');
