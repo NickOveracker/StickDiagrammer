@@ -1,0 +1,400 @@
+@import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@600&display=swap');
+
+*{
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+.edit-btn-content.small {
+    display: none;
+}
+
+body.dark {
+    background: #000000;
+    color: #ffffff;
+}
+
+body.light {
+    background: #ffffff;
+    color: #000000;
+}
+
+.clickable{
+    cursor: pointer;
+}
+
+/*--------Header----------*/
+.overall-header{
+    display: flex;
+    justify-content: center;
+    position: absolute;
+    top: 20px;
+}
+
+.header-left {
+    width: 25%;
+    text-align: center;
+}
+
+.header-center {
+    width: 50%;
+    text-align: center;
+}
+
+.header-right {
+    width: 25%;
+    text-align: center;
+}
+
+.header-button {
+    font-size: 25px;
+    padding: 10px;
+    color: #FFFFFF;
+    background: linear-gradient(180deg, #832AF4 0%, rgba(80, 84, 186, 0.99) 100%);
+    border-radius: 100%;
+    width: 30px;
+    height: 30px;
+    justify-content: center;
+}
+
+.instructions{
+    width: auto;
+    padding: 10px;
+    color: #FFFFFF;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+    left: 30px;
+    font-size: 25px;
+    font-family: 'Josefin Sans', sans-serif;
+    background: #4C26B8;
+}
+
+#dark-mode{
+    margin-left: 50px;
+    margin-top: 10px;
+    font-size: 30px;
+    color: #4C26B8;
+}
+
+.logo{
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 20px;
+}
+
+/*--------Header-end----------*/
+.main{
+    display: flex;
+    
+}
+
+/*-------------Canvas---------------*/
+.sample{
+    width: 50%;
+}
+
+.sample-content{
+    width: 600px;
+    height: 600px;
+    margin-left: 50px;
+    margin-top: 100px;
+}
+/*-------------Canvas-END---------------*/
+
+
+/*-------Right-side--------*/
+.controls{
+    margin-top: 100px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.rowBtn-1{
+    display: flex;
+    justify-content: center;
+    text-align: center;
+}
+
+.rowBtn{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+}
+
+.row-content{
+    display: flex;
+    justify-content:center;
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 20px;
+    font-weight: bold;
+    font-family: 'Josefin Sans', sans-serif;
+}
+
+#row-number{
+    margin-left: 10px;
+    padding: 10px;
+    box-shadow: rgba(9, 30, 66, 0.25) 0px 1px 1px, rgba(9, 30, 66, 0.13) 0px 0px 1px 1px;
+}
+
+#col-number{
+    margin-left: 10px;
+    padding: 10px;
+    box-shadow: rgba(9, 30, 66, 0.25) 0px 1px 1px, rgba(9, 30, 66, 0.13) 0px 0px 1px 1px;
+}
+
+.icon-back{
+    font-size: 18px;
+    padding: 10px;
+    color: #FFFFFF;
+    background:#221D1D;
+    width: 20px;
+    height: 20px;
+    justify-content: center;
+    text-align: center;
+    border-radius: 10%;
+}
+
+.icon-back:hover{
+    background:#4C26B8;
+    transition: .5s;
+}
+
+.rowBtn-2{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.colorChange{
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    margin-top: 30px;
+    width: 200px;
+    order: 1;
+}
+
+.fa-circle{
+    font-size: 30px;
+    margin: 10px;
+}
+
+.fa-circle:hover{
+    opacity: .7;
+    transition: .5;
+}
+
+/*-------Right-side-END--------*/
+
+/*-----Edit-section-------*/
+
+.edit-btn{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    width: 50%;
+    position: relative;
+    margin-top: 10px;
+    order: 2;
+}
+
+.edit-back{
+    font-size: 30px;
+    height: 35px;
+    width: 35px;
+    border:solid 2px;
+    padding: 10px;
+    border-radius: 100%;
+}
+
+.edit-back.small {
+    height: 20px;
+    width: 20px;
+    font-size: 20px;
+    padding: 10px;
+}
+
+.edit-btn-content h5{
+    font-size: 15px;
+    font-weight: bold;
+    margin-top: 5px;
+}
+/*-----Edit-section-end-------*/
+
+.evaluate-btn{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+    font-family: 'Josefin Sans', sans-serif;
+    width: 300px;
+    height: 50px;
+    background-color: #221D1D;
+    color: #FFFFFF;
+    margin-top: 30px;
+    order: 3;
+}
+
+.evaluate-btn:hover{
+    background-color: #4C26B8;
+    transition: 1s;
+}
+
+/*-------responsive--------*/
+@media screen and (max-width: 1000px){
+
+    .overall-header{
+        position: relative;
+        top: 0;
+        padding-top: 20px;
+        padding-bottom: 20px;
+    }
+
+    #menu-bar{
+        left: 90%;
+    }
+
+    #dark-mode{
+        font-size: 40px;
+    }
+
+    .logo{
+        font-size: 30px;
+    }
+
+    .controls{
+        margin-top: 10px;
+    }
+    .main{
+        flex-direction: column;
+    }
+
+    .sample{
+        width: 100%;
+    }
+
+    .sample-content{
+        width:100%;
+        height: auto;
+        margin-left: 0;
+        margin-top: 0;
+    }
+
+    .row-content{
+        font-size: 20px;
+        margin-top: 20px;
+        margin-bottom: 5px;
+    }
+
+    .icon-back{
+        padding: 20px;
+        color: #FFFFFF;
+        background:#221D1D;
+        align-items: center;
+        margin: 10px;
+        margin-top: 0;
+    }
+
+    .icon-back:hover{
+        background:#4C26B8;
+        transition: .2s;
+    }
+
+    .rowBtn-2{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        text-align: center;
+        margin-top: 10px;
+    }
+
+    .colorChange{
+        display: flex;
+        justify-content: center;
+        text-align: center;
+        margin-top: 0;
+        width: 90%;
+        order: 0;
+    }
+
+    .fa-circle{
+        margin-bottom: 20px;
+    }
+
+    .edit-back{
+        font-size: 40px;
+        height: 40px;
+        width:  40px;
+        border:solid 2px;
+        padding: 20px;
+        border-radius: 100%;
+    }
+
+    .edit-btn {
+        margin-top: 0;
+        width: 100%;
+        order: 0;
+    }
+
+    .edit-btn-content h5{
+        display: none;
+    }
+
+    .edit-btn-content.small {
+        display: inline-block;
+        width: 50%;
+    }
+
+    .evaluate-btn{
+        font-size: 40px;
+        width: 100%;
+        height: 80px;
+        margin-top: 20px;
+        order: 0;
+    }
+}
+
+#truth-table-container {
+    text-align: center;
+    margin-top: 30px;
+    width: 50%;
+    padding-left: 25%;
+    padding-right: 25%;
+    overflow-y: auto;
+    font-size: 2.2vh;
+    z-index: 1;
+}
+
+#truth-table-container table {
+    border: 1px solid;
+    margin: 0;
+    padding: 0;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+#truth-table-container table .header {
+    border: 1px solid;
+    padding: 5px;
+}
+
+#truth-table-container table td {
+    border: 1px dotted;
+    width: 20%;
+}
+
+#truth-table-container table td.output {
+    border-left: 3px double;
+    border-right: 3px double;
+    font-weight: bold;
+}

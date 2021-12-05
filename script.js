@@ -788,9 +788,15 @@ class DiagramController {
     }
 
 
-    toggleEraseMode() {
+    // Toggle if mode is not provided.
+    setEraseMode(mode) {
         'use strict';
-        this.eraseMode = !this.eraseMode;
+        if(mode !== undefined) {
+            this.eraseMode = mode;
+        }
+        else {
+            this.eraseMode = !this.eraseMode;
+        }
     }
 
     isEraseEvent(event) {
@@ -849,10 +855,11 @@ class DiagramController {
 
     inBounds(screenX, screenY) {
         'use strict';
-        return screenX > this.view.canvas.offsetLeft + this.view.cellWidth &&
-               screenX < this.view.canvas.offsetLeft + this.view.canvas.width - this.view.cellWidth &&
-               screenY > this.view.canvas.offsetTop + this.view.cellHeight &&
-               screenY < this.view.canvas.offsetTop + this.view.canvas.height - this.view.cellHeight;
+        let boundingBox = this.view.canvas.getBoundingClientRect();
+        return screenX > boundingBox.left &&
+               screenX < boundingBox.right &&
+               screenY > boundingBox.top &&
+               screenY < boundingBox.bottom;
     }
 
     getCellAtCursor(screenX, screenY) {
@@ -860,8 +867,8 @@ class DiagramController {
         // Ignore if not inside the canvas
         if (this.inBounds(screenX, screenY)) {
 
-            let x = Math.floor((screenX - this.view.canvas.offsetLeft - this.view.cellWidth) / this.view.cellWidth);
-            let y = Math.floor((screenY - this.view.canvas.offsetTop - this.view.cellHeight) / this.view.cellHeight);
+            let x = Math.floor((screenX - this.view.canvas.getBoundingClientRect().left - this.view.cellWidth) / this.view.cellWidth);
+            let y = Math.floor((screenY - this.view.canvas.getBoundingClientRect().top - this.view.cellHeight) / this.view.cellHeight);
             return { x: x, y: y, };
         }
         return null;
@@ -875,8 +882,8 @@ class DiagramController {
 
         // Ignore if not inside the canvas
         if (this.inBounds(clientX, clientY)) {
-            let x = Math.floor((clientX - this.view.canvas.offsetLeft - this.view.cellWidth) / this.view.cellWidth);
-            let y = Math.floor((clientY - this.view.canvas.offsetTop - this.view.cellHeight) / this.view.cellHeight);
+            let x = Math.floor((clientX - this.view.canvas.getBoundingClientRect().left - this.view.cellWidth) / this.view.cellWidth);
+            let y = Math.floor((clientY - this.view.canvas.getBoundingClientRect().top - this.view.cellHeight) / this.view.cellHeight);
 
             // Erase all layers of the cell.
             Diagram.layers.forEach(function (_, layer) {
@@ -952,7 +959,7 @@ class DiagramController {
         } else {
             // If in the canvas and over a colored cell, erase it.
             // Otherwise, change the layer.
-            if (!this.clearIfPainted(clientX, clientY)) {
+            if (!(this.eraseMode || this.clearIfPainted(clientX, clientY))) {
                 this.changeLayer();
             }
         }
@@ -973,8 +980,8 @@ class DiagramController {
         if (this.isPrimaryInput(event) || event.button === 2) {
             // If not between cells 1 and gridsize - 1, undo and return.
             if (this.dragging && this.inBounds(clientX, clientY)) {
-                let endX = Math.floor((clientX - this.view.canvas.offsetLeft - this.view.cellWidth) / this.view.cellWidth);
-                let endY = Math.floor((clientY - this.view.canvas.offsetTop - this.view.cellHeight) / this.view.cellHeight);
+                let endX = Math.floor((clientX - this.view.canvas.getBoundingClientRect().left - this.view.cellWidth) / this.view.cellWidth);
+                let endY = Math.floor((clientY - this.view.canvas.getBoundingClientRect().top - this.view.cellHeight) / this.view.cellHeight);
                 let bounds = {
                     left: Math.min(this.startX, endX),
                     right: Math.max(this.startX, endX),
@@ -1004,7 +1011,7 @@ class DiagramController {
             else if (this.dragging) {
                 this.undo();
             }
-            else if(this.isEraseEvent(event)) {
+            else if(!this.eraseMode && this.isEraseEvent(event)) {
                 this.changeLayer();
             }
         }
@@ -1080,8 +1087,8 @@ class DiagramController {
                     this.saveCurrentState();
                 }
 
-                let endX = Math.floor((clientX - this.view.canvas.offsetLeft - this.view.cellWidth) / this.view.cellWidth);
-                let endY = Math.floor((clientY - this.view.canvas.offsetTop - this.view.cellHeight) / this.view.cellHeight);
+                let endX = Math.floor((clientX - this.view.canvas.getBoundingClientRect().left - this.view.cellWidth) / this.view.cellWidth);
+                let endY = Math.floor((clientY - this.view.canvas.getBoundingClientRect().top - this.view.cellHeight) / this.view.cellHeight);
 
                 let bounds = {
                     left: Math.min(this.startX, endX),
@@ -1126,18 +1133,23 @@ class DiagramController {
     }
 
     // Change the layer/cursor color
-    changeLayer() {
+    // layerIndex is optional; if not provided, the next layer is used
+    changeLayer(layerIndex) {
         'use strict';
-        // Go to the next selectable index.
-        let tempIndex = this.cursorIndex + 1;
+        if(layerIndex === undefined) {
+            // Go to the next selectable index.
+            let tempIndex = this.cursorIndex + 1;
 
-        while(tempIndex >= Diagram.layers.length || !Diagram.layers[tempIndex].selectable) {
-            tempIndex = tempIndex >= Diagram.layers.length - 1 ? 0 : tempIndex + 1;
+            while(tempIndex >= Diagram.layers.length || !Diagram.layers[tempIndex].selectable) {
+                tempIndex = tempIndex >= Diagram.layers.length - 1 ? 0 : tempIndex + 1;
+            }
+            this.cursorIndex = tempIndex;
+
+            // set the outer border of the canvas to the new cursor color
+            this.view.drawBorder();
+        } else {
+            this.cursorIndex = layerIndex;
         }
-        this.cursorIndex = tempIndex;
-
-        // set the outer border of the canvas to the new cursor color
-        this.view.drawBorder();
     }
 
     ctrlCommandHandler(event) {
@@ -1188,8 +1200,8 @@ class DiagramController {
         if (this.isPrimaryInput(event) || event.button === 2) {
             // Return if not between cells 1 and gridsize - 1
             if (this.inBounds(clientX, clientY)) {
-                this.startX = Math.floor((clientX - this.view.canvas.offsetLeft - this.view.cellWidth) / this.view.cellWidth);
-                this.startY = Math.floor((clientY - this.view.canvas.offsetTop - this.view.cellHeight) / this.view.cellHeight);
+                this.startX = Math.floor((clientX - this.view.canvas.getBoundingClientRect().left - this.view.cellWidth) / this.view.cellWidth);
+                this.startY = Math.floor((clientY - this.view.canvas.getBoundingClientRect().top - this.view.cellHeight) / this.view.cellHeight);
             } else {
                 this.startX = -1;
                 this.startY = -1;
@@ -1245,8 +1257,10 @@ class DiagramView {
         this.gridCanvas = gridCanvas;
         this.ctx = this.canvas.getContext("2d");
         this.gridCtx = this.gridCanvas.getContext('2d');
-        this.cellWidth  = this.canvas.width  / (this.diagram.layeredGrid.width  + 2);
-        this.cellHeight = this.canvas.height / (this.diagram.layeredGrid.height + 2);
+        this.canvasWidth = Math.min(this.canvas.clientWidth, this.canvas.clientHeight);
+        this.canvasHeight = this.canvasWidth;
+        this.cellWidth  = this.canvasWidth  / (this.diagram.layeredGrid.width  + 2);
+        this.cellHeight = this.canvasHeight / (this.diagram.layeredGrid.height + 2);
         this.useFlatColors = false;
     }
     
@@ -1256,19 +1270,21 @@ class DiagramView {
         'use strict';
         // Place the grid canvas behind the main canvas.
         // Same size as the canvas.
-        this.gridCanvas.width = this.canvas.width - 1;
-        this.gridCanvas.height = this.canvas.height - 1;
+        this.gridCanvas.width = this.canvasWidth;
+        this.gridCanvas.height = this.canvasHeight;
+        this.gridCanvas.style.width = this.canvasWidth + 'px';
+        this.gridCanvas.style.height = this.canvasHeight + 'px';
         this.gridCanvas.style.position = 'absolute';
         this.gridCanvas.style.left = this.canvas.offsetLeft + 'px';
         this.gridCanvas.style.top = this.canvas.offsetTop + 'px';
         this.gridCanvas.style.zIndex = -1;
 
         // Set the gridCanvas context.
-        this.cellWidth = this.canvas.width / (this.diagram.layeredGrid.width + 2);
-        this.cellHeight = this.canvas.height / (this.diagram.layeredGrid.height + 2);
+        this.cellWidth = this.canvasWidth / (this.diagram.layeredGrid.width + 2);
+        this.cellHeight = this.canvasHeight / (this.diagram.layeredGrid.height + 2);
 
         // Clear the grid canvas.
-        this.gridCtx.clearRect(0, 0, this.gridCanvas.width, this.gridCanvas.height);
+        this.gridCtx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
 
         // Set stroke color depending on whether the dark mode is on or off.
         // Should be faintly visible in both modes.
@@ -1278,17 +1294,17 @@ class DiagramView {
             this.gridCtx.strokeStyle = lightModeGridColor;
         }
 
-        for (let ii = 0; ii < Math.max(this.diagram.layeredGrid.width, this.diagram.layeredGrid.height) + 2; ii++) {
-            if(ii < this.diagram.layeredGrid.width + 2) {
+        for (let ii = 1; ii <= Math.max(this.diagram.layeredGrid.width, this.diagram.layeredGrid.height); ii++) {
+            if(ii <= this.diagram.layeredGrid.width) {
                 this.gridCtx.beginPath();
-                this.gridCtx.moveTo(ii * this.cellWidth, 0);
-                this.gridCtx.lineTo(ii * this.cellWidth, this.gridCanvas.height);
+                this.gridCtx.moveTo(ii * this.cellWidth, this.cellHeight);
+                this.gridCtx.lineTo(ii * this.cellWidth, this.gridCanvas.height - this.cellHeight);
                 this.gridCtx.stroke();
             }
-            if(ii < this.diagram.layeredGrid.height + 2) {
+            if(ii <= this.diagram.layeredGrid.height) {
                 this.gridCtx.beginPath();
-                this.gridCtx.moveTo(0, ii * this.cellHeight);
-                this.gridCtx.lineTo(this.gridCanvas.width, ii * this.cellHeight);
+                this.gridCtx.moveTo(this.cellWidth, ii * this.cellHeight);
+                this.gridCtx.lineTo(this.canvasWidth - this.cellWidth, ii * this.cellHeight);
                 this.gridCtx.stroke();
             }
         }
@@ -1297,17 +1313,21 @@ class DiagramView {
     // Draw the outer border of the canvas.
     drawBorder() {
         'use strict';
-        this.ctx.strokeStyle = this.useFlatColors? Diagram.layers[this.diagram.controller.cursorIndex].flatColor : Diagram.layers[this.diagram.controller.cursorIndex].color;
+        if(this.diagram.controller.eraseMode) {
+            this.ctx.strokeStyle = this.useFlatColors? Diagram.layers[Diagram.DELETE].flatColor : Diagram.layers[Diagram.DELETE].color;
+        } else {
+            this.ctx.strokeStyle = this.useFlatColors? Diagram.layers[this.diagram.controller.cursorIndex].flatColor : Diagram.layers[this.diagram.controller.cursorIndex].color;
+        }
         this.ctx.lineWidth = this.cellWidth;
-        this.ctx.strokeRect(this.cellWidth / 2, this.cellWidth / 2, this.canvas.width - this.cellWidth, this.canvas.height - this.cellWidth);
+        this.ctx.strokeRect(this.cellWidth / 2, this.cellWidth / 2, this.canvasWidth - this.cellWidth, this.canvas.height - this.cellWidth);
 
         // Draw a thick border on the edge of the border drawn above.
         this.ctx.lineWidth = this.cellWidth / 4;
         this.ctx.strokeStyle = darkMode ? "#ffffff" : "#000000";
         this.ctx.strokeRect(1 + this.cellWidth - this.ctx.lineWidth / 2,
             1 + this.cellHeight - this.ctx.lineWidth / 2,
-            this.canvas.width - 2 * this.cellWidth + this.ctx.lineWidth / 2,
-            this.canvas.height - 2 * this.cellHeight + this.ctx.lineWidth / 2
+            this.canvasWidth - 2 * this.cellWidth + this.ctx.lineWidth / 2,
+            this.canvasHeight - 2 * this.cellHeight + this.ctx.lineWidth / 2
         );
 
         // For the middle 11 cells of the upper border, fill with the grid color.
@@ -1317,21 +1337,28 @@ class DiagramView {
 
         // Write the cursor color name in the middle of the upper border of the canvas.
         this.ctx.fillStyle = darkMode ? '#000000' : '#ffffff';
-        this.ctx.font = '20px Arial';
+        this.ctx.font = Math.floor(this.cellHeight) + 'px Arial';
         this.ctx.textAlign = 'center';
-        this.ctx.fillText(Diagram.layers[this.diagram.controller.cursorIndex].name, this.canvas.width / 2, this.cellHeight * 3 / 4);
+
+        if(this.diagram.controller.eraseMode) {
+            this.ctx.fillText('erase', this.canvasWidth / 2, this.cellHeight * 3 / 4);
+        } else {
+            this.ctx.fillText(Diagram.layers[this.diagram.controller.cursorIndex].name, this.canvasWidth / 2, this.cellHeight * 3 / 4);
+        }
     }
 
     // Resize the canvas to the largest square that fits in the window.
     resizeCanvas() {
         'use strict';
-        let windowWidth = window.innerWidth;
-        let windowHeight = window.innerHeight;
-        let windowSize = Math.min(windowWidth, windowHeight);
-        let sizeChanged = this.canvas.width !== windowSize || this.canvas.height !== windowSize;
+        let containerWidth = this.canvas.clientWidth;
+        let containerHeight = this.canvas.clientHeight;
+        let containerSize = Math.min(containerWidth, containerHeight);
+        let sizeChanged = this.canvasWidth !== containerSize || this.canvasHeight !== containerSize;
 
-        this.canvas.width = windowSize;
-        this.canvas.height = windowSize;
+        this.canvas.width = containerSize;
+        this.canvas.height = containerSize;
+        this.canvasWidth = containerSize;
+        this.canvasHeight = containerSize;
 
         if(sizeChanged) {
             this.drawGrid();
@@ -1356,7 +1383,7 @@ class DiagramView {
     drawLabels() {
         'use strict';
         // Draw labels on the canvas above each input and output.
-        this.ctx.font = "bold 18px Arial";
+        this.ctx.font = "bold " + Math.floor(this.cellHeight) + "px Arial";
         this.ctx.fillStyle = darkMode ? "#ffffff" : "#000000";
 
         this.diagram.inputs.forEach(function(input, index) {
@@ -1959,6 +1986,7 @@ function refreshTruthTable() {
     // The first row should be a header.
     let table = buildTruthTable();
     let tableElement = document.getElementById("truth-table");
+
     tableElement.innerHTML = "";
 
     let header = tableElement.createTHead();
@@ -2003,32 +2031,14 @@ function setDarkMode(setToDark) {
 
 function toggleDarkMode() {
     'use strict';
-    let dd = document.getElementById("dashboard");
-    let td = document.getElementById("truth-table");
-    let id = document.getElementById("instructions");
-
     darkMode = !darkMode;
 
     if (darkMode) {
         document.body.classList.add('dark');
         document.body.classList.remove('light');
-
-        dd.classList.add('dark-accent');
-        td.classList.add('dark-accent');
-        id.classList.add('dark-accent');
-        dd.classList.remove('light-accent');
-        td.classList.remove('light-accent');
-        id.classList.remove('light-accent');
     } else {
         document.body.classList.add('light');
         document.body.classList.remove('dark');
-
-        dd.classList.add('light-accent');
-        td.classList.add('light-accent');
-        id.classList.add('light-accent');
-        dd.classList.remove('dark-accent');
-        td.classList.remove('dark-accent');
-        id.classList.remove('dark-accent');
     }
 }
 
@@ -2042,70 +2052,92 @@ function setUpControls() {
     let shiftRightButton = document.getElementById("shift-right");
     let shiftUpButton = document.getElementById("shift-up");
     let shiftDownButton = document.getElementById("shift-down");
-    let changeLayerButton = document.getElementById("change-layer");
-    let eraseToggleButton = document.getElementById("erase-toggle");
-    let terminalSelect = document.getElementById("terminal-select");
-    let terminalSelectButton = document.getElementById("terminal-select-button");
+    let paintModeButton = document.getElementById("paint-mode-btn");
+    let darkModeButton = document.getElementById("dark-mode-btn");
+    let undoButton = document.getElementById("undo-btn");
+    let redoButton = document.getElementById("redo-btn");
 
-    removeRowButton.addEventListener("click", function() {
+    removeRowButton.onclick = function() {
         this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height - 1);
-        document.getElementById("row-count").innerHTML = this.layeredGrid.height;
+        document.getElementById("num-rows").innerHTML = this.layeredGrid.height;
         this.view.drawGrid();
-    }.bind(diagram));
+    }.bind(diagram);
 
-    addRowButton.addEventListener("click", function() {
+    addRowButton.onclick = function() {
         this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height + 1);
-        document.getElementById("row-count").innerHTML = this.layeredGrid.height;
+        document.getElementById("num-rows").innerHTML = this.layeredGrid.height;
         this.view.drawGrid();
-    }.bind(diagram));
+    }.bind(diagram);
 
-    removeColumnButton.addEventListener("click", function() {
+    removeColumnButton.onclick = function() {
         this.layeredGrid.resize(this.layeredGrid.width - 1, this.layeredGrid.height);
-        document.getElementById("column-count").innerHTML = this.layeredGrid.width;
+        document.getElementById("num-cols").innerHTML = this.layeredGrid.width;
         this.view.drawGrid();
-    }.bind(diagram));
+    }.bind(diagram);
 
-    addColumnButton.addEventListener("click", function() {
+    addColumnButton.onclick = function() {
         this.layeredGrid.resize(this.layeredGrid.width + 1, this.layeredGrid.height);
-        document.getElementById("column-count").innerHTML = this.layeredGrid.width;
+        document.getElementById("num-cols").innerHTML = this.layeredGrid.width;
         this.view.drawGrid();
-    }.bind(diagram));
+    }.bind(diagram);
 
-    shiftLeftButton.addEventListener("click", function() {
+    shiftLeftButton.onclick = function() {
         this.layeredGrid.shift(-1, 0);
-    }.bind(diagram));
+    }.bind(diagram);
 
-    shiftRightButton.addEventListener("click", function() {
+    shiftRightButton.onclick = function() {
         this.layeredGrid.shift(1, 0);
-    }.bind(diagram));
+    }.bind(diagram);
 
-    shiftUpButton.addEventListener("click", function() {
+    shiftUpButton.onclick = function() {
         this.layeredGrid.shift(0, -1);
-    }.bind(diagram));
+    }.bind(diagram);
 
-    shiftDownButton.addEventListener("click", function() {
+    shiftDownButton.onclick = function() {
         this.layeredGrid.shift(0, 1);
+    }.bind(diagram);
+
+    Array.from(document.getElementById("colorChange").children).forEach(function(element, index) {
+        element.onclick = function() {
+            diagram.controller.changeLayer(index);
+
+            if (this.controller.eraseMode) {
+                paintModeButton.classList.remove('fa-eraser');
+                paintModeButton.classList.add('fa-paint-brush');
+            }
+
+            diagram.controller.setEraseMode(false);
+        };
+        element.style.color = Diagram.layers[index].flatColor;
     }.bind(diagram));
 
-    changeLayerButton.addEventListener("click", function() {
-        this.controller.changeLayer();
-    }.bind(diagram));
+    paintModeButton.onclick = function() {
+        // No argument -> Toggle
+        this.controller.setEraseMode();
 
-    eraseToggleButton.addEventListener("click", function() {
-        let child = document.getElementById("erase-toggle").children[0];
-        this.controller.toggleEraseMode();
-        if(this.controller.eraseMode) {
-            child.classList.remove('fa-paint-brush');
-            child.classList.add('fa-eraser');
+        // Set the icon.
+        let paintModeButton = document.getElementById("paint-mode-btn");
+
+        if (this.controller.eraseMode) {
+            paintModeButton.classList.remove('fa-paint-brush');
+            paintModeButton.classList.add('fa-eraser');
         } else {
-            child.classList.remove('fa-eraser');
-            child.classList.add('fa-paint-brush');
+            paintModeButton.classList.remove('fa-eraser');
+            paintModeButton.classList.add('fa-paint-brush');
         }
-    }.bind(diagram));
+    }.bind(diagram);
 
-    terminalSelectButton.addEventListener("click", function() {
-        this.controller.setPlaceTerminalMode(parseInt(terminalSelect.value));
-    }.bind(diagram));
+    darkModeButton.onclick = function() {
+        toggleDarkMode();
+    };
+
+    undoButton.onclick = function() {
+        this.controller.undo();
+    }.bind(diagram);
+
+    redoButton.onclick = function() {
+        this.controller.redo();
+    }.bind(diagram);
 }
 
 window.onload = function () {
@@ -2135,47 +2167,9 @@ window.onload = function () {
     window.addEventListener("keyup",     function(e) { this.keyupHandler(e);     }.bind(diagram.controller));
 
     // Set up the evaluate button.
-    button = document.getElementById("generate-truth-table");
+    button = document.getElementById("evaluate-btn");
     button.onclick = function () {
         refreshTruthTable();
-    };
-
-    // Set up the instructions close button.
-    button = document.getElementById("instructions-close");
-    button.onclick = function () {
-        let label  = document.getElementById("instructions-close-label");
-        let div = document.getElementById("instructions");
-        // Remove the 'open' class and replace with 'closed'.
-        if(div.classList.contains('open')) {
-            div.classList.remove('open');
-            div.classList.add('closed');
-            label.classList.remove('fa-chevron-left');
-            label.classList.add('fa-chevron-right');
-        } else {
-            div.classList.remove('closed');
-            div.classList.add('open');
-            label.classList.remove('fa-chevron-right');
-            label.classList.add('fa-chevron-left');
-        }
-    };
-
-    // Set up the dashboard close button.
-    button = document.getElementById("dashboard-close");
-    button.onclick = function () {
-        let label = document.getElementById("dashboard-close-label");
-        let div = document.getElementById("dashboard");
-        // Remove the 'open' class and replace with 'closed'.
-        if(div.classList.contains('open')) {
-            div.classList.remove('open');
-            div.classList.add('closed');
-            label.classList.remove('fa-chevron-right');
-            label.classList.add('fa-chevron-left');
-        } else {
-            div.classList.remove('closed');
-            div.classList.add('open');
-            label.classList.remove('fa-chevron-left');
-            label.classList.add('fa-chevron-right');
-        }
     };
 
     // Set Diagram.CONTACT at the coordinates of each input and output.
@@ -2190,6 +2184,8 @@ window.onload = function () {
     diagram.layeredGrid.set(diagram.vddCell.x, diagram.vddCell.y, Diagram.CONTACT);
     diagram.layeredGrid.set(diagram.gndCell.x, diagram.gndCell.y, Diagram.CONTACT);
 
+    document.getElementById("num-rows").innerHTML = diagram.layeredGrid.height;
+    document.getElementById("num-cols").innerHTML = diagram.layeredGrid.width;
     setUpControls();
 
     diagram.view.refreshCanvas();
