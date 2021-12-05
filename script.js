@@ -2077,6 +2077,8 @@ function setUpControls() {
     //let terminalSelect = document.getElementById("terminal-select");
     //let terminalSelectButton = document.getElementById("terminal-select-button");
     let darkModeButton = document.getElementById("dark-mode-btn");
+    let undoButton = document.getElementById("undo-btn");
+    let redoButton = document.getElementById("redo-btn");
 
     removeRowButton.onclick = function(event) {
         this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height - 1);
@@ -2154,7 +2156,15 @@ function setUpControls() {
 
     darkModeButton.onclick = function(event) {
         toggleDarkMode();
-    }
+    };
+
+    undoButton.onclick = function(event) {
+        this.controller.undo();
+    }.bind(diagram);
+
+    redoButton.onclick = function(event) {
+        this.controller.redo();
+    }.bind(diagram);
 }
 
 window.onload = function () {

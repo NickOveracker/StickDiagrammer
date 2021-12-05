@@ -6,6 +6,10 @@
     width: 100%;
 }
 
+.edit-btn-content.small {
+    display: none;
+}
+
 body.dark {
     background: #000000;
     color: #ffffff;
@@ -211,6 +215,13 @@ body.light {
     border-radius: 100%;
 }
 
+.edit-back.small {
+    height: 20px;
+    width: 20px;
+    font-size: 20px;
+    padding: 10px;
+}
+
 .edit-btn-content h5{
     font-size: 15px;
     font-weight: bold;
@@ -337,6 +348,11 @@ body.light {
 
     .edit-btn-content h5{
         display: none;
+    }
+
+    .edit-btn-content.small {
+        display: inline-block;
+        width: 50%;
     }
 
     .evaluate-btn{
