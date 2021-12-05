@@ -246,14 +246,6 @@ body.light {
 		left: 90%;
 	}
 
-	.fa-bars{
-		font-size: 40px;
-		padding: 20px;
-		width: 40px;
-		height: 40px;
-		margin-top: -10px;
-	}
-
 	#dark-mode{
 		font-size: 40px;
 	}
