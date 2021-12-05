@@ -952,7 +952,7 @@ class DiagramController {
         } else {
             // If in the canvas and over a colored cell, erase it.
             // Otherwise, change the layer.
-            if (!this.clearIfPainted(clientX, clientY)) {
+            if (!(this.eraseMode || this.clearIfPainted(clientX, clientY))) {
                 this.changeLayer();
             }
         }
@@ -1004,7 +1004,7 @@ class DiagramController {
             else if (this.dragging) {
                 this.undo();
             }
-            else if(this.isEraseEvent(event)) {
+            else if(!this.eraseMode && this.isEraseEvent(event)) {
                 this.changeLayer();
             }
         }
@@ -2066,7 +2066,6 @@ function setUpControls() {
     let shiftRightButton = document.getElementById("shift-right");
     let shiftUpButton = document.getElementById("shift-up");
     let shiftDownButton = document.getElementById("shift-down");
-    //let changeLayerButton = document.getElementById("change-layer");
     let paintModeButton = document.getElementById("paint-btn");
     let eraseModeButton = document.getElementById("erase-btn");
     //let terminalSelect = document.getElementById("terminal-select");
