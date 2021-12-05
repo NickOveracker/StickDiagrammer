@@ -1882,11 +1882,16 @@ function runTestbench(runTo) {
     }
 
     // Clear #instructions-text and replace its contents with the elapsed time
-    document.getElementById("instructions-text").innerHTML = "";
+    // Make a new div.
+    let resultsDiv = document.createElement("div");
+    document.body.appendChild(resultsDiv);
+    resultsDiv.innerHTML = "";
+
     p = document.createElement("p");
     p.innerHTML = `<b>Elapsed time:</b> ${endTime - startTime}ms`;
-    document.getElementById("instructions-text").appendChild(p);
-    document.getElementById("instructions-text").appendChild(document.createElement("br"));
+
+    resultsDiv.appendChild(p);
+    resultsDiv.appendChild(document.createElement("br"));
 
     // Add indidual test results to #instructions-text as PASS or FAIL
     // Label with their test case names.
@@ -1894,6 +1899,6 @@ function runTestbench(runTo) {
         p = document.createElement("p");
         p.innerHTML = `<span style="cursor:pointer" onclick="runTestbench(${index + 1})"><b>Test ${index}:</b> ${testCases[index]}</span>`;
         p.innerHTML += `<b style='float:right;color:${result ? "green'>PASS" : "red'>FAIL"}</b>`;
-        document.getElementById("instructions-text").appendChild(p);
+        resultsDiv.appendChild(p);
     });
 }
