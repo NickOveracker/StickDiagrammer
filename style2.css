@@ -22,11 +22,38 @@ body.light {
 
 /*--------Header----------*/
 .overall-header{
-    
     display: flex;
     justify-content: center;
     position: fixed;
     top: 20px;
+}
+
+.header-left {
+	width: 25%;
+	text-align: left;
+}
+
+.header-center {
+	width: 50%;
+	padding-left: 25%;
+	padding-right: 25%;
+	text-align: center;
+}
+
+.header-right {
+	width: 25%;
+	text-align: right;
+}
+
+.header-button {
+	font-size: 25px;
+	padding: 10px;
+	color: #FFFFFF;
+	background: linear-gradient(180deg, #832AF4 0%, rgba(80, 84, 186, 0.99) 100%);
+	border-radius: 100%;
+	width: 30px;
+	height: 30px;
+	justify-content: center;
 }
 
 .instructions{
@@ -50,19 +77,8 @@ body.light {
 }
 
 .logo{
-    display: inline-block;
-    margin: auto;
-    text-align: center;
-	padding-left: 25%;
-	padding-right: 25%;
-	width: 50%;
     font-family: 'Josefin Sans', sans-serif;
     font-size: 20px;
-}
-
-#menu-bar{
-    position: fixed;
-    left: 95%;
 }
 
 .fa-bars{
