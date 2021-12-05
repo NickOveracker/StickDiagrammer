@@ -1306,7 +1306,11 @@ class DiagramView {
     // Draw the outer border of the canvas.
     drawBorder() {
         'use strict';
-        this.ctx.strokeStyle = this.useFlatColors? Diagram.layers[this.diagram.controller.cursorIndex].flatColor : Diagram.layers[this.diagram.controller.cursorIndex].color;
+        if(this.diagram.controller.eraseMode) {
+            this.ctx.strokeStyle = this.useFlatColors? Diagram.layers[Diagram.DELETE].flatColor : Diagram.layers[Diagram.DELETE].color;
+        } else {
+            this.ctx.strokeStyle = this.useFlatColors? Diagram.layers[this.diagram.controller.cursorIndex].flatColor : Diagram.layers[this.diagram.controller.cursorIndex].color;
+        }
         this.ctx.lineWidth = this.cellWidth;
         this.ctx.strokeRect(this.cellWidth / 2, this.cellWidth / 2, this.canvasWidth - this.cellWidth, this.canvas.height - this.cellWidth);
 
@@ -1328,7 +1332,12 @@ class DiagramView {
         this.ctx.fillStyle = darkMode ? '#000000' : '#ffffff';
         this.ctx.font = '20px Arial';
         this.ctx.textAlign = 'center';
-        this.ctx.fillText(Diagram.layers[this.diagram.controller.cursorIndex].name, this.canvasWidth / 2, this.cellHeight * 3 / 4);
+
+        if(this.diagram.controller.eraseMode) {
+            this.ctx.fillText('erase', this.canvasWidth / 2, this.cellHeight * 3 / 4);
+        } else {
+            this.ctx.fillText(Diagram.layers[this.diagram.controller.cursorIndex].name, this.canvasWidth / 2, this.cellHeight * 3 / 4);
+        }
     }
 
     // Resize the canvas to the largest square that fits in the window.
