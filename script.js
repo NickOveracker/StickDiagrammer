@@ -788,9 +788,15 @@ class DiagramController {
     }
 
 
+    // Toggle if mode is not provided.
     setEraseMode(mode) {
         'use strict';
-        this.eraseMode = mode;
+        if(mode !== undefined) {
+            this.eraseMode = mode;
+        }
+        else {
+            this.eraseMode = !this.eraseMode;
+        }
     }
 
     isEraseEvent(event) {
@@ -2067,8 +2073,7 @@ function setUpControls() {
     let shiftRightButton = document.getElementById("shift-right");
     let shiftUpButton = document.getElementById("shift-up");
     let shiftDownButton = document.getElementById("shift-down");
-    let paintModeButton = document.getElementById("paint-btn");
-    let eraseModeButton = document.getElementById("erase-btn");
+    let paintModeButton = document.getElementById("paint-mode-btn");
     //let terminalSelect = document.getElementById("terminal-select");
     //let terminalSelectButton = document.getElementById("terminal-select-button");
     let darkModeButton = document.getElementById("dark-mode-btn");
@@ -2116,17 +2121,31 @@ function setUpControls() {
     Array.from(document.getElementById("colorChange").children).forEach(function(element, index) {
         element.onclick = function(event) {
             diagram.controller.changeLayer(index);
+
+            if (this.controller.eraseMode) {
+                paintModeButton.classList.remove('fa-eraser');
+                paintModeButton.classList.add('fa-paint-brush');
+            }
+
             diagram.controller.setEraseMode(false);
         }
         element.style.color = Diagram.layers[index].flatColor;
     }.bind(diagram));
 
-    eraseModeButton.onclick = function(event) {
-        this.controller.setEraseMode(true);
-    }.bind(diagram);
-
     paintModeButton.onclick = function(event) {
-        this.controller.setEraseMode(false);
+        // No argument -> Toggle
+        this.controller.setEraseMode();
+
+        // Set the icon.
+        let paintModeButton = document.getElementById("paint-mode-btn");
+
+        if (this.controller.eraseMode) {
+            paintModeButton.classList.remove('fa-paint-brush');
+            paintModeButton.classList.add('fa-eraser');
+        } else {
+            paintModeButton.classList.remove('fa-eraser');
+            paintModeButton.classList.add('fa-paint-brush');
+        }
     }.bind(diagram);
 
     /*terminalSelectButton.addEventListener("onclick", function() {
