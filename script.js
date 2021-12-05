@@ -1330,7 +1330,7 @@ class DiagramView {
 
         // Write the cursor color name in the middle of the upper border of the canvas.
         this.ctx.fillStyle = darkMode ? '#000000' : '#ffffff';
-        this.ctx.font = '20px Arial';
+        this.ctx.font = Math.floor(this.cellHeight) + 'px Arial';
         this.ctx.textAlign = 'center';
 
         if(this.diagram.controller.eraseMode) {
@@ -1376,7 +1376,7 @@ class DiagramView {
     drawLabels() {
         'use strict';
         // Draw labels on the canvas above each input and output.
-        this.ctx.font = "bold 18px Arial";
+        this.ctx.font = "bold " + Math.floor(this.cellHeight) + "px Arial";
         this.ctx.fillStyle = darkMode ? "#ffffff" : "#000000";
 
         this.diagram.inputs.forEach(function(input, index) {
