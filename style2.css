@@ -300,13 +300,11 @@ body.light {
         display: flex;
         justify-content: center;
         text-align: center;
-        margin-top: 30px;
+        margin-top: 0;
         width: 90%;
     }
 
     .fa-circle{
-        font-size: 60px;
-        margin-top: 40px;
         margin-bottom: 40px;
     }
 
@@ -318,6 +316,11 @@ body.light {
         padding: 20px;
         border-radius: 100%;
     }
+
+	.edit-btn {
+		margin-top: 0;
+		width: 100%;
+	}
 
     .edit-btn-content h5{
         font-size: 35px;
