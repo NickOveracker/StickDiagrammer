@@ -88,12 +88,11 @@ body.light {
 /*-------------Canvas---------------*/
 .sample{
     width: 50%;
-
 }
 
 .sample-content{
-    width:600px;
-    height: 600px;
+	width: 600px;
+	height: 600px;
     margin-left: 50px;
     margin-top: 100px;
 }
@@ -265,7 +264,6 @@ body.light {
 
     .sample-content{
         width:100%;
-        margin-left: 0;
         margin-top: 100px;
     }
 
@@ -335,9 +333,9 @@ body.light {
 #truth-table-container {
     text-align: center;
     margin-top: 30px;
-    width: 90%;
-    right: 0;
-    position: absolute;
+    width: 50%;
+    padding-left: 25%;
+    padding-right: 25%;
     overflow-y: auto;
     font-size: 2.2vh;
     z-index: 1;
@@ -358,6 +356,7 @@ body.light {
 
 #truth-table-container table td {
     border: 1px dotted;
+    width: 20%;
 }
 
 #truth-table-container table td.output {
