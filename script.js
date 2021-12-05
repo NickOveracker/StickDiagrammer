@@ -1313,8 +1313,8 @@ class DiagramView {
         this.ctx.strokeStyle = darkMode ? "#ffffff" : "#000000";
         this.ctx.strokeRect(1 + this.cellWidth - this.ctx.lineWidth / 2,
             1 + this.cellHeight - this.ctx.lineWidth / 2,
-            this.canvas.width - 2 * this.cellWidth + this.ctx.lineWidth / 2,
-            this.canvas.height - 2 * this.cellHeight + this.ctx.lineWidth / 2
+            this.canvas.clientWidth - 2 * this.cellWidth + this.ctx.lineWidth / 2,
+            this.canvas.clientHeight - 2 * this.cellHeight + this.ctx.lineWidth / 2
         );
 
         // For the middle 11 cells of the upper border, fill with the grid color.
