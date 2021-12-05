@@ -2036,9 +2036,13 @@ function toggleDarkMode() {
     if (darkMode) {
         document.body.classList.add('dark');
         document.body.classList.remove('light');
+        document.getElementById('dark-mode-btn').classList.remove('fa-cloud-moon');
+        document.getElementById('dark-mode-btn').classList.add('fa-sun');
     } else {
         document.body.classList.add('light');
         document.body.classList.remove('dark');
+        document.getElementById('dark-mode-btn').classList.remove('fa-sun');
+        document.getElementById('dark-mode-btn').classList.add('fa-cloud-moon');
     }
 }
 
