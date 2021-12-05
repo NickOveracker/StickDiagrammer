@@ -2099,15 +2099,19 @@ function setUpControls() {
 
     Array.from(document.getElementById("colorChange").children).forEach(function(element, index) {
         element.onclick = function() {
-            diagram.controller.changeLayer(index);
+            let paintModeButton = document.getElementById("paint-mode-btn");
 
+            this.controller.changeLayer(index);
+
+            // Set the icon.
             if (this.controller.eraseMode) {
                 paintModeButton.classList.remove('fa-eraser');
                 paintModeButton.classList.add('fa-paint-brush');
             }
 
             diagram.controller.setEraseMode(false);
-        };
+        }.bind(this);
+
         element.style.color = Diagram.layers[index].flatColor;
     }.bind(diagram));
 
