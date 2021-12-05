@@ -1250,8 +1250,8 @@ class DiagramView {
         this.gridCanvas = gridCanvas;
         this.ctx = this.canvas.getContext("2d");
         this.gridCtx = this.gridCanvas.getContext('2d');
-        this.cellWidth  = this.canvas.width  / (this.diagram.layeredGrid.width  + 2);
-        this.cellHeight = this.canvas.height / (this.diagram.layeredGrid.height + 2);
+        this.cellWidth  = this.canvas.clientWidth  / (this.diagram.layeredGrid.width  + 2);
+        this.cellHeight = this.canvas.clientHeight / (this.diagram.layeredGrid.height + 2);
         this.useFlatColors = false;
     }
     
