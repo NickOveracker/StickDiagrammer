@@ -2101,7 +2101,7 @@ function setUpControls() {
         element.onclick = function() {
             let paintModeButton = document.getElementById("paint-mode-btn");
 
-            diagram.controller.changeLayer(index);
+            this.controller.changeLayer(index);
 
             // Set the icon.
             if (this.controller.eraseMode) {
@@ -2110,7 +2110,8 @@ function setUpControls() {
             }
 
             diagram.controller.setEraseMode(false);
-        };
+        }.bind(this);
+
         element.style.color = Diagram.layers[index].flatColor;
     }.bind(diagram));
 
