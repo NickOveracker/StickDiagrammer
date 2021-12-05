@@ -1271,8 +1271,8 @@ class DiagramView {
         this.gridCanvas.style.zIndex = -1;
 
         // Set the gridCanvas context.
-        this.cellWidth = this.canvas.width / (this.diagram.layeredGrid.width + 2);
-        this.cellHeight = this.canvas.height / (this.diagram.layeredGrid.height + 2);
+        this.cellWidth = this.canvas.clientWidth / (this.diagram.layeredGrid.width + 2);
+        this.cellHeight = this.canvas.clientHeight / (this.diagram.layeredGrid.height + 2);
 
         // Clear the grid canvas.
         this.gridCtx.clearRect(0, 0, this.gridCanvas.width, this.gridCanvas.height);
