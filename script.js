@@ -2115,6 +2115,7 @@ function setUpControls() {
     Array.from(document.getElementById("colorChange").children).forEach(function(element, index) {
         element.onclick = function(event) {
             diagram.controller.changeLayer(index);
+            diagram.controller.setEraseMode(false);
         }
         element.style.color = Diagram.layers[index].flatColor;
     }.bind(diagram));
