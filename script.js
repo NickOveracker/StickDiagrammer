@@ -1977,7 +1977,6 @@ function buildTruthTable() {
 }
 
 // Table is a 2D array of single character strings.
-// TODO
 function refreshTruthTable() {
     'use strict';
     // Update the diagram.netlist.
@@ -2030,39 +2029,19 @@ function setDarkMode(setToDark) {
     }
 }
 
-// TODO
 function toggleDarkMode() {
     'use strict';
-    //let dd = document.getElementById("dashboard");
-    //let td = document.getElementById("truth-table");
-    //let id = document.getElementById("instructions");
-
     darkMode = !darkMode;
 
     if (darkMode) {
         document.body.classList.add('dark');
         document.body.classList.remove('light');
-
-        //dd.classList.add('dark-accent');
-        //td.classList.add('dark-accent');
-        //id.classList.add('dark-accent');
-        //dd.classList.remove('light-accent');
-        //td.classList.remove('light-accent');
-        //id.classList.remove('light-accent');
     } else {
         document.body.classList.add('light');
         document.body.classList.remove('dark');
-
-        //dd.classList.add('light-accent');
-        //td.classList.add('light-accent');
-        //id.classList.add('light-accent');
-        //dd.classList.remove('dark-accent');
-        //td.classList.remove('dark-accent');
-        //id.classList.remove('dark-accent');
     }
 }
 
-// TODO
 function setUpControls() {
     'use strict';
     let removeRowButton = document.getElementById("remove-row");
@@ -2074,54 +2053,52 @@ function setUpControls() {
     let shiftUpButton = document.getElementById("shift-up");
     let shiftDownButton = document.getElementById("shift-down");
     let paintModeButton = document.getElementById("paint-mode-btn");
-    //let terminalSelect = document.getElementById("terminal-select");
-    //let terminalSelectButton = document.getElementById("terminal-select-button");
     let darkModeButton = document.getElementById("dark-mode-btn");
     let undoButton = document.getElementById("undo-btn");
     let redoButton = document.getElementById("redo-btn");
 
-    removeRowButton.onclick = function(event) {
+    removeRowButton.onclick = function() {
         this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height - 1);
         document.getElementById("num-rows").innerHTML = this.layeredGrid.height;
         this.view.drawGrid();
     }.bind(diagram);
 
-    addRowButton.onclick = function(event) {
+    addRowButton.onclick = function() {
         this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height + 1);
         document.getElementById("num-rows").innerHTML = this.layeredGrid.height;
         this.view.drawGrid();
     }.bind(diagram);
 
-    removeColumnButton.onclick = function(event) {
+    removeColumnButton.onclick = function() {
         this.layeredGrid.resize(this.layeredGrid.width - 1, this.layeredGrid.height);
         document.getElementById("num-cols").innerHTML = this.layeredGrid.width;
         this.view.drawGrid();
     }.bind(diagram);
 
-    addColumnButton.onclick = function(event) {
+    addColumnButton.onclick = function() {
         this.layeredGrid.resize(this.layeredGrid.width + 1, this.layeredGrid.height);
         document.getElementById("num-cols").innerHTML = this.layeredGrid.width;
         this.view.drawGrid();
     }.bind(diagram);
 
-    shiftLeftButton.onclick = function(event) {
+    shiftLeftButton.onclick = function() {
         this.layeredGrid.shift(-1, 0);
     }.bind(diagram);
 
-    shiftRightButton.onclick = function(event) {
+    shiftRightButton.onclick = function() {
         this.layeredGrid.shift(1, 0);
     }.bind(diagram);
 
-    shiftUpButton.onclick = function(event) {
+    shiftUpButton.onclick = function() {
         this.layeredGrid.shift(0, -1);
     }.bind(diagram);
 
-    shiftDownButton.onclick = function(event) {
+    shiftDownButton.onclick = function() {
         this.layeredGrid.shift(0, 1);
     }.bind(diagram);
 
     Array.from(document.getElementById("colorChange").children).forEach(function(element, index) {
-        element.onclick = function(event) {
+        element.onclick = function() {
             diagram.controller.changeLayer(index);
 
             if (this.controller.eraseMode) {
@@ -2130,11 +2107,11 @@ function setUpControls() {
             }
 
             diagram.controller.setEraseMode(false);
-        }
+        };
         element.style.color = Diagram.layers[index].flatColor;
     }.bind(diagram));
 
-    paintModeButton.onclick = function(event) {
+    paintModeButton.onclick = function() {
         // No argument -> Toggle
         this.controller.setEraseMode();
 
@@ -2150,19 +2127,15 @@ function setUpControls() {
         }
     }.bind(diagram);
 
-    /*terminalSelectButton.addEventListener("onclick", function() {
-        this.controller.setPlaceTerminalMode(parseInt(terminalSelect.value));
-    }.bind(diagram));*/
-
-    darkModeButton.onclick = function(event) {
+    darkModeButton.onclick = function() {
         toggleDarkMode();
     };
 
-    undoButton.onclick = function(event) {
+    undoButton.onclick = function() {
         this.controller.undo();
     }.bind(diagram);
 
-    redoButton.onclick = function(event) {
+    redoButton.onclick = function() {
         this.controller.redo();
     }.bind(diagram);
 }
@@ -2198,44 +2171,6 @@ window.onload = function () {
     button.onclick = function () {
         refreshTruthTable();
     };
-
-    // Set up the instructions close button.
-    /*button = document.getElementById("instructions-close");
-    button.onclick = function () {
-        let label  = document.getElementById("instructions-close-label");
-        let div = document.getElementById("instructions");
-        // Remove the 'open' class and replace with 'closed'.
-        if(div.classList.contains('open')) {
-            div.classList.remove('open');
-            div.classList.add('closed');
-            label.classList.remove('fa-chevron-left');
-            label.classList.add('fa-chevron-right');
-        } else {
-            div.classList.remove('closed');
-            div.classList.add('open');
-            label.classList.remove('fa-chevron-right');
-            label.classList.add('fa-chevron-left');
-        }
-    };
-
-    // Set up the dashboard close button.
-    button = document.getElementById("dashboard-close");
-    button.onclick = function () {
-        let label = document.getElementById("dashboard-close-label");
-        let div = document.getElementById("dashboard");
-        // Remove the 'open' class and replace with 'closed'.
-        if(div.classList.contains('open')) {
-            div.classList.remove('open');
-            div.classList.add('closed');
-            label.classList.remove('fa-chevron-right');
-            label.classList.add('fa-chevron-left');
-        } else {
-            div.classList.remove('closed');
-            div.classList.add('open');
-            label.classList.remove('fa-chevron-left');
-            label.classList.add('fa-chevron-right');
-        }
-    };*/
 
     // Set Diagram.CONTACT at the coordinates of each input and output.
     diagram.inputs.forEach(function(input) {
