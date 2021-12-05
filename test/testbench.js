@@ -71,8 +71,8 @@ function runTestbench(runTo) {
         diagram.controller.changeLayer();
     }
 
-    function mapX(x) {return x*diagram.view.cellWidth + diagram.view.canvas.getBoundingClientRect().left + diagram.view.cellWidth;}
-    function mapY(y) {return y*diagram.view.cellHeight + diagram.view.canvas.getBoundingClientRect().top + diagram.view.cellHeight;}
+    function mapX(x) {return Math.floor(x*diagram.view.cellWidth + diagram.view.canvas.getBoundingClientRect().left + diagram.view.cellWidth);}
+    function mapY(y) {return Math.floor(y*diagram.view.cellHeight + diagram.view.canvas.getBoundingClientRect().top + diagram.view.cellHeight);}
 
     let events = [
         // Clear the canvas
