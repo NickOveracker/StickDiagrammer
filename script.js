@@ -867,8 +867,8 @@ class DiagramController {
         // Ignore if not inside the canvas
         if (this.inBounds(screenX, screenY)) {
 
-            let x = Math.floor((screenX - this.view.canvas.offsetLeft - this.view.cellWidth) / this.view.cellWidth);
-            let y = Math.floor((screenY - this.view.canvas.offsetTop - this.view.cellHeight) / this.view.cellHeight);
+            let x = Math.floor((screenX - this.view.canvas.getBoundingClientRect().left - this.view.cellWidth) / this.view.cellWidth);
+            let y = Math.floor((screenY - this.view.canvas.getBoundingClientRect().top - this.view.cellHeight) / this.view.cellHeight);
             return { x: x, y: y, };
         }
         return null;
@@ -882,8 +882,8 @@ class DiagramController {
 
         // Ignore if not inside the canvas
         if (this.inBounds(clientX, clientY)) {
-            let x = Math.floor((clientX - this.view.canvas.offsetLeft - this.view.cellWidth) / this.view.cellWidth);
-            let y = Math.floor((clientY - this.view.canvas.offsetTop - this.view.cellHeight) / this.view.cellHeight);
+            let x = Math.floor((clientX - this.view.canvas.getBoundingClientRect().left - this.view.cellWidth) / this.view.cellWidth);
+            let y = Math.floor((clientY - this.view.canvas.getBoundingClientRect().top - this.view.cellHeight) / this.view.cellHeight);
 
             // Erase all layers of the cell.
             Diagram.layers.forEach(function (_, layer) {
@@ -980,8 +980,8 @@ class DiagramController {
         if (this.isPrimaryInput(event) || event.button === 2) {
             // If not between cells 1 and gridsize - 1, undo and return.
             if (this.dragging && this.inBounds(clientX, clientY)) {
-                let endX = Math.floor((clientX - this.view.canvas.offsetLeft - this.view.cellWidth) / this.view.cellWidth);
-                let endY = Math.floor((clientY - this.view.canvas.offsetTop - this.view.cellHeight) / this.view.cellHeight);
+                let endX = Math.floor((clientX - this.view.canvas.getBoundingClientRect().left - this.view.cellWidth) / this.view.cellWidth);
+                let endY = Math.floor((clientY - this.view.canvas.getBoundingClientRect().top - this.view.cellHeight) / this.view.cellHeight);
                 let bounds = {
                     left: Math.min(this.startX, endX),
                     right: Math.max(this.startX, endX),
@@ -1087,8 +1087,8 @@ class DiagramController {
                     this.saveCurrentState();
                 }
 
-                let endX = Math.floor((clientX - this.view.canvas.offsetLeft - this.view.cellWidth) / this.view.cellWidth);
-                let endY = Math.floor((clientY - this.view.canvas.offsetTop - this.view.cellHeight) / this.view.cellHeight);
+                let endX = Math.floor((clientX - this.view.canvas.getBoundingClientRect().left - this.view.cellWidth) / this.view.cellWidth);
+                let endY = Math.floor((clientY - this.view.canvas.getBoundingClientRect().top - this.view.cellHeight) / this.view.cellHeight);
 
                 let bounds = {
                     left: Math.min(this.startX, endX),
@@ -1200,8 +1200,8 @@ class DiagramController {
         if (this.isPrimaryInput(event) || event.button === 2) {
             // Return if not between cells 1 and gridsize - 1
             if (this.inBounds(clientX, clientY)) {
-                this.startX = Math.floor((clientX - this.view.canvas.offsetLeft - this.view.cellWidth) / this.view.cellWidth);
-                this.startY = Math.floor((clientY - this.view.canvas.offsetTop - this.view.cellHeight) / this.view.cellHeight);
+                this.startX = Math.floor((clientX - this.view.canvas.getBoundingClientRect().left - this.view.cellWidth) / this.view.cellWidth);
+                this.startY = Math.floor((clientY - this.view.canvas.getBoundingClientRect().top - this.view.cellHeight) / this.view.cellHeight);
             } else {
                 this.startX = -1;
                 this.startY = -1;
