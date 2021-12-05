@@ -849,10 +849,11 @@ class DiagramController {
 
     inBounds(screenX, screenY) {
         'use strict';
-        return screenX > this.view.canvas.offsetLeft + this.view.cellWidth &&
-               screenX < this.view.canvas.offsetLeft + this.view.canvas.width - this.view.cellWidth &&
-               screenY > this.view.canvas.offsetTop + this.view.cellHeight &&
-               screenY < this.view.canvas.offsetTop + this.view.canvas.height - this.view.cellHeight;
+        let boundingBox = this.view.canvas.getBoundingClientRect();
+        return screenX > boundingBox.left &&
+               screenX < boundingBox.right &&
+               screenY > boundingBox.top &&
+               screenY < boundingBox.bottom;
     }
 
     getCellAtCursor(screenX, screenY) {
