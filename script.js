@@ -1250,8 +1250,10 @@ class DiagramView {
         this.gridCanvas = gridCanvas;
         this.ctx = this.canvas.getContext("2d");
         this.gridCtx = this.gridCanvas.getContext('2d');
-        this.cellWidth  = this.canvas.clientWidth  / (this.diagram.layeredGrid.width  + 2);
-        this.cellHeight = this.canvas.clientHeight / (this.diagram.layeredGrid.height + 2);
+        this.canvasWidth = Math.min(this.canvas.clientWidth, this.canvas.clientHeight);
+        this.canvasHeight = this.canvasWidth;
+        this.cellWidth  = this.canvasWidth  / (this.diagram.layeredGrid.width  + 2);
+        this.cellHeight = this.canvasHeight / (this.diagram.layeredGrid.height + 2);
         this.useFlatColors = false;
     }
     
@@ -1261,21 +1263,21 @@ class DiagramView {
         'use strict';
         // Place the grid canvas behind the main canvas.
         // Same size as the canvas.
-        this.gridCanvas.width = this.canvas.clientWidth;
-        this.gridCanvas.height = this.canvas.clientHeight;
-        this.gridCanvas.style.width = this.canvas.clientWidth + 'px';
-        this.gridCanvas.style.height = this.canvas.clientHeight + 'px';
+        this.gridCanvas.width = this.canvasWidth;
+        this.gridCanvas.height = this.canvasHeight;
+        this.gridCanvas.style.width = this.canvasWidth + 'px';
+        this.gridCanvas.style.height = this.canvasHeight + 'px';
         this.gridCanvas.style.position = 'absolute';
         this.gridCanvas.style.left = this.canvas.offsetLeft + 'px';
         this.gridCanvas.style.top = this.canvas.offsetTop + 'px';
         this.gridCanvas.style.zIndex = -1;
 
         // Set the gridCanvas context.
-        this.cellWidth = this.canvas.clientWidth / (this.diagram.layeredGrid.width + 2);
-        this.cellHeight = this.canvas.clientHeight / (this.diagram.layeredGrid.height + 2);
+        this.cellWidth = this.canvasWidth / (this.diagram.layeredGrid.width + 2);
+        this.cellHeight = this.canvasHeight / (this.diagram.layeredGrid.height + 2);
 
         // Clear the grid canvas.
-        this.gridCtx.clearRect(0, 0, this.gridCanvas.width, this.gridCanvas.height);
+        this.gridCtx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
 
         // Set stroke color depending on whether the dark mode is on or off.
         // Should be faintly visible in both modes.
@@ -1295,7 +1297,7 @@ class DiagramView {
             if(ii <= this.diagram.layeredGrid.height) {
                 this.gridCtx.beginPath();
                 this.gridCtx.moveTo(this.cellWidth, ii * this.cellHeight);
-                this.gridCtx.lineTo(this.gridCanvas.width - this.cellWidth, ii * this.cellHeight);
+                this.gridCtx.lineTo(this.canvasWidth - this.cellWidth, ii * this.cellHeight);
                 this.gridCtx.stroke();
             }
         }
@@ -1306,15 +1308,15 @@ class DiagramView {
         'use strict';
         this.ctx.strokeStyle = this.useFlatColors? Diagram.layers[this.diagram.controller.cursorIndex].flatColor : Diagram.layers[this.diagram.controller.cursorIndex].color;
         this.ctx.lineWidth = this.cellWidth;
-        this.ctx.strokeRect(this.cellWidth / 2, this.cellWidth / 2, this.canvas.width - this.cellWidth, this.canvas.height - this.cellWidth);
+        this.ctx.strokeRect(this.cellWidth / 2, this.cellWidth / 2, this.canvasWidth - this.cellWidth, this.canvas.height - this.cellWidth);
 
         // Draw a thick border on the edge of the border drawn above.
         this.ctx.lineWidth = this.cellWidth / 4;
         this.ctx.strokeStyle = darkMode ? "#ffffff" : "#000000";
         this.ctx.strokeRect(1 + this.cellWidth - this.ctx.lineWidth / 2,
             1 + this.cellHeight - this.ctx.lineWidth / 2,
-            this.canvas.clientWidth - 2 * this.cellWidth + this.ctx.lineWidth / 2,
-            this.canvas.clientHeight - 2 * this.cellHeight + this.ctx.lineWidth / 2
+            this.canvasWidth - 2 * this.cellWidth + this.ctx.lineWidth / 2,
+            this.canvasHeight - 2 * this.cellHeight + this.ctx.lineWidth / 2
         );
 
         // For the middle 11 cells of the upper border, fill with the grid color.
@@ -1326,7 +1328,7 @@ class DiagramView {
         this.ctx.fillStyle = darkMode ? '#000000' : '#ffffff';
         this.ctx.font = '20px Arial';
         this.ctx.textAlign = 'center';
-        this.ctx.fillText(Diagram.layers[this.diagram.controller.cursorIndex].name, this.canvas.width / 2, this.cellHeight * 3 / 4);
+        this.ctx.fillText(Diagram.layers[this.diagram.controller.cursorIndex].name, this.canvasWidth / 2, this.cellHeight * 3 / 4);
     }
 
     // Resize the canvas to the largest square that fits in the window.
@@ -1335,10 +1337,12 @@ class DiagramView {
         let containerWidth = document.getElementById('canvas-container').clientWidth;
         let containerHeight = document.getElementById('canvas-container').clientHeight;
         let containerSize = Math.min(containerWidth, containerHeight);
-        let sizeChanged = this.canvas.width !== containerSize || this.canvas.height !== containerSize;
+        let sizeChanged = this.canvasWidth !== containerSize || this.canvas.height !== containerSize;
 
         this.canvas.width = containerSize;
         this.canvas.height = containerSize;
+        this.canvasWidth = containerSize;
+        this.canvasHeight = containerSize;
 
         if(sizeChanged) {
             this.drawGrid();
