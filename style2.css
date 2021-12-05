@@ -245,7 +245,8 @@ body.light {
     .overall-header{
         position: relative;
         top: 0;
-        padding: 20px;
+        padding-top: 20px;
+        padding-bottom: 20px;
     }
 
     #menu-bar{
