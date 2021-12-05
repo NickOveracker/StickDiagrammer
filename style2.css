@@ -24,7 +24,7 @@ body.light {
 .overall-header{
     display: flex;
     justify-content: center;
-    position: fixed;
+    position: absolute;
     top: 20px;
 }
 
@@ -241,6 +241,13 @@ body.light {
 
 /*-------responsive--------*/
 @media screen and (max-width: 1000px){
+
+    .overall-header{
+        position: relative;
+        top: 0;
+        padding: 20px;
+    }
+
     #menu-bar{
         left: 90%;
     }
