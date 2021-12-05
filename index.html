@@ -12,107 +12,106 @@
 
 <body class="dark">
 
-	<!-----Header------------>
-	<div class="overall-header">
-		<div class="header-left"><i class="fas fa-cloud-moon header-button clickable" id="dark-mode-btn"></i></div>
-		<div class="logo header-center">Stixu Stick Diagrammer</div>
-		<div class="header-right" id="menu-bar"><i class="fas fa-bars header-button clickable"></i></div>
-	</div>
-	<!-----Header-END-------->
+    <!-----Header------------>
+    <div class="overall-header">
+        <div class="header-left"><i class="fas fa-cloud-moon header-button clickable" id="dark-mode-btn"></i></div>
+        <div class="logo header-center">Stixu Stick Diagrammer</div>
+        <div class="header-right" id="menu-bar"><i class="fas fa-bars header-button clickable"></i></div>
+    </div>
+    <!-----Header-END-------->
 
-	<section class="main">
-		<div class="main-1">
+    <section class="main">
+        <div class="main-1">
 
-			<!---------canvas-sample (width:600px height 600px--------->
-			<div class="sample">
-				<div id="canvas-container" class="sample-content">
-					<canvas id="canvas"></canvas>
-					<canvas id="grid-canvas"></canvas>
-				</div>
-			</div>
-			<!-------canvas end--------->
-		</div>
+            <!---------canvas-sample (width:600px height 600px--------->
+            <div class="sample">
+                <div id="canvas-container" class="sample-content">
+                    <canvas id="canvas"></canvas>
+                    <canvas id="grid-canvas"></canvas>
+                </div>
+            </div>
+            <!-------canvas end--------->
+        </div>
 
-	<!-------Right-side-------->
-		<section class="controls">
+    <!-------Right-side-------->
+        <section class="controls">
+            <!---colorBtn----->
+            <div class="colorChange" id="colorChange">
+                <i class="fas fa-circle clickable"></i>
+                <i class="fas fa-circle clickable"></i>
+                <i class="fas fa-circle clickable"></i>
+                <i class="fas fa-circle clickable"></i>
+                <i class="fas fa-circle clickable"></i>
+                <i class="fas fa-circle clickable"></i>
+            </div>
+            <!---colorBtn END----->
 
-			<!-----Edit-section----->
-			<div class="edit-btn">
-				<div class="edit-btn-content">
-					<i id="paint-btn" class="fas fa-paint-brush edit-back clickable"></i>
-					<h5>Paint</h5>
-				</div>
-				<div class="edit-btn-content">
-					<i id="erase-btn" class="fas fa-eraser edit-back clickable"></i>
-					<h5>Erase</h5>
-				</div>
-				<div class="edit-btn-content">
-					<i class="fas fa-edit edit-back clickable"></i>
-					<h5>Edit</h5>
-				</div>
-			</div>
-			<!-----Edit-section-END----->
+            <!-----Edit-section----->
+            <div class="edit-btn">
+                <div class="edit-btn-content">
+                    <i id="paint-btn" class="fas fa-paint-brush edit-back clickable"></i>
+                    <h5>Paint</h5>
+                </div>
+                <div class="edit-btn-content">
+                    <i id="erase-btn" class="fas fa-eraser edit-back clickable"></i>
+                    <h5>Erase</h5>
+                </div>
+                <div class="edit-btn-content">
+                    <i class="fas fa-edit edit-back clickable"></i>
+                    <h5>Edit</h5>
+                </div>
+            </div>
+            <!-----Edit-section-END----->
 
-			<!---colorBtn----->
-			<div class="colorChange" id="colorChange">
-				<i class="fas fa-circle clickable"></i>
-				<i class="fas fa-circle clickable"></i>
-				<i class="fas fa-circle clickable"></i>
-				<i class="fas fa-circle clickable"></i>
-				<i class="fas fa-circle clickable"></i>
-				<i class="fas fa-circle clickable"></i>
-			</div>
-			<!---colorBtn END----->
+            <div class="rowBtn-1">
+                <!---row-btn--->
+                <div class="rowBtn">
+                    <div class="row-content">
+                        <h3>Rows: <span id="num-rows"><!-- AUTO --></span></h3>
+                    </div>
+                    <div class="row-icon">
+                        <i class="fas fa-plus icon-back clickable" id="add-row"></i>
+                        <i class="fas fa-minus icon-back clickable" id="remove-row"></i>
+                    </div>
+                </div>
+                <!------>
+                <!---colum-btn--->
+                <div class="rowBtn">
+                    <div class="row-content">
+                        <h3>Columns: <span id="num-cols"><!-- AUTO --></span></h3>
+                    </div>
+                    <div class="row-icon">
+                        <i class="fas fa-plus icon-back clickable" id="add-column"></i>
+                        <i class="fas fa-minus icon-back clickable" id="remove-column"></i>
+                    </div>
+                </div>
+                <!------>
+            </div>
 
-			<div class="rowBtn-1">
-				<!---row-btn--->
-				<div class="rowBtn">
-					<div class="row-content">
-						<h3>Rows: <span id="num-rows"><!-- AUTO --></span></h3>
-					</div>
-					<div class="row-icon">
-						<i class="fas fa-plus icon-back clickable" id="add-row"></i>
-						<i class="fas fa-minus icon-back clickable" id="remove-row"></i>
-					</div>
-				</div>
-				<!------>
-				<!---colum-btn--->
-				<div class="rowBtn">
-					<div class="row-content">
-						<h3>Columns: <span id="num-cols"><!-- AUTO --></span></h3>
-					</div>
-					<div class="row-icon">
-						<i class="fas fa-plus icon-back clickable" id="add-column"></i>
-						<i class="fas fa-minus icon-back clickable" id="remove-column"></i>
-					</div>
-				</div>
-				<!------>
-			</div>
+            <!---Shift grid-btn--->
+            <div class="rowBtn-2">
+                <div class="row-content">
+                    <h3>Shift grid</h3>
+                </div>
+                <div class="row-icon">
+                    <i class="fas fa-chevron-up icon-back clickable" id="shift-up" ></i>
+                    <i class="fas fa-chevron-right icon-back clickable" id="shift-right"></i>
+                    <i class="fas fa-chevron-left icon-back clickable" id="shift-left"></i>
+                    <i class="fas fa-chevron-down icon-back clickable" id="shift-down"></i>
+                </div>
+            </div>
+            <!------>
 
-			<!---Shift grid-btn--->
-			<div class="rowBtn-2">
-				<div class="row-content">
-					<h3>Shift grid</h3>
-				</div>
-				<div class="row-icon">
-					<i class="fas fa-chevron-up icon-back clickable" id="shift-up" ></i>
-					<i class="fas fa-chevron-right icon-back clickable" id="shift-right"></i>
-					<i class="fas fa-chevron-left icon-back clickable" id="shift-left"></i>
-					<i class="fas fa-chevron-down icon-back clickable" id="shift-down"></i>
-				</div>
-			</div>
-			<!------>
+            <div class="evaluate-btn clickable" id="evaluate-btn">Evaluate</div>
+        </section>
+        <!-------Right-side-END-------->
+    </section>
 
-			<div class="evaluate-btn clickable" id="evaluate-btn">Evaluate</div>
-		</section>
-		<!-------Right-side-END-------->
-	</section>
-
-	<section class="truth-table-section">
-		<div id="truth-table-container">
-			<table id="truth-table"></table>
-		</div>
-	</section>
+    <section class="truth-table-section">
+        <div id="truth-table-container">
+            <table id="truth-table"></table>
+        </div>
+    </section>
 
 </body>
 </html>
