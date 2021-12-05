@@ -28,7 +28,7 @@
 * Export netlist for use in electronics design software.
 * Colorblind-friendly mode.
 * Arbitrary number of I/O.
-* Mobile interface.
+* ~~Mobile interface.~~ *Resolved 2021/12/6*
 * ~~Record user input sequence in debug mode for the testbench.~~ *Resolved 2021/12/4*
 * ~~HTML button interface for those who prefer not to use a keyboard.~~ *Resolved 2021/12/2*
 * ~~Arbitrary width/height.~~ *Resolved 2021/11/28*
