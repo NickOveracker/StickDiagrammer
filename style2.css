@@ -26,10 +26,8 @@ body.light {
 
 /*--------Header----------*/
 .overall-header{
-    display: flex;
     justify-content: center;
-    position: absolute;
-    top: 20px;
+    display: flex;
 }
 
 .header-left {
@@ -96,13 +94,13 @@ body.light {
 /*-------------Canvas---------------*/
 .sample{
     width: 50%;
+    margin-top: 15vh;
+    margin-left: 15vh;
 }
 
 .sample-content{
-    width: 600px;
-    height: 600px;
-    margin-left: 50px;
-    margin-top: 100px;
+    width: 80vh;
+    height: 80vh;
 }
 /*-------------Canvas-END---------------*/
 
@@ -163,11 +161,6 @@ body.light {
     border-radius: 10%;
 }
 
-.icon-back:hover{
-    background:#4C26B8;
-    transition: .5s;
-}
-
 .rowBtn-2{
     display: flex;
     flex-direction: column;
@@ -188,11 +181,6 @@ body.light {
 .fa-circle{
     font-size: 30px;
     margin: 10px;
-}
-
-.fa-circle:hover{
-    opacity: .7;
-    transition: .5;
 }
 
 /*-------Right-side-END--------*/
@@ -249,13 +237,45 @@ body.light {
     order: 3;
 }
 
-.evaluate-btn:hover{
+.icon-back:active{
+    background:#4C26B8;
+}
+
+.fa-circle:active{
+    opacity: .7;
+}
+
+.evaluate-btn:active{
     background-color: #4C26B8;
-    transition: 1s;
+}
+
+@media (hover: hover) {
+    .icon-back:hover{
+        background:#4C26B8;
+        transition: .5s;
+    }
+
+    .fa-circle:hover{
+        opacity: .7;
+        transition: .5;
+    }
+
+    .evaluate-btn:hover{
+        background-color: #4C26B8;
+        transition: .5s;
+    }
 }
 
 /*-------responsive--------*/
-@media screen and (max-width: 1000px){
+@media screen and (orientation: landscape){
+    .overall-header {
+        top: 2vh;
+        height: 13vh;
+        position: absolute;
+    }
+}
+
+@media screen and (orientation: portrait){
 
     .overall-header{
         position: relative;
@@ -285,6 +305,8 @@ body.light {
 
     .sample{
         width: 100%;
+        margin-left: 0;
+        margin-right: 0;
     }
 
     .sample-content{
@@ -307,11 +329,6 @@ body.light {
         align-items: center;
         margin: 10px;
         margin-top: 0;
-    }
-
-    .icon-back:hover{
-        background:#4C26B8;
-        transition: .2s;
     }
 
     .rowBtn-2{
