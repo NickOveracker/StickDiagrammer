@@ -327,7 +327,7 @@ body.light {
 
     .row-content{
         font-size: 20px;
-        /*margin-top: 20px;*/
+        margin-top: 20px;
         margin-bottom: 5px;
         top: 100vh;
     }
