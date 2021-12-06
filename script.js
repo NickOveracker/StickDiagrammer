@@ -2075,6 +2075,8 @@ function setUpControls() {
     let darkModeButton = document.getElementById("dark-mode-btn");
     let undoButton = document.getElementById("undo-btn");
     let redoButton = document.getElementById("redo-btn");
+    let termMenuButton = document.getElementById("term-menu-btn");
+    let closeTermMenuButton = document.getElementById("close-term-menu-btn");
 
     removeRowButton.onclick = function() {
         this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height - 1);
@@ -2161,6 +2163,20 @@ function setUpControls() {
     redoButton.onclick = function() {
         this.controller.redo();
     }.bind(diagram);
+
+    termMenuButton.onclick = function() {
+        let termMenu = document.getElementById("terminal-menu");
+        if(termMenu.classList.contains("closed")) {
+            termMenu.classList.remove("closed");
+        }
+    }
+
+    closeTermMenuButton.onclick = function() {
+        let termMenu = document.getElementById("terminal-menu");
+        if(!termMenu.classList.contains("closed")) {
+            termMenu.classList.add("closed");
+        }
+    }
 }
 
 window.onload = function () {
