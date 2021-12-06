@@ -2203,7 +2203,7 @@ window.onload = function () {
 
     diagram.view.refreshCanvas();
     // 60 fps
-    setInterval(diagram.view.refreshCanvas.bind(diagram.view), 16);
+    window.requestAnimationFrame(diagram.view.refreshCanvas.bind(diagram.view));
 
     if(window.runTestbench) {
         runTestbench();
