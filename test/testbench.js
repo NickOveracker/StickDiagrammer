@@ -1884,7 +1884,6 @@ function runTestbench(runTo) {
     // Clear #instructions-text and replace its contents with the elapsed time
     // Make a new div.
     let resultsDiv = document.getElementById("results");
-    document.body.appendChild(resultsDiv);
     resultsDiv.innerHTML = "";
 
     p = document.createElement("p");
