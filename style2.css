@@ -16,6 +16,7 @@ html {
 
 .no-controls .sample {
     width: 100%;
+    margin-left: 0;
 }
 
 .no-controls .sample-content {
@@ -228,9 +229,10 @@ body.light {
 }
 
 .edit-btn-content h5{
-    font-size: 15px;
+    font-size: 2vh;
     font-weight: bold;
-    margin-top: 5px;
+    margin-top: 1vh;
+    margin-bottom: 2vh;
 }
 /*-----Edit-section-end-------*/
 
@@ -364,8 +366,8 @@ body.light {
     }
 
     .row-content{
-        font-size: 20px;
-        margin-bottom: 5px;
+        font-size: 2.5vh;
+        margin-bottom: 1vh;
     }
     
     .offscreen {
