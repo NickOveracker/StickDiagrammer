@@ -502,36 +502,31 @@ body.light {
     border-right: 3px double;
     font-weight: bold;
 }
-
 /*--------------truth-table-end-----------------*/
 
-
 /*-------Dark-mode-----*/
-.edit-back, .dark{
+.dark .edit-back {
 	color: #221D1D;
 	background:#FFFFFF;
 }
 
-.evaluate-btn, .dark{
+.dark .evaluate-btn {
 	color: #FFFFFF;
 	background:#4C26B8;
 }
 
-.icon-back, .dark{
+.dark .icon-back {
 	color: #FFFFFF;
 	background:rgba(109,110,106,.7);
 }
 
-.icon-back, .dark:hover{
+.dark .icon-back:hover {
 	background:#4C26B8;
 	transition: .5s;
 }
-
 /*--------------------*/
 
 /*---------Main-Menu------------*/
-
-
 li{
 	list-style: none;
 }
