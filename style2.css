@@ -1,3 +1,22 @@
+
+/*------------*/
+/*body*/
+/*header 60*/
+/*controls 130*/
+/*edit-section 212*/
+/*responsive 293*/
+/*Canvas 444*/
+/*truth-table 457*/
+/*Dark-mode 498*/
+/*Main-menu 533*/
+/*Edit-open 619*/
+
+/*------------*/
+
+
+
+
+
 @import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@600&display=swap');
 
 html {
@@ -23,7 +42,7 @@ canvas {
 }
 
 body.dark {
-    background: #000000;
+    background: #221D1D; 
     color: #ffffff;
 }
 
@@ -36,7 +55,10 @@ body.light {
     cursor: pointer;
 }
 
+
+
 /*--------Header----------*/
+
 .overall-header{
     justify-content: center;
     display: flex;
@@ -98,12 +120,16 @@ body.light {
 }
 
 /*--------Header-end----------*/
+
+
 .main{
     display: flex;
     
 }
 
-/*-------Right-side--------*/
+/*-------Controls-----------------*/
+
+
 .controls{
     margin-top: 100px;
     display: flex;
@@ -181,7 +207,7 @@ body.light {
     margin: 10px;
 }
 
-/*-------Right-side-END--------*/
+/*-------Controls-END--------*/
 
 /*-----Edit-section-------*/
 
@@ -272,18 +298,7 @@ body.light {
         position: absolute;
     }
 
-    /*-------------Canvas---------------*/
-    .sample{
-        width: 50%;
-        margin-top: 15vh;
-        margin-left: 15vh;
-    }
-
-    .sample-content{
-        width: 80vh;
-        height: 80vh;
-    }
-    /*-------------Canvas-END---------------*/
+   
 
     .evaluate-btn{
         margin-left: auto;
@@ -400,6 +415,8 @@ body.light {
         border-radius: 100%;
     }
 
+    
+
     .edit-btn {
         margin-top: 0;
         width: 100%;
@@ -423,6 +440,21 @@ body.light {
         order: 0;
     }
 }
+
+ /*-------------Canvas---------------*/
+ .sample{
+    width: 50%;
+    margin-top: 15vh;
+    margin-left: 15vh;
+}
+
+.sample-content{
+    width: 80vh;
+    height: 80vh;
+}
+/*-------------Canvas-END---------------*/
+
+/*--------------truth-table-----------------*/
 
 #truth-table-container {
     text-align: center;
@@ -459,3 +491,224 @@ body.light {
     border-right: 3px double;
     font-weight: bold;
 }
+
+/*--------------truth-table-end-----------------*/
+
+
+/*-------Dark-mode-----*/
+.edit-back, .dark{
+	
+	color: #221D1D;
+	background:#FFFFFF;
+	
+
+}
+
+.evaluate-btn, .dark{
+	
+	
+	color: #FFFFFF;
+	margin-top: 50px;
+	border-radius: 10px;
+	background:#4C26B8;
+
+}
+
+.icon-back, .dark{
+	color: #FFFFFF;
+	background:rgba(109,110,106,.7);
+	
+}
+
+.icon-back, .dark:hover{
+	background:#4C26B8;
+	transition: .5s;
+
+}
+
+
+
+/*--------------------*/
+
+/*---------Main-Menu------------*/
+
+
+li{
+	list-style: none;
+}
+
+.menu{
+	display: none;
+	height: 100vh;
+	width: 100%;
+	z-index: 9999;
+	background-color: rgba(76,38,184,97%);
+	position: fixed;
+	font-family: 'Josefin Sans', sans-serif;
+}
+
+.fa-times{
+    position: fixed;
+	left: 40px;
+	font-size: 35px;
+	color: #FFFFFF;margin-top: 20px;
+}
+
+
+.menu-content{
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	text-align: center;
+	margin: auto;
+	top: 20%;
+	position: relative;
+	align-items: center;
+	width: 400px;
+	
+
+}
+
+.menu-content li{
+	margin: 20px;
+	color: #FFFFFF;
+	font-size: 30px;
+	font-weight: 500;
+	text-transform: uppercase;
+
+}
+
+.menu-btn-content{
+	display: flex;
+	flex-direction: column;
+	width: 300px;
+	color: #FFFFFF;
+	text-align: center;
+}
+
+.teacher-btn{
+	background-color: rgba(0,0,0,.9);
+	padding: 10px;
+	margin-top: 20px;
+
+}
+
+.toss-btn{
+	
+	padding: 10px;
+	margin-top: 20px;
+	border:solid 2px #FFFFFF;
+	color: #FFFFFF;
+}
+
+
+.menu-text{
+	font-size: 18px;
+	
+}
+
+.menu-text span{
+	font-family: 'Josefin Sans', sans-serif;
+	font-weight: bold;
+
+}
+
+
+/*-------------------------------*/
+
+/*-----------Edit-open-------------*/
+.edit-open{
+	width: 50%;
+	height: 100vh;
+	background-color: rgba(76,38,184,98%);
+	position: fixed;
+	top: 0;
+	right: 0;
+	display: none;
+}
+
+#edit-close{
+	color: #FFFFFF;
+	font-size: 30px;
+	position: relative;
+	top: 20px;
+	left:40px;
+}
+
+.terminal{
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	text-align: center;
+	align-items: center;
+	margin-top: 30%;
+	font-family: 'Josefin Sans', sans-serif;
+
+}
+
+.terminal h3{
+	font-size: 25px;
+	color: #FFFFFF;
+	text-transform: uppercase;
+}
+
+.terminal-select{
+	display: flex;
+	max-width: 500px;
+	margin-top: 30px;
+	background-color: rgba(255,255,255,.8);
+	padding: 10px;
+	border-radius: 10px;
+
+}
+
+.terminal-select p{
+	font-size: 18px;
+	color: #221D1D;
+	box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;
+	margin: 10px;
+	padding: 10px;
+	border-radius: 10px;
+}
+
+.terminal-select p:hover{
+	background-color: rgba(76,38,184,.9);
+	color: #FFFFFF;
+	transition: 1s;
+
+}
+
+.terminal-select2{
+	margin-top: 30px;
+	display: flex;
+	max-width: 300px;
+}
+
+.terminalBtn{
+	font-size: 25px;
+	margin: 10px;
+	padding: 20px;
+	width: 20px;
+	height: 20px;
+	border-radius: 10px;
+	color: #221D1D;
+	box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 12px;
+	background-color: rgba(255,255,255,.8);
+}
+
+.select-content{
+	flex-direction: column;
+}
+
+.small
+{
+	font-size: 12px;
+	color: #FFFFFF;
+	margin-top: 0;
+
+}
+
+
+
+
+/*---------------------------Edit-open-end*/
