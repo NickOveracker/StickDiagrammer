@@ -13,6 +13,7 @@
 </head>
 
 <body class="dark">
+
     <!-----Header------------>
     <div class="overall-header">
         <div class="header-left"><i class="fas fa-cloud-moon header-button clickable" id="dark-mode-btn"></i></div>
@@ -65,57 +66,58 @@
                 </div>
             </div>
             <!-----Edit-section-END----->
+            <div class="offscreen">
+                <div class="rowBtn-1">
+                    <!---row-btn--->
+                    <div class="rowBtn">
+                        <div class="row-content">
+                            <h3>Rows: <span id="num-rows"><!-- AUTO --></span></h3>
+                        </div>
+                        <div class="row-icon">
+                            <i class="fas fa-plus icon-back clickable" id="add-row"></i>
+                            <i class="fas fa-minus icon-back clickable" id="remove-row"></i>
+                        </div>
+                    </div>
+                    <!------>
+                    <!---colum-btn--->
+                    <div class="rowBtn">
+                        <div class="row-content">
+                            <h3>Columns: <span id="num-cols"><!-- AUTO --></span></h3>
+                        </div>
+                        <div class="row-icon">
+                            <i class="fas fa-plus icon-back clickable" id="add-column"></i>
+                            <i class="fas fa-minus icon-back clickable" id="remove-column"></i>
+                        </div>
+                    </div>
+                    <!------>
+                </div>
 
-            <div class="rowBtn-1">
-                <!---row-btn--->
-                <div class="rowBtn">
+                <!---Shift grid-btn--->
+                <div class="rowBtn-2">
                     <div class="row-content">
-                        <h3>Rows: <span id="num-rows"><!-- AUTO --></span></h3>
+                        <h3>Shift grid</h3>
                     </div>
                     <div class="row-icon">
-                        <i class="fas fa-plus icon-back clickable" id="add-row"></i>
-                        <i class="fas fa-minus icon-back clickable" id="remove-row"></i>
+                        <i class="fas fa-chevron-left icon-back clickable" id="shift-left"></i>
+                        <i class="fas fa-chevron-up icon-back clickable" id="shift-up" ></i>
+                        <i class="fas fa-chevron-down icon-back clickable" id="shift-down"></i>
+                        <i class="fas fa-chevron-right icon-back clickable" id="shift-right"></i>
                     </div>
                 </div>
                 <!------>
-                <!---colum-btn--->
-                <div class="rowBtn">
-                    <div class="row-content">
-                        <h3>Columns: <span id="num-cols"><!-- AUTO --></span></h3>
-                    </div>
-                    <div class="row-icon">
-                        <i class="fas fa-plus icon-back clickable" id="add-column"></i>
-                        <i class="fas fa-minus icon-back clickable" id="remove-column"></i>
-                    </div>
-                </div>
-                <!------>
-            </div>
 
-            <!---Shift grid-btn--->
-            <div class="rowBtn-2">
-                <div class="row-content">
-                    <h3>Shift grid</h3>
-                </div>
-                <div class="row-icon">
-                    <i class="fas fa-chevron-left icon-back clickable" id="shift-left"></i>
-                    <i class="fas fa-chevron-up icon-back clickable" id="shift-up" ></i>
-                    <i class="fas fa-chevron-down icon-back clickable" id="shift-down"></i>
-                    <i class="fas fa-chevron-right icon-back clickable" id="shift-right"></i>
-                </div>
+                <div class="evaluate-btn clickable" id="evaluate-btn">Evaluate</div>
+                
+                <section class="truth-table-section">
+                    <div id="truth-table-container">
+                        <table id="truth-table"></table>
+                    </div>
+                </section>
+                <div id="results"></div>
             </div>
-            <!------>
-
-            <div class="evaluate-btn clickable" id="evaluate-btn">Evaluate</div>
         </section>
         <!-------Right-side-END-------->
     </section>
 
-    <section class="truth-table-section">
-        <div id="truth-table-container">
-            <table id="truth-table"></table>
-        </div>
-    </section>
-
-    <div id="results"></div>
 </body>
 </html>
