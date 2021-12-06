@@ -10,7 +10,7 @@ html {
     width: 100%;
 }
 
-.no-controls .controls {
+.no-controls .controls, .closed {
     display: none;
 }
 
@@ -32,10 +32,6 @@ canvas {
     margin-left: auto;
     margin-right: auto;
     display: block;
-}
-
-.edit-btn-content.small {
-    display: none;
 }
 
 body.dark {
@@ -287,6 +283,10 @@ body.light {
         top: 2vh;
         height: 13vh;
         position: absolute;
+    }
+
+    .edit-btn-content.small {
+        display: none;
     }
 
     /*-------------Canvas---------------*/
