@@ -324,7 +324,7 @@ body.light {
 
     .sample-content{
         width:100%;
-        height: min(62vh, 100%);
+        height: min(62vh, 100vw);
         margin-left: 0;
         margin-top: 0;
     }
