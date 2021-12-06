@@ -508,36 +508,24 @@ body.light {
 
 /*-------Dark-mode-----*/
 .edit-back, .dark{
-	
 	color: #221D1D;
 	background:#FFFFFF;
-	
-
 }
 
 .evaluate-btn, .dark{
-	
-	
 	color: #FFFFFF;
-	margin-top: 50px;
-	border-radius: 10px;
 	background:#4C26B8;
-
 }
 
 .icon-back, .dark{
 	color: #FFFFFF;
 	background:rgba(109,110,106,.7);
-	
 }
 
 .icon-back, .dark:hover{
 	background:#4C26B8;
 	transition: .5s;
-
 }
-
-
 
 /*--------------------*/
 
@@ -685,7 +673,7 @@ li{
 .terminal-select p:hover{
 	background-color: rgba(76,38,184,.9);
 	color: #FFFFFF;
-	transition: 1s;
+	transition: .5s;
 
 }
 
