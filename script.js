@@ -1262,6 +1262,7 @@ class DiagramView {
         this.cellWidth  = this.canvasWidth  / (this.diagram.layeredGrid.width  + 2);
         this.cellHeight = this.canvasHeight / (this.diagram.layeredGrid.height + 2);
         this.useFlatColors = false;
+        this.drawGrid();
     }
     
     // Draw a faint grid on the canvas.
