@@ -1355,10 +1355,10 @@ class DiagramView {
         let containerSize = Math.min(containerWidth, containerHeight);
         let sizeChanged = this.canvasWidth !== containerSize || this.canvasHeight !== containerSize;
 
-        this.canvas.clientHeight = containerSize;
-        this.canvas.clientWidth = containerSize;
         this.canvas.width = containerSize;
         this.canvas.height = containerSize;
+        this.canvas.style.width = containerSize + 'px';
+        this.canvas.style.width = containerSize + 'px';
         this.canvasWidth = containerSize;
         this.canvasHeight = containerSize;
 
