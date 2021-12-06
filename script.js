@@ -1350,10 +1350,28 @@ class DiagramView {
     // Resize the canvas to the largest square that fits in the window.
     resizeCanvas() {
         'use strict';
+        if(Math.min(window.innerHeight, window.innerWidth) * 0.95 + 300 > document.body.clientWidth) {
+            if(!document.body.classList.contains('no-controls')) {
+                document.body.classList.add('no-controls');
+            }
+        } else if(document.body.classList.contains('no-controls')) {
+            document.body.classList.remove('no-controls');
+        }
+
         let containerWidth = document.getElementById('canvas-container').clientWidth;
         let containerHeight = document.getElementById('canvas-container').clientHeight;
         let containerSize = Math.min(containerWidth, containerHeight);
         let sizeChanged = this.canvasWidth !== containerSize || this.canvasHeight !== containerSize;
+        
+        if(sizeChanged && document.scrollWidth > document.clientWidth) {
+            document.body.classList.add('no-controls');
+            resizeCanvas();
+            return;
+        } else if(sizeChanged && document.body.classList.contains('no-controls')) {
+            document.body.classList.remove('no-controls');
+            resizeCanvas();
+            return;
+        }
 
         this.canvas.width = containerSize;
         this.canvas.height = containerSize;
