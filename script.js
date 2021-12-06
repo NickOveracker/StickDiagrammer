@@ -1350,7 +1350,8 @@ class DiagramView {
     // Resize the canvas to the largest square that fits in the window.
     resizeCanvas() {
         'use strict';
-        if(Math.min(window.innerHeight, window.innerWidth) * 0.95 + 300 > document.body.clientWidth) {
+        if(document.body.clientWidth > document.body.clientHeight
+            && Math.min(window.innerHeight, window.innerWidth) * 0.95 + 300 > document.body.clientWidth) {
             if(!document.body.classList.contains('no-controls')) {
                 document.body.classList.add('no-controls');
             }
