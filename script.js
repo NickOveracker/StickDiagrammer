@@ -2016,6 +2016,8 @@ function refreshTruthTable() {
             tCell.className = colIndex < diagram.inputs.length ? "input" : "output";
         });
     });
+
+    tableElement.scrollTo({behavior: "smooth", top: 0});
 }
 
 function setDarkMode(setToDark) {
