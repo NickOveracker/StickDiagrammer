@@ -2017,7 +2017,7 @@ function refreshTruthTable() {
         });
     });
 
-    window.scrollTo({behavior: "smooth", top: tableElement.getBoundingClientRect().top, left: 0});
+    window.scrollTo({behavior: "smooth", top: Math.ceil(tableElement.getBoundingClientRect().top + window.scrollY), left: 0});
 }
 
 function setDarkMode(setToDark) {
