@@ -154,8 +154,8 @@ body.light {
     display: flex;
     justify-content:center;
     text-align: center;
-    margin-bottom: 20px;
-    font-size: 20px;
+    margin-bottom: 1vh;
+    font-size: 2.5vh;
     font-weight: bold;
     font-family: 'Josefin Sans', sans-serif;
 }
@@ -222,11 +222,11 @@ body.light {
 }
 
 .edit-back{
-    font-size: 30px;
-    height: 35px;
-    width: 35px;
-    border:solid 2px;
-    padding: 10px;
+    font-size: 2vw;
+    height: 2vw;
+    width: 2vw;
+    border: solid 2px;
+    padding: 1vw;
     border-radius: 100%;
 }
 
@@ -647,7 +647,7 @@ li{
 
 }
 
-.terminal-select p{
+.terminal-menu p, .terminal-menu i {
     font-size: 18px;
     color: #221D1D;
     box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;

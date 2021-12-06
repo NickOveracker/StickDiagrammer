@@ -2077,6 +2077,8 @@ function setUpControls() {
     let redoButton = document.getElementById("redo-btn");
     let termMenuButton = document.getElementById("term-menu-btn");
     let closeTermMenuButton = document.getElementById("close-term-menu-btn");
+    let mainMenuButton = document.getElementById("main-menu-btn");
+    let mainMenuCloseButton = document.getElementById("close-main-menu-btn");
 
     removeRowButton.onclick = function() {
         this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height - 1);
@@ -2175,6 +2177,20 @@ function setUpControls() {
         let termMenu = document.getElementById("terminal-menu");
         if(!termMenu.classList.contains("closed")) {
             termMenu.classList.add("closed");
+        }
+    }
+
+    mainMenuButton.onclick = function() {
+        let mainMenu = document.getElementById("main-menu");
+        if(mainMenu.classList.contains("closed")) {
+            mainMenu.classList.remove("closed");
+        }
+    }
+
+    mainMenuCloseButton.onclick = function() {
+        let mainMenu = document.getElementById("main-menu");
+        if(!mainMenu.classList.contains("closed")) {
+            mainMenu.classList.add("closed");
         }
     }
 }
