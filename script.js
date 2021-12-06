@@ -1361,18 +1361,8 @@ class DiagramView {
         let containerWidth = document.getElementById('canvas-container').clientWidth;
         let containerHeight = document.getElementById('canvas-container').clientHeight;
         let containerSize = Math.min(containerWidth, containerHeight);
-        let sizeChanged = this.canvasWidth !== containerSize || this.canvasHeight !== containerSize;
-        
-        if(sizeChanged && document.scrollWidth > document.clientWidth) {
-            document.body.classList.add('no-controls');
-            resizeCanvas();
-            return;
-        } else if(sizeChanged && document.body.classList.contains('no-controls')) {
-            document.body.classList.remove('no-controls');
-            resizeCanvas();
-            return;
-        }
-
+        //let sizeChanged = this.canvasWidth !== containerSize || this.canvasHeight !== containerSize;
+       
         this.canvas.width = containerSize;
         this.canvas.height = containerSize;
         this.canvas.style.width = containerSize + 'px';
@@ -2036,7 +2026,7 @@ function refreshTruthTable() {
         });
     });
 
-    window.scrollTo({behavior: "smooth", top: Math.ceil(tableElement.getBoundingClientRect().top + window.scrollY), left: 0});
+    window.scrollTo({behavior: "smooth", top: Math.ceil(tableElement.getBoundingClientRect().top + window.scrollY), left: 0,});
 }
 
 function setDarkMode(setToDark) {
