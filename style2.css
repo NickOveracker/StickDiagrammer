@@ -194,10 +194,10 @@ body.light {
 }
 
 .edit-back.small {
-    height: 20px;
-    width: 20px;
-    font-size: 20px;
-    padding: 10px;
+    height: 2.6vh;
+    width: 2.6vh;
+    font-size: 2.6vh;
+    padding: 1.3vh;
 }
 
 .edit-btn-content h5{
@@ -279,24 +279,26 @@ body.light {
     .overall-header{
         position: relative;
         top: 0;
-        padding-top: 20px;
-        padding-bottom: 20px;
+        padding-top: 2vh;
+        padding-bottom: 2vh;
+    }
+
+    .header-button {
+        font-size: 4vh;
+        width: 4vh;
+        height: 4vh;
     }
 
     #menu-bar{
         left: 90%;
     }
 
-    #dark-mode{
-        font-size: 40px;
-    }
-
     .logo{
-        font-size: 30px;
+        font-size: 4vh;
     }
 
     .controls{
-        margin-top: 10px;
+        margin-top: 2vh;
     }
     .main{
         flex-direction: column;
@@ -310,7 +312,7 @@ body.light {
 
     .sample-content{
         width:100%;
-        height: auto;
+        height: 62vh;
         margin-left: 0;
         margin-top: 0;
     }
@@ -348,15 +350,17 @@ body.light {
     }
 
     .fa-circle{
-        margin-bottom: 20px;
+        font-size: 4vh;
+        margin: 2vh;
+        margin-bottom: 3vh;
     }
 
     .edit-back{
-        font-size: 40px;
-        height: 40px;
-        width:  40px;
-        border:solid 2px;
-        padding: 20px;
+        font-size: 5.3vh;
+        height: 5.3vh;
+        width: 5.3vh;
+        border: solid 2px;
+        padding: 2.6vh;
         border-radius: 100%;
     }
 

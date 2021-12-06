@@ -1350,8 +1350,8 @@ class DiagramView {
     // Resize the canvas to the largest square that fits in the window.
     resizeCanvas() {
         'use strict';
-        let containerWidth = this.canvas.clientWidth;
-        let containerHeight = this.canvas.clientHeight;
+        let containerWidth = document.getElementById('canvas-container').clientWidth;
+        let containerHeight = document.getElementById('canvas-container').clientHeight;
         let containerSize = Math.min(containerWidth, containerHeight);
         let sizeChanged = this.canvasWidth !== containerSize || this.canvasHeight !== containerSize;
 
