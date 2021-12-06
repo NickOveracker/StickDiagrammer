@@ -1442,6 +1442,7 @@ class DiagramView {
         // set the outer border of the canvas to the cursor color
         this.drawBorder();
         this.drawLabels();
+        window.requestAnimationFrame(this.refreshCanvas.bind(this));
     }
 }
 
