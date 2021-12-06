@@ -232,7 +232,7 @@ body.light {
     background-color: #221D1D;
     color: #FFFFFF;
     margin-top: 30px;
-    order: 3;
+    order: 5;
 }
 
 .icon-back:active{
@@ -284,6 +284,26 @@ body.light {
         height: 80vh;
     }
     /*-------------Canvas-END---------------*/
+
+    .evaluate-btn{
+        margin-left: auto;
+        margin-right: auto;
+        order: 5;
+    }
+
+    .offscreen {
+        display: flex;
+        flex-direction: column;
+        order: 2;
+    }
+
+    .truth-table-section {
+        order: 6;
+    }
+
+    #results {
+        order: 7;
+    };
 }
 
 @media screen and (orientation: portrait){
