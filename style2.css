@@ -327,8 +327,11 @@ body.light {
 
     .row-content{
         font-size: 20px;
-        margin-top: 20px;
         margin-bottom: 5px;
+    }
+    
+    .offscreen {
+        position: absolute;
         top: 100vh;
     }
 
