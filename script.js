@@ -2206,7 +2206,4 @@ window.onload = function () {
     if(window.runTestbench) {
         runTestbench();
     }
-    
-    // Hide the address bar on mobile
-    window.scrollTo(0,1);
 };
