@@ -1012,12 +1012,15 @@ class DiagramController {
     // If the right (or secondary) button, use the same coordinates to delete a line of cells.
     mouseupHandler(event) {
         'use strict';
-        event.preventDefault();
         let clientX, clientY;
         let coords = this.getCoordsFromEvent(event);
 
         clientX = coords.x;
         clientY = coords.y;
+
+        if(this.inBounds(clientX, clientY)) {
+            event.preventDefault();
+        }
      
         if (this.isPrimaryInput(event) || event.button === 2) {
             // If not between cells 1 and gridsize - 1, undo and return.
@@ -1068,12 +1071,15 @@ class DiagramController {
     // Show a preview line when the user is dragging the mouse.
     mousemoveHandler(event) {
         'use strict';
-        event.preventDefault();
         let clientX, clientY;
         let coords = this.getCoordsFromEvent(event);
 
         clientX = coords.x;
         clientY = coords.y;
+
+        if(this.inBounds(clientX, clientY)) {
+            event.preventDefault();
+        }
 
         if(event.type.includes("mouse")) {
             this.view.trailCursor = true;
@@ -1227,20 +1233,10 @@ class DiagramController {
         else if (isGND(event.keyCode))    { this.placeTerminal(event, this.diagram.gndCell); }
     }
 
-    // Don't show a context-menu when right-clicking
-    contextmenuHandler(event) {
-        'use strict';
-        if (event.button === 2) {
-            // Don't show a context menu.
-            event.preventDefault();
-        }
-    }
-
     // Note the grid coordinates when the left mouse button is pressed.
     // Store the coordinates in startX and startY.
     mousedownHandler(event) {
         'use strict';
-        event.preventDefault();
         let clientX, clientY;
         let coords = this.getCoordsFromEvent(event);
 
@@ -1250,6 +1246,7 @@ class DiagramController {
         if (this.isPrimaryInput(event) || event.button === 2) {
             // Return if not between cells 1 and gridsize - 1
             if (this.inBounds(clientX, clientY)) {
+                event.preventDefault();
                 this.startX = Math.floor((clientX - this.view.canvas.getBoundingClientRect().left - this.view.cellWidth) / this.view.cellWidth);
                 this.startY = Math.floor((clientY - this.view.canvas.getBoundingClientRect().top - this.view.cellHeight) / this.view.cellHeight);
             } else {
@@ -2357,19 +2354,22 @@ window.onload = function () {
     // Set to dark mode if it is night time
     setDarkMode(new Date().getHours() > 19 || new Date().getHours() < 7);
 
-    // Canvas mouse event listeners.
-    canvasContainer.addEventListener("touchend",    function(e) { this.mouseupHandler(e);     }.bind(diagram.controller));
-    canvasContainer.addEventListener("mouseup",     function(e) { this.mouseupHandler(e);     }.bind(diagram.controller));
-    canvasContainer.addEventListener("contextmenu", function(e) { this.contextmenuHandler(e); }.bind(diagram.controller));
-
     // Some of these pertain the the canvas, but we don't know whether
     // it will be selected.
-    window.addEventListener("touchstart", function(e) { this.mousedownHandler(e); }.bind(diagram.controller));
-    window.addEventListener("mousedown",  function(e) { this.mousedownHandler(e); }.bind(diagram.controller));
-    window.addEventListener("touchmove",  function(e) { this.mousemoveHandler(e); }.bind(diagram.controller));
-    window.addEventListener("mousemove",  function(e) { this.mousemoveHandler(e); }.bind(diagram.controller));
-    window.addEventListener("keydown",    function(e) { this.keydownHandler(e);   }.bind(diagram.controller));
-    window.addEventListener("keyup",      function(e) { this.keyupHandler(e);     }.bind(diagram.controller));
+    window.addEventListener("touchend",    function(e) { this.mouseupHandler(e);     }.bind(diagram.controller));
+    window.addEventListener("mouseup",     function(e) { this.mouseupHandler(e);     }.bind(diagram.controller));
+    window.addEventListener("touchstart",  function(e) { this.mousedownHandler(e);   }.bind(diagram.controller));
+    window.addEventListener("mousedown",   function(e) { this.mousedownHandler(e);   }.bind(diagram.controller));
+    window.addEventListener("touchmove",   function(e) { this.mousemoveHandler(e);   }.bind(diagram.controller));
+    window.addEventListener("mousemove",   function(e) { this.mousemoveHandler(e);   }.bind(diagram.controller));
+    window.addEventListener("keydown",     function(e) { this.keydownHandler(e);     }.bind(diagram.controller));
+    window.addEventListener("keyup",       function(e) { this.keyupHandler(e);       }.bind(diagram.controller));
+    window.addEventListener("contextmenu", function(e) {
+        if (event.button === 2) {
+            // Don't show a context menu.
+            event.preventDefault();
+        }
+    });
 
     // Set up the evaluate button.
     button = document.getElementById("evaluate-btn");
