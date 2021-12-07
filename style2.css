@@ -92,12 +92,6 @@ input[type="radio"] {
     background:rgba(109,110,106,.7);
 }
 
-.dark .icon-back:hover {
-    background:#4C26B8;
-    transition: .5s;
-}
-/*--------------------*/
-
 /*---------Main-Menu------------*/
 li{
     list-style: none;
@@ -213,12 +207,6 @@ li{
     background-color: rgba(255,255,255,.8);
     padding-top: 0;
     padding-bottom: 0;
-}
-
-.terminal-select p:hover{
-    background-color: rgba(76,38,184,.9);
-    color: #FFFFFF;
-    transition: .5s;
 }
 
 .terminal-select2{
@@ -516,6 +504,23 @@ body.light {
 
     .evaluate-btn:hover{
         background-color: #4C26B8;
+        transition: .5s;
+    }
+
+    .terminalBtn:hover {
+        background-color: #221D1D;
+        color: #fff;
+    }
+
+    .dark .icon-back:hover {
+        background:#4C26B8;
+        transition: .5s;
+    }
+
+    /*--------------------*/
+    .terminal-select p:hover{
+        background-color: rgba(76,38,184,.9);
+        color: #FFFFFF;
         transition: .5s;
     }
 }
