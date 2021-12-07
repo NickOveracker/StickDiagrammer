@@ -116,6 +116,7 @@ li{
 .fa-times{
     position: relative;
     color: #FFFFFF;
+    width: unset;
 }
 
 .menu-content{
