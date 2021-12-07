@@ -809,7 +809,7 @@ class DiagramController {
 
     addTerminal() {
         'use strict';
-        let newTerm = this.diagram.inputs[this.diagram.inputs.push({x: 0, y: 0,})];
+        let newTerm = this.diagram.inputs[this.diagram.inputs.push({x: 0, y: 0,}) - 1];
         this.placeTerminal(newTerm, newTerm, true);
         populateTermSelect();
     }
@@ -2243,13 +2243,13 @@ function setUpControls() {
     mainMenuCloseButton.onclick = closeMainMenu;
 
     placeTermButton.onclick = function() {
+        let placeTermButton = document.getElementById("place-term-btn");
+        let term = document.querySelector('input[name="termselect"]:checked');
+
         if(placeTermButton.classList.contains("active")) {
             this.clearPlaceTerminalMode();
             return;
         }
-
-        let placeTermButton = document.getElementById("place-term-btn");
-        let term = document.querySelector('input[name="termselect"]:checked');
 
         if(term === null) {
             return;
