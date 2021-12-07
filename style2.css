@@ -125,9 +125,7 @@ li{
 }
 
 .menu-content li{
-    margin: 20px;
     color: #FFFFFF;
-    font-size: 30px;
     font-weight: 500;
     text-transform: uppercase;
 }
@@ -142,14 +140,14 @@ li{
 
 .teacher-btn{
     background-color: rgba(0,0,0,.9);
-    padding: 10px;
-    margin-top: 20px;
+    padding: 2vh;
+    margin-top: 4vh;
     width: auto;
 }
 
 .dono-btn{
-    padding: 10px;
-    margin-top: 20px;
+    padding: 2vh;
+    margin-top: 4vh;
     border:solid 2px #FFFFFF;
     color: #FFFFFF;
     width: auto;
@@ -533,6 +531,11 @@ body.light {
 
     .menu-content{
         top: 5vh;
+    }
+
+    .menu-content li{
+        margin: 1vh;
+        font-size: 5vh;
     }
 
     .logo {
