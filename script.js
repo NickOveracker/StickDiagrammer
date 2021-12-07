@@ -803,6 +803,7 @@ class DiagramController {
         let removedTerminal = this.diagram.inputs.pop();
         if(removedTerminal !== undefined) {
             this.diagram.layeredGrid.clear(removedTerminal.x, removedTerminal.y, Diagram.CONTACT);
+            this.diagram.inputNets.pop();
             populateTermSelect();
         }
     }
@@ -811,6 +812,7 @@ class DiagramController {
         'use strict';
         let newTerm = this.diagram.inputs[this.diagram.inputs.push({x: 0, y: 0,}) - 1];
         this.placeTerminal(newTerm, newTerm, true);
+        this.diagram.inputNets.push(new Net(String.fromCharCode(65 + this.diagram.inputs.length-1), true));
         populateTermSelect();
     }
 
@@ -1069,6 +1071,10 @@ class DiagramController {
         clientX = coords.x;
         clientY = coords.y;
 
+        if(event.type.includes("mouse")) {
+            this.view.trailCursor = true;
+        }
+
         let leftMouseMoveHandler = function(bounds) {
             // If the mouse moved more horizontally than vertically,
             // draw a horizontal line.
@@ -1309,6 +1315,7 @@ class DiagramView {
         this.cellWidth  = this.canvasWidth  / (this.diagram.layeredGrid.width  + 2);
         this.cellHeight = this.canvasHeight / (this.diagram.layeredGrid.height + 2);
         this.useFlatColors = false;
+        this.trailCursor = false;
     }
     
     // Draw a faint grid on the canvas.
@@ -1490,7 +1497,7 @@ class DiagramView {
             bottom: this.diagram.layeredGrid.height - 1,
             lowLayer: 0,
             highLayer: this.diagram.layeredGrid.layers - 1,
-            cursor: currentCell,
+            cursor: this.trailCursor ? currentCell : undefined,
         };
 
         this.diagram.layeredGrid.map(bounds, function (x, y, layer) {
