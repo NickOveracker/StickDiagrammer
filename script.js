@@ -1249,7 +1249,7 @@ class DiagramController {
 
         // Close the top window by pressing escape.
         if (event.keyCode === 27) {
-            closeTopWindow();
+            closeTopMenu();
         }
     }
 }
@@ -2178,14 +2178,14 @@ function setUpControls() {
         }
     }
 
-    closeTermMenuButton.onclick = function() {
-        let termMenu = document.getElementById("terminal-menu");
-        if(!termMenu.classList.contains("closed")) {
-            termMenu.classList.add("closed");
+    mainMenuButton.onclick = function() {
+        let mainMenu = document.getElementById("main-menu");
+        if(mainMenu.classList.contains("closed")) {
+            mainMenu.classList.remove("closed");
         }
     }
 
-    mainMenuButton.onclick = closeTermMenu;
+    closeTermMenuButton.onclick = closeTermMenu;
     mainMenuCloseButton.onclick = closeMainMenu;
 }
 
