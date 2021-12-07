@@ -41,7 +41,8 @@
             <i class="fas fa-times clickable" id="close-term-menu-btn"></i>
             <div class="terminal">
                 <h3>Manage Terminals</h3>
-                <div class="terminal-select">
+                <div id="termselect-list" class="terminal-select">
+                <!--
                     <input type="radio" name="termselect" id="termselect_0" value="0">
                     <label for="termselect_0" class="clickable first">A</label>
 
@@ -62,15 +63,16 @@
 
                     <input type="radio" name="termselect" id="termselect_6" value="6">
                     <label for="termselect_6" class="clickable last">GND</label>
+                -->
                 </div>
                 <div class="terminal-select2">
-                    <div class="select-content">
+                    <div class="select-content" id="remove-terminal-btn">
                         <i class="fas fa-minus terminalBtn clickable"></i><span class="small">Delete a Terminal</span>
                     </div>
                     <div class="select-content" id="place-term-btn">
                         <i class="fas fa-map-pin terminalBtn clickable"></i><span class="small">Place Terminal</span>
                     </div>
-                    <div class="select-content">
+                    <div class="select-content" id="add-terminal-btn">
                         <i class="fas fa-plus terminalBtn clickable"></i><span class="small">Add a Terminal</span>
                     </div>
                 </div>

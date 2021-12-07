@@ -109,6 +109,26 @@ class Diagram {
         this.controller = new DiagramController(this, this.view, mainCanvas);
     }
 
+    getTerminals() {
+        'use strict';
+        return this.inputs.concat(this.outputs, this.vddCell, this.gndCell);
+    }
+
+    getTerminalName(index) {
+        'use strict';
+        if(index < this.inputs.length) {
+            return String.fromCharCode(65 + index);
+        } else if(index < this.inputs.length + this.outputs.length) {
+            return String.fromCharCode(89 - index + this.inputs.length);
+        } else if(index == this.inputs.length + this.outputs.length) {
+            return "VDD";
+        } else if(index == this.inputs.length + this.outputs.length + 1) {
+            return "GND";
+        } else {
+            return "?";
+        }
+    }
+
     pathExists(node1, node2) {
         'use strict';
         return this.nodeNodeMap[this.graph.getIndexByNode(node1)][this.graph.getIndexByNode(node2)];
@@ -778,11 +798,26 @@ class DiagramController {
         this.selectedTerminal = null;
     }
 
+    removeTerminal() {
+        'use strict';
+        let removedTerminal = this.diagram.inputs.pop();
+        if(removedTerminal !== undefined) {
+            this.diagram.layeredGrid.clear(removedTerminal.x, removedTerminal.y, Diagram.CONTACT);
+            populateTermSelect();
+        }
+    }
+
+    addTerminal() {
+        'use strict';
+        let newTerm = this.diagram.inputs.push({x: 0, y: 0,});
+        this.placeTerminal(newTerm, newTerm, true);
+        populateTermSelect();
+    }
+
     setPlaceTerminalMode(terminalNumber) {
         'use strict';
         // Concatenate diagram.inputs, diagram.outputs, diagram.vddCell, and diagram.gndCell.
-        let terminals = this.diagram.inputs.concat(this.diagram.outputs, this.diagram.vddCell, this.diagram.gndCell);
-
+        let terminals = this.diagram.getTerminals();
         this.placeTermMode = true;
         this.selectedTerminal = terminals[terminalNumber];
     }
@@ -1112,12 +1147,14 @@ class DiagramController {
         }
     }
 
-    placeTerminal(event, terminal) {
+    placeTerminal(event, terminal, useGridCoords) {
         'use strict';
         let cell;
         let oldX, oldY;
 
-        if(event.type.includes('touch')) {
+        if(useGridCoords) {
+            cell = event;
+        } else if(event.type.includes('touch')) {
             cell = this.getCellAtCursor(event.changedTouches[0].clientX, event.changedTouches[0].clientY);
         } else {
             cell = this.getCellAtCursor(this.currentX, this.currentY);
@@ -2099,6 +2136,8 @@ function setUpControls() {
     let mainMenuButton = document.getElementById("main-menu-btn");
     let mainMenuCloseButton = document.getElementById("close-main-menu-btn");
     let placeTermButton = document.getElementById("place-term-btn");
+    let addTerminalButton = document.getElementById("add-terminal-btn");
+    let removeTerminalButton = document.getElementById("remove-terminal-btn");
 
     removeRowButton.onclick = function() {
         this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height - 1);
@@ -2221,9 +2260,18 @@ function setUpControls() {
         placeTermButton.classList.add("active");
 
     }.bind(diagram.controller);
+
+    addTerminalButton.onclick = function() {
+        this.addTerminal();
+    }.bind(diagram.controller);
+
+    removeTerminalButton.onclick = function() {
+        this.removeTerminal();
+    }.bind(diagram.controller);
 }
 
 function closeMainMenu() {
+    'strict mode';
     let mainMenu = document.getElementById("main-menu");
     if(!mainMenu.classList.contains("closed")) {
         mainMenu.classList.add("closed");
@@ -2232,6 +2280,7 @@ function closeMainMenu() {
 }
 
 function closeTermMenu() {
+    'strict mode';
     let termMenu = document.getElementById("terminal-menu");
     if(!termMenu.classList.contains("closed")) {
         termMenu.classList.add("closed");
@@ -2240,12 +2289,41 @@ function closeTermMenu() {
 }
 
 function closeTopMenu() {
+    'strict mode';
     closeMainMenu() || closeTermMenu();
 }
 
 function clearPlaceTerminalMode() {
+    'strict mode';
     let placeTermButton = document.getElementById("place-term-btn");
     placeTermButton.classList.remove("active");
+}
+
+// Fill in the termselect-list div with a radio button for each terminal.
+function populateTermSelect() {
+    'strict mode';
+    let termSelectList = document.getElementById("termselect-list");
+    let terminals = diagram.getTerminals();
+
+    // First, clear the list.
+    termSelect.innerHTML = "";
+
+    for(let ii = 0; ii < terminals.length; ii++) {
+        let term = terminals[ii];
+        let termSelectItemLabel = document.createElement("label");
+        let termSelectItemInput = document.createElement("input");
+
+        termSelectItemInput.type = "radio";
+        termSelectItemInput.name = "termselect";
+        termSelectItemInput.value = ii;
+        termSelectItemInput.id = "termselect-" + ii;
+
+        termSelectItemLabel.innerHTML = diagram.getTerminalName(ii);
+        termSelectItemLabel.htmlFor = termSelectItemInput.id;
+
+        termSelectItemLabel.appendChild(termSelectItemInput);
+        termSelectList.appendChild(termSelectItemLabel);
+    }
 }
 
 window.onload = function () {
