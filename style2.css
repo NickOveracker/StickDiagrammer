@@ -119,7 +119,6 @@ li{
     justify-content: center;
     text-align: center;
     margin: auto;
-    top: 20%;
     position: relative;
     align-items: center;
     width: 400px;
@@ -531,6 +530,10 @@ body.light {
         top: 2vh;
         height: 13vh;
         position: absolute;
+    }
+
+    .menu-content{
+        top: 5vh;
     }
 
     .logo {
