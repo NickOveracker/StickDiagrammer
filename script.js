@@ -787,6 +787,11 @@ class DiagramController {
         this.selectedTerminal = terminals[terminalNumber];
     }
 
+    clearPlaceTerminalMode() {
+        'use strict';
+        this.placeTermMode = false;
+        clearPlaceTerminalMode();
+    }
 
     // Toggle if mode is not provided.
     setEraseMode(mode) {
@@ -949,7 +954,7 @@ class DiagramController {
         clientY = coords.y;
 
         if(this.placeTermMode) {
-            this.placeTermMode = false;
+            this.clearPlaceTerminalMode();
             this.placeTerminal(event, this.selectedTerminal);
         } else if (!this.isEraseEvent(event)) {
             // Just fill in or delete the cell at the start coordinates.
@@ -2199,6 +2204,7 @@ function setUpControls() {
     mainMenuCloseButton.onclick = closeMainMenu;
 
     placeTermButton.onclick = function() {
+        let placeTermButton = document.getElementById("place-term-btn");
         let term = document.querySelector('input[name="termselect"]:checked');
 
         if(term === null) {
@@ -2207,6 +2213,7 @@ function setUpControls() {
 
         term = parseInt(term.value);
         this.setPlaceTerminalMode(term);
+        placeTermButton.classList.remove("active");
     }.bind(diagram.controller);
 }
 
@@ -2228,6 +2235,11 @@ function closeTermMenu() {
 
 function closeTopMenu() {
     closeMainMenu() || closeTermMenu();
+}
+
+function clearPlaceTerminalMode() {
+    let placeTermButton = document.getElementById("place-term-btn");
+    placeTermButton.classList.remove("active");
 }
 
 window.onload = function () {

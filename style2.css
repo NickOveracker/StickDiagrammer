@@ -672,6 +672,10 @@ body.light {
         display: block;
     }
 
+    .terminalBtn.active {
+        background-color: #D4AF37;
+    }
+
     .overall-header{
         position: relative;
         top: 0;
