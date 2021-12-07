@@ -240,7 +240,7 @@ li{
     flex-direction: column;
 }
 
-.small
+span.small
 {
     font-size: 12px;
     color: #FFFFFF;
