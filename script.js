@@ -120,9 +120,9 @@ class Diagram {
             return String.fromCharCode(65 + index);
         } else if(index < this.inputs.length + this.outputs.length) {
             return String.fromCharCode(89 - index + this.inputs.length);
-        } else if(index == this.inputs.length + this.outputs.length) {
+        } else if(index === this.inputs.length + this.outputs.length) {
             return "VDD";
-        } else if(index == this.inputs.length + this.outputs.length + 1) {
+        } else if(index === this.inputs.length + this.outputs.length + 1) {
             return "GND";
         } else {
             return "?";
@@ -1119,9 +1119,11 @@ class DiagramController {
             // Ignore if not inside the canvas
             if (this.inBounds(clientX, clientY)) {
                 if (this.startX === -1 || this.startY === -1) {
-                    let temp = this.getCellAtCursor(this.currentX, this.currentY);
+                    /*let temp = this.getCellAtCursor(this.currentX, this.currentY);
                     this.startX = temp.x;
                     this.startY = temp.y;
+                    */
+                   return;
                 }
 
                 if (!this.dragging) {
@@ -1408,8 +1410,8 @@ class DiagramView {
     // Resize the canvas to the largest square that fits in the window.
     resizeCanvas() {
         'use strict';
-        if(window.innerWidth > window.innerHeight
-            && Math.min(window.innerHeight, window.innerWidth) * 0.95 + 300 > window.innerWidth) {
+        if(window.innerWidth > window.innerHeight &&
+            Math.min(window.innerHeight, window.innerWidth) * 0.95 + 300 > window.innerWidth) {
             if(!document.body.classList.contains('no-controls')) {
                 document.body.classList.add('no-controls');
             }
@@ -2241,14 +2243,14 @@ function setUpControls() {
         if(termMenu.classList.contains("closed")) {
             termMenu.classList.remove("closed");
         }
-    }
+    };
 
     mainMenuButton.onclick = function() {
         let mainMenu = document.getElementById("main-menu");
         if(mainMenu.classList.contains("closed")) {
             mainMenu.classList.remove("closed");
         }
-    }
+    };
 
     closeTermMenuButton.onclick = closeTermMenu;
     mainMenuCloseButton.onclick = closeMainMenu;
@@ -2282,7 +2284,7 @@ function setUpControls() {
 }
 
 function closeMainMenu() {
-    'strict mode';
+    'use strict';
     let mainMenu = document.getElementById("main-menu");
     if(!mainMenu.classList.contains("closed")) {
         mainMenu.classList.add("closed");
@@ -2291,7 +2293,7 @@ function closeMainMenu() {
 }
 
 function closeTermMenu() {
-    'strict mode';
+    'use strict';
     let termMenu = document.getElementById("terminal-menu");
     if(!termMenu.classList.contains("closed")) {
         termMenu.classList.add("closed");
@@ -2300,19 +2302,21 @@ function closeTermMenu() {
 }
 
 function closeTopMenu() {
-    'strict mode';
-    closeMainMenu() || closeTermMenu();
+    'use strict';
+    if(!closeMainMenu()) {
+        closeTermMenu();
+    }
 }
 
 function clearPlaceTerminalMode() {
-    'strict mode';
+    'use strict';
     let placeTermButton = document.getElementById("place-term-btn");
     placeTermButton.classList.remove("active");
 }
 
 // Fill in the termselect-list div with a radio button for each terminal.
 function populateTermSelect() {
-    'strict mode';
+    'use strict';
     let termSelectList = document.getElementById("termselect-list");
     let terminals = diagram.getTerminals();
 
@@ -2320,7 +2324,6 @@ function populateTermSelect() {
     termSelectList.innerHTML = "";
 
     for(let ii = 0; ii < terminals.length; ii++) {
-        let term = terminals[ii];
         let termSelectItemLabel = document.createElement("label");
         let termSelectItemInput = document.createElement("input");
 
