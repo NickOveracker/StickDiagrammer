@@ -1059,6 +1059,10 @@ class DiagramController {
         }
 
         this.dragging = false;
+
+        if(event.type.includes("touch")) {
+            this.currentX = this.currentY = -1;
+        }
     }
 
     // Show a preview line when the user is dragging the mouse.
