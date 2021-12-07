@@ -2330,7 +2330,7 @@ function populateTermSelect() {
         termSelectItemLabel.innerHTML = diagram.getTerminalName(ii);
         termSelectItemLabel.htmlFor = termSelectItemInput.id;
 
-        termSelectItemLabel.appendChild(termSelectItemInput);
+        termSelectList.appendChild(termSelectItemInput);
         termSelectList.appendChild(termSelectItemLabel);
     }
 }
