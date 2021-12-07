@@ -529,6 +529,10 @@ body.light {
         position: absolute;
     }
 
+    .controls{
+        margin-top: 18vh;
+    }
+
     .menu-content{
         top: 5vh;
     }
@@ -585,7 +589,7 @@ body.light {
     }
 
     .edit-open {
-        margin-top: -15vh;
+        margin-top: -33vh;
     }
 
     .terminal-select {
@@ -690,6 +694,7 @@ body.light {
     .controls{
         margin-top: 2vh;
     }
+
     .main{
         flex-direction: column;
     }
