@@ -212,12 +212,10 @@ li{
 
 .terminal-select{
     display: flex;
-    max-width: 100%;
     margin-top: 30px;
     background-color: rgba(255,255,255,.8);
-    padding-top: 10px;
-    padding-bottom: 10px;
-    border-radius: 10px;
+    padding-top: 0;
+    padding-bottom: 0;
 }
 
 .terminal-select p:hover{
@@ -242,6 +240,7 @@ li{
     color: #221D1D;
     box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 12px;
     background-color: rgba(255,255,255,.8);
+    text-align: center;
 }
 
 .select-content{
@@ -597,7 +596,7 @@ body.light {
         height: 3vh;
         text-align: center;
         display: block;
-        left: 0;
+        left: unset;
     }
 
     .terminal h3{
@@ -620,8 +619,6 @@ body.light {
     .terminal-select {
         max-width: 100%;
         margin-top: 0;
-        padding-top: 0;
-        padding-bottom: 0;
         border-radius: 0;
     }
 
@@ -646,7 +643,6 @@ body.light {
         margin-left: auto;
         margin-right: auto;
         display: block;
-        text-align: center;
     }
 
     .overall-header{
