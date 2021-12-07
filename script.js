@@ -1214,7 +1214,6 @@ class DiagramController {
         'use strict';
         // Toggle dark mode by pressing space
         if (event.keyCode === 32) {
-            event.preventDefault(); // prevent scrolling
             toggleDarkMode();
         }
         // Toggle useFlatColors by pressing 'f'
@@ -1246,6 +1245,11 @@ class DiagramController {
         // Update the truth table by pressing enter.
         if (event.keyCode === 13) {
             refreshTruthTable();
+        }
+
+        // Close the top window by pressing escape.
+        if (event.keyCode === 27) {
+            closeTopWindow();
         }
     }
 }
@@ -2181,19 +2185,28 @@ function setUpControls() {
         }
     }
 
-    mainMenuButton.onclick = function() {
-        let mainMenu = document.getElementById("main-menu");
-        if(mainMenu.classList.contains("closed")) {
-            mainMenu.classList.remove("closed");
-        }
-    }
+    mainMenuButton.onclick = closeTermMenu;
+    mainMenuCloseButton.onclick = closeMainMenu;
+}
 
-    mainMenuCloseButton.onclick = function() {
-        let mainMenu = document.getElementById("main-menu");
-        if(!mainMenu.classList.contains("closed")) {
-            mainMenu.classList.add("closed");
-        }
+function closeMainMenu() {
+    let mainMenu = document.getElementById("main-menu");
+    if(!mainMenu.classList.contains("closed")) {
+        mainMenu.classList.add("closed");
+        return true;
     }
+}
+
+function closeTermMenu() {
+    let termMenu = document.getElementById("terminal-menu");
+    if(!termMenu.classList.contains("closed")) {
+        termMenu.classList.add("closed");
+        return true;
+    }
+}
+
+function closeTopMenu() {
+    closeMainMenu() || closeTermMenu();
 }
 
 window.onload = function () {
