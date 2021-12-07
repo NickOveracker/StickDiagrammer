@@ -453,19 +453,6 @@ body.light {
     }
 }
 
- /*-------------Canvas---------------*/
- .sample{
-    width: 50%;
-    margin-top: 15vh;
-    margin-left: 15vh;
-}
-
-.sample-content{
-    width: 80vh;
-    height: 80vh;
-}
-/*-------------Canvas-END---------------*/
-
 /*--------------truth-table-----------------*/
 #truth-table-container {
     text-align: center;
