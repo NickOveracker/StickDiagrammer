@@ -1119,10 +1119,6 @@ class DiagramController {
             // Ignore if not inside the canvas
             if (this.inBounds(clientX, clientY)) {
                 if (this.startX === -1 || this.startY === -1) {
-                    /*let temp = this.getCellAtCursor(this.currentX, this.currentY);
-                    this.startX = temp.x;
-                    this.startY = temp.y;
-                    */
                    return;
                 }
 
@@ -1241,7 +1237,7 @@ class DiagramController {
     }
 
     // Note the grid coordinates when the left mouse button is pressed.
-    // Store the m in startX and startY.
+    // Store the coordinates in startX and startY.
     mousedownHandler(event) {
         'use strict';
         event.preventDefault();
@@ -2362,18 +2358,18 @@ window.onload = function () {
     setDarkMode(new Date().getHours() > 19 || new Date().getHours() < 7);
 
     // Canvas mouse event listeners.
-    canvasContainer.addEventListener("touchstart",  function(e) { this.mousedownHandler(e);   }.bind(diagram.controller));
     canvasContainer.addEventListener("touchend",    function(e) { this.mouseupHandler(e);     }.bind(diagram.controller));
-    canvasContainer.addEventListener("mousedown",   function(e) { this.mousedownHandler(e);   }.bind(diagram.controller));
     canvasContainer.addEventListener("mouseup",     function(e) { this.mouseupHandler(e);     }.bind(diagram.controller));
     canvasContainer.addEventListener("contextmenu", function(e) { this.contextmenuHandler(e); }.bind(diagram.controller));
 
     // Some of these pertain the the canvas, but we don't know whether
     // it will be selected.
-    window.addEventListener("touchmove", function(e) { this.mousemoveHandler(e); }.bind(diagram.controller));
-    window.addEventListener("mousemove", function(e) { this.mousemoveHandler(e); }.bind(diagram.controller));
-    window.addEventListener("keydown",   function(e) { this.keydownHandler(e);   }.bind(diagram.controller));
-    window.addEventListener("keyup",     function(e) { this.keyupHandler(e);     }.bind(diagram.controller));
+    window.addEventListener("touchstart", function(e) { this.mousedownHandler(e); }.bind(diagram.controller));
+    window.addEventListener("mousedown",  function(e) { this.mousedownHandler(e); }.bind(diagram.controller));
+    window.addEventListener("touchmove",  function(e) { this.mousemoveHandler(e); }.bind(diagram.controller));
+    window.addEventListener("mousemove",  function(e) { this.mousemoveHandler(e); }.bind(diagram.controller));
+    window.addEventListener("keydown",    function(e) { this.keydownHandler(e);   }.bind(diagram.controller));
+    window.addEventListener("keyup",      function(e) { this.keyupHandler(e);     }.bind(diagram.controller));
 
     // Set up the evaluate button.
     button = document.getElementById("evaluate-btn");
