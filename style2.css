@@ -210,6 +210,13 @@ li{
     text-transform: uppercase;
 }
 
+.terminal-select {
+    display: flex;
+    background-color: rgba(255,255,255,.8);
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
 .terminal-select p:hover{
     background-color: rgba(76,38,184,.9);
     color: #FFFFFF;
@@ -556,14 +563,10 @@ body.light {
 
     #results {
         order: 7;
-    };
+    }
 
     .terminal-select {
-        display: flex;
         margin-top: 30px;
-        background-color: rgba(255,255,255,.8);
-        padding-top: 0;
-        padding-bottom: 0;
         max-width: 70%;
         border-radius: 10px;
     }
@@ -615,13 +618,9 @@ body.light {
     }
 
     .terminal-select {
-        display: flex;
         max-width: 100%;
         margin-top: 0;
         border-radius: 0;
-        background-color: rgba(255,255,255,.8);
-        padding-top: 0;
-        padding-bottom: 0;
     }
 
     .terminal-select2 {
