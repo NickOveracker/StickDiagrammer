@@ -104,9 +104,14 @@ li{
     font-size: 2.5vw;
     color: #FFFFFF;
     margin-top: 3vh;
+    width: 4vh;
+    height: 4vh;
+    text-align: center;
+    display: block;
 }
 
 .menu-content{
+    top: 13vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
