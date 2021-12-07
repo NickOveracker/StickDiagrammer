@@ -115,10 +115,7 @@ li{
 
 .fa-times{
     position: relative;
-    left: 2vw;
-    font-size: 2.5vw;
     color: #FFFFFF;
-    margin-top: 3vh;
 }
 
 .menu-content{
@@ -528,6 +525,11 @@ body.light {
         position: absolute;
     }
 
+    .fa-times{
+        font-size: 2.5vw;
+        padding: 2.5vw;
+    }
+
     .edit-btn-content.small {
         display: none;
     }
@@ -587,8 +589,6 @@ body.light {
 
     .fa-times {
         font-size: 3vh;
-        margin-top: 0;
-        margin-bottom: 0;
         margin-left: auto;
         margin-right: auto;
         padding: 1.5vh;
@@ -596,7 +596,6 @@ body.light {
         height: 3vh;
         text-align: center;
         display: block;
-        left: unset;
     }
 
     .terminal h3{
