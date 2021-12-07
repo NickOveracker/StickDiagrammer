@@ -1214,6 +1214,7 @@ class DiagramController {
         'use strict';
         // Toggle dark mode by pressing space
         if (event.keyCode === 32) {
+            event.preventDefault(); // prevent scrolling
             toggleDarkMode();
         }
         // Toggle useFlatColors by pressing 'f'
