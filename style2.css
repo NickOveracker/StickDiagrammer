@@ -241,6 +241,7 @@ li{
 
 .select-content{
     flex-direction: column;
+    text-align: center;
 }
 
 span.small
@@ -248,6 +249,7 @@ span.small
     font-size: 12px;
     color: #FFFFFF;
     margin-top: 0;
+    display: block;
 }
 /*---------------------------Edit-open-end*/
 
