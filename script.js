@@ -1448,6 +1448,7 @@ class DiagramView {
             bottom: this.diagram.layeredGrid.height - 1,
             lowLayer: 0,
             highLayer: this.diagram.layeredGrid.layers - 1,
+            cursor: currentCell,
         };
 
         this.diagram.layeredGrid.map(bounds, function (x, y, layer) {
@@ -1580,6 +1581,9 @@ class LayeredGrid {
         let cell;
 
         let outOfGrid = function(x, y, layer) {
+            if(bounds.cursor && bounds.cursor.x === x && bounds.cursor.y === y) {
+                return false;
+            }
             return x < 0     || x >= this.width  ||
                    y < 0     || y >= this.height || 
                    layer < 0 || layer >= this.layers;
