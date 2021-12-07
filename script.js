@@ -1424,11 +1424,18 @@ class DiagramView {
         'use strict';
         this.resizeCanvas();
 
+        let currentCell = this.diagram.controller.getCellAtCursor(this.currentX, this.currentY);
+
         // Check the layers of the grid, and draw cells as needed.
         let drawCell = function(i, j, layer) {
             if (this.diagram.layeredGrid.get(i, j, layer).isSet) {
                 this.ctx.fillStyle = this.useFlatColors? Diagram.layers[layer].flatColor : Diagram.layers[layer].color;
                 this.ctx.fillRect((i+1) * this.cellWidth, (j+1) * this.cellHeight - 1, this.cellWidth + 1, this.cellHeight + 2);
+            } else if(!this.diagram.controller.dragging && layer === Diagram.layers.length - 1) {
+                // Draw a faint highlight on the cell at the cursor location.
+                if(i === currentCell.x && j === currentCell.y) {
+                    this.ctx.fillStyle = darkMode ? "rgba(255, 255, 255, 0.5)" : "rgba(0, 0, 0, 0.5)";
+                }
             }
         }.bind(this);
 
