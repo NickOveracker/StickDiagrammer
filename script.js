@@ -1435,6 +1435,7 @@ class DiagramView {
                 // Draw a faint highlight on the cell at the cursor location.
                 if(i === currentCell.x && j === currentCell.y) {
                     this.ctx.fillStyle = darkMode ? "rgba(255, 255, 255, 0.5)" : "rgba(0, 0, 0, 0.5)";
+                    this.ctx.fillRect((i+1) * this.cellWidth, (j+1) * this.cellHeight - 1, this.cellWidth + 1, this.cellHeight + 2);
                 }
             }
         }.bind(this);
