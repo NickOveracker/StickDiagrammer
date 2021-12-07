@@ -809,7 +809,7 @@ class DiagramController {
 
     addTerminal() {
         'use strict';
-        let newTerm = this.diagram.inputs.push({x: 0, y: 0,});
+        let newTerm = this.diagram.inputs[this.diagram.inputs.push({x: 0, y: 0,})];
         this.placeTerminal(newTerm, newTerm, true);
         populateTermSelect();
     }
@@ -2306,7 +2306,7 @@ function populateTermSelect() {
     let terminals = diagram.getTerminals();
 
     // First, clear the list.
-    termSelect.innerHTML = "";
+    termSelectList.innerHTML = "";
 
     for(let ii = 0; ii < terminals.length; ii++) {
         let term = terminals[ii];
@@ -2383,6 +2383,7 @@ window.onload = function () {
     document.getElementById("num-cols").innerHTML = diagram.layeredGrid.width;
     setUpControls();
 
+    populateTermSelect();
     diagram.view.refreshCanvas();
     // 60 fps
     window.requestAnimationFrame(diagram.view.refreshCanvas.bind(diagram.view));
