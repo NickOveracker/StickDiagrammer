@@ -597,6 +597,7 @@ body.light {
         height: 3vh;
         text-align: center;
         display: block;
+        left: 0;
     }
 
     .terminal h3{
