@@ -23,6 +23,21 @@ html {
     width: 100%;
 }
 
+input[type="radio"] {
+    display: none;
+}
+
+.terminal-select label {
+    padding-top: 1.5vh;
+    padding-bottom: 1.5vh;
+    color: #221D1D;
+}
+
+.terminal-select > input:checked + label {
+    background-color: #221D1D;
+    color: #fff;
+}
+
 /*--------------truth-table-----------------*/
 #truth-table-container {
     text-align: center;
@@ -202,15 +217,6 @@ li{
     background-color: rgba(255,255,255,.8);
     padding-top: 10px;
     padding-bottom: 10px;
-    border-radius: 10px;
-}
-
-.terminal-menu p, .terminal-menu i {
-    font-size: 18px;
-    color: #221D1D;
-    box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;
-    margin: 10px;
-    padding: 10px;
     border-radius: 10px;
 }
 
@@ -560,6 +566,22 @@ body.light {
     #results {
         order: 7;
     };
+
+    .terminal-select {
+        max-width: 70%;
+    }
+
+    .edit-open {
+        margin-top: -13vh;
+    }
+
+    .terminal-select label.first {
+        border-radius: 10px 0 0 10px;
+    }
+
+    .terminal-select label.last {
+        border-radius: 0 10px 10px 0;
+    }
 }
 
 @media screen and (orientation: portrait){
