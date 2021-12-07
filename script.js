@@ -1593,7 +1593,7 @@ class LayeredGrid {
                         continue;
                     }
                     cell = this.grid[this.convertFromCoordinates(x, y, layer)];
-                    if(cell || includeEmpty || (bounds.cursor.x === x && bounds.cursor.y === y)) {
+                    if(cell || includeEmpty || (bounds.cursor && bounds.cursor.x === x && bounds.cursor.y === y)) {
                         func(x, y, layer);
                     }
                 }
