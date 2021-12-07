@@ -506,12 +506,9 @@ body.light {
         transition: .5s;
     }
 
-    .terminal-menu .clickable:hover, .main-menu.clickable:hover{
+    .clickable:hover {
         color: #d4af37;
-    }
-
-    .terminal-select label:hover{
-        color: #808;
+        transition: .5s;
     }
 
     .dark .icon-back:hover {
@@ -519,8 +516,7 @@ body.light {
         transition: .5s;
     }
 
-    /*--------------------*/
-    .terminal-select p:hover{
+    .terminal-select label:hover{
         background-color: rgba(76,38,184,.9);
         color: #FFFFFF;
         transition: .5s;
