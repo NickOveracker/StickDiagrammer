@@ -27,6 +27,10 @@ input[type="radio"] {
     display: none;
 }
 
+.active .terminalBtn {
+    background-color: #D4AF37;
+}
+
 .terminal-select label {
     padding-top: 1.5vh;
     padding-bottom: 1.5vh;
@@ -670,10 +674,6 @@ body.light {
         margin-left: auto;
         margin-right: auto;
         display: block;
-    }
-
-    .terminalBtn.active {
-        background-color: #D4AF37;
     }
 
     .overall-header{
