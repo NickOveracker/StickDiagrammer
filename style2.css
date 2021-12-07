@@ -339,10 +339,24 @@ body.light {
 
     .fa-times {
         font-size: 3vh;
+        margin-top: 1vh;
     }
 
     .terminal {
         margin-top: 0;
+    }
+
+    .terminal-select {
+        max-width: 100%;
+        margin-top: 1vh;
+        padding-top: 1.5vh;
+        padding-bottom: 1.5vh;
+        border-radius: 0;
+    }
+
+    .terminal-select2 {
+        margin-top: 1vh;
+        max-width: 100%;
     }
 
     .overall-header{
