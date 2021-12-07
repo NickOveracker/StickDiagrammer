@@ -507,14 +507,10 @@ body.light {
     }
 
     .terminal-menu .clickable:hover, .main-menu.clickable:hover{
-        background-color: #d4af37;
+        color: #d4af37;
     }
 
     .terminal-select label:hover{
-        background-color: #808;
-    }
-
-    .terminalBtn:hover {
         color: #808;
     }
 
