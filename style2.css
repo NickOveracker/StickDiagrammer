@@ -618,9 +618,9 @@ body.light {
 
     .terminal-select {
         max-width: 100%;
-        margin-top: 1vh;
-        padding-top: 1.5vh;
-        padding-bottom: 1.5vh;
+        margin-top: 0;
+        padding-top: 0;
+        padding-bottom: 0;
         border-radius: 0;
     }
 
@@ -642,6 +642,10 @@ body.light {
         padding: 1.8vh;
         width: 1.8vh;
         height: 1.8vh;
+        margin-left: auto;
+        margin-right: auto;
+        display: block;
+        text-align: center;
     }
 
     .overall-header{
