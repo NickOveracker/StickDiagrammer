@@ -1424,7 +1424,7 @@ class DiagramView {
         'use strict';
         this.resizeCanvas();
 
-        let currentCell = this.diagram.controller.getCellAtCursor(this.currentX, this.currentY);
+        let currentCell = this.diagram.controller.getCellAtCursor(this.diagram.controller.currentX, this.diagram.controller.currentY);
 
         // Check the layers of the grid, and draw cells as needed.
         let drawCell = function(i, j, layer) {
