@@ -568,6 +568,7 @@ body.light {
 
     .terminal-select {
         max-width: 70%;
+        border-radius: 10px;
     }
 
     .edit-open {
