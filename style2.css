@@ -531,6 +531,7 @@ body.light {
 
     .controls{
         margin-top: 18vh;
+        position: relative;
     }
 
     .menu-content{
@@ -589,7 +590,8 @@ body.light {
     }
 
     .edit-open {
-        margin-top: -33vh;
+        margin-top: -18vh;
+        position: absolute;
     }
 
     .terminal-select {
