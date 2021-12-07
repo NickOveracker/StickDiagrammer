@@ -23,6 +23,231 @@ html {
     width: 100%;
 }
 
+/*--------------truth-table-----------------*/
+#truth-table-container {
+    text-align: center;
+    margin-top: 6vh;
+    margin-bottom: 12vh;
+    width: 50%;
+    padding-left: 25%;
+    padding-right: 25%;
+    overflow-y: auto;
+    font-size: 2.2vh;
+    z-index: 1;
+}
+
+#truth-table-container table {
+    border: 1px solid;
+    margin: 0;
+    padding: 0;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+#truth-table-container table .header {
+    border: 1px solid;
+    padding: 5px;
+}
+
+#truth-table-container table td {
+    border: 1px dotted;
+    width: 20%;
+}
+
+#truth-table-container table td.output {
+    border-left: 3px double;
+    border-right: 3px double;
+    font-weight: bold;
+}
+/*--------------truth-table-end-----------------*/
+
+/*-------Dark-mode-----*/
+.dark .edit-back {
+    color: #221D1D;
+    background:#FFFFFF;
+}
+
+.dark .evaluate-btn {
+    color: #FFFFFF;
+    background:#4C26B8;
+}
+
+.dark .icon-back {
+    color: #FFFFFF;
+    background:rgba(109,110,106,.7);
+}
+
+.dark .icon-back:hover {
+    background:#4C26B8;
+    transition: .5s;
+}
+/*--------------------*/
+
+/*---------Main-Menu------------*/
+li{
+    list-style: none;
+}
+
+.menu{
+    height: 100vh;
+    width: 100%;
+    z-index: 9999;
+    background-color: rgba(76,38,184,97%);
+    position: fixed;
+    top: 0;
+    font-family: 'Josefin Sans', sans-serif;
+}
+
+.fa-times{
+    position: relative;
+    left: 2vw;
+    font-size: 2.5vw;
+    color: #FFFFFF;
+    margin-top: 3vh;
+}
+
+.menu-content{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    margin: auto;
+    top: 20%;
+    position: relative;
+    align-items: center;
+    width: 400px;
+}
+
+.menu-content li{
+    margin: 20px;
+    color: #FFFFFF;
+    font-size: 30px;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.menu-btn-content{
+    display: flex;
+    flex-direction: column;
+    width: 300px;
+    color: #FFFFFF;
+    text-align: center;
+}
+
+.teacher-btn{
+    background-color: rgba(0,0,0,.9);
+    padding: 10px;
+    margin-top: 20px;
+}
+
+.toss-btn{
+    padding: 10px;
+    margin-top: 20px;
+    border:solid 2px #FFFFFF;
+    color: #FFFFFF;
+}
+
+.menu-text{
+    font-size: 18px;
+}
+
+.menu-text span{
+    font-family: 'Josefin Sans', sans-serif;
+    font-weight: bold;
+}
+
+/*-------------------------------*/
+
+/*-----------Edit-open-------------*/
+.edit-open{
+    width: 100%;
+    height: 100vh;
+    background-color: rgba(76,38,184,98%);
+    position: sticky;
+    top: 0;
+    right: 0;
+    z-index: 1000;
+}
+
+#edit-close{
+    color: #FFFFFF;
+    font-size: 30px;
+    position: relative;
+    top: 20px;
+    left:40px;
+}
+
+.terminal{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    align-items: center;
+    margin-top: 30%;
+    font-family: 'Josefin Sans', sans-serif;
+}
+
+.terminal h3{
+    font-size: 25px;
+    color: #FFFFFF;
+    text-transform: uppercase;
+}
+
+.terminal-select{
+    display: flex;
+    max-width: 100%;
+    margin-top: 30px;
+    background-color: rgba(255,255,255,.8);
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-radius: 10px;
+}
+
+.terminal-menu p, .terminal-menu i {
+    font-size: 18px;
+    color: #221D1D;
+    box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;
+    margin: 10px;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.terminal-select p:hover{
+    background-color: rgba(76,38,184,.9);
+    color: #FFFFFF;
+    transition: .5s;
+}
+
+.terminal-select2{
+    margin-top: 30px;
+    display: flex;
+    max-width: 300px;
+}
+
+.terminalBtn{
+    font-size: 25px;
+    margin: 10px;
+    padding: 20px;
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    color: #221D1D;
+    box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 12px;
+    background-color: rgba(255,255,255,.8);
+}
+
+.select-content{
+    flex-direction: column;
+}
+
+.small
+{
+    font-size: 12px;
+    color: #FFFFFF;
+    margin-top: 0;
+}
+/*---------------------------Edit-open-end*/
+
 .no-controls .controls, .closed {
     display: none;
 }
@@ -474,238 +699,3 @@ body.light {
         order: 0;
     }
 }
-
-/*--------------truth-table-----------------*/
-#truth-table-container {
-    text-align: center;
-    margin-top: 6vh;
-    margin-bottom: 12vh;
-    width: 50%;
-    padding-left: 25%;
-    padding-right: 25%;
-    overflow-y: auto;
-    font-size: 2.2vh;
-    z-index: 1;
-}
-
-#truth-table-container table {
-    border: 1px solid;
-    margin: 0;
-    padding: 0;
-    border-collapse: collapse;
-    width: 100%;
-}
-
-#truth-table-container table .header {
-    border: 1px solid;
-    padding: 5px;
-}
-
-#truth-table-container table td {
-    border: 1px dotted;
-    width: 20%;
-}
-
-#truth-table-container table td.output {
-    border-left: 3px double;
-    border-right: 3px double;
-    font-weight: bold;
-}
-/*--------------truth-table-end-----------------*/
-
-/*-------Dark-mode-----*/
-.dark .edit-back {
-    color: #221D1D;
-    background:#FFFFFF;
-}
-
-.dark .evaluate-btn {
-    color: #FFFFFF;
-    background:#4C26B8;
-}
-
-.dark .icon-back {
-    color: #FFFFFF;
-    background:rgba(109,110,106,.7);
-}
-
-.dark .icon-back:hover {
-    background:#4C26B8;
-    transition: .5s;
-}
-/*--------------------*/
-
-/*---------Main-Menu------------*/
-li{
-    list-style: none;
-}
-
-.menu{
-    height: 100vh;
-    width: 100%;
-    z-index: 9999;
-    background-color: rgba(76,38,184,97%);
-    position: fixed;
-    top: 0;
-    font-family: 'Josefin Sans', sans-serif;
-}
-
-.fa-times{
-    position: relative;
-    left: 2vw;
-    font-size: 2.5vw;
-    color: #FFFFFF;
-    margin-top: 3vh;
-}
-
-.menu-content{
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    text-align: center;
-    margin: auto;
-    top: 20%;
-    position: relative;
-    align-items: center;
-    width: 400px;
-}
-
-.menu-content li{
-    margin: 20px;
-    color: #FFFFFF;
-    font-size: 30px;
-    font-weight: 500;
-    text-transform: uppercase;
-}
-
-.menu-btn-content{
-    display: flex;
-    flex-direction: column;
-    width: 300px;
-    color: #FFFFFF;
-    text-align: center;
-}
-
-.teacher-btn{
-    background-color: rgba(0,0,0,.9);
-    padding: 10px;
-    margin-top: 20px;
-}
-
-.toss-btn{
-    padding: 10px;
-    margin-top: 20px;
-    border:solid 2px #FFFFFF;
-    color: #FFFFFF;
-}
-
-.menu-text{
-    font-size: 18px;
-}
-
-.menu-text span{
-    font-family: 'Josefin Sans', sans-serif;
-    font-weight: bold;
-
-}
-
-
-/*-------------------------------*/
-
-/*-----------Edit-open-------------*/
-.edit-open{
-    width: 100%;
-    height: 100vh;
-    background-color: rgba(76,38,184,98%);
-    position: sticky;
-    top: 0;
-    right: 0;
-    z-index: 1000;
-}
-
-#edit-close{
-    color: #FFFFFF;
-    font-size: 30px;
-    position: relative;
-    top: 20px;
-    left:40px;
-}
-
-.terminal{
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    text-align: center;
-    align-items: center;
-    margin-top: 30%;
-    font-family: 'Josefin Sans', sans-serif;
-
-}
-
-.terminal h3{
-    font-size: 25px;
-    color: #FFFFFF;
-    text-transform: uppercase;
-}
-
-.terminal-select{
-    display: flex;
-    max-width: 100%;
-    margin-top: 30px;
-    background-color: rgba(255,255,255,.8);
-    padding-top: 10px;
-    padding-bottom: 10px;
-    border-radius: 10px;
-
-}
-
-.terminal-menu p, .terminal-menu i {
-    font-size: 18px;
-    color: #221D1D;
-    box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;
-    margin: 10px;
-    padding: 10px;
-    border-radius: 10px;
-}
-
-.terminal-select p:hover{
-    background-color: rgba(76,38,184,.9);
-    color: #FFFFFF;
-    transition: .5s;
-
-}
-
-.terminal-select2{
-    margin-top: 30px;
-    display: flex;
-    max-width: 300px;
-}
-
-.terminalBtn{
-    font-size: 25px;
-    margin: 10px;
-    padding: 20px;
-    width: 20px;
-    height: 20px;
-    border-radius: 10px;
-    color: #221D1D;
-    box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 12px;
-    background-color: rgba(255,255,255,.8);
-}
-
-.select-content{
-    flex-direction: column;
-}
-
-.small
-{
-    font-size: 12px;
-    color: #FFFFFF;
-    margin-top: 0;
-
-}
-
-
-
-
-/*---------------------------Edit-open-end*/
