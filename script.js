@@ -2093,6 +2093,7 @@ function setUpControls() {
     let closeTermMenuButton = document.getElementById("close-term-menu-btn");
     let mainMenuButton = document.getElementById("main-menu-btn");
     let mainMenuCloseButton = document.getElementById("close-main-menu-btn");
+    let placeTermButton = document.getElementById("place-term-btn");
 
     removeRowButton.onclick = function() {
         this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height - 1);
@@ -2196,6 +2197,17 @@ function setUpControls() {
 
     closeTermMenuButton.onclick = closeTermMenu;
     mainMenuCloseButton.onclick = closeMainMenu;
+
+    placeTermButton.onclick = function() {
+        let term = document.querySelector('input[name="termselect"]:checked');
+
+        if(term === null) {
+            return;
+        }
+
+        term = parseInt(term.value);
+        this.setPlaceTerminalMode(term);
+    }.bind(diagram.controller);
 }
 
 function closeMainMenu() {
