@@ -1581,9 +1581,6 @@ class LayeredGrid {
         let cell;
 
         let outOfGrid = function(x, y, layer) {
-            if(bounds.cursor && bounds.cursor.x === x && bounds.cursor.y === y) {
-                return false;
-            }
             return x < 0     || x >= this.width  ||
                    y < 0     || y >= this.height || 
                    layer < 0 || layer >= this.layers;
@@ -1596,7 +1593,7 @@ class LayeredGrid {
                         continue;
                     }
                     cell = this.grid[this.convertFromCoordinates(x, y, layer)];
-                    if(cell || includeEmpty) {
+                    if(cell || includeEmpty || (bounds.cursor.x === x && bounds.cursor.y === y)) {
                         func(x, y, layer);
                     }
                 }
