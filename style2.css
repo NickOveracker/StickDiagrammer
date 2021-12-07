@@ -506,9 +506,16 @@ body.light {
         transition: .5s;
     }
 
+    .terminal-menu .clickable:hover, .main-menu.clickable:hover{
+        background-color: #d4af37;
+    }
+
+    .terminal-select label:hover{
+        background-color: #808;
+    }
+
     .terminalBtn:hover {
-        background-color: #221D1D;
-        color: #fff;
+        color: #808;
     }
 
     .dark .icon-back:hover {
