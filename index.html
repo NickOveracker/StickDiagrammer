@@ -35,6 +35,35 @@
 
     <!-------Right-side-------->
         <section class="controls">
+
+        <!--------Edit-open--------------------------------------->
+        <div id="terminal-menu" class="edit-open closed">
+            <i class="fas fa-times clickable" id="close-term-menu-btn"></i>
+            <div class="terminal">
+                <h3>Choose terminal</h3>
+                <div class="terminal-select">
+                    <p id="btnA" class="clickable">A</p>
+                    <p id="btnB" class="clickable">B</p>
+                    <p id="btnC" class="clickable">C</p>
+                    <p id="btnD" class="clickable">D</p>
+                    <p id="btnVDD" class="clickable">VDD</p>
+                    <p id="btnGND" class="clickable">GND</p>
+                </div>
+                <div class="terminal-select2">
+                    <div class="select-content">
+                        <i class="fas fa-plus terminalBtn clickable"></i><span class="small">Add</span>
+                    </div>
+                    <div class="select-content">
+                        <i class="fas fa-minus terminalBtn clickable"></i><span class="small">Delete</span>
+                    </div>
+                    <div class="select-content">
+                        <i class="fas fa-arrow-circle-right terminalBtn clickable"></i><span class="small">Place Terminal</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--------Edit-open-end------------------------------------------>
+
             <!---colorBtn----->
             <div class="colorChange" id="colorChange">
                 <i class="fas fa-circle clickable"></i>
@@ -137,36 +166,6 @@
         
     </section>
     <!------------------Main-menu-end------------------------->
-
-
-    <!--------Edit-open--------------------------------------->
-	<div id="terminal-menu" class="edit-open closed">
-		<i class="fas fa-times clickable" id="close-term-menu-btn"></i>
-		<div class="terminal">
-			<h3>Choose terminal</h3>
-			<div class="terminal-select">
-				<p id="btnA" class="clickable">A</p>
-				<p id="btnB" class="clickable">B</p>
-				<p id="btnC" class="clickable">C</p>
-				<p id="btnD" class="clickable">D</p>
-				<p id="btnVDD" class="clickable">VDD</p>
-				<p id="btnGND" class="clickable">GND</p>
-			</div>
-			<div class="terminal-select2">
-				<div class="select-content">
-					<i class="fas fa-plus terminalBtn clickable"></i><span class="small">Add</span>
-				</div>
-				<div class="select-content">
-					<i class="fas fa-minus terminalBtn clickable"></i><span class="small">Delete</span>
-				</div>
-				<div class="select-content">
-					<i class="fas fa-arrow-circle-right terminalBtn clickable"></i><span class="small">Place Terminal</span>
-				</div>
-			</div>
-		</div>
-	</div>
-	<!--------Edit-open-end------------------------------------------>
-
 
 </body>
 </html>
