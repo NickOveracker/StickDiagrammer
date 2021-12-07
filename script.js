@@ -2204,6 +2204,11 @@ function setUpControls() {
     mainMenuCloseButton.onclick = closeMainMenu;
 
     placeTermButton.onclick = function() {
+        if(placeTermButton.classList.contains("active")) {
+            this.clearPlaceTerminalMode();
+            return;
+        }
+
         let placeTermButton = document.getElementById("place-term-btn");
         let term = document.querySelector('input[name="termselect"]:checked');
 
@@ -2213,7 +2218,8 @@ function setUpControls() {
 
         term = parseInt(term.value);
         this.setPlaceTerminalMode(term);
-        placeTermButton.classList.remove("active");
+        placeTermButton.classList.add("active");
+
     }.bind(diagram.controller);
 }
 
