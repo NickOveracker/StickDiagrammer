@@ -226,7 +226,6 @@ li{
 .terminal-select2{
     margin-top: 30px;
     display: flex;
-    max-width: 300px;
 }
 
 .terminalBtn{
