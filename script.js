@@ -2313,6 +2313,15 @@ function populateTermSelect() {
         let termSelectItemLabel = document.createElement("label");
         let termSelectItemInput = document.createElement("input");
 
+        // Set CSS style
+        if(ii === 0) {
+            termSelectItemLabel.classList.add("first");
+        }
+        if(ii === terminals.length - 1) {
+            termSelectItemLabel.classList.add("last");
+        }
+        termSelectItemLabel.classList.add("clickable");
+
         termSelectItemInput.type = "radio";
         termSelectItemInput.name = "termselect";
         termSelectItemInput.value = ii;
