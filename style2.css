@@ -269,6 +269,7 @@ canvas {
     margin-left: auto;
     margin-right: auto;
     display: block;
+    touch-action: none;
 }
 
 body.dark {
