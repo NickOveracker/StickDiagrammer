@@ -1221,6 +1221,9 @@ class DiagramController {
 
     keydownHandler(event) {
         'use strict';
+        if(!document.getElementById("main-menu").classList.contains("closed")) {
+            return;
+        }
         let isInput  = (keyCode) => { return (keyCode >= 65) && (keyCode < 65 + this.diagram.inputs.length );    }; // Y, X, W, ...
         let isOutput = (keyCode) => { return (keyCode <= 89) && (keyCode > 89 - this.diagram.outputs.length);    }; // A, B, C, ...
         let isVDD    = (keyCode) => { return keyCode === 61 || keyCode === 187 || keyCode === 107;  }; // + key
@@ -1259,39 +1262,41 @@ class DiagramController {
     // Only change dark/light mode on keyup to avoid seizure-inducing flashes from holding down space.
     keyupHandler(event) {
         'use strict';
-        // Toggle dark mode by pressing space
-        if (event.keyCode === 32) {
-            toggleDarkMode();
-        }
-        // Toggle useFlatColors by pressing 'f'
-        if (event.keyCode === 70) {
-            this.view.useFlatColors = !this.view.useFlatColors;
-        }
+        if(document.getElementById("main-menu").classList.contains("closed")) {
+            // Toggle dark mode by pressing space
+            if (event.keyCode === 32) {
+                toggleDarkMode();
+            }
+            // Toggle useFlatColors by pressing 'f'
+            if (event.keyCode === 70) {
+                this.view.useFlatColors = !this.view.useFlatColors;
+            }
 
-        // Only do the following if CTRL is pressed.
-        if (event.ctrlKey) {
-            // Shift the LayeredGrid by pressing the arrow keys.
-            if (event.keyCode === 37) {
-                // Left
-                this.diagram.layeredGrid.shift(-1, 0);
+            // Only do the following if CTRL is pressed.
+            if (event.ctrlKey) {
+                // Shift the LayeredGrid by pressing the arrow keys.
+                if (event.keyCode === 37) {
+                    // Left
+                    this.diagram.layeredGrid.shift(-1, 0);
+                }
+                if (event.keyCode === 38) {
+                    // Up
+                    this.diagram.layeredGrid.shift(0, -1);
+                }
+                if (event.keyCode === 39) {
+                    // Right
+                    this.diagram.layeredGrid.shift(1, 0);
+                }
+                if (event.keyCode === 40) {
+                    // Down
+                    this.diagram.layeredGrid.shift(0, 1);
+                }
             }
-            if (event.keyCode === 38) {
-                // Up
-                this.diagram.layeredGrid.shift(0, -1);
-            }
-            if (event.keyCode === 39) {
-                // Right
-                this.diagram.layeredGrid.shift(1, 0);
-            }
-            if (event.keyCode === 40) {
-                // Down
-                this.diagram.layeredGrid.shift(0, 1);
-            }
-        }
 
-        // Update the truth table by pressing enter.
-        if (event.keyCode === 13) {
-            refreshTruthTable();
+            // Update the truth table by pressing enter.
+            if (event.keyCode === 13) {
+                refreshTruthTable();
+            }
         }
 
         // Close the top window by pressing escape.
@@ -2357,38 +2362,32 @@ window.onload = function () {
     // Some of these pertain the the canvas, but we don't know whether
     // it will be selected.
     
-    window.addEventListener("touchend",    function(e) {
+    window.addEventListener("touchend", function(e) {
         document.getElementById("main-menu").classList.contains("closed") && this.mouseupHandler(e);
     }.bind(diagram.controller));
 
-    window.addEventListener("mouseup",     function(e) {
+    window.addEventListener("mouseup", function(e) {
         document.getElementById("main-menu").classList.contains("closed") && this.mouseupHandler(e);
     }.bind(diagram.controller));
 
-    window.addEventListener("touchstart",  function(e) {
+    window.addEventListener("touchstart", function(e) {
         document.getElementById("main-menu").classList.contains("closed") && this.mousedownHandler(e);
     }.bind(diagram.controller));
 
-    window.addEventListener("mousedown",   function(e) {
+    window.addEventListener("mousedown", function(e) {
         document.getElementById("main-menu").classList.contains("closed") && this.mousedownHandler(e);
     }.bind(diagram.controller));
 
-    window.addEventListener("touchmove",   function(e) {
+    window.addEventListener("touchmove", function(e) {
         document.getElementById("main-menu").classList.contains("closed") && this.mousemoveHandler(e);
     }.bind(diagram.controller));
 
-    window.addEventListener("mousemove",   function(e) {
+    window.addEventListener("mousemove", function(e) {
         document.getElementById("main-menu").classList.contains("closed") && this.mousemoveHandler(e);
     }.bind(diagram.controller));
 
-    window.addEventListener("keydown",     function(e) {
-        document.getElementById("main-menu").classList.contains("closed") && this.keydownHandler(e);
-    }.bind(diagram.controller));
-
-    window.addEventListener("keyup",       function(e) {
-        document.getElementById("main-menu").classList.contains("closed") && this.keyupHandler(e);
-    }.bind(diagram.controller));
-
+    window.addEventListener("keydown", function(e) { this.keydownHandler(e); }.bind(diagram.controller));
+    window.addEventListener("keyup", function(e) { this.keyupHandler(e); }.bind(diagram.controller));
     window.addEventListener("contextmenu", function(e) {
         if (event.button === 2) {
             // Don't show a context menu.
