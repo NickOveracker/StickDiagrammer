@@ -152,6 +152,11 @@ li{
     text-align: center;
 }
 
+.menu-btn.content.h1 {
+    margin-top: 4vh;
+    font-size: 5vh;
+}
+
 .teacher-btn{
     background-color: rgba(0,0,0,.9);
     padding: 2vh;
