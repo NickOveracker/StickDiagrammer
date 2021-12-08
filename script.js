@@ -48,15 +48,17 @@ let diagram;
 class Diagram {
     // Cycle through the following cursor colors by pressing space: Diagram.PDIFF, Diagram.NDIFF, Diagram.POLY, METAL1, Diagram.CONTACT
     // Additional colors: Diagram.DELETE at index (numLayers + 0)
+    // Colorblind-friendly template found on [David Nichols's](https://personal.sron.nl/~pault/) website.
+    // Specifically, [Paul Tol's](https://personal.sron.nl/~pault/) template was used.
     static get layers() {
         return [
-            {name: 'pdiff',   color: 'rgba(118,   0, 181,   1)', accessibleColor: 'rgba(51,   34, 136,   1)', selectable: true, },
-            {name: 'ndiff',   color: 'rgba(50,  205,  50,   1)', accessibleColor: 'rgba(17,  119,  51,   1)', selectable: true, },
-            {name: 'poly',    color: 'rgba(255,   0,   0, 0.5)', accessibleColor: 'rgba(68,  170, 153, 0.5)', selectable: true, },
-            {name: 'metal1',  color: 'rgba(0,   255, 255, 0.5)', accessibleColor: 'rgba(136, 204, 238, 0.5)', selectable: true, },
-            {name: 'metal2',  color: 'rgba(255,   0, 204, 0.5)', accessibleColor: 'rgba(221, 204, 119, 0.5)', selectable: true, },
-            {name: 'contact', color: 'rgba(204, 204, 204, 0.5)', accessibleColor: 'rgba(204, 102, 119, 0.5)', selectable: true, },
-            {name: 'delete',  color: 'rgba(208, 160,  32, 0.5)', accessibleColor: 'rgba(170,  68, 153, 0.5)', selectable: false,},
+            {name: 'pdiff',   color: 'rgba(118,   0, 181,   1)', friendlyColor: 'rgba(51,   34, 136,   1)', selectable: true, },
+            {name: 'ndiff',   color: 'rgba(50,  205,  50,   1)', friendlyColor: 'rgba(17,  119,  51,   1)', selectable: true, },
+            {name: 'poly',    color: 'rgba(255,   0,   0, 0.5)', friendlyColor: 'rgba(68,  170, 153, 0.5)', selectable: true, },
+            {name: 'metal1',  color: 'rgba(0,   255, 255, 0.5)', friendlyColor: 'rgba(136, 204, 238, 0.5)', selectable: true, },
+            {name: 'metal2',  color: 'rgba(255,   0, 204, 0.5)', friendlyColor: 'rgba(221, 204, 119, 0.5)', selectable: true, },
+            {name: 'contact', color: 'rgba(204, 204, 204, 0.5)', friendlyColor: 'rgba(204, 102, 119, 0.5)', selectable: true, },
+            {name: 'delete',  color: 'rgba(208, 160,  32, 0.5)', friendlyColor: 'rgba(170,  68, 153, 0.5)', selectable: false,},
         ];
     }
     static get PDIFF()   { return 0; }
@@ -1372,7 +1374,7 @@ class DiagramView {
     getColor(layer, flat) {
         'use strict';
         let layerObj = Diagram.layers[layer];
-        let color = this.diagram.controller.accessible ? layerObj.accessibleColor : layerObj.color;
+        let color = this.diagram.controller.accessible ? layerObj.friendlyColor : layerObj.color;
 
         if(flat || this.useFlatColors) {
             // Convert from rgba to rgb.
