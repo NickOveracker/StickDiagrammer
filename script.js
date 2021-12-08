@@ -1213,6 +1213,12 @@ class DiagramController {
 
     ctrlCommandHandler(event) {
         'use strict';
+        if (event.keyCode === 86) { // V for VDD
+            this.placeTerminal(event, this.diagram.vddCell);
+        }
+        if (event.keyCode === 71) { // G for GND
+            this.placeTerminal(event, this.diagram.gndCell);
+        }
         if (event.keyCode === 90) {
             // z
             this.undo();
@@ -1229,14 +1235,11 @@ class DiagramController {
         }
         let isInput  = (keyCode) => { return (keyCode >= 65) && (keyCode < 65 + this.diagram.inputs.length );    }; // Y, X, W, ...
         let isOutput = (keyCode) => { return (keyCode <= 89) && (keyCode > 89 - this.diagram.outputs.length);    }; // A, B, C, ...
-        let isVDD    = (keyCode) => { return keyCode === 61 || keyCode === 187 || keyCode === 107;  }; // + key
-        let isGND    = (keyCode) => { return keyCode === 173 || keyCode === 189 || keyCode === 109; }; // - key
+        // GND and VDD are handled in ctrlCommandHandler.
 
         if      (event.ctrlKey)           { this.ctrlCommandHandler(event); }
         else if (isInput(event.keyCode))  { this.placeTerminal(event, this.diagram.inputs[event.keyCode - 65]); }
         else if (isOutput(event.keyCode)) { this.placeTerminal(event, this.diagram.outputs[89 - event.keyCode]); }
-        else if (isVDD(event.keyCode))    { this.placeTerminal(event, this.diagram.vddCell); }
-        else if (isGND(event.keyCode))    { this.placeTerminal(event, this.diagram.gndCell); }
     }
 
     // Note the grid coordinates when the left mouse button is pressed.
@@ -1266,17 +1269,24 @@ class DiagramController {
     keyupHandler(event) {
         'use strict';
         if(document.getElementById("main-menu").classList.contains("closed")) {
-            // Toggle dark mode by pressing space
-            if (event.keyCode === 32) {
-                toggleDarkMode();
-            }
-            // Toggle useFlatColors by pressing 'f'
-            if (event.keyCode === 70) {
-                this.view.useFlatColors = !this.view.useFlatColors;
-            }
-
             // Only do the following if CTRL is pressed.
             if (event.ctrlKey) {
+                // Toggle accessible mode by pressing A.
+                if (event.keyCode === 65) {
+                    this.diagram.accessibleMode = !this.diagram.accessibleMode;
+                    setUpLayerSelector();
+                }
+
+                // Toggle dark mode by pressing D
+                if (event.keyCode === 68) {
+                    toggleDarkMode();
+                }
+
+                // Toggle useFlatColors by pressing F
+                if (event.keyCode === 70) {
+                    this.view.useFlatColors = !this.view.useFlatColors;
+                }
+
                 // Shift the LayeredGrid by pressing the arrow keys.
                 if (event.keyCode === 37) {
                     // Left
