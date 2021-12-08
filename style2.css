@@ -111,6 +111,10 @@ li{
     list-style: none;
 }
 
+li.clickable {
+    font-size: 3vh !important;
+}
+
 .menu{
     height: 100vh;
     width: 100%;
@@ -142,7 +146,7 @@ li{
     color: #FFFFFF;
     font-weight: 500;
     text-transform: uppercase;
-    font-size: 2vh;
+   
 }
 
 .menu-btn-content{
