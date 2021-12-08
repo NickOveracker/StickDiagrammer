@@ -50,13 +50,13 @@ class Diagram {
     // Additional colors: Diagram.DELETE at index (numLayers + 0)
     static get layers() {
         return [
-            {name: 'pdiff',   color: 'rgba(118,   0, 181,   1)', flatColor: 'rgb(118,   0, 181)', selectable: true, },
-            {name: 'ndiff',   color: 'rgba(50,  205,  50,   1)', flatColor: 'rgb(50,  205,  50)', selectable: true, },
-            {name: 'poly',    color: 'rgba(255,   0,   0, 0.5)', flatColor: 'rgb(255,   0,   0)', selectable: true, },
-            {name: 'metal1',  color: 'rgba(0,   255, 255, 0.5)', flatColor: 'rgb(0,   255, 255)', selectable: true, },
-            {name: 'metal2',  color: 'rgba(255,   0, 204, 0.5)', flatColor: 'rgb(255,   0, 204)', selectable: true, },
-            {name: 'contact', color: 'rgba(204, 204, 204, 0.5)', flatColor: 'rgb(204, 204, 204)', selectable: true, },
-            {name: 'delete',  color: 'rgba(208, 160,  32, 0.5)', flatColor: 'rgb(208, 160,  32)', selectable: false,},
+            {name: 'pdiff',   color: 'rgba(118,   0, 181,   1)', accessibleColor: 'rgba(51,   34, 136,   1)', selectable: true, },
+            {name: 'ndiff',   color: 'rgba(50,  205,  50,   1)', accessibleColor: 'rgba(17,  119,  51,   1)', selectable: true, },
+            {name: 'poly',    color: 'rgba(255,   0,   0, 0.5)', accessibleColor: 'rgba(68,  170, 153, 0.5)', selectable: true, },
+            {name: 'metal1',  color: 'rgba(0,   255, 255, 0.5)', accessibleColor: 'rgba(136, 204, 238, 0.5)', selectable: true, },
+            {name: 'metal2',  color: 'rgba(255,   0, 204, 0.5)', accessibleColor: 'rgba(221, 204, 119, 0.5)', selectable: true, },
+            {name: 'contact', color: 'rgba(204, 204, 204, 0.5)', accessibleColor: 'rgba(204, 102, 119, 0.5)', selectable: true, },
+            {name: 'delete',  color: 'rgba(208, 160,  32, 0.5)', accessibleColor: 'rgba(170,  68, 153, 0.5)', selectable: false,},
         ];
     }
     static get PDIFF()   { return 0; }
@@ -796,6 +796,7 @@ class DiagramController {
         this.eraseMode        = false;
         this.placeTermMode    = false;
         this.selectedTerminal = null;
+        this.accessible       = true;
     }
 
     removeTerminal() {
@@ -1367,14 +1368,29 @@ class DiagramView {
             }
         }
     }
+
+    getColor(layer, flat) {
+        'use strict';
+        let layerObj = Diagram.layers[layer];
+        let color = this.diagram.controller.accessible ? layerObj.accessibleColor : layerObj.color;
+
+        if(flat || this.useFlatColors) {
+            // Convert from rgba to rgb.
+            // I like regex.
+            return color.replace(/(a|,[\s\d\.]+(?=\)))/g,'');
+        }
+        else {
+            return color;
+        }
+    }
     
     // Draw the outer border of the canvas.
     drawBorder() {
         'use strict';
         if(this.diagram.controller.eraseMode) {
-            this.ctx.strokeStyle = this.useFlatColors? Diagram.layers[Diagram.DELETE].flatColor : Diagram.layers[Diagram.DELETE].color;
+            this.ctx.strokeStyle = this.getColor(Diagram.DELETE);
         } else {
-            this.ctx.strokeStyle = this.useFlatColors? Diagram.layers[this.diagram.controller.cursorIndex].flatColor : Diagram.layers[this.diagram.controller.cursorIndex].color;
+            this.ctx.strokeStyle = this.getColor(this.diagram.controller.cursorIndex);
         }
         this.ctx.lineWidth = this.cellWidth;
         this.ctx.strokeRect(this.cellWidth / 2, this.cellWidth / 2, this.canvasWidth - this.cellWidth, this.canvas.height - this.cellWidth);
@@ -1482,7 +1498,7 @@ class DiagramView {
         // Check the layers of the grid, and draw cells as needed.
         let drawCell = function(i, j, layer) {
             if (this.diagram.layeredGrid.get(i, j, layer).isSet) {
-                this.ctx.fillStyle = this.useFlatColors? Diagram.layers[layer].flatColor : Diagram.layers[layer].color;
+                this.ctx.fillStyle = this.getColor(layer);
                 this.ctx.fillRect((i+1) * this.cellWidth, (j+1) * this.cellHeight - 1, this.cellWidth + 1, this.cellHeight + 2);
             } else if(!this.diagram.controller.dragging && layer === Diagram.layers.length - 1) {
                 // Draw a faint highlight on the cell at the cursor location.
@@ -2128,6 +2144,35 @@ function toggleDarkMode() {
     }
 }
 
+function setUpLayerSelector() {
+    'use strict'; 
+
+    // Loop through all layer select buttons.
+    Array.from(document.getElementById("colorChange").children).forEach(function(element, index) {
+
+        // Set up the onclick event if not already set.
+        if(!element.onclick) {
+            element.onclick = function() {
+                let paintModeButton = document.getElementById("paint-mode-btn");
+
+                this.controller.changeLayer(index);
+
+                // Set the icon.
+                if (this.controller.eraseMode) {
+                    paintModeButton.classList.remove('fa-eraser');
+                    paintModeButton.classList.add('fa-paint-brush');
+                }
+
+                diagram.controller.setEraseMode(false);
+            }.bind(this);
+        }
+
+        // Color with flat color (rgb, not rgba).
+        element.style.color = diagram.view.getColor(index);
+    }.bind(diagram));
+
+}
+
 function setUpControls() {
     'use strict';
     let removeRowButton = document.getElementById("remove-row");
@@ -2190,23 +2235,7 @@ function setUpControls() {
         this.layeredGrid.shift(0, 1);
     }.bind(diagram);
 
-    Array.from(document.getElementById("colorChange").children).forEach(function(element, index) {
-        element.onclick = function() {
-            let paintModeButton = document.getElementById("paint-mode-btn");
-
-            this.controller.changeLayer(index);
-
-            // Set the icon.
-            if (this.controller.eraseMode) {
-                paintModeButton.classList.remove('fa-eraser');
-                paintModeButton.classList.add('fa-paint-brush');
-            }
-
-            diagram.controller.setEraseMode(false);
-        }.bind(this);
-
-        element.style.color = Diagram.layers[index].flatColor;
-    }.bind(diagram));
+    setUpLayerSelector();
 
     paintModeButton.onclick = function() {
         // No argument -> Toggle
