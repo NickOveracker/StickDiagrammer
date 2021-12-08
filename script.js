@@ -2356,14 +2356,39 @@ window.onload = function () {
 
     // Some of these pertain the the canvas, but we don't know whether
     // it will be selected.
-    window.addEventListener("touchend",    function(e) { this.mouseupHandler(e);     }.bind(diagram.controller));
-    window.addEventListener("mouseup",     function(e) { this.mouseupHandler(e);     }.bind(diagram.controller));
-    window.addEventListener("touchstart",  function(e) { this.mousedownHandler(e);   }.bind(diagram.controller));
-    window.addEventListener("mousedown",   function(e) { this.mousedownHandler(e);   }.bind(diagram.controller));
-    window.addEventListener("touchmove",   function(e) { this.mousemoveHandler(e);   }.bind(diagram.controller));
-    window.addEventListener("mousemove",   function(e) { this.mousemoveHandler(e);   }.bind(diagram.controller));
-    window.addEventListener("keydown",     function(e) { this.keydownHandler(e);     }.bind(diagram.controller));
-    window.addEventListener("keyup",       function(e) { this.keyupHandler(e);       }.bind(diagram.controller));
+    
+    window.addEventListener("touchend",    function(e) {
+        document.getElementById("main-menu").classList.contains("closed") && this.mouseupHandler(e);
+    }.bind(diagram.controller));
+
+    window.addEventListener("mouseup",     function(e) {
+        document.getElementById("main-menu").classList.contains("closed") && this.mouseupHandler(e);
+    }.bind(diagram.controller));
+
+    window.addEventListener("touchstart",  function(e) {
+        document.getElementById("main-menu").classList.contains("closed") && this.mousedownHandler(e);
+    }.bind(diagram.controller));
+
+    window.addEventListener("mousedown",   function(e) {
+        document.getElementById("main-menu").classList.contains("closed") && this.mousedownHandler(e);
+    }.bind(diagram.controller));
+
+    window.addEventListener("touchmove",   function(e) {
+        document.getElementById("main-menu").classList.contains("closed") && this.mousemoveHandler(e);
+    }.bind(diagram.controller));
+
+    window.addEventListener("mousemove",   function(e) {
+        document.getElementById("main-menu").classList.contains("closed") && this.mousemoveHandler(e);
+    }.bind(diagram.controller));
+
+    window.addEventListener("keydown",     function(e) {
+        document.getElementById("main-menu").classList.contains("closed") && this.keydownHandler(e);
+    }.bind(diagram.controller));
+
+    window.addEventListener("keyup",       function(e) {
+        document.getElementById("main-menu").classList.contains("closed") && this.keyupHandler(e);
+    }.bind(diagram.controller));
+
     window.addEventListener("contextmenu", function(e) {
         if (event.button === 2) {
             // Don't show a context menu.
