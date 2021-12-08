@@ -1273,7 +1273,7 @@ class DiagramController {
             if (event.shiftKey) {
                 // Toggle accessible mode by pressing A.
                 if (event.keyCode === 65) {
-                    this.diagram.accessible = !this.diagram.accessible;
+                    this.accessible = !this.accessible;
                     setUpLayerSelector();
                 }
 
