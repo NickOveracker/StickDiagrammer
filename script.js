@@ -1049,7 +1049,7 @@ class DiagramController {
                         this.diagram.layeredGrid.clear(x, y, layer);
                     }.bind(this));
                 }
-            } else if (this.inBounds(clientX, clientY) && this.inBounds(this.startX, this.startY)) {
+            } else if (this.inBounds(clientX, clientY) && this.startX !== -1) {
                 this.cellClickHandler(event);
             }
             // If the mouse was released outside the canvas, undo and return.
@@ -1124,7 +1124,7 @@ class DiagramController {
         if (this.isPrimaryInput(event) || event.buttons === 2) {
             // Ignore if not inside the canvas
             if (this.inBounds(clientX, clientY)) {
-                if (this.startX === -1 || this.startY === -1) {
+                if (this.startX === -1) {
                    return;
                 }
 
