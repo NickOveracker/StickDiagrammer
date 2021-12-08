@@ -54,7 +54,7 @@ class Diagram {
         return [
             {name: 'pdiff',   color: 'rgba(118,   0, 181,   1)', friendlyColor: 'rgba(51,   34, 136,   1)', selectable: true, },
             {name: 'ndiff',   color: 'rgba(50,  205,  50,   1)', friendlyColor: 'rgba(17,  119,  51,   1)', selectable: true, },
-            {name: 'poly',    color: 'rgba(255,   0,   0, 0.5)', friendlyColor: 'rgba(68,  170, 153, 0.5)', selectable: true, },
+            {name: 'poly',    color: 'rgba(255,   0,   0, 0.5)', friendlyColor: 'rgba(136,  34,  85, 0.5)', selectable: true, },
             {name: 'metal1',  color: 'rgba(0,   255, 255, 0.5)', friendlyColor: 'rgba(136, 204, 238, 0.5)', selectable: true, },
             {name: 'metal2',  color: 'rgba(255,   0, 204, 0.5)', friendlyColor: 'rgba(221, 204, 119, 0.5)', selectable: true, },
             {name: 'contact', color: 'rgba(204, 204, 204, 0.5)', friendlyColor: 'rgba(204, 102, 119, 0.5)', selectable: true, },
