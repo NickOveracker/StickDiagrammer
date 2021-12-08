@@ -26,8 +26,8 @@
 * Warn user when pulling up with NMOS or pulling down with PMOS.
 * Logical effort calculations (allow user to set constants)
 * Export netlist for use in electronics design software.
-* Colorblind-friendly mode.
 * Arbitrary number of I/O.
+* ~~Colorblind-friendly mode.~~ *Resolved 2021/12/8*
 * ~~Mobile interface.~~ *Resolved 2021/12/6*
 * ~~Record user input sequence in debug mode for the testbench.~~ *Resolved 2021/12/4*
 * ~~HTML button interface for those who prefer not to use a keyboard.~~ *Resolved 2021/12/2*
