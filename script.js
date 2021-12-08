@@ -1211,7 +1211,7 @@ class DiagramController {
         }
     }
 
-    ctrlCommandHandler(event) {
+    shiftCommandHandler(event) {
         'use strict';
         if (event.keyCode === 86) { // V for VDD
             this.placeTerminal(event, this.diagram.vddCell);
@@ -1235,9 +1235,9 @@ class DiagramController {
         }
         let isInput  = (keyCode) => { return (keyCode >= 65) && (keyCode < 65 + this.diagram.inputs.length );    }; // Y, X, W, ...
         let isOutput = (keyCode) => { return (keyCode <= 89) && (keyCode > 89 - this.diagram.outputs.length);    }; // A, B, C, ...
-        // GND and VDD are handled in ctrlCommandHandler.
+        // GND and VDD are handled in shiftCommandHandler.
 
-        if      (event.ctrlKey)           { this.ctrlCommandHandler(event); }
+        if      (event.shiftKey)          { this.shiftCommandHandler(event); }
         else if (isInput(event.keyCode))  { this.placeTerminal(event, this.diagram.inputs[event.keyCode - 65]); }
         else if (isOutput(event.keyCode)) { this.placeTerminal(event, this.diagram.outputs[89 - event.keyCode]); }
     }
@@ -1269,8 +1269,8 @@ class DiagramController {
     keyupHandler(event) {
         'use strict';
         if(document.getElementById("main-menu").classList.contains("closed")) {
-            // Only do the following if CTRL is pressed.
-            if (event.ctrlKey) {
+            // Only do the following if shift is pressed.
+            if (event.shiftKey) {
                 // Toggle accessible mode by pressing A.
                 if (event.keyCode === 65) {
                     this.diagram.accessibleMode = !this.diagram.accessibleMode;
