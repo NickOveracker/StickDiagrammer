@@ -1884,7 +1884,6 @@ function runTestbench(runTo) {
     // Clear #instructions-text and replace its contents with the elapsed time
     // Make a new div.
     let resultsDiv = document.getElementById("results");
-    document.body.appendChild(resultsDiv);
     resultsDiv.innerHTML = "";
 
     p = document.createElement("p");
@@ -1897,7 +1896,7 @@ function runTestbench(runTo) {
     // Label with their test case names.
     results.forEach(function(result, index) {
         p = document.createElement("p");
-        p.innerHTML = `<span style="cursor:pointer" onclick="runTestbench(${index + 1})"><b>Test ${index}:</b> ${testCases[index]}</span>`;
+        p.innerHTML = `<span style="cursor:pointer" onclick="runTestbench(${index + 1}); window.scrollTo({top: 0, left: 0, behavior: 'smooth'})"><b>Test ${index}:</b> ${testCases[index]}</span>`;
         p.innerHTML += `<b style='float:right;color:${result ? "green'>PASS" : "red'>FAIL"}</b>`;
         resultsDiv.appendChild(p);
     });
