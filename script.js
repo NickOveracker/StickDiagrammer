@@ -1389,7 +1389,7 @@ class DiagramView {
         if(flat || this.useFlatColors) {
             // Convert from rgba to rgb.
             // I like regex.
-            return color.replace(/(a|,[\s\d\.]+(?=\)))/g,'');
+            return color.replace(/(a|,[\s\d\.]+(?=\)))/u,'');
         }
         else {
             return color;
