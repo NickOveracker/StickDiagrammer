@@ -641,12 +641,12 @@ body.light {
 @media screen and (orientation: portrait){
 
     .fa-times {
-        font-size: 4vh;
+        font-size: 5vh;
         margin-left: auto;
         margin-right: auto;
         padding: 1.5vh;
-        width: 4vh;
-        height: 4vh;
+        width: 5vh;
+        height: 5vh;
         text-align: left;
         display: block;
     }
