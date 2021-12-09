@@ -864,12 +864,12 @@ class DiagramController {
         let termArr, netArr, removedTerm;
 
         if(isOutput) {
-            termArr = this.diagram.outputTerminals;
+            termArr = this.diagram.outputs;
             netArr  = this.diagram.outputNets;
             removedTerm = termArr.shift();
             netArr.shift();
         } else {
-            termArr = this.diagram.inputTerminals;
+            termArr = this.diagram.inputs;
             netArr  = this.diagram.inputNets;
             removedTerm = termArr.pop();
             netArr.pop();
@@ -894,7 +894,7 @@ class DiagramController {
             termArr = this.diagram.outputs;
             netArr  = this.diagram.outputNets;
             name = String.fromCharCode(89 - this.diagram.outputs.length);
-            termArr.unshift({x: this.diagram.LayeredGrid.width - 1, y: 0,});
+            termArr.unshift({x: this.diagram.layeredGrid.width - 1, y: 0,});
             newTerm = termArr[0];
             this.placeTerminal(newTerm, newTerm, true);
             netArr.unshift(new Net(name, true));
