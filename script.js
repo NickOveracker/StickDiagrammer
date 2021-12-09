@@ -1349,7 +1349,7 @@ class DiagramController {
         else if (event.ctrlKey)           { this.ctrlCommandHandler(event); }
         else if (isInput(event.keyCode))  { this.placeTerminal(event, this.diagram.inputs[event.keyCode - 65]); }
         else if (isOutput(event.keyCode)) {
-            this.placeTerminal(event, this.diagram.outputs[this.diagram.ouputs.length - 90 + event.keyCode]);
+            this.placeTerminal(event, this.diagram.outputs[this.diagram.outputs.length - 90 + event.keyCode]);
         }
     }
 
