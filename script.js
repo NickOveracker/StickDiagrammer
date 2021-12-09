@@ -114,7 +114,7 @@ class Diagram {
 
     getTerminals() {
         'use strict';
-        return this.vddCell.concat(this.gndCell, this.inputs, this.outputs);
+        return [].concat(this.vddCell, this.gndCell, this.inputs, this.outputs);
     }
 
     getTerminalName(index) {
