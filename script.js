@@ -1563,11 +1563,11 @@ class DiagramView {
         this.ctx.fillStyle = darkMode ? "#ffffff" : "#000000";
 
         // Draw labels for all terminals.
-        this.diagram.getTerminals().forEach((terminal, index) => {
+        this.diagram.getTerminals().forEach(((terminal, index) => {
             this.ctx.fillText(this.diagram.getTerminalName(index),
                 this.cellWidth  * (terminal.x + 1.5),
                 this.cellHeight * (terminal.y + 0.75));
-        }).bind(this);
+        }).bind(this));
     }
 
     // Initialize everything
