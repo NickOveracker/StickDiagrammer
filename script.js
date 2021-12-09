@@ -1562,20 +1562,12 @@ class DiagramView {
         this.ctx.font = "bold " + Math.floor(this.cellHeight) + "px Arial";
         this.ctx.fillStyle = darkMode ? "#ffffff" : "#000000";
 
-        this.diagram.inputs.forEach(function(input, index) {
-            this.ctx.fillText(String.fromCharCode(65 + index),
-                this.cellWidth * (input.x + 1.5),
-                this.cellHeight * (input.y + 0.75));
-        }.bind(this));
-        this.diagram.outputs.forEach(function(output, index) {
-            this.ctx.fillText(String.fromCharCode(89 - index),
-                this.cellWidth * (output.x + 1.5),
-                this.cellHeight * (output.y + 0.75));
-        }.bind(this));
-
-        // Same for VDD and GND
-        this.ctx.fillText("VDD", this.cellWidth * (this.diagram.vddCell.x + 1.5), this.cellHeight * (this.diagram.vddCell.y + 0.75));
-        this.ctx.fillText("GND", this.cellWidth * (this.diagram.gndCell.x + 1.5), this.cellHeight * (this.diagram.gndCell.y + 0.75));
+        // Draw labels for all terminals.
+        this.diagram.getTerminals().forEach((terminal, index) => {
+            this.ctx.fillText(this.diagram.getTerminalName(index),
+                this.cellWidth  * (terminal.x + 1.5),
+                this.cellHeight * (terminal.y + 0.75));
+        }).bind(this);
     }
 
     // Initialize everything
