@@ -61,13 +61,14 @@ class Diagram {
             {name: 'delete',  color: 'rgba(208, 160,  32, 0.5)', friendlyColor: 'rgba(170,  68, 153, 0.5)', selectable: false,},
         ];
     }
-    static get PDIFF()   { return 0; }
-    static get NDIFF()   { return 1; }
-    static get POLY()    { return 2; }
-    static get METAL1()  { return 3; }
-    static get METAL2()  { return 4; }
-    static get CONTACT() { return 5; }
-    static get DELETE()  { return 6; } // always make this the last layer
+    static get PDIFF()        { return 0; }
+    static get NDIFF()        { return 1; }
+    static get POLY()         { return 2; }
+    static get METAL1()       { return 3; }
+    static get METAL2()       { return 4; }
+    static get CONTACT()      { return 5; }
+    static get DELETE()       { return 6; } // always make this the last layer
+    static get maxTerminals() { return 8; }
 
     constructor(mainCanvas, gridCanvas) {
         'use strict';
@@ -113,19 +114,19 @@ class Diagram {
 
     getTerminals() {
         'use strict';
-        return this.inputs.concat(this.outputs, this.vddCell, this.gndCell);
+        return this.vddCell.concat(this.gndCell, this.inputs, this.outputs);
     }
 
     getTerminalName(index) {
         'use strict';
-        if(index < this.inputs.length) {
-            return String.fromCharCode(65 + index);
-        } else if(index < this.inputs.length + this.outputs.length) {
-            return String.fromCharCode(89 - index + this.inputs.length);
-        } else if(index === this.inputs.length + this.outputs.length) {
+        if(index === 0) {
             return "VDD";
-        } else if(index === this.inputs.length + this.outputs.length + 1) {
+        } else if(index === 1) {
             return "GND";
+        } else if(index < this.inputs.length + 2) {
+            return String.fromCharCode(65 + index - 2);
+        } else if(index < this.inputs.length + this.outputs.length + 2) {
+            return String.fromCharCode(89 - index + this.inputs.length + 2);
         } else {
             return "?";
         }
@@ -868,11 +869,27 @@ class DiagramController {
         }
     }
 
-    addTerminal() {
+    addTerminal(isOutput) {
         'use strict';
-        let newTerm = this.diagram.inputs[this.diagram.inputs.push({x: 0, y: 0,}) - 1];
+        let termArr, netArr, newTerm, name;
+
+        if(this.diagram.inputs.length + this.diagram.outputs.length >= Diagram.maxTerminals) {
+            return;
+        }
+
+        if(isOutput) {
+            termArr = this.diagram.outputs;
+            netArr  = this.diagram.outputNets;
+            name = String.fromCharCode(89 - this.diagram.outputs.length);
+        } else {
+            termArr = this.diagram.inputs;
+            netArr  = this.diagram.inputNets;
+            name = String.fromCharCode(65 + this.diagram.inputs.length);
+        }
+
+        newTerm = termArr[termArr.push({x: 0, y: 0,}) - 1];
         this.placeTerminal(newTerm, newTerm, true);
-        this.diagram.inputNets.push(new Net(String.fromCharCode(65 + this.diagram.inputs.length-1), true));
+        netArr.push(new Net(name, true));
         populateTermSelect();
     }
 
@@ -2283,9 +2300,6 @@ function setUpControls() {
         toggleDarkMode();
     };
 
-    document.getElementById("add-terminal-btn");
-    document.getElementById("remove-terminal-btn");
-
     document.getElementById("undo-btn").onclick = function() {
         this.controller.undo();
     }.bind(diagram);
@@ -2330,12 +2344,20 @@ function setUpControls() {
 
     }.bind(diagram.controller);
 
-    document.getElementById('add-terminal-btn').onclick = function() {
-        this.addTerminal();
+    document.getElementById('add-input-btn').onclick = function() {
+        this.addTerminal(false);
     }.bind(diagram.controller);
 
-    document.getElementById('remove-terminal-btn').onclick = function() {
-        this.removeTerminal();
+    document.getElementById('remove-input-btn').onclick = function() {
+        this.removeTerminal(false);
+    }.bind(diagram.controller);
+
+    document.getElementById('add-output-btn').onclick = function() {
+        this.addTerminal(true);
+    }.bind(diagram.controller);
+
+    document.getElementById('remove-output-btn').onclick = function() {
+        this.removeTerminal(true);
     }.bind(diagram.controller);
 
     setUpLayerSelector();
