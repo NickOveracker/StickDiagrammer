@@ -1348,7 +1348,9 @@ class DiagramController {
         if (event.shiftKey && this.shiftCommands[event.keyCode]) { this.shiftCommands[event.keyCode](event); }
         else if (event.ctrlKey)           { this.ctrlCommandHandler(event); }
         else if (isInput(event.keyCode))  { this.placeTerminal(event, this.diagram.inputs[event.keyCode - 65]); }
-        else if (isOutput(event.keyCode)) { this.placeTerminal(event, this.diagram.outputs[89 - event.keyCode]); }
+        else if (isOutput(event.keyCode)) {
+            this.placeTerminal(event, this.diagram.outputs[this.diagram.ouputs.length - 90 + event.keyCode]);
+        }
     }
 
     // Note the grid coordinates when the left mouse button is pressed.
