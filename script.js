@@ -126,7 +126,7 @@ class Diagram {
         } else if(index < this.inputs.length + 2) {
             return String.fromCharCode(65 + index - 2);
         } else if(index < this.inputs.length + this.outputs.length + 2) {
-            return String.fromCharCode(89 - index + this.inputs.length + 2);
+            return String.fromCharCode(90 - this.outputs.length + index - this.inputs.length - 2);
         } else {
             return "?";
         }
@@ -894,7 +894,10 @@ class DiagramController {
             termArr = this.diagram.outputs;
             netArr  = this.diagram.outputNets;
             name = String.fromCharCode(89 - this.diagram.outputs.length);
-            termArr.unshift({x: this.diagram.layeredGrid.width - 1, y: 0,});
+            termArr.unshift({
+                x: this.diagram.layeredGrid.width - 1,
+                y: Math.floor(this.diagram.layeredGrid.height/2),
+            });
             newTerm = termArr[0];
             this.placeTerminal(newTerm, newTerm, true);
             netArr.unshift(new Net(name, true));
@@ -902,7 +905,11 @@ class DiagramController {
             termArr = this.diagram.inputs;
             netArr  = this.diagram.inputNets;
             name = String.fromCharCode(65 + this.diagram.inputs.length);
-            newTerm = termArr[termArr.push({x: 0, y: 0,}) - 1];
+            termArr.push({
+                x: 0,
+                y: Math.floor(this.diagram.layeredGrid.height/2),
+            });
+            newTerm = termArr[termArr.length - 1];
             this.placeTerminal(newTerm, newTerm, true);
             netArr.push(new Net(name, true));
         }
