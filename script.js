@@ -859,14 +859,27 @@ class DiagramController {
         }).bind(this);
     }
 
-    removeTerminal() {
+    removeTerminal(isOutput) {
         'use strict';
-        let removedTerminal = this.diagram.inputs.pop();
-        if(removedTerminal !== undefined) {
-            this.diagram.layeredGrid.clear(removedTerminal.x, removedTerminal.y, Diagram.CONTACT);
-            this.diagram.inputNets.pop();
-            populateTermSelect();
+        let termArr, netArr, removedTerm;
+
+        if(isOutput) {
+            termArr = this.diagram.outputTerminals;
+            netArr  = this.diagram.outputNets;
+            removedTerm = termArr.shift();
+            netArr.shift();
+        } else {
+            termArr = this.diagram.inputTerminals;
+            netArr  = this.diagram.inputNets;
+            removedTerm = termArr.pop();
+            netArr.pop();
         }
+
+        if(removedTerm !== undefined) {
+            this.diagram.layeredGrid.clear(removedTerm.x, removedTerm.y, Diagram.CONTACT);
+        }
+
+        populateTermSelect();
     }
 
     addTerminal(isOutput) {
@@ -881,15 +894,19 @@ class DiagramController {
             termArr = this.diagram.outputs;
             netArr  = this.diagram.outputNets;
             name = String.fromCharCode(89 - this.diagram.outputs.length);
+            termArr.unshift({x: this.diagram.LayeredGrid.width - 1, y: 0,});
+            newTerm = termArr[0];
+            this.placeTerminal(newTerm, newTerm, true);
+            netArr.unshift(new Net(name, true));
         } else {
             termArr = this.diagram.inputs;
             netArr  = this.diagram.inputNets;
             name = String.fromCharCode(65 + this.diagram.inputs.length);
+            newTerm = termArr[termArr.push({x: 0, y: 0,}) - 1];
+            this.placeTerminal(newTerm, newTerm, true);
+            netArr.push(new Net(name, true));
         }
 
-        newTerm = termArr[termArr.push({x: 0, y: 0,}) - 1];
-        this.placeTerminal(newTerm, newTerm, true);
-        netArr.push(new Net(name, true));
         populateTermSelect();
     }
 
@@ -1260,7 +1277,7 @@ class DiagramController {
         let oldX, oldY;
 
         if(useGridCoords) {
-            cell = event;
+            cell = terminal;
         } else if(event.type.includes('touch')) {
             cell = this.getCellAtCursor(event.changedTouches[0].clientX, event.changedTouches[0].clientY);
         } else {
