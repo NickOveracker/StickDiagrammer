@@ -1066,7 +1066,7 @@ class DiagramController {
         } else {
             // If in the canvas and over a colored cell, erase it.
             // Otherwise, change the layer.
-            if (!(this.eraseMode || this.clearIfPainted(clientX, clientY))) {
+            if (!(this.clearIfPainted(clientX, clientY) || this.eraseMode)) {
                 this.changeLayer();
             }
         }
