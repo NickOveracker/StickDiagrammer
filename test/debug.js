@@ -101,7 +101,7 @@ Node.prototype.getName = function() {
         name += this.isPmos ? "+" : "";
         name += this.isNmos ? "-" : "";
     } else {
-        name = this.graph.getIndexByNode(this);
+        name =  diagram.graph.getIndexByNode(this);
         name += this.isPmos ? "+" : "";
         name += this.isNmos ? "-" : "";
     }
