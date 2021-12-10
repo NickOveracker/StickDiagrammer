@@ -26,7 +26,7 @@
 * Warn user when pulling up with NMOS or pulling down with PMOS.
 * Logical effort calculations (allow user to set constants)
 * Export netlist for use in electronics design software.
-* Arbitrary number of I/O.
+* ~~Arbitrary number of I/O.~~ *Resolved 20201/12/10*
 * ~~Colorblind-friendly mode.~~ *Resolved 2021/12/8*
 * ~~Mobile interface.~~ *Resolved 2021/12/6*
 * ~~Record user input sequence in debug mode for the testbench.~~ *Resolved 2021/12/4*
