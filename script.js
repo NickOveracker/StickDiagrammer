@@ -1566,10 +1566,10 @@ class DiagramView {
     // Initialize everything
     refreshCanvas() {
         'use strict';
-        let coords = this.diagram.controller.getCoordsFromEvent(this.diagram.controller.currentX, this.diagram.controller.currentY);
+        let coords = this.diagram.controller.getCoordsFromEvent({clientX: this.diagram.controller.currentX, clientY: this.diagram.controller.currentY,});
         this.resizeCanvas();
 
-        let currentCell = this.diagram.controller.getCellAtCursor({clientX: coords.x, clientY: coords.y,});
+        let currentCell = this.diagram.controller.getCellAtCursor(coords.x, coords.y);
 
         // Check the layers of the grid, and draw cells as needed.
         let drawCell = function(i, j, layer) {
