@@ -1,7 +1,38 @@
+/* jshint bitwise: true */
+/* jshint curly: true */
+/* jshint eqeqeq: true */
+/* jshint esversion: 6 */
+/* jshint forin: true */
+/* jshint freeze: true */
+/* jshint futurehostile: true */
+/* jshint leanswitch: true */
+/* jshint maxcomplexity: 10 */
+/* jshint maxdepth: 4 */
+/* jshint maxparams: 4 */
+/* jshint maxstatements: 30 */
+/* jshint noarg: true */
+/* jshint nocomma: false */
+/* jshint nonbsp: true */
+/* jshint nonew: true */
+/* jshint noreturnawait: true */
+/* jshint regexpu: true */
+/* jshint strict: true */
+/* jshint trailingcomma: true */
+/* jshint undef: true */
+/* jshint unused: true */
+/* jshint varstmt: true */
+/* jshint browser: true */
+/* globals DiagramController: false,
+           diagram:           false,
+           Diagram:           false,
+           Graph:             false,
+*/
+
 let PRINT_MOUSE_POS = false;
 
 // Represent the graph visually as a graph in the console.
 Graph.prototype.print = function() {
+    'use strict';
     let edgeSet = new Set();
     console.log('graph G {');
     for (let node of this.nodes) {
@@ -19,24 +50,29 @@ Graph.prototype.print = function() {
         edge = edgeIterator.next();
     }
     console.log('}');
-}
+};
 
-Diagram.prototype.printNodeNodeMap = function() {
+Diagram.prototype.printNodeNodeMap = function(inputVals) {
+    'use strict';
     let str = "   ";
-    for(let ii = 0; ii < this.nodeNodeMap.length; ii++) {
+    for(let ii = 0; ii < this.analyses[inputVals].length; ii++) {
         str += ii + " ";
-        if(ii < 9) str += " ";
+        if(ii < 9) {
+            str += " ";
+        }
     }
     str += "\n";
-    for(let ii = 0; ii < this.nodeNodeMap.length; ii++) {
+    for(let ii = 0; ii < this.analyses[inputVals].length; ii++) {
         str += ii + " ";
-        if(ii <= 9) str += " ";
-        for(let jj = 0; jj < this.nodeNodeMap.length; jj++) {
-            if(this.nodeNodeMap[ii][jj] === null) {
+        if(ii <= 9) {
+            str += " ";
+        }
+        for(let jj = 0; jj < this.analyses[inputVals].length; jj++) {
+            if(this.analyses[inputVals][ii][jj] === null) {
                 str += "?  ";
-            } else if(this.nodeNodeMap[ii][jj] === undefined) {
+            } else if(this.analyses[inputVals][ii][jj] === undefined) {
                 str += "   ";
-            } else if(this.nodeNodeMap[ii][jj] === true) {
+            } else if(this.analyses[inputVals][ii][jj] === true) {
                 str += "1  ";
             } else {
                 str += "0  ";
@@ -45,11 +81,12 @@ Diagram.prototype.printNodeNodeMap = function() {
         str += "\n";
     }
   
-    console.log(str)
-}
+    console.log(str);
+};
 
 // Print a grid with in all cells that are in a given net.
 Diagram.prototype.printGrid = function(netNum) {
+    'use strict';
     let grid = [];
     let net = this.netlist[netNum];
     let name = "X";
@@ -70,7 +107,7 @@ Diagram.prototype.printGrid = function(netNum) {
     }
 
     // Print to the console, rotated 90 degrees.
-    str = ""
+    let str = "";
     for(let ii = 0; ii < grid.length; ii++) {
         let row = "";
         for(let jj = 0; jj < grid[ii].length; jj++) {
@@ -79,56 +116,61 @@ Diagram.prototype.printGrid = function(netNum) {
         str += row + "\n";
     }
     console.log(str);
-}
+};
+
+DiagramController.prototype.getCellAtCursor_old = DiagramController.prototype.getCellAtCursor;
 
 DiagramController.prototype.getCellAtCursor = function(screenX, screenY) {
     'use strict';
-    // Ignore if not inside the canvas
-    if (this.inBounds(screenX, screenY)) {
+    let retVal = this.getCellAtCursor_old(screenX, screenY);
 
-        let x = Math.floor((screenX - this.view.canvas.getBoundingClientRect().left - this.view.cellWidth) / this.view.cellWidth);
-        let y = Math.floor((screenY - this.view.canvas.getBoundingClientRect().top - this.view.cellHeight) / this.view.cellHeight);
-        PRINT_MOUSE_POS && console.log(x, y);
-        return { x: x, y: y, };
+    if(PRINT_MOUSE_POS && !!retVal) {
+        console.log(retVal.x, retVal.y);
     }
-    return null;
-}
 
+    return retVal;
+};
+
+Node.prototype.getName_old = Node.prototype.getName;
 Node.prototype.getName = function() {
-    let name = "";
+    'use strict';
+    let name = this.getName_old();
+
     if(this.cell.gate && this.cell.gate.name !== "?") {
         name = this.cell.gate.name;
         name += this.isPmos ? "+" : "";
         name += this.isNmos ? "-" : "";
     } else {
-        name =  diagram.graph.getIndexByNode(this);
+        name = diagram.graph.getIndexByNode(this);
         name += this.isPmos ? "+" : "";
         name += this.isNmos ? "-" : "";
     }
 
     return name;
-}
+};
 
 window.userInput = [];
 window.recordMode = false;
 
 function recordEvent(event) {
+    'use strict';
     if(window.recordMode) {
         if(event.type === "mousemove") {
             if(!diagram.controller.dragging) {
                 return;
             }
-            else if(userInput[userInput.length - 1].type === event.type) {
-                userInput.pop();
+            else if(window.userInput[window.userInput.length - 1].type === event.type) {
+                window.userInput.pop();
             }
         }
-        userInput.push(event);
+        window.userInput.push(event);
     }
 }
 
 function getRecording() {
-    outArr = [];
-    userInput.forEach(function(event) {
+    'use strict';
+    let outArr = [];
+    window.userInput.forEach(function(event) {
         outArr.push([
             event.type, {
                 clientX: Math.ceil((event.clientX - diagram.view.canvas.offsetLeft - diagram.view.cellWidth)  / diagram.view.cellWidth),
@@ -141,13 +183,15 @@ function getRecording() {
             outArr[outArr.length - 1][1].button = event.button;
         }
     });
-    str = JSON.stringify(outArr);
-    console.log(str.replace(/^\[(\[.*\])\]$/, "$1").replaceAll("}],", "}],\n") + ",");
+    let str = JSON.stringify(outArr);
+    console.log(str.replace(/^\[(\[.*\])\]$/u, "$1").replaceAll("}],", "}],\n") + ",");
 }
 
 
 let oldOnload = window.onload;
 window.onload = function() {
+    'use strict';
+
     oldOnload();
 
     // Record these events.

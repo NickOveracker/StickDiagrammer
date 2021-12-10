@@ -100,6 +100,7 @@ class Diagram {
         this.inputNets = [];
         this.outputNets = [];
         this.triggers = [];
+        this.analyses = [];
         this.nmosPullup = false;
         this.pmosPulldown = false;
 
@@ -112,6 +113,17 @@ class Diagram {
 
         this.view = new DiagramView(this, mainCanvas, gridCanvas);
         this.controller = new DiagramController(this, this.view, mainCanvas);
+    }
+
+    // Helps with garbage collection
+    clearAnalyses() {
+        'use strict';
+        this.analyses.forEach(analysis => {
+            analysis.forEach(row => {
+                row.length = 0;
+            });
+            analysis.length = 0;
+        });
     }
 
     getTerminals() {
@@ -374,7 +386,6 @@ class Diagram {
         this.triggers.length = 0;
 
         // Get this.pmos output.
-        this.nodeNodeMap.length = 0;
         for (let ii = 0; ii < this.graph.nodes.length; ii++) {
             this.nodeNodeMap[ii] = [];
             this.nodeNodeMap[ii][ii] = true;
@@ -382,11 +393,15 @@ class Diagram {
         pmosOut = this.computeOutputRecursive(this.vddNode, outputNode, inputVals) ? 1 : "Z";
 
         // Get this.nmos output.
-        this.nodeNodeMap.length = 0;
-        for (let ii = 0; ii < this.graph.nodes.length; ii++) {
-            this.nodeNodeMap[ii] = [];
-            this.nodeNodeMap[ii][ii] = true;
-        }
+        //this.nodeNodeMap.length = 0;
+        this.graph.nodes.forEach(function(node, ii) {
+            for (let jj = 0; jj < ii; jj++) {
+                if(this.nodeNodeMap[ii][jj] === null) {
+                    this.nodeNodeMap[ii][jj] = this.nodeNodeMap[jj][ii] = undefined;
+                }
+            }
+        }.bind(this));
+      
         this.triggers.length = 0;
         nmosOut = this.computeOutputRecursive(this.gndNode, outputNode, inputVals) ? 0 : "Z";
 
@@ -404,6 +419,9 @@ class Diagram {
                 }
             }
         }
+
+        this.analyses[inputVals] = [...this.nodeNodeMap,];
+        this.nodeNodeMap.length = 0;
 
         return this.reconcileOutput(pmosOut, nmosOut, directInput);
     }
@@ -1436,6 +1454,8 @@ class DiagramView {
         this.cellHeight = this.canvasHeight / (this.diagram.layeredGrid.height + 2);
         this.useFlatColors = false;
         this.trailCursor = false;
+        this.highlightNets = false;
+        this.netHighlightGrid = [];
     }
     
     // Draw a faint grid on the canvas.
@@ -1489,7 +1509,7 @@ class DiagramView {
         let layerObj = Diagram.layers[layer];
         let color = this.diagram.controller.accessible ? layerObj.friendlyColor : layerObj.color;
 
-        if(flat || this.useFlatColors) {
+        if(flat || (flat !== false && this.useFlatColors)) {
             // Convert from rgba to rgb.
             // I like regex.
             return color.replace(/(a|,[\s\d\.]+(?=\)))/gu,'');
@@ -1595,26 +1615,66 @@ class DiagramView {
         }).bind(this));
     }
 
+    // Check the layers of the grid, and draw cells as needed.
+    drawCell(ii, jj, layer) {
+        'use strict';
+        let currentCell;
+        let baseColor;
+
+        if (this.diagram.layeredGrid.get(ii, jj, layer).isSet) {
+            this.ctx.fillStyle = this.getColor(layer);
+            this.ctx.fillRect((ii+1) * this.cellWidth, (jj+1) * this.cellHeight - 1, this.cellWidth + 1, this.cellHeight + 2);
+        } else if(!this.diagram.controller.dragging && layer === Diagram.layers.length - 1) {
+            // Draw a faint highlight on the cell at the cursor location.
+            currentCell = this.diagram.controller.getCellAtCursor(this.diagram.controller.currentX, this.diagram.controller.currentY);
+            if(ii === currentCell.x && jj === currentCell.y) {
+                this.ctx.fillStyle = darkMode ? "rgba(255, 255, 255, 0.5)" : "rgba(0, 0, 0, 0.5)";
+                this.ctx.fillRect((ii+1) * this.cellWidth, (jj+1) * this.cellHeight - 1, this.cellWidth + 1, this.cellHeight + 2);
+            }
+        }
+        if(this.highlightNets && this.netHighlightGrid[ii] && this.netHighlightGrid[ii][jj]) {
+            baseColor = this.getColor(Diagram.DELETE, false).slice(0, -4);
+            this.ctx.fillStyle = baseColor + 
+                                 Math.round(
+                                    Math.sin(
+                                        (Math.floor(Date.now()/100) % 10) * Math.PI / 10
+                                    ) * 10
+                                 ) / 10 + ")";
+            this.ctx.fillRect((ii+1) * this.cellWidth, (jj+1) * this.cellHeight - 1, this.cellWidth + 1, this.cellHeight + 2);
+        }
+    }
+
+    setHighlight(path) {
+        'use strict';
+        this.netHighlightGrid.length = 0;
+
+        for(let ii = 0; ii < this.diagram.layeredGrid.width; ii++) {
+            this.netHighlightGrid[ii] = [];
+        }
+
+        for(let ii = 0; ii < path.length; ii++) {
+            if(!path[ii]) {
+                continue;
+            }
+            for(let jj = 0; jj < this.diagram.netlist.length; jj++) {
+                if(this.diagram.netlist[jj].containsNode(this.diagram.graph.nodes[ii])) {
+                    let cellIter = this.diagram.netlist[jj].cells.values();
+                    for(let cell = cellIter.next(); !cell.done; cell = cellIter.next()) {
+                        this.netHighlightGrid[cell.value.x][cell.value.y] = true;
+                    }
+                }
+            }
+        }
+
+        this.highlightNets = true;
+    }
+
     // Initialize everything
     refreshCanvas() {
         'use strict';
         this.resizeCanvas();
 
         let currentCell = this.diagram.controller.getCellAtCursor(this.diagram.controller.currentX, this.diagram.controller.currentY);
-
-        // Check the layers of the grid, and draw cells as needed.
-        let drawCell = function(i, j, layer) {
-            if (this.diagram.layeredGrid.get(i, j, layer).isSet) {
-                this.ctx.fillStyle = this.getColor(layer);
-                this.ctx.fillRect((i+1) * this.cellWidth, (j+1) * this.cellHeight - 1, this.cellWidth + 1, this.cellHeight + 2);
-            } else if(!this.diagram.controller.dragging && layer === Diagram.layers.length - 1) {
-                // Draw a faint highlight on the cell at the cursor location.
-                if(i === currentCell.x && j === currentCell.y) {
-                    this.ctx.fillStyle = darkMode ? "rgba(255, 255, 255, 0.5)" : "rgba(0, 0, 0, 0.5)";
-                    this.ctx.fillRect((i+1) * this.cellWidth, (j+1) * this.cellHeight - 1, this.cellWidth + 1, this.cellHeight + 2);
-                }
-            }
-        }.bind(this);
 
         // Draw each layer in order.
         let bounds = {
@@ -1628,7 +1688,7 @@ class DiagramView {
         };
 
         this.diagram.layeredGrid.map(bounds, function (x, y, layer) {
-            drawCell(x, y, layer);
+            this.drawCell(x, y, layer);
 
             // For the last layer, fill each filled cell with a cross.
             if (layer === Diagram.CONTACT) {
@@ -2141,6 +2201,7 @@ function buildTruthTable() {
     let header     = [];
     let inputVals  = [];
     let outputVals = [];
+    diagram.clearAnalyses();
 
     // Each loop iteration is a combination of input values.
     // I.e., one row of the output table.
@@ -2213,7 +2274,23 @@ function refreshTruthTable() {
 
             // Set the cell class depending on whether this is
             // an input or output cell.
-            tCell.className = colIndex < diagram.inputs.length ? "input" : "output";
+            if(colIndex < diagram.inputs.length) {
+                tCell.className = "input";
+            } else {
+                tCell.className = "output";
+                tCell.onmouseover = ((rowIndex, colIndex) => {
+                    return (() => {
+                        let path, outputNum, outputNodeIndex;
+                        outputNum = colIndex - diagram.inputs.length;
+                        outputNodeIndex = diagram.graph.getIndexByNode(diagram.outputNodes[outputNum]);
+                        path = diagram.analyses[rowIndex - 1][outputNodeIndex];
+                        diagram.view.setHighlight(path);
+                    });
+                })(rowIndex, colIndex);
+                tCell.onmouseleave = function () {
+                    diagram.view.highlightNets = false;
+                };
+            }
         });
     });
 
