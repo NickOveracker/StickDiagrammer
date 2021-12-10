@@ -23,9 +23,9 @@
 * Student/Teacher modes with generating/grading homework, practice problems, etc.
 * Show at least one (ideally every) path from rail voltage to output for each input configuration.
 * Draw CMOS circuit schematic corresponding to the painted topology.
-* Warn user when pulling up with NMOS or pulling down with PMOS.
 * Logical effort calculations (allow user to set constants)
 * Export netlist for use in electronics design software.
+* ~Warn user when pulling up with NMOS or pulling down with PMOS.~ *Resolved 2021/12/10*
 * Arbitrary number of I/O.
 * ~~Colorblind-friendly mode.~~ *Resolved 2021/12/8*
 * ~~Mobile interface.~~ *Resolved 2021/12/6*
