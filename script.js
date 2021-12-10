@@ -2233,8 +2233,7 @@ function buildTruthTable() {
     // Merge input and output into one table (input on the left, output on the right.)
     table[0] = header;
     for (let ii = 0; ii < inputVals.length; ii++) {
-        // Reverse the input row.
-        table[ii + 1] = inputVals[ii].reverse().concat(outputVals[ii]);
+        table[ii + 1] = inputVals[ii].concat(outputVals[ii]);
     }
 
     return table;
