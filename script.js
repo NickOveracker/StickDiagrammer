@@ -609,6 +609,8 @@ class Diagram {
     } // end function setNets
 
     checkPolarity() {
+        this.nmosPullup = this.pmosPulldown = false;
+
         // See if there are any NDIFF cells in vddNet.
         // If there are, flag for nmos pullup.
         let vddNetIterator = this.vddNet.cells.values();
