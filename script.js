@@ -636,9 +636,10 @@ class Diagram {
 
         // Alert the user with alert() if there are any pullups/pulldowns.
         if (this.nmosPullup || this.pmosPulldown) {
-            alert("Warning: NMOS pull-up or PMOS pull-down detected.\n" +
-                  "NMOS should be used for pull-down, and PMOS should be used for pull-up.\n" +
-                  "The simulation may not reflect actual behavior.\n");
+            alert("Warning:\n" +
+                  "N pull-up or P pull-down detected.\n" +
+                  "Simulation may be inaccurate."
+            );
         }
     }
 
