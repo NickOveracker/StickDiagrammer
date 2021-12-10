@@ -25,14 +25,14 @@
 * Draw CMOS circuit schematic corresponding to the painted topology.
 * Logical effort calculations (allow user to set constants)
 * Export netlist for use in electronics design software.
-* ~Warn user when pulling up with NMOS or pulling down with PMOS.~ *Resolved 2021/12/10*
-* Arbitrary number of I/O.
+* ~~Warn user when pulling up with NMOS or pulling down with PMOS.~~ *Resolved 2021/12/10*
+* ~~Arbitrary number of I/O.~~ *Resolved 20201/12/10*
 * ~~Colorblind-friendly mode.~~ *Resolved 2021/12/8*
 * ~~Mobile interface.~~ *Resolved 2021/12/6*
 * ~~Record user input sequence in debug mode for the testbench.~~ *Resolved 2021/12/4*
 * ~~HTML button interface for those who prefer not to use a keyboard.~~ *Resolved 2021/12/2*
 * ~~Arbitrary width/height.~~ *Resolved 2021/11/28*
-* ~~More efficient data structure for the grid.~~ *Resolved 2021/11/25**
+* ~~More efficient data structure for the grid.~~ *Resolved 2021/11/25*
 * ~~Foolproof usage instructions.~~ *Resolved 2021/11/21*
 * ~~More metal layers.~~ *Resolved 2021/11/21*
 * ~~Moveable VDD/GND terminals.~~ *Resolved 2021/11/21 (move with + and - keys)*

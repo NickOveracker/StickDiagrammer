@@ -2,12 +2,21 @@ let PRINT_MOUSE_POS = false;
 
 // Represent the graph visually as a graph in the console.
 Graph.prototype.print = function() {
+    let edgeSet = new Set();
     console.log('graph G {');
     for (let node of this.nodes) {
         console.log(node.getName() + ';');
+        // Add all edges to the set.
+        for (let edge of node.edges) {
+            edgeSet.add(edge);
+        }
     }
-    for (let edge of this.edges) {
-        console.log(edge.getNode1().getName() + ' <-> ' + edge.getNode2().getName() + ';');
+    // Loop through edgeSet and print each edge.
+    let edgeIterator = edgeSet.values();
+    let edge = edgeIterator.next();
+    while (!edge.done) {
+        console.log(edge.value.getNode1().getName() + ' <-> ' + edge.value.getNode2().getName() + ';');
+        edge = edgeIterator.next();
     }
     console.log('}');
 }
@@ -44,16 +53,16 @@ Diagram.prototype.printGrid = function(netNum) {
     let grid = [];
     let net = this.netlist[netNum];
     let name = "X";
-    for(let ii = 0; ii < layeredGrid.height; ii++) {
+    for(let ii = 0; ii < this.layeredGrid.height; ii++) {
         grid[ii] = [];
-        for(let jj = 0; jj < layeredGrid.width; jj++) {
+        for(let jj = 0; jj < this.layeredGrid.width; jj++) {
             grid[ii][jj] = "_";
             // If any of the layers are in netA, set the cell to "A".
-            for(let kk = 0; kk < numLayers; kk++) {
-                if(layeredGrid.get(ii, jj, kk).isSet && net.containsCell(layeredGrid.get(ii, jj, kk))) {
+            for(let kk = 0; kk < Diagram.layers.length; kk++) {
+                if(this.layeredGrid.get(ii, jj, kk).isSet && net.containsCell(this.layeredGrid.get(ii, jj, kk))) {
                     grid[ii][jj] = name;
                 }
-                else if(pmos.has(layeredGrid.get(ii, jj, kk)) || nmos.has(layeredGrid.get(ii, jj, kk))) {
+                else if(this.pmos.has(this.layeredGrid.get(ii, jj, kk)) || this.nmos.has(this.layeredGrid.get(ii, jj, kk))) {
                     grid[ii][jj] = "T";
                 }
             }
@@ -77,8 +86,8 @@ DiagramController.prototype.getCellAtCursor = function(screenX, screenY) {
     // Ignore if not inside the canvas
     if (this.inBounds(screenX, screenY)) {
 
-        let x = Math.floor((screenX - this.view.canvas.offsetLeft - this.view.cellWidth) / this.view.cellWidth);
-        let y = Math.floor((screenY - this.view.canvas.offsetTop - this.view.cellHeight) / this.view.cellHeight);
+        let x = Math.floor((screenX - this.view.canvas.getBoundingClientRect().left - this.view.cellWidth) / this.view.cellWidth);
+        let y = Math.floor((screenY - this.view.canvas.getBoundingClientRect().top - this.view.cellHeight) / this.view.cellHeight);
         PRINT_MOUSE_POS && console.log(x, y);
         return { x: x, y: y, };
     }
@@ -92,7 +101,7 @@ Node.prototype.getName = function() {
         name += this.isPmos ? "+" : "";
         name += this.isNmos ? "-" : "";
     } else {
-        name = graph.getIndexByNode(this);
+        name =  diagram.graph.getIndexByNode(this);
         name += this.isPmos ? "+" : "";
         name += this.isNmos ? "-" : "";
     }

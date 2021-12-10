@@ -61,13 +61,14 @@ class Diagram {
             {name: 'delete',  color: 'rgba(208, 160,  32, 0.5)', friendlyColor: 'rgba(170,  68, 153, 0.5)', selectable: false,},
         ];
     }
-    static get PDIFF()   { return 0; }
-    static get NDIFF()   { return 1; }
-    static get POLY()    { return 2; }
-    static get METAL1()  { return 3; }
-    static get METAL2()  { return 4; }
-    static get CONTACT() { return 5; }
-    static get DELETE()  { return 6; } // always make this the last layer
+    static get PDIFF()        { return 0; }
+    static get NDIFF()        { return 1; }
+    static get POLY()         { return 2; }
+    static get METAL1()       { return 3; }
+    static get METAL2()       { return 4; }
+    static get CONTACT()      { return 5; }
+    static get DELETE()       { return 6; } // always make this the last layer
+    static get maxTerminals() { return 8; }
 
     constructor(mainCanvas, gridCanvas) {
         'use strict';
@@ -115,19 +116,19 @@ class Diagram {
 
     getTerminals() {
         'use strict';
-        return this.inputs.concat(this.outputs, this.vddCell, this.gndCell);
+        return [].concat(this.vddCell, this.gndCell, this.inputs, this.outputs);
     }
 
     getTerminalName(index) {
         'use strict';
-        if(index < this.inputs.length) {
-            return String.fromCharCode(65 + index);
-        } else if(index < this.inputs.length + this.outputs.length) {
-            return String.fromCharCode(89 - index + this.inputs.length);
-        } else if(index === this.inputs.length + this.outputs.length) {
+        if(index === 0) {
             return "VDD";
-        } else if(index === this.inputs.length + this.outputs.length + 1) {
+        } else if(index === 1) {
             return "GND";
+        } else if(index < this.inputs.length + 2) {
+            return String.fromCharCode(65 + index - 2);
+        } else if(index < this.inputs.length + this.outputs.length + 2) {
+            return String.fromCharCode(90 - this.outputs.length + index - this.inputs.length - 2);
         } else {
             return "?";
         }
@@ -894,21 +895,61 @@ class DiagramController {
         }).bind(this);
     }
 
-    removeTerminal() {
+    removeTerminal(isOutput) {
         'use strict';
-        let removedTerminal = this.diagram.inputs.pop();
-        if(removedTerminal !== undefined) {
-            this.diagram.layeredGrid.clear(removedTerminal.x, removedTerminal.y, Diagram.CONTACT);
-            this.diagram.inputNets.pop();
-            populateTermSelect();
+        let termArr, netArr, removedTerm;
+
+        if(isOutput) {
+            termArr = this.diagram.outputs;
+            netArr  = this.diagram.outputNets;
+            removedTerm = termArr.shift();
+            netArr.shift();
+        } else {
+            termArr = this.diagram.inputs;
+            netArr  = this.diagram.inputNets;
+            removedTerm = termArr.pop();
+            netArr.pop();
         }
+
+        if(removedTerm !== undefined) {
+            this.diagram.layeredGrid.clear(removedTerm.x, removedTerm.y, Diagram.CONTACT);
+        }
+
+        populateTermSelect();
     }
 
-    addTerminal() {
+    addTerminal(isOutput) {
         'use strict';
-        let newTerm = this.diagram.inputs[this.diagram.inputs.push({x: 0, y: 0,}) - 1];
-        this.placeTerminal(newTerm, newTerm, true);
-        this.diagram.inputNets.push(new Net(String.fromCharCode(65 + this.diagram.inputs.length-1), true));
+        let termArr, netArr, newTerm, name;
+
+        if(this.diagram.inputs.length + this.diagram.outputs.length >= Diagram.maxTerminals) {
+            return;
+        }
+
+        if(isOutput) {
+            termArr = this.diagram.outputs;
+            netArr  = this.diagram.outputNets;
+            name = String.fromCharCode(89 - this.diagram.outputs.length);
+            termArr.unshift({
+                x: this.diagram.layeredGrid.width - 1,
+                y: Math.floor(this.diagram.layeredGrid.height/2),
+            });
+            newTerm = termArr[0];
+            this.placeTerminal(newTerm, newTerm, true);
+            netArr.unshift(new Net(name, false));
+        } else {
+            termArr = this.diagram.inputs;
+            netArr  = this.diagram.inputNets;
+            name = String.fromCharCode(65 + this.diagram.inputs.length);
+            termArr.push({
+                x: 0,
+                y: Math.floor(this.diagram.layeredGrid.height/2),
+            });
+            newTerm = termArr[termArr.length - 1];
+            this.placeTerminal(newTerm, newTerm, true);
+            netArr.push(new Net(name, true));
+        }
+
         populateTermSelect();
     }
 
@@ -1085,11 +1126,7 @@ class DiagramController {
             return;
         }
 
-        let clientX, clientY;
         let coords = this.getCoordsFromEvent(event);
-
-        clientX = coords.x;
-        clientY = coords.y;
 
         if(this.placeTermMode) {
             this.clearPlaceTerminalMode();
@@ -1102,7 +1139,7 @@ class DiagramController {
         } else {
             // If in the canvas and over a colored cell, erase it.
             // Otherwise, change the layer.
-            if (!(this.clearIfPainted(clientX, clientY) || this.eraseMode)) {
+            if (!(this.clearIfPainted(coords.x, coords.y) || this.eraseMode)) {
                 this.changeLayer();
             }
         }
@@ -1113,13 +1150,9 @@ class DiagramController {
     // If the right (or secondary) button, use the same coordinates to delete a line of cells.
     mouseupHandler(event) {
         'use strict';
-        let clientX, clientY;
         let coords = this.getCoordsFromEvent(event);
 
-        clientX = coords.x;
-        clientY = coords.y;
-
-        if(this.inBounds(clientX, clientY)) {
+        if(this.inBounds(coords.x, coords.y)) {
             event.preventDefault();
         }
      
@@ -1245,13 +1278,9 @@ class DiagramController {
     // Show a preview line when the user is dragging the mouse.
     mousemoveHandler(event) {
         'use strict';
-        let clientX, clientY;
         let coords = this.getCoordsFromEvent(event);
 
-        clientX = coords.x;
-        clientY = coords.y;
-
-        if(this.inBounds(clientX, clientY)) {
+        if(this.inBounds(coords.x, coords.y)) {
             event.preventDefault();
         }
 
@@ -1260,14 +1289,14 @@ class DiagramController {
         }
 
         // Save the current X and Y coordinates.
-        this.currentX = clientX;
-        this.currentY = clientY;
+        this.currentX = coords.x;
+        this.currentY = coords.y;
         let currentCell = this.getCellAtCursor(this.currentX, this.currentY);
 
         // If the mouse is pressed and the mouse is between cells 1 and gridsize - 1,
         if (this.isPrimaryInput(event) || event.buttons === 2) {
             // Ignore if not inside the canvas
-            if (this.inBounds(clientX, clientY)) {
+            if (this.inBounds(coords.x, coords.y)) {
                 this.drag(currentCell);
             }
         }
@@ -1279,9 +1308,7 @@ class DiagramController {
         let oldX, oldY;
 
         if(useGridCoords) {
-            cell = event;
-        } else if(event.type.includes('touch')) {
-            cell = this.getCellAtCursor(event.changedTouches[0].clientX, event.changedTouches[0].clientY);
+            cell = terminal;
         } else {
             cell = this.getCellAtCursor(this.currentX, this.currentY);
         }
@@ -1343,7 +1370,9 @@ class DiagramController {
         if (event.shiftKey && this.shiftCommands[event.keyCode]) { this.shiftCommands[event.keyCode](event); }
         else if (event.ctrlKey)           { this.ctrlCommandHandler(event); }
         else if (isInput(event.keyCode))  { this.placeTerminal(event, this.diagram.inputs[event.keyCode - 65]); }
-        else if (isOutput(event.keyCode)) { this.placeTerminal(event, this.diagram.outputs[89 - event.keyCode]); }
+        else if (isOutput(event.keyCode)) {
+            this.placeTerminal(event, this.diagram.outputs[this.diagram.outputs.length - 90 + event.keyCode]);
+        }
     }
 
     // Note the grid coordinates when the left mouse button is pressed.
@@ -1557,20 +1586,12 @@ class DiagramView {
         this.ctx.font = "bold " + Math.floor(this.cellHeight) + "px Arial";
         this.ctx.fillStyle = darkMode ? "#ffffff" : "#000000";
 
-        this.diagram.inputs.forEach(function(input, index) {
-            this.ctx.fillText(String.fromCharCode(65 + index),
-                this.cellWidth * (input.x + 1.5),
-                this.cellHeight * (input.y + 0.75));
-        }.bind(this));
-        this.diagram.outputs.forEach(function(output, index) {
-            this.ctx.fillText(String.fromCharCode(89 - index),
-                this.cellWidth * (output.x + 1.5),
-                this.cellHeight * (output.y + 0.75));
-        }.bind(this));
-
-        // Same for VDD and GND
-        this.ctx.fillText("VDD", this.cellWidth * (this.diagram.vddCell.x + 1.5), this.cellHeight * (this.diagram.vddCell.y + 0.75));
-        this.ctx.fillText("GND", this.cellWidth * (this.diagram.gndCell.x + 1.5), this.cellHeight * (this.diagram.gndCell.y + 0.75));
+        // Draw labels for all terminals.
+        this.diagram.getTerminals().forEach(((terminal, index) => {
+            this.ctx.fillText(this.diagram.getTerminalName(index),
+                this.cellWidth  * (terminal.x + 1.5),
+                this.cellHeight * (terminal.y + 0.75));
+        }).bind(this));
     }
 
     // Initialize everything
@@ -2114,8 +2135,10 @@ let lightModeGridColor = '#999999';
 // Z is high impedance, X is error (VDD and GND contradiction.)
 function buildTruthTable() {
     'use strict';
-    let header = [];
-    let inputVals = [];
+    let terminals  = diagram.getTerminals().slice(2);
+    let table      = [];
+    let header     = [];
+    let inputVals  = [];
     let outputVals = [];
 
     // Each loop iteration is a combination of input values.
@@ -2141,14 +2164,12 @@ function buildTruthTable() {
     }
 
     // Header
-    for (let jj = inputVals[0].length - 1; jj >= 0; jj--) {
-        header[inputVals[0].length - 1 - jj] = String.fromCharCode(65 + jj);
-    }
+    terminals.forEach(function(terminal, index) {
+        header[index] = diagram.getTerminalName(index + 2);
+    });
 
     // Merge input and output into one table (input on the left, output on the right.)
-    let table = [];
     table[0] = header;
-    table[0][header.length] = "Y";
     for (let ii = 0; ii < inputVals.length; ii++) {
         // Reverse the input row.
         table[ii + 1] = inputVals[ii].reverse().concat(outputVals[ii]);
@@ -2319,9 +2340,6 @@ function setUpControls() {
         toggleDarkMode();
     };
 
-    document.getElementById("add-terminal-btn");
-    document.getElementById("remove-terminal-btn");
-
     document.getElementById("undo-btn").onclick = function() {
         this.controller.undo();
     }.bind(diagram);
@@ -2366,12 +2384,20 @@ function setUpControls() {
 
     }.bind(diagram.controller);
 
-    document.getElementById('add-terminal-btn').onclick = function() {
-        this.addTerminal();
+    document.getElementById('add-input-btn').onclick = function() {
+        this.addTerminal(false);
     }.bind(diagram.controller);
 
-    document.getElementById('remove-terminal-btn').onclick = function() {
-        this.removeTerminal();
+    document.getElementById('remove-input-btn').onclick = function() {
+        this.removeTerminal(false);
+    }.bind(diagram.controller);
+
+    document.getElementById('add-output-btn').onclick = function() {
+        this.addTerminal(true);
+    }.bind(diagram.controller);
+
+    document.getElementById('remove-output-btn').onclick = function() {
+        this.removeTerminal(true);
     }.bind(diagram.controller);
 
     setUpLayerSelector();
