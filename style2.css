@@ -170,7 +170,7 @@ li.clickable {
     width: auto;
 }
 
-.dono-btn{
+.box-btn{
     padding: 2vh;
     margin-top: 4vh;
     border:solid 2px #FFFFFF;
@@ -178,10 +178,10 @@ li.clickable {
     width: auto;
 }
 
-.black{
+.box-btn.options-btn {
     border:solid 2px #221D1D;
     background-color: #221D1D;
-    
+    margin-top: 1vh;
 }
 
 .menu-text{
