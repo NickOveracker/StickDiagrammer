@@ -99,6 +99,8 @@ class Diagram {
         this.inputNets = [];
         this.outputNets = [];
         this.triggers = [];
+        this.nmosPullup = false;
+        this.pmosPulldown = false;
 
         for (let ii = 0; ii < this.inputs.length; ii++) {
             this.inputNets.push(new Net(String.fromCharCode(65 + ii), true));
@@ -603,7 +605,39 @@ class Diagram {
         }.bind(this));
 
         this.linkIdenticalNets();
+        this.checkPolarity();
     } // end function setNets
+
+    checkPolarity() {
+        // See if there are any NDIFF cells in vddNet.
+        // If there are, flag for nmos pullup.
+        let vddNetIterator = this.vddNet.values();
+        let cell = vddNetIterator.next();
+        while (!cell.done) {
+            if (cell.value.layer === Diagram.NDIFF) {
+                this.nmosPullup = true;
+            }
+            cell = vddNetIterator.next();
+        }
+
+        // Now check if there are any PDIFF cells in gndNet.
+        // If there are, flag for pmos pulldown.
+        let gndNetIterator = this.gndNet.values();
+        cell = gndNetIterator.next();
+        while (!cell.done) {
+            if (cell.value.layer === Diagram.PDIFF) {
+                this.pmosPulldown = true;
+            }
+            cell = gndNetIterator.next();
+        }
+
+        // Alert the user with alert() if there are any pullups/pulldowns.
+        if (this.nmosPullup || this.pmosPulldown) {
+            alert("Warning: NMOS pull-up or PMOS pull-down detected.\n" +
+                  "NMOS should be used for pull-down, and PMOS should be used for pull-up.\n" +
+                  "The simulation may not reflect actual behavior.\n");
+        }
+    }
 
     linkIdenticalNets() {
         'use strict';
