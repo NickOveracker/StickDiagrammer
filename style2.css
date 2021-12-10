@@ -651,16 +651,20 @@ body.light {
         font-size: 5vh;
         margin-left: auto;
         margin-right: auto;
-        margin-top: 20px;
-        padding: 1.5vh;
+        margin-top: 1vh;
+        padding: 1vh;
         width: 5vh;
         height: 5vh;
-        text-align: left;
+        text-align: center;
         display: block;
     }
 
     .terminal h3{
         display: none;
+    }
+
+    .menu {
+        padding-top: 1vh;
     }
 
     .menu-content{
