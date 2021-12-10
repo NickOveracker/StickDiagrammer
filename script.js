@@ -1090,11 +1090,7 @@ class DiagramController {
             return;
         }
 
-        let clientX, clientY;
         let coords = this.getCoordsFromEvent(event);
-
-        clientX = coords.x;
-        clientY = coords.y;
 
         if(this.placeTermMode) {
             this.clearPlaceTerminalMode();
@@ -1107,7 +1103,7 @@ class DiagramController {
         } else {
             // If in the canvas and over a colored cell, erase it.
             // Otherwise, change the layer.
-            if (!(this.clearIfPainted(clientX, clientY) || this.eraseMode)) {
+            if (!(this.clearIfPainted(coords.x, coords.y) || this.eraseMode)) {
                 this.changeLayer();
             }
         }
@@ -1250,13 +1246,9 @@ class DiagramController {
     // Show a preview line when the user is dragging the mouse.
     mousemoveHandler(event) {
         'use strict';
-        let clientX, clientY;
         let coords = this.getCoordsFromEvent(event);
 
-        clientX = coords.x;
-        clientY = coords.y;
-
-        if(this.inBounds(clientX, clientY)) {
+        if(this.inBounds(coords.x, coords.y)) {
             event.preventDefault();
         }
 
@@ -1265,14 +1257,14 @@ class DiagramController {
         }
 
         // Save the current X and Y coordinates.
-        this.currentX = clientX;
-        this.currentY = clientY;
+        this.currentX = coords.x;
+        this.currentY = coords.y;
         let currentCell = this.getCellAtCursor(this.currentX, this.currentY);
 
         // If the mouse is pressed and the mouse is between cells 1 and gridsize - 1,
         if (this.isPrimaryInput(event) || event.buttons === 2) {
             // Ignore if not inside the canvas
-            if (this.inBounds(clientX, clientY)) {
+            if (this.inBounds(coords.x, coords.y)) {
                 this.drag(currentCell);
             }
         }
@@ -1282,13 +1274,12 @@ class DiagramController {
         'use strict';
         let cell;
         let oldX, oldY;
+        let coords = this.getCoordsFromEvent(event);
 
         if(useGridCoords) {
             cell = terminal;
-        } else if(event.type.includes('touch')) {
-            cell = this.getCellAtCursor(event.changedTouches[0].clientX, event.changedTouches[0].clientY);
         } else {
-            cell = this.getCellAtCursor(this.currentX, this.currentY);
+            cell = this.getCellAtCursor(coords.x, coords.y);
         }
 
         if (cell !== null && !event.ctrlKey) {
@@ -1575,9 +1566,10 @@ class DiagramView {
     // Initialize everything
     refreshCanvas() {
         'use strict';
+        let coords = this.diagram.controller.getCoordsFromEvent(this.diagram.controller.currentX, this.diagram.controller.currentY);
         this.resizeCanvas();
 
-        let currentCell = this.diagram.controller.getCellAtCursor(this.diagram.controller.currentX, this.diagram.controller.currentY);
+        let currentCell = this.diagram.controller.getCellAtCursor(coords.x, coords.y);
 
         // Check the layers of the grid, and draw cells as needed.
         let drawCell = function(i, j, layer) {
