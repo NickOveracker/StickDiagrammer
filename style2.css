@@ -583,6 +583,8 @@ body.light {
     .fa-times{
         font-size: 2.5vw;
         padding: 2.5vw;
+        margin-left: auto;
+        margin-right: auto;
     }
 
     .edit-btn-content.small {
