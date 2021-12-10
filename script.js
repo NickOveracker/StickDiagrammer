@@ -2113,8 +2113,10 @@ let lightModeGridColor = '#999999';
 // Z is high impedance, X is error (VDD and GND contradiction.)
 function buildTruthTable() {
     'use strict';
-    let header = [];
-    let inputVals = [];
+    let terminals  = diagram.getTerminals().slice(2);
+    let table      = [];
+    let header     = [];
+    let inputVals  = [];
     let outputVals = [];
 
     // Each loop iteration is a combination of input values.
@@ -2140,14 +2142,12 @@ function buildTruthTable() {
     }
 
     // Header
-    for (let jj = inputVals[0].length - 1; jj >= 0; jj--) {
-        header[inputVals[0].length - 1 - jj] = String.fromCharCode(65 + jj);
-    }
+    terminals.forEach(function(terminal, index) {
+        header[index] = diagram.getTerminalName(index + 2);
+    });
 
     // Merge input and output into one table (input on the left, output on the right.)
-    let table = [];
     table[0] = header;
-    table[0][header.length] = "Y";
     for (let ii = 0; ii < inputVals.length; ii++) {
         // Reverse the input row.
         table[ii + 1] = inputVals[ii].reverse().concat(outputVals[ii]);
