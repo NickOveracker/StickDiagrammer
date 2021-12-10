@@ -179,7 +179,7 @@ li.clickable {
 }
 
 .black{
-    border:initial;
+    border:solid 2px #221D1D;
     background-color: #221D1D;
     
 }
