@@ -99,6 +99,7 @@ class Diagram {
         this.inputNets = [];
         this.outputNets = [];
         this.triggers = [];
+        this.analyses = [];
 
         for (let ii = 0; ii < this.inputs.length; ii++) {
             this.inputNets.push(new Net(String.fromCharCode(65 + ii), true));
@@ -109,6 +110,17 @@ class Diagram {
 
         this.view = new DiagramView(this, mainCanvas, gridCanvas);
         this.controller = new DiagramController(this, this.view, mainCanvas);
+    }
+
+    // Helps with garbage collection
+    clearAnalyses() {
+        'use strict';
+        this.analyses.forEach(analysis => {
+            analysis.forEach(row => {
+                row.length = 0;
+            });
+            analysis.length = 0;
+        });
     }
 
     getTerminals() {
@@ -371,7 +383,6 @@ class Diagram {
         this.triggers.length = 0;
 
         // Get this.pmos output.
-        this.nodeNodeMap.length = 0;
         for (let ii = 0; ii < this.graph.nodes.length; ii++) {
             this.nodeNodeMap[ii] = [];
             this.nodeNodeMap[ii][ii] = true;
@@ -379,11 +390,15 @@ class Diagram {
         pmosOut = this.computeOutputRecursive(this.vddNode, outputNode, inputVals) ? 1 : "Z";
 
         // Get this.nmos output.
-        this.nodeNodeMap.length = 0;
-        for (let ii = 0; ii < this.graph.nodes.length; ii++) {
-            this.nodeNodeMap[ii] = [];
-            this.nodeNodeMap[ii][ii] = true;
-        }
+        //this.nodeNodeMap.length = 0;
+        this.graph.nodes.forEach(function(node, ii) {
+            for (let jj = 0; jj < ii; jj++) {
+                if(this.nodeNodeMap[ii][jj] === null) {
+                    this.nodeNodeMap[ii][jj] = this.nodeNodeMap[jj][ii] = undefined;
+                }
+            }
+        });
+      
         this.triggers.length = 0;
         nmosOut = this.computeOutputRecursive(this.gndNode, outputNode, inputVals) ? 0 : "Z";
 
@@ -401,6 +416,9 @@ class Diagram {
                 }
             }
         }
+
+        this.analyses[inputVals] = [...this.nodeNodeMap,];
+        this.nodeNodeMap.length = 0;
 
         return this.reconcileOutput(pmosOut, nmosOut, directInput);
     }
@@ -2081,6 +2099,7 @@ function buildTruthTable() {
     let header = [];
     let inputVals = [];
     let outputVals = [];
+    diagram.clearAnalyses();
 
     // Each loop iteration is a combination of input values.
     // I.e., one row of the output table.
