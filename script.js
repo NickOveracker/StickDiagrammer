@@ -900,7 +900,7 @@ class DiagramController {
             });
             newTerm = termArr[0];
             this.placeTerminal(newTerm, newTerm, true);
-            netArr.unshift(new Net(name, true));
+            netArr.unshift(new Net(name, false));
         } else {
             termArr = this.diagram.inputs;
             netArr  = this.diagram.inputNets;
