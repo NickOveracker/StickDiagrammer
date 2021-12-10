@@ -1114,13 +1114,9 @@ class DiagramController {
     // If the right (or secondary) button, use the same coordinates to delete a line of cells.
     mouseupHandler(event) {
         'use strict';
-        let clientX, clientY;
         let coords = this.getCoordsFromEvent(event);
 
-        clientX = coords.x;
-        clientY = coords.y;
-
-        if(this.inBounds(clientX, clientY)) {
+        if(this.inBounds(coords.x, coords.y)) {
             event.preventDefault();
         }
      
@@ -1274,12 +1270,11 @@ class DiagramController {
         'use strict';
         let cell;
         let oldX, oldY;
-        let coords = this.getCoordsFromEvent(event);
 
         if(useGridCoords) {
             cell = terminal;
         } else {
-            cell = this.getCellAtCursor(coords.x, coords.y);
+            cell = this.getCellAtCursor(this.currentX, this.currentY);
         }
 
         if (cell !== null && !event.ctrlKey) {
@@ -1566,10 +1561,9 @@ class DiagramView {
     // Initialize everything
     refreshCanvas() {
         'use strict';
-        let coords = this.diagram.controller.getCoordsFromEvent({clientX: this.diagram.controller.currentX, clientY: this.diagram.controller.currentY,});
         this.resizeCanvas();
 
-        let currentCell = this.diagram.controller.getCellAtCursor(coords.x, coords.y);
+        let currentCell = this.diagram.controller.getCellAtCursor(this.diagram.controller.currentX, this.diagram.controller.currentY);
 
         // Check the layers of the grid, and draw cells as needed.
         let drawCell = function(i, j, layer) {

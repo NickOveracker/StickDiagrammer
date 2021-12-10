@@ -86,8 +86,8 @@ DiagramController.prototype.getCellAtCursor = function(screenX, screenY) {
     // Ignore if not inside the canvas
     if (this.inBounds(screenX, screenY)) {
 
-        let x = Math.floor((screenX - this.view.canvas.offsetLeft - this.view.cellWidth) / this.view.cellWidth);
-        let y = Math.floor((screenY - this.view.canvas.offsetTop - this.view.cellHeight) / this.view.cellHeight);
+        let x = Math.floor((screenX - this.view.canvas.getBoundingClientRect().left - this.view.cellWidth) / this.view.cellWidth);
+        let y = Math.floor((screenY - this.view.canvas.getBoundingClientRect().top - this.view.cellHeight) / this.view.cellHeight);
         PRINT_MOUSE_POS && console.log(x, y);
         return { x: x, y: y, };
     }
