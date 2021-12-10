@@ -611,7 +611,7 @@ class Diagram {
     checkPolarity() {
         // See if there are any NDIFF cells in vddNet.
         // If there are, flag for nmos pullup.
-        let vddNetIterator = this.vddNet.values();
+        let vddNetIterator = this.vddNet.cells.values();
         let cell = vddNetIterator.next();
         while (!cell.done) {
             if (cell.value.layer === Diagram.NDIFF) {
@@ -622,7 +622,7 @@ class Diagram {
 
         // Now check if there are any PDIFF cells in gndNet.
         // If there are, flag for pmos pulldown.
-        let gndNetIterator = this.gndNet.values();
+        let gndNetIterator = this.gndNet.cells.values();
         cell = gndNetIterator.next();
         while (!cell.done) {
             if (cell.value.layer === Diagram.PDIFF) {
