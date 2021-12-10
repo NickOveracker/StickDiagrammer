@@ -1388,7 +1388,7 @@ class DiagramView {
         this.cellHeight = this.canvasHeight / (this.diagram.layeredGrid.height + 2);
         this.useFlatColors = false;
         this.trailCursor = false;
-        this.netHighlight = true;
+        this.highlightNets = false;
         this.netHighlightGrid = [];
     }
     
@@ -1443,7 +1443,7 @@ class DiagramView {
         let layerObj = Diagram.layers[layer];
         let color = this.diagram.controller.accessible ? layerObj.friendlyColor : layerObj.color;
 
-        if(flat || this.useFlatColors) {
+        if(flat || (flat !== false && this.useFlatColors)) {
             // Convert from rgba to rgb.
             // I like regex.
             return color.replace(/(a|,[\s\d\.]+(?=\)))/gu,'');
@@ -1561,6 +1561,7 @@ class DiagramView {
     drawCell(ii, jj, layer) {
         'use strict';
         let currentCell;
+        let baseColor;
 
         if (this.diagram.layeredGrid.get(ii, jj, layer).isSet) {
             this.ctx.fillStyle = this.getColor(layer);
@@ -1573,8 +1574,14 @@ class DiagramView {
                 this.ctx.fillRect((ii+1) * this.cellWidth, (jj+1) * this.cellHeight - 1, this.cellWidth + 1, this.cellHeight + 2);
             }
         }
-        if(this.netHighlightGrid[ii] && this.netHighlightGrid[ii][jj]) {
-            this.ctx.fillStyle = "rgba(255, 255, 255, 0." + Math.abs((Math.floor(Date.now()/100) % 18) - 9) + ")";
+        if(this.highlightNets && this.netHighlightGrid[ii] && this.netHighlightGrid[ii][jj]) {
+            baseColor = this.getColor(Diagram.DELETE, false).slice(0, -4);
+            this.ctx.fillStyle = baseColor + 
+                                 Math.round(
+                                    Math.sin(
+                                        (Math.floor(Date.now()/100) % 10) * Math.PI / 10
+                                    ) * 10
+                                 ) / 10 + ")";
             this.ctx.fillRect((ii+1) * this.cellWidth, (jj+1) * this.cellHeight - 1, this.cellWidth + 1, this.cellHeight + 2);
         }
     }
@@ -1588,17 +1595,20 @@ class DiagramView {
         }
 
         for(let ii = 0; ii < path.length; ii++) {
-            if(path[ii]) {
-                for(let jj = 0; jj < this.diagram.netlist.length; jj++) {
-                    if(this.diagram.netlist[jj].containsNode(this.diagram.graph.nodes[ii])) {
-                        let cellIter = this.diagram.netlist[jj].cells.values();
-                        for(let cell = cellIter.next(); !cell.done; cell = cellIter.next()) {
-                            this.netHighlightGrid[cell.value.x][cell.value.y] = true;
-                        }
+            if(!path[ii]) {
+                continue;
+            }
+            for(let jj = 0; jj < this.diagram.netlist.length; jj++) {
+                if(this.diagram.netlist[jj].containsNode(this.diagram.graph.nodes[ii])) {
+                    let cellIter = this.diagram.netlist[jj].cells.values();
+                    for(let cell = cellIter.next(); !cell.done; cell = cellIter.next()) {
+                        this.netHighlightGrid[cell.value.x][cell.value.y] = true;
                     }
                 }
             }
         }
+
+        this.highlightNets = true;
     }
 
     // Initialize everything
@@ -2206,7 +2216,23 @@ function refreshTruthTable() {
 
             // Set the cell class depending on whether this is
             // an input or output cell.
-            tCell.className = colIndex < diagram.inputs.length ? "input" : "output";
+            if(colIndex < diagram.inputs.length) {
+                tCell.className = "input";
+            } else {
+                tCell.className = "output";
+                tCell.onmouseover = ((rowIndex, colIndex) => {
+                    return (() => {
+                        let path, outputNum, outputNodeIndex;
+                        outputNum = colIndex - diagram.inputs.length;
+                        outputNodeIndex = diagram.graph.getIndexByNode(diagram.outputNodes[outputNum]);
+                        path = diagram.analyses[rowIndex - 1][outputNodeIndex];
+                        diagram.view.setHighlight(path);
+                    });
+                })(rowIndex, colIndex);
+                tCell.onmouseleave = function () {
+                    diagram.view.highlightNets = false;
+                };
+            }
         });
     });
 
