@@ -35,7 +35,7 @@
 * ~~More efficient data structure for the grid.~~ *Resolved 2021/11/25*
 * ~~Foolproof usage instructions.~~ *Resolved 2021/11/21*
 * ~~More metal layers.~~ *Resolved 2021/11/21*
-* ~~Moveable VDD/GND terminals.~~ *Resolved 2021/11/21 (move with + and - keys)*
+* ~~Moveable VDD/GND terminals.~~ *Resolved 2021/11/21*
 * ~~Show every layer in a cell, not just the top.~~ *Resolved 2021/11/21*
 
 ## Absolute Pie in the Sky
