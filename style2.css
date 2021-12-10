@@ -111,6 +111,10 @@ li{
     list-style: none;
 }
 
+li.clickable {
+    font-size: 3vh !important;
+}
+
 .menu{
     height: 100vh;
     width: 100%;
@@ -142,6 +146,7 @@ li{
     color: #FFFFFF;
     font-weight: 500;
     text-transform: uppercase;
+   
 }
 
 .menu-btn-content{
@@ -154,7 +159,8 @@ li{
 
 .menu-btn-content h1 {
     margin-top: 4vh;
-    font-size: 5vh;
+    font-size: 2.5vh;
+   
 }
 
 .teacher-btn{
@@ -164,12 +170,18 @@ li{
     width: auto;
 }
 
-.dono-btn{
+.box-btn{
     padding: 2vh;
     margin-top: 4vh;
     border:solid 2px #FFFFFF;
     color: #FFFFFF;
     width: auto;
+}
+
+.box-btn.options-btn {
+    border:solid 2px #221D1D;
+    background-color: #221D1D;
+    margin-top: 1vh;
 }
 
 .menu-text{
@@ -636,12 +648,13 @@ body.light {
 @media screen and (orientation: portrait){
 
     .fa-times {
-        font-size: 3vh;
+        font-size: 5vh;
         margin-left: auto;
         margin-right: auto;
-        padding: 1.5vh;
-        width: 3vh;
-        height: 3vh;
+        margin-top: 1vh;
+        padding: 1vh;
+        width: 5vh;
+        height: 5vh;
         text-align: center;
         display: block;
     }
@@ -650,13 +663,17 @@ body.light {
         display: none;
     }
 
+    .menu {
+        padding-top: 1vh;
+    }
+
     .menu-content{
-        top: 13vh;
+        top: 10vh;
     }
 
     .menu-content li{
         margin: 2vh;
-        font-size: 4vh;
+        font-size: 3vh;
     }
 
     .terminal {
