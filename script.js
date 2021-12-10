@@ -307,7 +307,7 @@ class Diagram {
 
         if (gateNet.isInput) {
             /*jslint bitwise: true */
-            let inputNum = node.getName().charCodeAt(0) - 65;
+            let inputNum = this.inputs.length - (node.getName().charCodeAt(0) - 65);
 
             // Pass-through positive for NMOS.
             let evalInput = !!((inputVals >> inputNum) & 1);
