@@ -177,6 +177,12 @@ li.clickable {
     width: auto;
 }
 
+.dono-btn, .black{
+    border:initial;
+    background-color: #221D1D;
+    
+}
+
 .menu-text{
     font-size: 18px;
 }
@@ -642,8 +648,8 @@ body.light {
 
     .fa-times {
         font-size: 5vh;
-        margin-left: auto;
-        margin-right: auto;
+        /*margin-left: auto;
+        margin-right: auto;*/
         padding: 1.5vh;
         width: 5vh;
         height: 5vh;
