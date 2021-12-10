@@ -33,12 +33,21 @@ let PRINT_MOUSE_POS = false;
 // Represent the graph visually as a graph in the console.
 Graph.prototype.print = function() {
     'use strict';
+    let edgeSet = new Set();
     console.log('graph G {');
     for (let node of this.nodes) {
         console.log(node.getName() + ';');
+        // Add all edges to the set.
+        for (let edge of node.edges) {
+            edgeSet.add(edge);
+        }
     }
-    for (let edge of this.edges) {
-        console.log(edge.getNode1().getName() + ' <-> ' + edge.getNode2().getName() + ';');
+    // Loop through edgeSet and print each edge.
+    let edgeIterator = edgeSet.values();
+    let edge = edgeIterator.next();
+    while (!edge.done) {
+        console.log(edge.value.getNode1().getName() + ' <-> ' + edge.value.getNode2().getName() + ';');
+        edge = edgeIterator.next();
     }
     console.log('}');
 };
