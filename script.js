@@ -2506,7 +2506,7 @@ function setUpControls() {
         this.removeTerminal(true);
     }.bind(diagram.controller);
 
-    document.getElementById('selectPaletteButton').onclick = function() {
+    document.getElementById('select-palette-btn').onclick = function() {
         this.accessible = !this.accessible;
         if(this.accessible) {
             document.getElementById('palette-setting').innerHTML = "Tol";
