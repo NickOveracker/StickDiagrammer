@@ -7,125 +7,273 @@
     <title>Stixu Stick Diagrammer</title>
     <script src="https://kit.fontawesome.com/039fa42282.js" crossorigin="anonymous"></script>
     <script src="script.js"></script>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style2.css">
 </head>
-<body>
-    <div id="instructions" class="sidebar left open">
-        <div id="instructions-text" class="sidebar-contents">
-            <h1>Instructions</h1>
+
+<body class="dark">
+
+    <div id="main-container">
+        <!-----Header------------>
+        <div class="overall-header">
+            <div class="header-left"><i class="fas fa-cloud-moon header-button clickable" id="dark-mode-btn"></i></div>
+            <div class="logo header-center">Stixu Stick Diagrammer</div>
+            <div class="header-right"><i id="main-menu-btn" class="fas fa-bars header-button clickable"></i></div>
+        </div>
+        <!-----Header-END-------->
+
+        <section class="main">
+            <div class="main-1">
+
+                <!---------canvas-sample (width:600px height 600px--------->
+                <div class="sample">
+                    <div id="canvas-container" class="sample-content">
+                        <canvas id="canvas"></canvas>
+                        <canvas id="grid-canvas"></canvas>
+                    </div>
+                </div>
+                <!-------canvas end--------->
+            </div>
+
+        <!-------Right-side-------->
+            <section class="controls">
+
+            <!--------Edit-open--------------------------------------->
+            <div id="terminal-menu" class="edit-open closed">
+                <i class="fas fa-times clickable" id="close-term-menu-btn"></i>
+                <div class="terminal">
+                    <h3>Manage Terminals</h3>
+                    <div id="termselect-list" class="terminal-select">
+                        <!-- AUTO -->
+                    </div>
+                    <div class="terminal-select2">
+                        <div class="select-content" id="remove-input-btn">
+                            <i class="fas fa-minus terminalBtn clickable"></i><span class="small">Delete an Input</span>
+                        </div>
+                        <div class="select-content" id="add-input-btn">
+                            <i class="fas fa-plus terminalBtn clickable"></i><span class="small">Add an Input</span>
+                        </div>
+                        <div class="select-content" id="place-term-btn">
+                            <i class="fas fa-map-pin terminalBtn clickable"></i><span class="small">Place Terminal</span>
+                        </div>
+                        <div class="select-content" id="remove-output-btn">
+                            <i class="fas fa-minus terminalBtn clickable"></i><span class="small">Delete an Output</span>
+                        </div>
+                        <div class="select-content" id="add-output-btn">
+                            <i class="fas fa-plus terminalBtn clickable"></i><span class="small">Add an Output</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--------Edit-open-end------------------------------------------>
+
+                <!---colorBtn----->
+                <div class="colorChange" id="colorChange">
+                    <i class="fas fa-circle clickable"></i>
+                    <i class="fas fa-circle clickable"></i>
+                    <i class="fas fa-circle clickable"></i>
+                    <i class="fas fa-circle clickable"></i>
+                    <i class="fas fa-circle clickable"></i>
+                    <i class="fas fa-circle clickable"></i>
+                </div>
+                <!---colorBtn END----->
+
+                <!-----Edit-section----->
+                <div class="edit-btn">
+                    <div class="edit-btn-content small">
+                        <i id="undo-btn" class="fas fa-undo edit-back clickable small"></i>
+                    </div>
+                    <div class="edit-btn-content">
+                        <i id="paint-mode-btn" class="fas fa-paint-brush edit-back clickable"></i>
+                        <h5>Paint/Erase</h5>
+                    </div>
+                    <div class="edit-btn-content">
+                        <i id="term-menu-btn" class="fas fa-edit edit-back clickable"></i>
+                        <h5>Terminals</h5>
+                    </div>
+                    <div class="edit-btn-content small">
+                        <i id="redo-btn" class="fas fa-redo edit-back clickable small"></i>
+                    </div>
+                </div>
+                <!-----Edit-section-END----->
+                <div class="offscreen">
+                    <div class="rowBtn-1">
+                        <!---row-btn--->
+                        <div class="rowBtn">
+                            <div class="row-content">
+                                <h3>Rows: <span id="num-rows"><!-- AUTO --></span></h3>
+                            </div>
+                            <div class="row-icon">
+                                <i class="fas fa-plus icon-back clickable" id="add-row"></i>
+                                <i class="fas fa-minus icon-back clickable" id="remove-row"></i>
+                            </div>
+                        </div>
+                        <!------>
+                        <!---colum-btn--->
+                        <div class="rowBtn">
+                            <div class="row-content">
+                                <h3>Cols: <span id="num-cols"><!-- AUTO --></span></h3>
+                            </div>
+                            <div class="row-icon">
+                                <i class="fas fa-plus icon-back clickable" id="add-column"></i>
+                                <i class="fas fa-minus icon-back clickable" id="remove-column"></i>
+                            </div>
+                        </div>
+                        <!------>
+                    </div>
+
+                    <!---Shift grid-btn--->
+                    <div class="rowBtn-2">
+                        <div class="row-content">
+                            <h3>Shift grid</h3>
+                        </div>
+                        <div class="row-icon">
+                            <i class="fas fa-chevron-left icon-back clickable" id="shift-left"></i>
+                            <i class="fas fa-chevron-up icon-back clickable" id="shift-up" ></i>
+                            <i class="fas fa-chevron-down icon-back clickable" id="shift-down"></i>
+                            <i class="fas fa-chevron-right icon-back clickable" id="shift-right"></i>
+                        </div>
+                    </div>
+                    <!------>
+
+                    <div class="evaluate-btn clickable" id="evaluate-btn">Evaluate</div>
+                    
+                    <section class="truth-table-section">
+                        <div id="truth-table-container">
+                            <table id="truth-table"></table>
+                        </div>
+                    </section>
+                    <div id="results"><!-- AUTO --></div>
+                </div>
+            </section>
+            <!-------Right-side-END-------->
+        </section>
+    </div>
+
+    <!--------------Main-Menu--------------->
+    <section class="menu scrollable closed" id="main-menu">
+        <i class="fas fa-times clickable" id="close-main-menu-btn"></i>
+
+        <div class="menu-content">
+            <li class="clickable" id="open-instructions-btn">Instructions</li>
+            <li class="clickable" id="open-about-page-btn">About</li>
+            <li class="clickable"><a href="mailto:nickoveracker@okstate.edu">Bug Report</a></li>
+            <li class="clickable"><a href="mailto:nickoveracker@okstate.edu">Contact</a></li>
+
+            <div class="menu-btn-content">
+                <div class="box-btn clickable options-btn" id="open-options-btn">
+                    <i class="fas fa-cogs menu-text">
+                        <span>&nbsp;Option</span>
+                    </i>
+                </div>
+                <!--<div class="teacher-btn clickable"><i class="fas fa-glasses menu-text"><span>&nbsp;Teacher Mode</span></i></div>-->
+            <h1>Support this project!</h1>
+                <div class="box-btn clickable">
+                    <a href="https://patreon.com/twentynine" target="_blank">
+                        <i class="fab fa-patreon menu-text">
+                            <span>&nbsp;Patron</span>
+                        </i>
+                    </a>
+                </div>
+                <div class="box-btn clickable">
+                    <a href="https://ko-fi.com/twentynine" target="_blank">
+                        <i class="fas fa-coffee menu-text">
+                            <span>&nbsp;Ko-Fi</span>
+                        </i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!------------------Main-menu-end------------------------->
+
+    <section class="menu scrollable closed column-flex" id="instructions">
+        <i class="fas fa-times clickable" id="close-instructions-btn"></i>
+
+        <section class="menu-long-text desktop">
+            <h1>Basic Mouse/Keyboard Controls</h1>
             <ul>
                 <li>Left-click to paint a cell with the selected layer.
-                    <ul><li>Left-click and drag to draw a line.</li></ul>
+                    <ul><li>Left-click and drag to paint a line.</li></ul>
                 </li>
 
                 <li>Right-click to clear all layers on the selected cell.
-                <ul><li>Right-click and drag to clear all cells in the selected area.</li></ul>
+                    <ul><li>Right-click and drag to clear all cells in the selected area.</li></ul>
                 </li>
 
-                <li>Right-click without dragging away from any painted cell to change layers.</li>
-                
-                <li>Point at a cell and type "=" or "+" to move the VDD contact to that cell.</li>
+                <li>Right-click in an unpainted area to change layers.
+                    <ul><li>The layer name is displayed at the top of the canvas.</li></ul>
+                </li>
 
-                <li>Point at a cell and type "-" to move the GND contact to that cell.</li>
-
-                <li>Point at a cell and type "A", "B", "C", "D", or "Y" to move the chosen contact to that cell.</li>
-
-                <li>Click "Evaluate" to generate a truth table for the painted diagram.</li>
-
-                <li>Press the Spacebar to toggle dark mode.</li>
-
-                <li><a href="https://ko-fi.com/twentynine">Toss a coin to your Witcher.</a></li>
+                <li>Point at a cell and type SHIFT + V to move the VDD contact to that cell.</li>
+                <li>Point at a cell and type SHIFT + G to move the GND contact to that cell.</li>
+                <li>Point at a cell and type the name of that terminal (A, B, C, ...) to move the chosen contact to that cell.</li>
+                <li>Press Enter or click "Evaluate" to generate a truth table for the painted diagram.
+                    <ul><li>Outputs are found with lazy evaluation, so not all paths are computed.</li></ul>
+                </li>
+                <li>See additional keyboard shortcuts in the Options menu.</li>
             </ul>
-        </div>
-        <div id="instructions-close" class="toggle-button">
-            <i id="instructions-close-label" class="fas fa-chevron-left toggle-button-label"></i>
-        </div>
-    </div>
-    <div id="canvas-container">
-        <canvas id="grid-canvas"></canvas>
-        <canvas id="canvas"></canvas>
-    </div>
-    <div id="dashboard" class="sidebar right open">
-        <div id="dashboard-close" class="toggle-button">
-            <i id="dashboard-close-label" class="fas fa-chevron-right toggle-button-label"></i>
-        </div>
-        <div class="sidebar-contents">
-            <div id="controls">
-                &nbsp;<hr>
-                <div id="row-controls" class="half-width">
-                    <button id="add-row" class="control-button" tabindex="-1">
-                        <i class="fas fa-plus"></i>
-                    </button>
-                    Rows: <span id="row-count">29</span>
-                    <button id="remove-row" class="control-button" tabindex="-1">
-                        <i class="fas fa-minus"></i>
-                    </button>
-                </div>
-                <div id="column-controls" class="half-width">
-                    <button id="add-column" class="control-button" tabindex="-1">
-                        <i class="fas fa-plus"></i>
-                    </button>
-                    Columns: <span id="column-count">29</span>
-                    <button id="remove-column" class="control-button" tabindex="-1">
-                        <i class="fas fa-minus"></i>
-                    </button>
-                </div>
-                <hr>&nbsp;<hr>
-                <div id="shift-controls">
-                    Shift grid:
-                    <button id="shift-up" class="control-button" tabindex="-1">
-                        <i class="fas fa-arrow-up"></i>
-                    </button>
-                    <button id="shift-left" class="half-width control-button" tabindex="-1">
-                        <i class="fas fa-arrow-left"></i>
-                    </button>
-                    <button id="shift-right" class="half-width control-button" tabindex="-1">
-                        <i class="fas fa-arrow-right"></i>
-                    </button>
-                    <button id="shift-down" class="control-button" tabindex="-1">
-                        <i class="fas fa-arrow-down"></i>
-                    </button>
-                </div>
-                <hr>&nbsp;<hr>
-                <div id="layer-controls" class="half-width">
-                    Change layer:
-                    <button id="change-layer" class="control-button" tabindex="-1">
-                        <i class="fas fa-layer-group"></i>
-                    </button>
-                </div>
-                <div id="mode-controls" class="half-width">
-                    Current mode:
-                    <button id="erase-toggle" class="control-button" tabindex="-1">
-                        <i class="fas fa-paint-brush"></i>
-                    </button>
-                </div>
-                <hr>&nbsp;<hr>
-                <div id="terminal-dropdown">
-                    <label for="terminal-select" class="full-width">Place terminal:</label>
+        </section>
 
-                    <div id="terminal-dropdown-list" class="half-width">
-                        <select id="terminal-select" class="control-button full-width" tabindex="-1" name="terminal-select">
-                            <option value="0">A</option>
-                            <option value="1">B</option>
-                            <option value="2">C</option>
-                            <option value="3">D</option>
-                            <option value="4">Y</option>
-                            <option value="5">VDD</option>
-                            <option value="6">GND</option>
-                        </select>
-                    </div>
-                    <div id="terminal-dropdown-button" class="half-width">
-                        <button id="terminal-select-button" class="control-button" tabindex="-1">
-                            <i class="fas fa-map-pin"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div id="truth-table-container">
-                <button id="generate-truth-table" class="control-button" tabindex="-1">Evaluate</button>
-                <table id="truth-table"></table>
-            </div>
+        <section class="menu-long-text">
+            <h1>Basic Touch-Friendly Controls</h1>
+            <ul>
+                <li>Tap the Paint <i class="fas fa-paint-brush inline"></i>
+                    or Erase <i class="fas fa-eraser inline"></i>
+                    icon to switch between paint and erase mode.</li>
+                <li>Tap to paint or clear a cell with the selected layer.
+                    <ul><li>Touch and drag to paint a line or clear an area.</li></ul>
+                </li>
+
+                <li>Tap one of the colored circles to change paint layers.
+                    <ul><li>The layer name is displayed at the top of the canvas.</li></ul>
+                </li>
+
+                <li>Tap the Terminal menu button <i class="fas fa-edit inline"></i> to edit I/O terminals.
+                    <ul>
+                        <li>Use the <i class="fas fa-minus inline"></i> and <i class="fas fa-plus inline"></i> buttons to remove and add terminals.
+                            <ul>
+                                <li>The buttons on the left control input terminals.</li>
+                                <li>The buttons on the right control output terminals.</li>
+                            </ul>
+                        </li>
+                        <li>Select a terminal from the list and tap the <i class="fas fa-map-pin inline"></i> button to enter terminal placement mode.
+                            <ul>
+                                <li>Tap any cell in the canvas to place the terminal.</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <li>Scroll down and tap "Evaluate" to generate a truth table for the painted diagram.</li>
+                <li>Tap any output value in the truth table to highlight the evaluated path to the output.
+                    <ul><li>Outputs are found with lazy evaluation, so not all paths are computed.</li></ul>
+                </li>
+            </ul>
+        </section>
+    </section>
+
+    <section class="menu scrollable closed" id="about-page">
+        <i class="fas fa-times clickable" id="close-about-page-btn"></i>
+        <div class="menu-long-text">
+            Stixu is a tool for designing and validating CMOS logic circuits.
+            <br><br>
+            The tool was conceived and developed by Nick Overacker, an Oklahoma State University Computer Engineering graduate currently living in Japan.
+            <br><br>
+            The user interface was designed and implemented with the help of Miho Kobayashi, a Kansai Gaidai University graduate, former OSU exchange student, and freelance web designer.
+            <br><br>
+            The default canvas palette was borrowed from <a href="https://personal.sron.nl/~pault/" target="_blank">Paul Tol's</a> work.
+            <br><br>
+            The alternate "Sorcery" palette was inspired by the <a href="http://opencircuitdesign.com/magic/" target="_blank">Magic</a> VLSI layout tool.
         </div>
-    </div>
+    </section>
+
+    <section class="menu scrollable closed" id="options-menu">
+        <i class="fas fa-times clickable" id="close-options-btn"></i>
+        <div class="menu-content">
+        <ul>
+            <li class="clickable" id="select-palette-btn">Palette: <span id="palette-setting">Tol</span></li>
+            <li class="clickable" id="toggle-transparency-btn">Layer transparency: <span id="transparency-setting">ON</span></li>
+        </ul>
+    </section>
+
 </body>
 </html>

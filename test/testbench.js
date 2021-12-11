@@ -71,8 +71,8 @@ function runTestbench(runTo) {
         diagram.controller.changeLayer();
     }
 
-    function mapX(x) {return x*diagram.view.cellWidth + diagram.view.canvas.offsetLeft + diagram.view.cellWidth;}
-    function mapY(y) {return y*diagram.view.cellHeight + diagram.view.canvas.offsetTop + diagram.view.cellHeight;}
+    function mapX(x) {return Math.floor(x*diagram.view.cellWidth + diagram.view.canvas.getBoundingClientRect().left + diagram.view.cellWidth);}
+    function mapY(y) {return Math.floor(y*diagram.view.cellHeight + diagram.view.canvas.getBoundingClientRect().top + diagram.view.cellHeight);}
 
     let events = [
         // Clear the canvas
@@ -397,7 +397,7 @@ function runTestbench(runTo) {
         ["mouseup",   {button:  2, clientX: mapX(3),  clientY: mapY(24)}],
 
         2,
-        "1010101010101010",
+        "1111111100000000",
 
         /* 4-stage buffer */
 
@@ -410,7 +410,7 @@ function runTestbench(runTo) {
         },
 
         2,
-        "0101010101010101",
+        "0000000011111111",
 
         /* OR-4 */
         ["mousedown", {button:  2, clientX: mapX(3),   clientY: mapY(3)}],
@@ -689,7 +689,7 @@ function runTestbench(runTo) {
         ["mouseup",   {button:  2, clientX: mapX(29), clientY: mapY(4)}],
         
         2,
-        "X0X0X0X0X0X0X0X0",
+        "XXXXXXXX00000000",
 
         ["mousedown", {button:  0, clientX: mapX(29), clientY: mapY(4)}],
         ["mouseup",   {button:  0, clientX: mapX(29), clientY: mapY(4)}],
@@ -698,7 +698,7 @@ function runTestbench(runTo) {
         ["mouseup",   {button:  2, clientX: mapX(29), clientY: mapY(26)}],
         
         2,
-        "1X1X1X1X1X1X1X1X",
+        "11111111XXXXXXXX",
 
         /* Various open circuits */
         ["mousedown", {button:  2, clientX: mapX(2),  clientY: mapY(26)}],
@@ -708,7 +708,7 @@ function runTestbench(runTo) {
         ["mouseup",   {button:  2, clientX: mapX(29), clientY: mapY(4)}],
         
         2,
-        "1Z1Z1Z1Z1Z1Z1Z1Z",
+        "11111111ZZZZZZZZ",
 
         ["mousedown", {button:  0, clientX: mapX(2),  clientY: mapY(26)}],
         ["mouseup",   {button:  0, clientX: mapX(2),  clientY: mapY(26)}],
@@ -717,7 +717,7 @@ function runTestbench(runTo) {
         ["mouseup",   {button:  2, clientX: mapX(2),  clientY: mapY(4)}],
         
         2,
-        "Z0Z0Z0Z0Z0Z0Z0Z0",
+        "ZZZZZZZZ00000000",
 
         ["mousedown", {button:  2, clientX: mapX(2),  clientY: mapY(26)}],
         ["mouseup",   {button:  2, clientX: mapX(2),  clientY: mapY(26)}],
@@ -735,7 +735,7 @@ function runTestbench(runTo) {
         },
 
         2,
-        "0101010101010101",
+        "0000000011111111",
 
         1,
 
@@ -746,7 +746,7 @@ function runTestbench(runTo) {
         },
 
         2,
-        "0XX10XX10XX10XX1",
+        "0000XXXXXXXX1111",
 
         1,
 
@@ -757,7 +757,7 @@ function runTestbench(runTo) {
         },
 
         2,
-        "0XXXXXX10XXXXXX1",
+        "00XXXXXXXXXXXX11",
 
         1,
 
@@ -1079,7 +1079,7 @@ function runTestbench(runTo) {
         ["mouseup",   {button:  0, clientX: mapX(28), clientY: mapY(26)}],
 
         2,
-        "0000000100010001",
+        "0000000000000111",
 
         0,
 
@@ -1412,7 +1412,7 @@ function runTestbench(runTo) {
         },
 
         2,
-        "000000000000111Z",
+        "000100010001000Z",
 
         /** SR Latch **/
         1,
@@ -1456,7 +1456,7 @@ function runTestbench(runTo) {
         ["mouseup",   {button:  0, clientX: mapX(12), clientY: mapY(10)}],
 
         2,
-        "101Z101Z101Z101Z",
+        "111111110000ZZZZ",
 
         /** SR Latch Q' **/
         1,
@@ -1466,7 +1466,7 @@ function runTestbench(runTo) {
         },
 
         2,
-        "110Z110Z110Z110Z",
+        "111100001111ZZZZ",
 
         /** D FLIP FLOP **/
         // Automatically captured input
@@ -1810,7 +1810,7 @@ function runTestbench(runTo) {
         ["mouseup",{"button":0,"clientX":mapX(25),"clientY":mapY(9)}],
 
         2,
-        "ZZ01ZZ01ZZ01ZZ01",
+        "ZZZZ0000ZZZZ1111",
    ];
 
     /** RUN TESTBENCH **/
@@ -1874,7 +1874,7 @@ function runTestbench(runTo) {
         }
     }
     endTime = Date.now();
-    refreshTruthTable();
+    refreshTruthTable(true);
 
     // Only overwrite the results if all tests were run.
     if(runTo < testCases.length) {
@@ -1882,18 +1882,22 @@ function runTestbench(runTo) {
     }
 
     // Clear #instructions-text and replace its contents with the elapsed time
-    document.getElementById("instructions-text").innerHTML = "";
+    // Make a new div.
+    let resultsDiv = document.getElementById("results");
+    resultsDiv.innerHTML = "";
+
     p = document.createElement("p");
     p.innerHTML = `<b>Elapsed time:</b> ${endTime - startTime}ms`;
-    document.getElementById("instructions-text").appendChild(p);
-    document.getElementById("instructions-text").appendChild(document.createElement("br"));
+
+    resultsDiv.appendChild(p);
+    resultsDiv.appendChild(document.createElement("br"));
 
     // Add indidual test results to #instructions-text as PASS or FAIL
     // Label with their test case names.
     results.forEach(function(result, index) {
         p = document.createElement("p");
-        p.innerHTML = `<span style="cursor:pointer" onclick="runTestbench(${index + 1})"><b>Test ${index}:</b> ${testCases[index]}</span>`;
+        p.innerHTML = `<span style="cursor:pointer" onclick="runTestbench(${index + 1}); window.scrollTo({top: 0, left: 0, behavior: 'smooth'})"><b>Test ${index}:</b> ${testCases[index]}</span>`;
         p.innerHTML += `<b style='float:right;color:${result ? "green'>PASS" : "red'>FAIL"}</b>`;
-        document.getElementById("instructions-text").appendChild(p);
+        resultsDiv.appendChild(p);
     });
 }
