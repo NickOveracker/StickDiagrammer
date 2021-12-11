@@ -133,10 +133,11 @@ class Diagram {
                 }.bind(this));
             }
 
-            if(this.controller.backgroundEval) {
+            if(!this.controller.backgroundEval) {
                 return true;
             }
         }.bind(this));
+        this.controller.backgroundEval = false;
     }
 
     // Helps with garbage collection
