@@ -2573,7 +2573,7 @@ function closeOptionsMenu() {
 
 function closeTopMenu() {
     'use strict';
-    closeAboutPage() || closeOptionsMenu() || closeInstructions() || closeMainMenu() || closeTermMenu();
+    closeAboutPage() || closeOptionsMenu() || closeInstructions() || closeMainMenu() || closeTermMenu(); // jshint ignore:line
 }
 
 function clearPlaceTerminalMode() {
