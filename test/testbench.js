@@ -746,7 +746,7 @@ function runTestbench(runTo) {
         },
 
         2,
-        "0XX10XX10XX10XX1",
+        "0000XXXXXXXX1111",
 
         1,
 
@@ -757,7 +757,7 @@ function runTestbench(runTo) {
         },
 
         2,
-        "0XXXXXX10XXXXXX1",
+        "00XXXXXXXXXXXX11",
 
         1,
 
@@ -1079,7 +1079,7 @@ function runTestbench(runTo) {
         ["mouseup",   {button:  0, clientX: mapX(28), clientY: mapY(26)}],
 
         2,
-        "0000000100010001",
+        "0000000000000111",
 
         0,
 
@@ -1412,7 +1412,7 @@ function runTestbench(runTo) {
         },
 
         2,
-        "000000000000111Z",
+        "000100010001000Z",
 
         /** SR Latch **/
         1,
@@ -1456,7 +1456,7 @@ function runTestbench(runTo) {
         ["mouseup",   {button:  0, clientX: mapX(12), clientY: mapY(10)}],
 
         2,
-        "101Z101Z101Z101Z",
+        "111111110000ZZZZ",
 
         /** SR Latch Q' **/
         1,
@@ -1466,7 +1466,7 @@ function runTestbench(runTo) {
         },
 
         2,
-        "110Z110Z110Z110Z",
+        "111100001111ZZZZ",
 
         /** D FLIP FLOP **/
         // Automatically captured input
@@ -1810,7 +1810,7 @@ function runTestbench(runTo) {
         ["mouseup",{"button":0,"clientX":mapX(25),"clientY":mapY(9)}],
 
         2,
-        "ZZ01ZZ01ZZ01ZZ01",
+        "ZZZZ0000ZZZZ1111",
    ];
 
     /** RUN TESTBENCH **/
