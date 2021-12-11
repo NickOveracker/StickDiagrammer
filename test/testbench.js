@@ -1859,6 +1859,7 @@ function runTestbench(runTo) {
 
             // Do it.
             diagram.setNets();
+            diagram.clearAnalyses();
             tv = "";
             
             for(let ii = 0; ii < diagram.outputs.length; ii++) {
