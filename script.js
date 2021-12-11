@@ -386,9 +386,13 @@ class Diagram {
         this.triggers.length = 0;
 
         // Get this.pmos output.
-        for (let ii = 0; ii < this.graph.nodes.length; ii++) {
-            this.nodeNodeMap[ii] = [];
-            this.nodeNodeMap[ii][ii] = true;
+        if(!!this.analyses[inputVals] && !!this.analyses[inputVals].length) {
+            this.nodeNodeMap = [... this.analyses[inputVals],];
+        } else {
+            for (let ii = 0; ii < this.graph.nodes.length; ii++) {
+                this.nodeNodeMap[ii] = [];
+                this.nodeNodeMap[ii][ii] = true;
+            }
         }
         pmosOut = this.computeOutputRecursive(this.vddNode, outputNode, inputVals) ? 1 : "Z";
 
