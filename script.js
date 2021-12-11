@@ -2451,9 +2451,25 @@ function setUpControls() {
         }
     };
 
+    document.getElementById("open-about-page-btn").onclick = function() {
+        let instructions = document.getElementById("about-page");
+        if(instructions.classList.contains("closed")) {
+            instructions.classList.remove("closed");
+        }
+    };
+
+    document.getElementById("open-options-btn").onclick = function() {
+        let instructions = document.getElementById("options-menu");
+        if(instructions.classList.contains("closed")) {
+            instructions.classList.remove("closed");
+        }
+    };
+
     document.getElementById("close-term-menu-btn").onclick    = closeTermMenu;
     document.getElementById("close-main-menu-btn").onclick    = closeMainMenu;
     document.getElementById("close-instructions-btn").onclick = closeInstructions;
+    document.getElementById("close-about-page-btn").onclick   = closeAboutPage;
+    document.getElementById("close-options-btn").onclick      = closeOptions;
 
     document.getElementById("place-term-btn").onclick = function() {
         let placeTermButton = document.getElementById("place-term-btn");
@@ -2519,9 +2535,25 @@ function closeTermMenu() {
     }
 }
 
+function closeAboutPage() {
+    'use strict';
+    let aboutPage = document.getElementById("about-page");
+    if(!aboutPage.classList.contains("closed")) {
+        aboutPage.classList.add("closed");
+    }
+}
+
+function closeOptionsMenu() {
+    'use strict';
+    let optionsPage = document.getElementById("options-menu");
+    if(!optionsPage.classList.contains("closed")) {
+        optionsPage.classList.add("closed");
+    }
+}
+
 function closeTopMenu() {
     'use strict';
-    !closeInstructions() && !closeMainMenu() && !closeTermMenu();
+    !closeAboutPage() && !closeOptionsMenu() && !closeInstructions() && !closeMainMenu() && !closeTermMenu();
 }
 
 function clearPlaceTerminalMode() {
