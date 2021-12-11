@@ -115,6 +115,30 @@ class Diagram {
         this.controller = new DiagramController(this, this.view, mainCanvas);
     }
 
+    evaluateAll() {
+        'use strict';
+        this.outputNodes.some(function(node) {
+            let node1Index = this.graph.getIndexByNode(node);
+
+            for(let ii = 0; !this.controller.backgroundEval && ii < this.analyses.length; ii++) {
+                this.analyses[ii][node1Index].some(function(mapping, node2Index) { 
+                    if(mapping !== true && mapping !== false) {
+                        if(!this.controller.backgroundEval) {
+                            return true;
+                        }
+                        this.nodeNodeMap = [... this.analyses[ii],];
+                        this.computeOutputRecursive(node, this.graph.nodes[node2Index], ii);
+                        this.analyses[ii] = [... this.nodeNodeMap,];
+                    }
+                }.bind(this));
+            }
+
+            if(this.controller.backgroundEval) {
+                return true;
+            }
+        }.bind(this));
+    }
+
     // Helps with garbage collection
     clearAnalyses() {
         'use strict';
@@ -865,6 +889,7 @@ class DiagramController {
         this.placeTermMode    = false;
         this.selectedTerminal = null;
         this.shiftCommands    = [];
+        this.backgroundEval   = false;
 
         // Set up shift commands
         this.shiftCommands[37] = ((e) => {
@@ -921,6 +946,14 @@ class DiagramController {
                 this.placeTerminal(e, this.diagram.vddCell);
             }
         }).bind(this);
+    }
+
+    // Call this when the state of the canvas changes,
+    // rendering the truth table potentially incorrect.
+    stopBackgroundEval() {
+        'use strict';
+        this.backgroundEval = false;
+        document.getElementById("truth-table").innerHTML = "";
     }
 
     removeTerminal(isOutput) {
@@ -1157,13 +1190,17 @@ class DiagramController {
         let coords = this.getCoordsFromEvent(event);
 
         if(this.placeTermMode) {
+            this.stopBackgroundEval();
             this.clearPlaceTerminalMode();
             this.placeTerminal(event, this.selectedTerminal);
         } else if (!this.isEraseEvent(event)) {
             // Just fill in or delete the cell at the start coordinates.
             // If there is no cell at the start coordinates, change the cursor color.
-            if (!this.diagram.layeredGrid.get(this.startX, this.startY, this.cursorIndex).isSet) { this.saveCurrentState(); }
-            this.diagram.layeredGrid.set(this.startX, this.startY, this.cursorIndex);
+            if (!this.diagram.layeredGrid.get(this.startX, this.startY, this.cursorIndex).isSet) {
+                this.stopBackgroundEval();
+                this.saveCurrentState();
+                this.diagram.layeredGrid.set(this.startX, this.startY, this.cursorIndex);
+            }
         } else {
             // If in the canvas and over a colored cell, erase it.
             // Otherwise, change the layer.
@@ -1276,6 +1313,9 @@ class DiagramController {
             this.undo();
             return;
         }
+
+        // Kill background evaluation if it is running.
+        this.stopBackgroundEval();
 
         let endX = Math.floor((currentX - this.view.canvas.getBoundingClientRect().left - this.view.cellWidth) / this.view.cellWidth);
         let endY = Math.floor((currentY - this.view.canvas.getBoundingClientRect().top - this.view.cellHeight) / this.view.cellHeight);
@@ -2306,6 +2346,10 @@ function refreshTruthTable(suppressSetNets) {
     });
 
     window.scrollTo({behavior: "smooth", top: Math.ceil(tableElement.getBoundingClientRect().top + window.scrollY), left: 0,});
+
+    // Bare minimum complete -- now continue to evaluate additional paths in the background.
+    // This will continue until either the canvas state changes or all output nets have been evaluated.
+    diagram.evaluateAll();
 }
 
 function setDarkMode(setToDark) {
