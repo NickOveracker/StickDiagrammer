@@ -28,6 +28,32 @@ html {
     -ms-user-select: none; /* Internet Explorer/Edge */
 }
 
+.menu-long-text {
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 3vh;
+    margin-bottom: 2vh;
+    width: min(90vw, 500px);
+    color: #fff;
+}
+
+.menu-long-text  h1 {
+    margin-bottom: 3vh;
+}
+
+.menu-long-text li {
+    width: 90%;
+    list-style: revert;
+    padding-bottom: 1vh;
+    margin-left: 5vw;
+    font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+}
+
+.column-flex {
+    display: flex;
+    flex-direction: column;
+}
+
 a {
     text-decoration: inherit;
     color: inherit;
@@ -115,6 +141,10 @@ li.clickable {
     font-size: 3vh !important;
 }
 
+.inline {
+    display: inline;
+}
+
 .menu{
     height: 100vh;
     width: 100%;
@@ -123,6 +153,11 @@ li.clickable {
     position: fixed;
     top: 0;
     font-family: 'Josefin Sans', sans-serif;
+}
+
+.scrollable {
+    overflow-y: auto;
+    height: 100%;
 }
 
 .fa-times{
@@ -571,7 +606,8 @@ body.light {
     }
 
     .menu-content li{
-        margin: 1vh;
+        margin-top: 1vh;
+        margin-bottom: 1vh;
         font-size: 5vh;
     }
 
@@ -647,6 +683,10 @@ body.light {
 
 @media screen and (orientation: portrait){
 
+    .column-flex .desktop {
+        order: 2;
+    }
+
     .fa-times {
         font-size: 5vh;
         margin-left: auto;
@@ -672,7 +712,8 @@ body.light {
     }
 
     .menu-content li{
-        margin: 2vh;
+        margin-top: 2vh;
+        margin-bottom: 2vh;
         font-size: 3vh;
     }
 

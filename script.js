@@ -856,7 +856,6 @@ class DiagramController {
         this.eraseMode        = false;
         this.placeTermMode    = false;
         this.selectedTerminal = null;
-        this.accessible       = true;
         this.shiftCommands    = [];
 
         // Set up shift commands
@@ -886,7 +885,7 @@ class DiagramController {
 
         this.shiftCommands[65] = ((e) => {
             if(e.type.includes('up')) {
-                this.accessible = !this.accessible;
+                this.view.accessible = !this.view.accessible;
                 setUpLayerSelector();
             }
         }).bind(this);
@@ -1455,6 +1454,7 @@ class DiagramView {
         this.cellWidth  = this.canvasWidth  / (this.diagram.layeredGrid.width  + 2);
         this.cellHeight = this.canvasHeight / (this.diagram.layeredGrid.height + 2);
         this.useFlatColors = false;
+        this.accessible = true;
         this.trailCursor = false;
         this.highlightNets = false;
         this.netHighlightGrid = [];
@@ -1509,7 +1509,7 @@ class DiagramView {
     getColor(layer, flat) {
         'use strict';
         let layerObj = Diagram.layers[layer];
-        let color = this.diagram.controller.accessible ? layerObj.friendlyColor : layerObj.color;
+        let color = this.accessible ? layerObj.friendlyColor : layerObj.color;
 
         if(flat || (flat !== false && this.useFlatColors)) {
             // Convert from rgba to rgb.
@@ -2441,11 +2441,36 @@ function setUpControls() {
         let mainMenu = document.getElementById("main-menu");
         if(mainMenu.classList.contains("closed")) {
             mainMenu.classList.remove("closed");
+            document.getElementById("main-container").style.display = "none";
         }
     };
 
-    document.getElementById("close-term-menu-btn").onclick = closeTermMenu;
-    document.getElementById("close-main-menu-btn").onclick = closeMainMenu;
+    document.getElementById("open-instructions-btn").onclick = function() {
+        let instructions = document.getElementById("instructions");
+        if(instructions.classList.contains("closed")) {
+            instructions.classList.remove("closed");
+        }
+    };
+
+    document.getElementById("open-about-page-btn").onclick = function() {
+        let instructions = document.getElementById("about-page");
+        if(instructions.classList.contains("closed")) {
+            instructions.classList.remove("closed");
+        }
+    };
+
+    document.getElementById("open-options-btn").onclick = function() {
+        let instructions = document.getElementById("options-menu");
+        if(instructions.classList.contains("closed")) {
+            instructions.classList.remove("closed");
+        }
+    };
+
+    document.getElementById("close-term-menu-btn").onclick    = closeTermMenu;
+    document.getElementById("close-main-menu-btn").onclick    = closeMainMenu;
+    document.getElementById("close-instructions-btn").onclick = closeInstructions;
+    document.getElementById("close-about-page-btn").onclick   = closeAboutPage;
+    document.getElementById("close-options-btn").onclick      = closeOptionsMenu;
 
     document.getElementById("place-term-btn").onclick = function() {
         let placeTermButton = document.getElementById("place-term-btn");
@@ -2482,6 +2507,21 @@ function setUpControls() {
         this.removeTerminal(true);
     }.bind(diagram.controller);
 
+    document.getElementById('select-palette-btn').onclick = function() {
+        this.accessible = !this.accessible;
+        setUpLayerSelector();
+        if(this.accessible) {
+            document.getElementById('palette-setting').innerHTML = "Tol";
+        } else {
+            document.getElementById('palette-setting').innerHTML = "Sorcery";
+        }
+    }.bind(diagram.view);
+
+    document.getElementById('toggle-transparency-btn').onclick = function() {
+        this.useFlatColors = !this.useFlatColors;
+        document.getElementById('transparency-setting').innerHTML = this.useFlatColors ? "OFF" : "ON";
+    }.bind(diagram.view);
+
     setUpLayerSelector();
 }
 
@@ -2490,6 +2530,16 @@ function closeMainMenu() {
     let mainMenu = document.getElementById("main-menu");
     if(!mainMenu.classList.contains("closed")) {
         mainMenu.classList.add("closed");
+        document.getElementById("main-container").style.display = "block";
+        return true;
+    }
+}
+
+function closeInstructions() {
+    'use strict';
+    let instructions = document.getElementById("instructions");
+    if(!instructions.classList.contains("closed")) {
+        instructions.classList.add("closed");
         return true;
     }
 }
@@ -2503,11 +2553,27 @@ function closeTermMenu() {
     }
 }
 
+function closeAboutPage() {
+    'use strict';
+    let aboutPage = document.getElementById("about-page");
+    if(!aboutPage.classList.contains("closed")) {
+        aboutPage.classList.add("closed");
+        return true;
+    }
+}
+
+function closeOptionsMenu() {
+    'use strict';
+    let optionsPage = document.getElementById("options-menu");
+    if(!optionsPage.classList.contains("closed")) {
+        optionsPage.classList.add("closed");
+        return true;
+    }
+}
+
 function closeTopMenu() {
     'use strict';
-    if(!closeMainMenu()) {
-        closeTermMenu();
-    }
+    closeAboutPage() || closeOptionsMenu() || closeInstructions() || closeMainMenu() || closeTermMenu();
 }
 
 function clearPlaceTerminalMode() {
