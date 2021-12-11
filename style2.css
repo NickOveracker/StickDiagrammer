@@ -28,17 +28,17 @@ html {
     -ms-user-select: none; /* Internet Explorer/Edge */
 }
 
-.menu-text {
+.menu-long-text {
     margin-left: auto;
     margin-right: auto;
     width: min(90vw, 500px);
 }
 
-.menu-text section {
+.menu-long-text section {
     margin-bottom: 5vh;
 }
 
-.menu-text section h1 {
+.menu-long-text section h1 {
     margin-bottom: 5vh;
 }
 
