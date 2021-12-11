@@ -172,7 +172,7 @@ class Diagram {
                 this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] = false;
                 this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = false;
             }
-        };
+        }.bind(this);
 
         // Map the path to node2 appropriately for all nodes mapped to node1.
         for (let ii = 0; ii < this.nodeNodeMap.length; ii++) {
