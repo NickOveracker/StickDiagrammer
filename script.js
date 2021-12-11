@@ -2469,7 +2469,7 @@ function setUpControls() {
     document.getElementById("close-main-menu-btn").onclick    = closeMainMenu;
     document.getElementById("close-instructions-btn").onclick = closeInstructions;
     document.getElementById("close-about-page-btn").onclick   = closeAboutPage;
-    document.getElementById("close-options-btn").onclick      = closeOptions;
+    document.getElementById("close-options-btn").onclick      = closeOptionsMenu;
 
     document.getElementById("place-term-btn").onclick = function() {
         let placeTermButton = document.getElementById("place-term-btn");
