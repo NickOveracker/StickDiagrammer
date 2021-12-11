@@ -141,11 +141,6 @@ li.clickable {
     font-size: 3vh !important;
 }
 
-.scrollable {
-    overflow-y: auto;
-    height: 100%;
-}
-
 .inline {
     display: inline;
 }
@@ -158,6 +153,11 @@ li.clickable {
     position: fixed;
     top: 0;
     font-family: 'Josefin Sans', sans-serif;
+}
+
+.scrollable {
+    overflow-y: auto;
+    height: 100%;
 }
 
 .fa-times{
