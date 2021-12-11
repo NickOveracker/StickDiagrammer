@@ -120,7 +120,7 @@ class Diagram {
         this.outputNodes.some(function(node) {
             let node1Index = this.graph.getIndexByNode(node);
 
-            for(let ii = 0; !this.controller.backgroundEval && ii < this.analyses.length; ii++) {
+            for(let ii = 0; this.controller.backgroundEval && ii < this.analyses.length; ii++) {
                 this.analyses[ii][node1Index].some(function(mapping, node2Index) { 
                     if(mapping !== true && mapping !== false) {
                         if(!this.controller.backgroundEval) {
