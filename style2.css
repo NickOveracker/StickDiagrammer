@@ -31,6 +31,7 @@ html {
 .menu-long-text {
     margin-left: auto;
     margin-right: auto;
+    margin-bottom: 4em;
     width: min(90vw, 500px);
     color: #fff;
 }
@@ -697,7 +698,6 @@ body.light {
 
     .menu {
         padding-top: 1vh;
-        padding-bottom: 2vh;
     }
 
     .menu-content{
