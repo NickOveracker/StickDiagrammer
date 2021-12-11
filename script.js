@@ -856,7 +856,6 @@ class DiagramController {
         this.eraseMode        = false;
         this.placeTermMode    = false;
         this.selectedTerminal = null;
-        this.accessible       = true;
         this.shiftCommands    = [];
 
         // Set up shift commands
@@ -886,7 +885,7 @@ class DiagramController {
 
         this.shiftCommands[65] = ((e) => {
             if(e.type.includes('up')) {
-                this.accessible = !this.accessible;
+                this.view.accessible = !this.view.accessible;
                 setUpLayerSelector();
             }
         }).bind(this);
@@ -1455,6 +1454,7 @@ class DiagramView {
         this.cellWidth  = this.canvasWidth  / (this.diagram.layeredGrid.width  + 2);
         this.cellHeight = this.canvasHeight / (this.diagram.layeredGrid.height + 2);
         this.useFlatColors = false;
+        this.accessible = true;
         this.trailCursor = false;
         this.highlightNets = false;
         this.netHighlightGrid = [];
@@ -1509,7 +1509,7 @@ class DiagramView {
     getColor(layer, flat) {
         'use strict';
         let layerObj = Diagram.layers[layer];
-        let color = this.diagram.controller.accessible ? layerObj.friendlyColor : layerObj.color;
+        let color = this.accessible ? layerObj.friendlyColor : layerObj.color;
 
         if(flat || (flat !== false && this.useFlatColors)) {
             // Convert from rgba to rgb.
@@ -2505,6 +2505,24 @@ function setUpControls() {
     document.getElementById('remove-output-btn').onclick = function() {
         this.removeTerminal(true);
     }.bind(diagram.controller);
+
+    document.getElementById('selectPaletteButton').onclick = function() {
+        this.accessible = !this.accessible;
+        if(this.accessible) {
+            document.getElementById('palette-setting').innerHTML = "Tol";
+        } else {
+            document.getElementById('palette-setting').innerHTML = "Sorcery";
+        }
+    }.bind(diagram.view);
+
+    document.getElementById('toggle-transparency-btn').onclick = function() {
+        this.useFlatColors = !this.useFlatColors;
+        if(this.useFlatColors) {
+            document.getElementById('transparency-setting').innerHTML = "ON";
+        } else {
+            document.getElementById('transparency-setting').innerHTML = "OFF";
+        }
+    }.bind(diagram.view);
 
     setUpLayerSelector();
 }
