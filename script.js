@@ -2444,8 +2444,16 @@ function setUpControls() {
         }
     };
 
-    document.getElementById("close-term-menu-btn").onclick = closeTermMenu;
-    document.getElementById("close-main-menu-btn").onclick = closeMainMenu;
+    document.getElementById("open-instructions-btn").onclick = function() {
+        let instructions = document.getElementById("instructions");
+        if(instructions.classList.contains("closed")) {
+            instructions.classList.remove("closed");
+        }
+    };
+
+    document.getElementById("close-term-menu-btn").onclick    = closeTermMenu;
+    document.getElementById("close-main-menu-btn").onclick    = closeMainMenu;
+    document.getElementById("close-instructions-btn").onclick = closeInstructions;
 
     document.getElementById("place-term-btn").onclick = function() {
         let placeTermButton = document.getElementById("place-term-btn");
@@ -2494,6 +2502,14 @@ function closeMainMenu() {
     }
 }
 
+function closeInstructions() {
+    'use strict';
+    let instructions = document.getElementById("instructions");
+    if(!instructions.classList.contains("closed")) {
+        instructions.classList.add("closed");
+    }
+}
+
 function closeTermMenu() {
     'use strict';
     let termMenu = document.getElementById("terminal-menu");
@@ -2505,9 +2521,7 @@ function closeTermMenu() {
 
 function closeTopMenu() {
     'use strict';
-    if(!closeMainMenu()) {
-        closeTermMenu();
-    }
+    !closeInstructions() && !closeMainMenu() && !closeTermMenu();
 }
 
 function clearPlaceTerminalMode() {
