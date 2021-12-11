@@ -1403,7 +1403,6 @@ class DiagramController {
     // Store the coordinates in startX and startY.
     mousedownHandler(event) {
         'use strict';
-        let clientX, clientY;
         let coords = this.getCoordsFromEvent(event);
 
         this.currentX = coords.x;
