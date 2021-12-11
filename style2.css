@@ -143,6 +143,7 @@ li.clickable {
 
 .scrollable {
     overflow-y: auto;
+    height: 100%;
 }
 
 .inline {
