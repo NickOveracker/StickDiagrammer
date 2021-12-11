@@ -2243,10 +2243,12 @@ function buildTruthTable() {
 }
 
 // Table is a 2D array of single character strings.
-function refreshTruthTable() {
+function refreshTruthTable(suppressSetNets) {
     'use strict';
     // Update the diagram.netlist.
-    diagram.setNets();
+    if(!suppressSetNets) {
+        diagram.setNets();
+    }
 
     // Create a table with the correct number of rows and columns.
     // The first row should be a header.

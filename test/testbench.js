@@ -1858,6 +1858,7 @@ function runTestbench(runTo) {
             diagram.layeredGrid.set(diagram.gndCell.x, diagram.gndCell.y, Diagram.CONTACT);
 
             // Do it.
+            diagram.setNets();
             tv = "";
             
             for(let ii = 0; ii < diagram.outputs.length; ii++) {
@@ -1873,7 +1874,7 @@ function runTestbench(runTo) {
         }
     }
     endTime = Date.now();
-    refreshTruthTable();
+    refreshTruthTable(true);
 
     // Only overwrite the results if all tests were run.
     if(runTo < testCases.length) {
