@@ -2523,6 +2523,7 @@ function closeInstructions() {
     let instructions = document.getElementById("instructions");
     if(!instructions.classList.contains("closed")) {
         instructions.classList.add("closed");
+        return true;
     }
 }
 
@@ -2540,6 +2541,7 @@ function closeAboutPage() {
     let aboutPage = document.getElementById("about-page");
     if(!aboutPage.classList.contains("closed")) {
         aboutPage.classList.add("closed");
+        return true;
     }
 }
 
@@ -2548,12 +2550,13 @@ function closeOptionsMenu() {
     let optionsPage = document.getElementById("options-menu");
     if(!optionsPage.classList.contains("closed")) {
         optionsPage.classList.add("closed");
+        return true;
     }
 }
 
 function closeTopMenu() {
     'use strict';
-    !closeAboutPage() && !closeOptionsMenu() && !closeInstructions() && !closeMainMenu() && !closeTermMenu();
+    closeAboutPage() || closeOptionsMenu() || closeInstructions() || closeMainMenu() || closeTermMenu();
 }
 
 function clearPlaceTerminalMode() {
