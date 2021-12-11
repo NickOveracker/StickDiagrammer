@@ -386,9 +386,13 @@ class Diagram {
         this.triggers.length = 0;
 
         // Get this.pmos output.
-        for (let ii = 0; ii < this.graph.nodes.length; ii++) {
-            this.nodeNodeMap[ii] = [];
-            this.nodeNodeMap[ii][ii] = true;
+        if(!!this.analyses[inputVals] && !!this.analyses[inputVals].length) {
+            this.nodeNodeMap = [... this.analyses[inputVals],];
+        } else {
+            for (let ii = 0; ii < this.graph.nodes.length; ii++) {
+                this.nodeNodeMap[ii] = [];
+                this.nodeNodeMap[ii][ii] = true;
+            }
         }
         pmosOut = this.computeOutputRecursive(this.vddNode, outputNode, inputVals) ? 1 : "Z";
 
@@ -1399,18 +1403,17 @@ class DiagramController {
     // Store the coordinates in startX and startY.
     mousedownHandler(event) {
         'use strict';
-        let clientX, clientY;
         let coords = this.getCoordsFromEvent(event);
 
-        clientX = coords.x;
-        clientY = coords.y;
+        this.currentX = coords.x;
+        this.currentY = coords.y;
 
         if (this.isPrimaryInput(event) || event.button === 2) {
             // Return if not between cells 1 and gridsize - 1
-            if (this.inBounds(clientX, clientY)) {
+            if (this.inBounds(coords.x, coords.y)) {
                 event.preventDefault();
-                this.startX = Math.floor((clientX - this.view.canvas.getBoundingClientRect().left - this.view.cellWidth) / this.view.cellWidth);
-                this.startY = Math.floor((clientY - this.view.canvas.getBoundingClientRect().top - this.view.cellHeight) / this.view.cellHeight);
+                this.startX = Math.floor((coords.x - this.view.canvas.getBoundingClientRect().left - this.view.cellWidth) / this.view.cellWidth);
+                this.startY = Math.floor((coords.y - this.view.canvas.getBoundingClientRect().top - this.view.cellHeight) / this.view.cellHeight);
             } else {
                 this.startX = -1;
                 this.startY = -1;
