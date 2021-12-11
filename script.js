@@ -171,6 +171,9 @@ class Diagram {
             } else if (isPath && this.nodeNodeMap[ii][this.graph.getIndexByNode(node1)] === false) {
                 this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] = false;
                 this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = false;
+            } else if(!isPath && this.nodeNodeMap[ii][this.graph.getIndexByNode(node1)] === true) {
+                this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] = false;
+                this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = false;
             }
         };
 
