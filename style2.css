@@ -43,6 +43,14 @@ html {
     margin-bottom: 3vh;
 }
 
+.menu-long-text li {
+    width: 90%;
+    list-style: revert;
+    padding-bottom: 1vh;
+    margin-left: 5vw;
+    font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+}
+
 a {
     text-decoration: inherit;
     color: inherit;
