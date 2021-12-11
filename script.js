@@ -2441,6 +2441,7 @@ function setUpControls() {
         let mainMenu = document.getElementById("main-menu");
         if(mainMenu.classList.contains("closed")) {
             mainMenu.classList.remove("closed");
+            document.getElementById("main-container").style.display = "none";
         }
     };
 
@@ -2529,6 +2530,7 @@ function closeMainMenu() {
     let mainMenu = document.getElementById("main-menu");
     if(!mainMenu.classList.contains("closed")) {
         mainMenu.classList.add("closed");
+        document.getElementById("main-container").style.display = "block";
         return true;
     }
 }

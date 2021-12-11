@@ -602,7 +602,8 @@ body.light {
     }
 
     .menu-content li{
-        margin: 1vh;
+        margin-top: 1vh;
+        margin-bottom: 1vh;
         font-size: 5vh;
     }
 
@@ -703,7 +704,8 @@ body.light {
     }
 
     .menu-content li{
-        margin: 2vh;
+        margin-top: 2vh;
+        margin-bottom: 2vh;
         font-size: 3vh;
     }
 
