@@ -48,6 +48,11 @@ html {
     font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
 }
 
+.column-flex {
+    display: flex;
+    flex-direction: column;
+}
+
 a {
     text-decoration: inherit;
     color: inherit;
@@ -675,6 +680,10 @@ body.light {
 }
 
 @media screen and (orientation: portrait){
+
+    .column-flex .desktop {
+        order: 2;
+    }
 
     .fa-times {
         font-size: 5vh;
