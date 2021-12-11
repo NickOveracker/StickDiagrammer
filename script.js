@@ -164,19 +164,23 @@ class Diagram {
 
         if (isPath === null) { return; }
 
-        // Map the path to node2 appropriately for all nodes mapped to node1.
-        for (let ii = 0; ii < this.nodeNodeMap.length; ii++) {
+        let syncEdges = function(ii, node1, node2) {
             if (this.nodeNodeMap[ii][this.graph.getIndexByNode(node1)] === true) {
                 this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] = isPath;
                 this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = isPath;
+            } else if (isPath && this.nodeNodeMap[ii][this.graph.getIndexByNode(node1)] === false) {
+                this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] = false;
+                this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = false;
             }
+        };
+
+        // Map the path to node2 appropriately for all nodes mapped to node1.
+        for (let ii = 0; ii < this.nodeNodeMap.length; ii++) {
+            syncEdges(ii, node1, node2);
         }
         // Now do the inverse.
         for (let ii = 0; ii < this.nodeNodeMap.length; ii++) {
-            if (this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] === true) {
-                this.nodeNodeMap[ii][this.graph.getIndexByNode(node1)] = isPath;
-                this.nodeNodeMap[this.graph.getIndexByNode(node1)][ii] = isPath;
-            }
+            syncEdges(ii, node2, node1);
         }
 
         if(isPath !== undefined) {
