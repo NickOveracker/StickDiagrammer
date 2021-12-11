@@ -408,8 +408,9 @@ class Diagram {
         // Finally, see if an input is directly connected to the output.
         for (let ii = 0; ii < this.inputNets.length; ii++) {
             if(this.inputNets[ii].containsNode(outputNode)) {
+                let inputNum = (this.inputs.length - 1) - ii;
                 /*jslint bitwise: true */
-                let temp = (inputVals >> ii) & 1;
+                let temp = (inputVals >> inputNum) & 1;
                 /*jslint bitwise: false */
 
                 if(directInput === undefined || directInput === temp) {
@@ -628,6 +629,7 @@ class Diagram {
     } // end function setNets
 
     checkPolarity() {
+        'use strict';
         this.nmosPullup = this.pmosPulldown = false;
 
         // See if there are any NDIFF cells in vddNet.
@@ -2233,6 +2235,7 @@ function buildTruthTable() {
     // Merge input and output into one table (input on the left, output on the right.)
     table[0] = header;
     for (let ii = 0; ii < inputVals.length; ii++) {
+        // Reverse the inputs so that A is on the left.
         table[ii + 1] = inputVals[ii].reverse().concat(outputVals[ii]);
     }
 

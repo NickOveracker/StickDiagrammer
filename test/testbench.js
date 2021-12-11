@@ -397,7 +397,7 @@ function runTestbench(runTo) {
         ["mouseup",   {button:  2, clientX: mapX(3),  clientY: mapY(24)}],
 
         2,
-        "1010101010101010",
+        "1111111100000000",
 
         /* 4-stage buffer */
 
@@ -410,7 +410,7 @@ function runTestbench(runTo) {
         },
 
         2,
-        "0101010101010101",
+        "0000000011111111",
 
         /* OR-4 */
         ["mousedown", {button:  2, clientX: mapX(3),   clientY: mapY(3)}],
@@ -689,7 +689,7 @@ function runTestbench(runTo) {
         ["mouseup",   {button:  2, clientX: mapX(29), clientY: mapY(4)}],
         
         2,
-        "X0X0X0X0X0X0X0X0",
+        "XXXXXXXX00000000",
 
         ["mousedown", {button:  0, clientX: mapX(29), clientY: mapY(4)}],
         ["mouseup",   {button:  0, clientX: mapX(29), clientY: mapY(4)}],
@@ -698,7 +698,7 @@ function runTestbench(runTo) {
         ["mouseup",   {button:  2, clientX: mapX(29), clientY: mapY(26)}],
         
         2,
-        "1X1X1X1X1X1X1X1X",
+        "11111111XXXXXXXX",
 
         /* Various open circuits */
         ["mousedown", {button:  2, clientX: mapX(2),  clientY: mapY(26)}],
@@ -708,7 +708,7 @@ function runTestbench(runTo) {
         ["mouseup",   {button:  2, clientX: mapX(29), clientY: mapY(4)}],
         
         2,
-        "1Z1Z1Z1Z1Z1Z1Z1Z",
+        "11111111ZZZZZZZZ",
 
         ["mousedown", {button:  0, clientX: mapX(2),  clientY: mapY(26)}],
         ["mouseup",   {button:  0, clientX: mapX(2),  clientY: mapY(26)}],
@@ -717,7 +717,7 @@ function runTestbench(runTo) {
         ["mouseup",   {button:  2, clientX: mapX(2),  clientY: mapY(4)}],
         
         2,
-        "Z0Z0Z0Z0Z0Z0Z0Z0",
+        "ZZZZZZZZ00000000",
 
         ["mousedown", {button:  2, clientX: mapX(2),  clientY: mapY(26)}],
         ["mouseup",   {button:  2, clientX: mapX(2),  clientY: mapY(26)}],
@@ -735,7 +735,7 @@ function runTestbench(runTo) {
         },
 
         2,
-        "0101010101010101",
+        "0000000011111111",
 
         1,
 
@@ -1858,7 +1858,6 @@ function runTestbench(runTo) {
             diagram.layeredGrid.set(diagram.gndCell.x, diagram.gndCell.y, Diagram.CONTACT);
 
             // Do it.
-            diagram.setNets();
             tv = "";
             
             for(let ii = 0; ii < diagram.outputs.length; ii++) {
