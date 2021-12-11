@@ -2508,6 +2508,7 @@ function setUpControls() {
 
     document.getElementById('select-palette-btn').onclick = function() {
         this.accessible = !this.accessible;
+        setUpLayerSelector();
         if(this.accessible) {
             document.getElementById('palette-setting').innerHTML = "Tol";
         } else {
@@ -2517,11 +2518,7 @@ function setUpControls() {
 
     document.getElementById('toggle-transparency-btn').onclick = function() {
         this.useFlatColors = !this.useFlatColors;
-        if(this.useFlatColors) {
-            document.getElementById('transparency-setting').innerHTML = "ON";
-        } else {
-            document.getElementById('transparency-setting').innerHTML = "OFF";
-        }
+        document.getElementById('transparency-setting').innerHTML = this.useFlatColors ? "OFF" : "ON";
     }.bind(diagram.view);
 
     setUpLayerSelector();
