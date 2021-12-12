@@ -2529,7 +2529,7 @@ function setUpControls() {
     }.bind(diagram.controller);
 
     document.getElementById('select-palette-btn').onclick = function() {
-        this.theme = this.view.theme < DiagramView.themes.length - 1 ? this.theme + 1 : 0;
+        this.theme = this.theme < DiagramView.themes.length - 1 ? this.theme + 1 : 0;
         document.getElementById('palette-setting').innerHTML = DiagramView.themes[this.theme];
         setUpLayerSelector();
     }.bind(diagram.view);
