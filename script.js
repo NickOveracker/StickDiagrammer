@@ -50,6 +50,8 @@ class Diagram {
     // Additional colors: Diagram.DELETE at index (numLayers + 0)
     // Colorblind-friendly template found on [David Nichols's](https://personal.sron.nl/~pault/) website.
     // Specifically, [Paul Tol's](https://personal.sron.nl/~pault/) template was used.
+    //
+    // The other color scheme is borrowed from Magic VLSI.
     static get layers() {
         return [
             {name: 'pdiff',   color: 'rgba(202, 160, 115,   1)', friendlyColor: 'rgba(51,   34, 136,   1)', selectable: true, },
