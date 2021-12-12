@@ -54,12 +54,12 @@ class Diagram {
     // The other color scheme is borrowed from Magic VLSI.
     static get layers() {
         return [
-            {name: 'pdiff',   Stix: 'rgba(202, 160, 115,   1)', Sorcery: 'rgba(202, 160, 115,   1)', Tol: 'rgba(51,   34, 136,   1)', selectable: true, },
-            {name: 'ndiff',   Stix: 'rgba( 66, 213,  66,   1)', Sorcery: 'rgba( 66, 213,  66,   1)', Tol: 'rgba(17,  119,  51,   1)', selectable: true, },
-            {name: 'poly',    Stix: 'rgba(220,  95,  95, 0.7)', Sorcery: 'rgba(220,  95,  95, 0.7)', Tol: 'rgba(136,  34,  85, 0.7)', selectable: true, },
-            {name: 'metal1',  Stix: 'rgba(125, 166, 250, 0.7)', Sorcery: 'rgba(125, 166, 250, 0.7)', Tol: 'rgba(136, 204, 238, 0.7)', selectable: true, },
-            {name: 'metal2',  Stix: 'rgba(190, 153, 222, 0.7)', Sorcery: 'rgba(190, 153, 222, 0.7)', Tol: 'rgba(221, 204, 119, 0.7)', selectable: true, },
-            {name: 'contact', Stix: 'rgba(204, 204, 204, 0.7)', Sorcery: 'rgba(204, 204, 204, 0.7)', Tol: 'rgba(204, 102, 119, 0.7)', selectable: true, },
+            {name: 'pdiff',   Stix: 'rgba(118,   0, 181,   1)', Sorcery: 'rgba(202, 160, 115,   1)', Tol: 'rgba(51,   34, 136,   1)', selectable: true, },
+            {name: 'ndiff',   Stix: 'rgba(50,  205,  50,   1)', Sorcery: 'rgba( 66, 213,  66,   1)', Tol: 'rgba(17,  119,  51,   1)', selectable: true, },
+            {name: 'poly',    Stix: 'rgba(255,   0,   0, 0.6)', Sorcery: 'rgba(220,  95,  95, 0.6)', Tol: 'rgba(136,  34,  85, 0.6)', selectable: true, },
+            {name: 'metal1',  Stix: 'rgba(0,   255, 255, 0.6)', Sorcery: 'rgba(125, 166, 250, 0.6)', Tol: 'rgba(136, 204, 238, 0.6)', selectable: true, },
+            {name: 'metal2',  Stix: 'rgba(255,   0, 204, 0.6)', Sorcery: 'rgba(190, 153, 222, 0.6)', Tol: 'rgba(221, 204, 119, 0.6)', selectable: true, },
+            {name: 'contact', Stix: 'rgba(204, 204, 204, 0.5)', Sorcery: 'rgba(204, 204, 204, 0.5)', Tol: 'rgba(204, 102, 119, 0.5)', selectable: true, },
             {name: 'delete',  Stix: 'rgba(208, 160,  32, 0.5)', Sorcery: 'rgba(230, 230,   0, 0.5)', Tol: 'rgba(170,  68, 153, 0.5)', selectable: false,},
         ];
     }
@@ -1478,7 +1478,7 @@ class DiagramView {
         this.trailCursor = false;
         this.highlightNets = false;
         this.netHighlightGrid = [];
-        this.theme;
+        this.theme = 0;
     }
     
     // Draw a faint grid on the canvas.
