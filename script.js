@@ -1190,7 +1190,7 @@ class DiagramController {
      
         if (this.isPrimaryInput(event) || event.button === 2) {
             if (this.dragging) {
-                this.endDrag(coords.x, coords.y);
+                this.endDrag(coords.x, coords.y, event);
             } else if (this.inBounds(coords.x, coords.y)) {
                 this.cellClickHandler(event);
             } else if(event.button === 2) {
@@ -1237,7 +1237,7 @@ class DiagramController {
         }.bind(this), true);
     }
 
-    drag(currentCell) {
+    drag(currentCell, event) {
         'use strict';
         if (this.startX === -1) {
             return;
@@ -1273,7 +1273,7 @@ class DiagramController {
         }
     }
 
-    endDrag(currentX, currentY) {
+    endDrag(currentX, currentY, event) {
         'use strict';
         // If the mouse was released outside the canvas, undo and return.
         if(!this.inBounds(currentX, currentY)) {
@@ -1329,7 +1329,7 @@ class DiagramController {
         if (this.isPrimaryInput(event) || event.buttons === 2) {
             // Ignore if not inside the canvas
             if (this.inBounds(coords.x, coords.y)) {
-                this.drag(currentCell);
+                this.drag(currentCell, event);
             }
         }
     }
