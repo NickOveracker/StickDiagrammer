@@ -117,6 +117,7 @@ class Diagram {
 
     evaluateAll() {
         'use strict';
+        /*
         this.outputNodes.some(function(node) {
             let node1Index = this.graph.getIndexByNode(node);
 
@@ -136,7 +137,7 @@ class Diagram {
             if(!this.controller.backgroundEval) {
                 return true;
             }
-        }.bind(this));
+        }.bind(this));*/
         this.controller.backgroundEval = false;
     }
 
@@ -176,7 +177,7 @@ class Diagram {
         return this.nodeNodeMap[this.graph.getIndexByNode(node1)][this.graph.getIndexByNode(node2)];
     }
 
-    mapNodes(node1, node2, isPath, inputVals) {
+   mapNodes(node1, node2, isPath, inputVals) {
         'use strict';
         let currentMapping = this.pathExists(node1, node2);
 
@@ -193,7 +194,7 @@ class Diagram {
             if (this.nodeNodeMap[ii][this.graph.getIndexByNode(node1)] === true) {
                 this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] = isPath;
                 this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = isPath;
-            } else if (isPath && this.nodeNodeMap[ii][this.graph.getIndexByNode(node1)] === false) {
+            } else if (isPath && (this.nodeNodeMap[ii][this.graph.getIndexByNode(node1)] === false)) {
                 this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] = false;
                 this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = false;
             }
