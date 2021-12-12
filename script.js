@@ -54,13 +54,13 @@ class Diagram {
     // The other color scheme is borrowed from Magic VLSI.
     static get layers() {
         return [
-            {name: 'pdiff',   color: 'rgba(202, 160, 115,   1)', friendlyColor: 'rgba(51,   34, 136,   1)', selectable: true, },
-            {name: 'ndiff',   color: 'rgba( 66, 213,  66,   1)', friendlyColor: 'rgba(17,  119,  51,   1)', selectable: true, },
-            {name: 'poly',    color: 'rgba(220,  95,  95, 0.5)', friendlyColor: 'rgba(136,  34,  85, 0.5)', selectable: true, },
-            {name: 'metal1',  color: 'rgba(125, 166, 250, 0.5)', friendlyColor: 'rgba(136, 204, 238, 0.5)', selectable: true, },
-            {name: 'metal2',  color: 'rgba(190, 153, 222, 0.5)', friendlyColor: 'rgba(221, 204, 119, 0.5)', selectable: true, },
-            {name: 'contact', color: 'rgba(204, 204, 204, 0.5)', friendlyColor: 'rgba(204, 102, 119, 0.5)', selectable: true, },
-            {name: 'delete',  color: 'rgba(208, 160,  32, 0.5)', friendlyColor: 'rgba(170,  68, 153, 0.5)', selectable: false,},
+            {name: 'pdiff',   Stix: 'rgba(202, 160, 115,   1)', Sorcery: 'rgba(202, 160, 115,   1)', Tol: 'rgba(51,   34, 136,   1)', selectable: true, },
+            {name: 'ndiff',   Stix: 'rgba( 66, 213,  66,   1)', Sorcery: 'rgba( 66, 213,  66,   1)', Tol: 'rgba(17,  119,  51,   1)', selectable: true, },
+            {name: 'poly',    Stix: 'rgba(220,  95,  95, 0.7)', Sorcery: 'rgba(220,  95,  95, 0.7)', Tol: 'rgba(136,  34,  85, 0.7)', selectable: true, },
+            {name: 'metal1',  Stix: 'rgba(125, 166, 250, 0.7)', Sorcery: 'rgba(125, 166, 250, 0.7)', Tol: 'rgba(136, 204, 238, 0.7)', selectable: true, },
+            {name: 'metal2',  Stix: 'rgba(190, 153, 222, 0.7)', Sorcery: 'rgba(190, 153, 222, 0.7)', Tol: 'rgba(221, 204, 119, 0.7)', selectable: true, },
+            {name: 'contact', Stix: 'rgba(204, 204, 204, 0.7)', Sorcery: 'rgba(204, 204, 204, 0.7)', Tol: 'rgba(204, 102, 119, 0.7)', selectable: true, },
+            {name: 'delete',  Stix: 'rgba(208, 160,  32, 0.5)', Sorcery: 'rgba(230, 230,   0, 0.5)', Tol: 'rgba(170,  68, 153, 0.5)', selectable: Stix: '', false,},
         ];
     }
     static get PDIFF()        { return 0; }
@@ -893,9 +893,9 @@ class DiagramController {
             }
         }).bind(this);
 
-        this.shiftCommands[65] = ((e) => {
+        this.shiftCommands[84] = ((e) => {
             if(e.type.includes('up')) {
-                this.view.accessible = !this.view.accessible;
+                this.view.theme = this.view.theme < DiagramView.themes.length - 1 ? this.view.theme + 1 : 0;
                 setUpLayerSelector();
             }
         }).bind(this);
@@ -1453,6 +1453,16 @@ class DiagramController {
 }
 
 class DiagramView {
+
+    static get themes() {
+        'use strict';
+        return [
+            'Tol',
+            'Sorcery',
+            'Stix',
+        ]
+    }
+
     constructor(diagram, mainCanvas, gridCanvas) {
         'use strict';
         this.diagram = diagram;
@@ -1465,10 +1475,10 @@ class DiagramView {
         this.cellWidth  = this.canvasWidth  / (this.diagram.layeredGrid.width  + 2);
         this.cellHeight = this.canvasHeight / (this.diagram.layeredGrid.height + 2);
         this.useFlatColors = false;
-        this.accessible = true;
         this.trailCursor = false;
         this.highlightNets = false;
         this.netHighlightGrid = [];
+        this.theme;
     }
     
     // Draw a faint grid on the canvas.
@@ -1520,7 +1530,7 @@ class DiagramView {
     getColor(layer, flat) {
         'use strict';
         let layerObj = Diagram.layers[layer];
-        let color = this.accessible ? layerObj.friendlyColor : layerObj.color;
+        let color = layerObj[DiagramView.themes[this.theme]];
 
         if(flat || (flat !== false && this.useFlatColors)) {
             // Convert from rgba to rgb.
@@ -2519,13 +2529,9 @@ function setUpControls() {
     }.bind(diagram.controller);
 
     document.getElementById('select-palette-btn').onclick = function() {
-        this.accessible = !this.accessible;
+        this.theme = this.view.theme < DiagramView.themes.length - 1 ? this.theme + 1 : 0;
+        document.getElementById('palette-setting').innerHTML = DiagramView.themes[this.theme];
         setUpLayerSelector();
-        if(this.accessible) {
-            document.getElementById('palette-setting').innerHTML = "Tol";
-        } else {
-            document.getElementById('palette-setting').innerHTML = "Sorcery";
-        }
     }.bind(diagram.view);
 
     document.getElementById('toggle-transparency-btn').onclick = function() {
