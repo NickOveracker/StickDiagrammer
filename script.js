@@ -60,7 +60,7 @@ class Diagram {
             {name: 'metal1',  Stix: 'rgba(125, 166, 250, 0.7)', Sorcery: 'rgba(125, 166, 250, 0.7)', Tol: 'rgba(136, 204, 238, 0.7)', selectable: true, },
             {name: 'metal2',  Stix: 'rgba(190, 153, 222, 0.7)', Sorcery: 'rgba(190, 153, 222, 0.7)', Tol: 'rgba(221, 204, 119, 0.7)', selectable: true, },
             {name: 'contact', Stix: 'rgba(204, 204, 204, 0.7)', Sorcery: 'rgba(204, 204, 204, 0.7)', Tol: 'rgba(204, 102, 119, 0.7)', selectable: true, },
-            {name: 'delete',  Stix: 'rgba(208, 160,  32, 0.5)', Sorcery: 'rgba(230, 230,   0, 0.5)', Tol: 'rgba(170,  68, 153, 0.5)', selectable: Stix: '', false,},
+            {name: 'delete',  Stix: 'rgba(208, 160,  32, 0.5)', Sorcery: 'rgba(230, 230,   0, 0.5)', Tol: 'rgba(170,  68, 153, 0.5)', selectable: false,},
         ];
     }
     static get PDIFF()        { return 0; }
