@@ -50,15 +50,17 @@ class Diagram {
     // Additional colors: Diagram.DELETE at index (numLayers + 0)
     // Colorblind-friendly template found on [David Nichols's](https://personal.sron.nl/~pault/) website.
     // Specifically, [Paul Tol's](https://personal.sron.nl/~pault/) template was used.
+    //
+    // The other color scheme is borrowed from Magic VLSI.
     static get layers() {
         return [
-            {name: 'pdiff',   color: 'rgba(118,   0, 181,   1)', friendlyColor: 'rgba(51,   34, 136,   1)', selectable: true, },
-            {name: 'ndiff',   color: 'rgba(50,  205,  50,   1)', friendlyColor: 'rgba(17,  119,  51,   1)', selectable: true, },
-            {name: 'poly',    color: 'rgba(255,   0,   0, 0.5)', friendlyColor: 'rgba(136,  34,  85, 0.5)', selectable: true, },
-            {name: 'metal1',  color: 'rgba(0,   255, 255, 0.5)', friendlyColor: 'rgba(136, 204, 238, 0.5)', selectable: true, },
-            {name: 'metal2',  color: 'rgba(255,   0, 204, 0.5)', friendlyColor: 'rgba(221, 204, 119, 0.5)', selectable: true, },
-            {name: 'contact', color: 'rgba(204, 204, 204, 0.5)', friendlyColor: 'rgba(204, 102, 119, 0.5)', selectable: true, },
-            {name: 'delete',  color: 'rgba(208, 160,  32, 0.5)', friendlyColor: 'rgba(170,  68, 153, 0.5)', selectable: false,},
+            {name: 'pdiff',   Stix: 'rgba(118,   0, 181,   1)', Sorcery: 'rgba(202, 160, 115,   1)', Tol: 'rgba(51,   34, 136,   1)', selectable: true, },
+            {name: 'ndiff',   Stix: 'rgba(50,  205,  50,   1)', Sorcery: 'rgba( 66, 213,  66,   1)', Tol: 'rgba(17,  119,  51,   1)', selectable: true, },
+            {name: 'poly',    Stix: 'rgba(255,   0,   0, 0.6)', Sorcery: 'rgba(220,  95,  95, 0.6)', Tol: 'rgba(136,  34,  85, 0.6)', selectable: true, },
+            {name: 'metal1',  Stix: 'rgba(0,   255, 255, 0.6)', Sorcery: 'rgba(125, 166, 250, 0.6)', Tol: 'rgba(136, 204, 238, 0.6)', selectable: true, },
+            {name: 'metal2',  Stix: 'rgba(255,   0, 204, 0.6)', Sorcery: 'rgba(190, 153, 222, 0.6)', Tol: 'rgba(221, 204, 119, 0.6)', selectable: true, },
+            {name: 'contact', Stix: 'rgba(204, 204, 204, 0.5)', Sorcery: 'rgba(204, 204, 204, 0.5)', Tol: 'rgba(204, 102, 119, 0.5)', selectable: true, },
+            {name: 'delete',  Stix: 'rgba(208, 160,  32, 0.5)', Sorcery: 'rgba(230, 230,   0, 0.5)', Tol: 'rgba(170,  68, 153, 0.5)', selectable: false,},
         ];
     }
     static get PDIFF()        { return 0; }
@@ -151,7 +153,7 @@ class Diagram {
         return this.nodeNodeMap[this.graph.getIndexByNode(node1)][this.graph.getIndexByNode(node2)];
     }
 
-    mapNodes(node1, node2, isPath, inputVals) {
+   mapNodes(node1, node2, isPath, inputVals) {
         'use strict';
         let currentMapping = this.pathExists(node1, node2);
 
@@ -164,19 +166,23 @@ class Diagram {
 
         if (isPath === null) { return; }
 
-        // Map the path to node2 appropriately for all nodes mapped to node1.
-        for (let ii = 0; ii < this.nodeNodeMap.length; ii++) {
+        let syncEdges = function(ii, node1, node2) {
             if (this.nodeNodeMap[ii][this.graph.getIndexByNode(node1)] === true) {
                 this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] = isPath;
                 this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = isPath;
+            } else if (isPath && (this.nodeNodeMap[ii][this.graph.getIndexByNode(node1)] === false)) {
+                this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] = false;
+                this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = false;
             }
+        }.bind(this);
+
+        // Map the path to node2 appropriately for all nodes mapped to node1.
+        for (let ii = 0; ii < this.nodeNodeMap.length; ii++) {
+            syncEdges(ii, node1, node2);
         }
         // Now do the inverse.
         for (let ii = 0; ii < this.nodeNodeMap.length; ii++) {
-            if (this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] === true) {
-                this.nodeNodeMap[ii][this.graph.getIndexByNode(node1)] = isPath;
-                this.nodeNodeMap[this.graph.getIndexByNode(node1)][ii] = isPath;
-            }
+            syncEdges(ii, node2, node1);
         }
 
         if(isPath !== undefined) {
@@ -887,9 +893,9 @@ class DiagramController {
             }
         }).bind(this);
 
-        this.shiftCommands[65] = ((e) => {
+        this.shiftCommands[84] = ((e) => {
             if(e.type.includes('up')) {
-                this.view.accessible = !this.view.accessible;
+                this.view.theme = this.view.theme < DiagramView.themes.length - 1 ? this.view.theme + 1 : 0;
                 setUpLayerSelector();
             }
         }).bind(this);
@@ -1158,8 +1164,10 @@ class DiagramController {
         } else if (!this.isEraseEvent(event)) {
             // Just fill in or delete the cell at the start coordinates.
             // If there is no cell at the start coordinates, change the cursor color.
-            if (!this.diagram.layeredGrid.get(this.startX, this.startY, this.cursorIndex).isSet) { this.saveCurrentState(); }
-            this.diagram.layeredGrid.set(this.startX, this.startY, this.cursorIndex);
+            if (!this.diagram.layeredGrid.get(this.startX, this.startY, this.cursorIndex).isSet) {
+                this.saveCurrentState();
+                this.diagram.layeredGrid.set(this.startX, this.startY, this.cursorIndex);
+            }
         } else {
             // If in the canvas and over a colored cell, erase it.
             // Otherwise, change the layer.
@@ -1403,7 +1411,6 @@ class DiagramController {
     // Store the coordinates in startX and startY.
     mousedownHandler(event) {
         'use strict';
-        let clientX, clientY;
         let coords = this.getCoordsFromEvent(event);
 
         this.currentX = coords.x;
@@ -1446,6 +1453,16 @@ class DiagramController {
 }
 
 class DiagramView {
+
+    static get themes() {
+        'use strict';
+        return [
+            'Tol',
+            'Sorcery',
+            'Stix',
+        ]
+    }
+
     constructor(diagram, mainCanvas, gridCanvas) {
         'use strict';
         this.diagram = diagram;
@@ -1458,10 +1475,10 @@ class DiagramView {
         this.cellWidth  = this.canvasWidth  / (this.diagram.layeredGrid.width  + 2);
         this.cellHeight = this.canvasHeight / (this.diagram.layeredGrid.height + 2);
         this.useFlatColors = false;
-        this.accessible = true;
         this.trailCursor = false;
         this.highlightNets = false;
         this.netHighlightGrid = [];
+        this.theme = 0;
     }
     
     // Draw a faint grid on the canvas.
@@ -1513,7 +1530,7 @@ class DiagramView {
     getColor(layer, flat) {
         'use strict';
         let layerObj = Diagram.layers[layer];
-        let color = this.accessible ? layerObj.friendlyColor : layerObj.color;
+        let color = layerObj[DiagramView.themes[this.theme]];
 
         if(flat || (flat !== false && this.useFlatColors)) {
             // Convert from rgba to rgb.
@@ -2512,13 +2529,9 @@ function setUpControls() {
     }.bind(diagram.controller);
 
     document.getElementById('select-palette-btn').onclick = function() {
-        this.accessible = !this.accessible;
+        this.theme = this.theme < DiagramView.themes.length - 1 ? this.theme + 1 : 0;
+        document.getElementById('palette-setting').innerHTML = DiagramView.themes[this.theme];
         setUpLayerSelector();
-        if(this.accessible) {
-            document.getElementById('palette-setting').innerHTML = "Tol";
-        } else {
-            document.getElementById('palette-setting').innerHTML = "Sorcery";
-        }
     }.bind(diagram.view);
 
     document.getElementById('toggle-transparency-btn').onclick = function() {
