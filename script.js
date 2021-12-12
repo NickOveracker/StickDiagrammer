@@ -53,6 +53,7 @@ class Diagram {
     //
     // The other color scheme is borrowed from Magic VLSI.
     static get layers() {
+        'use strict';
         return [
             {name: 'pdiff',   Stix: 'rgba(118,   0, 181,   1)', Sorcery: 'rgba(202, 160, 115,   1)', Tol: 'rgba(51,   34, 136,   1)', selectable: true, },
             {name: 'ndiff',   Stix: 'rgba(50,  205,  50,   1)', Sorcery: 'rgba( 66, 213,  66,   1)', Tol: 'rgba(17,  119,  51,   1)', selectable: true, },
@@ -1460,7 +1461,7 @@ class DiagramView {
             'Tol',
             'Sorcery',
             'Stix',
-        ]
+        ];
     }
 
     constructor(diagram, mainCanvas, gridCanvas) {
