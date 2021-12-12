@@ -53,6 +53,7 @@ class Diagram {
     //
     // The other color scheme is borrowed from Magic VLSI.
     static get layers() {
+        'use strict';
         return [
             {name: 'pdiff',   Stix: 'rgba(118,   0, 181,   1)', Sorcery: 'rgba(202, 160, 115,   1)', Tol: 'rgba(51,   34, 136,   1)', selectable: true, },
             {name: 'ndiff',   Stix: 'rgba(50,  205,  50,   1)', Sorcery: 'rgba( 66, 213,  66,   1)', Tol: 'rgba(17,  119,  51,   1)', selectable: true, },
@@ -1190,7 +1191,7 @@ class DiagramController {
      
         if (this.isPrimaryInput(event) || event.button === 2) {
             if (this.dragging) {
-                this.endDrag(coords.x, coords.y);
+                this.endDrag(coords.x, coords.y, event);
             } else if (this.inBounds(coords.x, coords.y)) {
                 this.cellClickHandler(event);
             } else if(event.button === 2) {
@@ -1237,7 +1238,7 @@ class DiagramController {
         }.bind(this), true);
     }
 
-    drag(currentCell) {
+    drag(currentCell, event) {
         'use strict';
         if (this.startX === -1) {
             return;
@@ -1273,7 +1274,7 @@ class DiagramController {
         }
     }
 
-    endDrag(currentX, currentY) {
+    endDrag(currentX, currentY, event) {
         'use strict';
         // If the mouse was released outside the canvas, undo and return.
         if(!this.inBounds(currentX, currentY)) {
@@ -1329,7 +1330,7 @@ class DiagramController {
         if (this.isPrimaryInput(event) || event.buttons === 2) {
             // Ignore if not inside the canvas
             if (this.inBounds(coords.x, coords.y)) {
-                this.drag(currentCell);
+                this.drag(currentCell, event);
             }
         }
     }
@@ -1460,7 +1461,7 @@ class DiagramView {
             'Tol',
             'Sorcery',
             'Stix',
-        ]
+        ];
     }
 
     constructor(diagram, mainCanvas, gridCanvas) {
