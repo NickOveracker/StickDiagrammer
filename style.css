@@ -48,7 +48,7 @@ html {
     color: #221D1D;
     background-color: rgba(255,255,255,.9);
     border-radius: 30px;
-    padding: 10px;
+    padding: 20px;
 
 }
 
@@ -66,6 +66,9 @@ html {
     margin-left: auto;
     font-size: 13px;
     font-weight: 600;
+}
+
+.menu-long-text span{
     font-family: 'Noto Sans', sans-serif;
 }
 
