@@ -69,7 +69,9 @@ html {
 }
 
 .menu-long-text span{
-    font-family: 'Noto Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+
 }
 
 .column-flex {
