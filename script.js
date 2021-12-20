@@ -260,8 +260,8 @@ class Diagram {
             } else {
                 console.log("Error loading!");
             }
-            this.unpackGrid(JSON.parse(xhr.responseText));
-        }.bind(this);
+            diagram.unpackGrid(JSON.parse(xhr.responseText));
+        };
         xhr.send();
     }
 
