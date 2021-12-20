@@ -16,7 +16,6 @@
  * 
  **************************************************************************************************/
 
-/* jshint bitwise: true */
 /* jshint curly: true */
 /* jshint eqeqeq: true */
 /* jshint esversion: 6 */
@@ -122,20 +121,19 @@ class Diagram {
     packGrid() {
         'use strict';
         let cell;
-        let word;
-        let bit;
         let terminals = this.getTerminals();
         let byteCodeIndex = 0;
         let packedArr = [];
         let bitIndex = 0;
-        let str = "";
         let size = this.layeredGrid.width * this.layeredGrid.height * (this.layeredGrid.layers - 1);
 
         // Reduce each cell in each layer to a single bit.
         for(let ii = 0; ii < size; ii++) {
             // Get the cell and make room for the next bit.
             cell = this.layeredGrid.grid[ii];
+            /*jslint bitwise: true */
             packedArr[byteCodeIndex] <<= 1;
+            /*jslint bitwise: false */
 
             // If set, set the LSB.
             // It's 0 by default.
@@ -152,7 +150,9 @@ class Diagram {
         }
 
         // Pad the last word with zeros to the right.
+        /*jslint bitwise: true */
         packedArr[packedArr.length - 1] <<= (32 - bitIndex);
+        /*jslint bitwise: false */
         
         // Add the X and Y coordinates of each terminal.
         for(let ii = terminals.length - 1; ii >= 0; ii--) {
@@ -169,7 +169,7 @@ class Diagram {
         return packedArr;
     }
 
-    unpackGrid = function(packedArr) {
+    unpackGrid(packedArr) {
         'use strict';
         let word, bit, coords;
         let offset = 5 +                                    // version, width, height, #in, #out
@@ -211,7 +211,9 @@ class Diagram {
             bit = 31 - (ii % 32);
                     coords = this.layeredGrid.convertToCoordinates(ii);
             
+            /*jslint bitwise: true */
             if(!!((packedArr[offset + word] >> bit) & 1)) {
+            /*jslint bitwise: false */
                     this.layeredGrid.grid[ii] = {
                         isSet: true,
                         x: coords.x,
@@ -219,7 +221,9 @@ class Diagram {
                         layer: coords.layer,
                     };
             }
-            else delete this.layeredGrid.grid[ii];
+            else {
+                delete this.layeredGrid.grid[ii];
+            }
         }
     }
 
@@ -232,13 +236,13 @@ class Diagram {
         // Send packedArr as JSON.
         xhr.open('POST', '/api/v1/save', true);
         xhr.setRequestHeader('Content-Type', 'application/json');
-        xhr.onload = function(e) {
+        xhr.onload = function() {
             if (this.status === 200) {
                 console.log("Saved!");
             } else {
-                console.log("Error: " + this.status);
+                console.log("Error saving!");
             }
-        }
+        };
         xhr.send(JSON.stringify(packedArr));
     }
 
@@ -249,10 +253,12 @@ class Diagram {
         let xhr = new XMLHttpRequest();
         xhr.open('POST', '/api/v1/load', true);
         xhr.setRequestHeader('Content-Type', 'application/json');
-        xhr.onload = function(e) {
+        xhr.onload = function() {
             // Just print the response.
             if (this.status === 200) {
                 console.log("Loaded!");
+            } else {
+                console.log("Error loading!");
             }
             this.unpackGrid(JSON.parse(xhr.responseText));
         }.bind(this);
