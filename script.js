@@ -16,7 +16,6 @@
  * 
  **************************************************************************************************/
 
-/* jshint bitwise: true */
 /* jshint curly: true */
 /* jshint eqeqeq: true */
 /* jshint esversion: 6 */
@@ -116,6 +115,154 @@ class Diagram {
 
         this.view = new DiagramView(this, mainCanvas, gridCanvas);
         this.controller = new DiagramController(this, this.view, mainCanvas);
+    }
+
+    // Compact the grid to send to the server.
+    packGrid() {
+        'use strict';
+        let cell;
+        let terminals = this.getTerminals();
+        let byteCodeIndex = 0;
+        let packedArr = [];
+        let bitIndex = 0;
+        let size = this.layeredGrid.width * this.layeredGrid.height * (this.layeredGrid.layers - 1);
+
+        // Reduce each cell in each layer to a single bit.
+        for(let ii = 0; ii < size; ii++) {
+            // Get the cell and make room for the next bit.
+            cell = this.layeredGrid.grid[ii];
+            /*jslint bitwise: true */
+            packedArr[byteCodeIndex] <<= 1;
+            /*jslint bitwise: false */
+
+            // If set, set the LSB.
+            // It's 0 by default.
+            if(!!cell && cell.isSet) {
+                packedArr[byteCodeIndex]++;
+            }
+
+            // Increment the bit index and check if we need to move to the next word.
+            bitIndex++;
+            if(bitIndex > 31) {
+                bitIndex = 0;
+                byteCodeIndex++;
+            }
+        }
+
+        // Pad the last word with zeros to the right.
+        /*jslint bitwise: true */
+        packedArr[packedArr.length - 1] <<= (32 - bitIndex);
+        /*jslint bitwise: false */
+        
+        // Add the X and Y coordinates of each terminal.
+        for(let ii = terminals.length - 1; ii >= 0; ii--) {
+            packedArr.unshift(terminals[ii].y);
+            packedArr.unshift(terminals[ii].x);
+        }
+        // Add the count of outputs, inputs, and width/height info.
+        packedArr.unshift(this.outputs.length);
+        packedArr.unshift(this.inputs.length);
+        packedArr.unshift(this.layeredGrid.width);
+        packedArr.unshift(this.layeredGrid.height);
+        // Version number for this format.
+        packedArr.unshift(1);
+        return packedArr;
+    }
+
+    unpackGrid(packedArr) {
+        'use strict';
+        let word, bit, coords;
+        let offset = 5 +                                    // version, width, height, #in, #out
+                    2 * (packedArr[3] + packedArr[4] + 2); // X and Y for each IN,OUT,VDD,GND
+
+        this.layeredGrid.resize(packedArr[1], packedArr[2]);
+        
+        while(this.inputs.length > packedArr[3]) {
+            this.controller.removeTerminal();
+        }
+        while(this.outputs.length > packedArr[4]) {
+            this.controller.removeTerminal(true);
+        }
+            
+        while(this.inputs.length < packedArr[3]) {
+            this.controller.addTerminal();
+        }
+        while(this.outputs.length < packedArr[4]) {
+            this.controller.addTerminal(true);
+        }
+        
+        this.vddCell.x = packedArr[5];
+        this.vddCell.y = packedArr[6];
+        this.gndCell.x = packedArr[7];
+        this.gndCell.y = packedArr[8];
+        
+        for(let ii = 0; ii < packedArr[3]; ii++) {
+            this.inputs[ii].x = packedArr[2*ii +  9];
+            this.inputs[ii].y = packedArr[2*ii + 10];
+        }
+        
+        for(let ii = 0; ii < packedArr[4]; ii++) {
+            this.outputs[ii].x = packedArr[2*(ii + packedArr[3]) +  9];
+            this.outputs[ii].y = packedArr[2*(ii + packedArr[3]) + 10];
+        }
+        
+        for(let ii = 0; ii < 6*(packedArr[1] * packedArr[2]); ii++) {
+            word = Math.floor(ii / 32);
+            bit = 31 - (ii % 32);
+                    coords = this.layeredGrid.convertToCoordinates(ii);
+            
+            /*jslint bitwise: true */
+            if(!!((packedArr[offset + word] >> bit) & 1)) {
+            /*jslint bitwise: false */
+                    this.layeredGrid.grid[ii] = {
+                        isSet: true,
+                        x: coords.x,
+                        y: coords.y,
+                        layer: coords.layer,
+                    };
+            }
+            else {
+                delete this.layeredGrid.grid[ii];
+            }
+        }
+    }
+
+    // Sends a compacted version of the grid and terminal coordinates to the server.
+    save() {
+        'use strict';
+        let packedArr = this.packGrid();
+        let xhr = new XMLHttpRequest();
+
+        // Send packedArr as JSON.
+        xhr.open('POST', '/api/v1/save', true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onload = function() {
+            if (this.status === 200) {
+                console.log("Saved!");
+            } else {
+                console.log("Error saving!");
+            }
+        };
+        xhr.send(JSON.stringify(packedArr));
+    }
+
+    // Loads a grid from the server.
+    load() {
+        'use strict';
+        // Get the grid by sending a POST to /api/load_v1.
+        let xhr = new XMLHttpRequest();
+        xhr.open('POST', '/api/v1/load', true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onload = function() {
+            // Just print the response.
+            if (this.status === 200) {
+                console.log("Loaded!");
+            } else {
+                console.log("Error loading!");
+            }
+            this.unpackGrid(JSON.parse(xhr.responseText));
+        }.bind(this);
+        xhr.send();
     }
 
     // Helps with garbage collection
