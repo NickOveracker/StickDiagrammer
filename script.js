@@ -375,8 +375,8 @@ class Diagram {
     computeOutputRecursive(node, targetNode, inputVals) {
         'use strict';
         let hasPath;
-        let hasNullPath;
-        let pathFound;
+        let hasNullPath = false;
+        let pathFound = false;
 
         hasPath = this.pathExists(node, targetNode);
         // Prevent too much recursion.
@@ -411,22 +411,23 @@ class Diagram {
         }
 
         // Recurse on all edges.
-        hasNullPath = false;
-        pathFound = false;
-        /*jshint -W093 */
         node.edges.some(function(edge) {
             let otherNode = edge.getOtherNode(node);
             let hasPath = this.pathExists(otherNode, targetNode);
             if (hasPath) {
                 this.mapNodes(node, targetNode, true, inputVals);
                 this.mapNodes(node, edge.getOtherNode(node), true, inputVals);
+                /*jshint -W093 */
                 return pathFound = true;
+                /*jshint +W093 */
             }
             let result = hasPath !== false && this.computeOutputRecursive(otherNode, targetNode, inputVals);
             if (result) {
                 this.mapNodes(node, targetNode, true, inputVals);
                 this.mapNodes(node, edge.getOtherNode(node), true, inputVals);
+                /*jshint -W093 */
                 return pathFound = true;
+                /*jshint +W093 */
             }
 
             if(result === null || hasPath === null) {
@@ -434,7 +435,6 @@ class Diagram {
                 this.registerTrigger(targetNode, edge.getOtherNode(node), node, targetNode);
             }
         }.bind(this));
-        /*jshint +W093 */
 
         if(pathFound) {
             return true;
