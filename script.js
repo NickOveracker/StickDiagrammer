@@ -476,15 +476,17 @@ class Diagram {
 
         this.graph.nodes.forEach(function(node) {
             this.computeOutputRecursive(node, outputNode, inputVals);
+
+            if(this.pathExists(node, outputNode) === null) {
+                this.mapNodes(node, outputNode, false);
+            }
+
             for(let ii = 0; ii < this.graph.nodes.length; ii++) {
                 for(let jj = 0; jj < this.graph.nodes.length; jj++) {
                     if(this.nodeNodeMap[ii][jj] === null) {
                         this.nodeNodeMap[ii][jj] = undefined;
                     }
                 }
-            }
-            if(this.pathExists(node, outputNode) === undefined) {
-                this.mapNodes(node, outputNode, false);
             }
         }.bind(this));
 /*
