@@ -548,7 +548,7 @@ class Diagram {
         }.bind(this));
 
         this.graph.nodes.forEach(function(node) {
-            this.computeOutputRecursive(node, vddNode, inputVals);
+            this.computeOutputRecursive(node, this.vddNode, inputVals);
             for(let ii = 0; ii < this.graph.nodes.length; ii++) {
                 for(let jj = 0; jj < this.graph.nodes.length; jj++) {
                     if(this.nodeNodeMap[ii][jj] === null) {
@@ -559,7 +559,7 @@ class Diagram {
         }.bind(this));
 
         this.graph.nodes.forEach(function(node) {
-            this.computeOutputRecursive(node, gndNode, inputVals);
+            this.computeOutputRecursive(node, this.gndNode, inputVals);
             for(let ii = 0; ii < this.graph.nodes.length; ii++) {
                 for(let jj = 0; jj < this.graph.nodes.length; jj++) {
                     if(this.nodeNodeMap[ii][jj] === null) {
