@@ -544,7 +544,6 @@ class Diagram {
         pmosOut = this.computeOutputRecursive(this.vddNode, outputNode, inputVals) ? 1 : "Z";
 
         // Get nmos output.
-        //this.nodeNodeMap.length = 0;
         this.graph.nodes.forEach(function(node, ii) {
             for (let jj = 0; jj < ii; jj++) {
                 if(this.nodeNodeMap[ii][jj] === null) {
@@ -553,7 +552,6 @@ class Diagram {
             }
         }.bind(this));
       
-        this.triggers.length = 0;
         nmosOut = this.computeOutputRecursive(this.gndNode, outputNode, inputVals) ? 0 : "Z";
 
         // Finally, see if an input is directly connected to the output.
