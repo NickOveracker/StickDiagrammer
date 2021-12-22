@@ -519,42 +519,14 @@ class Diagram {
         return false;
     }
 
-    // Reconciles the VDD and GND paths to the output.
-    reconcileOutput(pOut, nOut, dIn) {
-        'use strict';
-        let out;
-
-        // Reconcile (this.nmos and this.pmos step)
-        if (pOut === "Z") {
-            out = nOut;
-        } else if (nOut === "Z") {
-            out = pOut;
-        } else {
-            out = "X";
-        }
-
-        // Handle direct connection between input and output.
-        if(dIn !== undefined) {
-            if(out === "Z") {
-                out = dIn;
-            }
-            else if(out !== dIn) {
-                out = "X";
-            }
-        }
-        
-        return out;
-    }
-
     // Computes the output of the selected output for a given set of inputs.
     computeOutput(inputVals, outputNode) {
         'use strict';
-        let pmosOut;
-        let nmosOut;
+        let outputVal = "Z";
         let directInput;
         this.triggers.length = 0;
 
-        // Get pmos output.
+        //  Set up the map of connections between nodes.
         if(!!this.analyses[inputVals] && !!this.analyses[inputVals].length) {
             this.nodeNodeMap = [... this.analyses[inputVals],];
         } else {
@@ -563,23 +535,30 @@ class Diagram {
                 this.nodeNodeMap[ii][ii] = true;
             }
         }
-        pmosOut = this.computeOutputRecursive(this.vddNode, outputNode, inputVals) ? 1 : "Z";
 
-        // Get nmos output.
-        this.graph.nodes.forEach(function(node, ii) {
-            for (let jj = 0; jj < ii; jj++) {
-                if(this.nodeNodeMap[ii][jj] === null) {
-                    this.nodeNodeMap[ii][jj] = this.nodeNodeMap[jj][ii] = undefined;
+        this.graph.nodes.forEach(function(node) {
+            this.computeOutputRecursive(node, outputNode, inputVals);
+            for(let ii = 0; ii < this.graph.nodes.length; ii++) {
+                for(let jj = 0; jj < this.graph.nodes.length; jj++) {
+                    if(this.nodeNodeMap[ii][jj] === null) {
+                        this.nodeNodeMap[ii][jj] = undefined;
+                    }
                 }
             }
         }.bind(this));
-      
-        nmosOut = this.computeOutputRecursive(this.gndNode, outputNode, inputVals) ? 0 : "Z";
 
-        // Finally, see if an input is directly connected to the output.
-        for (let ii = 0; ii < this.inputNets.length; ii++) {
-            if(this.inputNets[ii].containsNode(outputNode)) {
-                let inputNum = (this.inputs.length - 1) - ii;
+        // Determine the value of the output.
+        if(this.pathExists(this.vddNode, outputNode)) {
+            outputVal = "1";
+        }
+        if(this.pathExists(this.gndNode, outputNode)) {
+            outputVal = outputVal === "Z" ? "0" : "X";
+        }
+
+        // See if an input is directly connected to the output.
+        this.inputNets.some(function(inputNet, ii, arr) {
+            if(inputNet.containsNode(outputNode)) {
+                let inputNum = (arr.length - 1) - ii;
                 /*jslint bitwise: true */
                 let temp = (inputVals >> inputNum) & 1;
                 /*jslint bitwise: false */
@@ -588,14 +567,19 @@ class Diagram {
                     directInput = temp;
                 } else {
                     directInput = "X";
+                    return true;
                 }
             }
+        });
+
+        if(directInput !== undefined && (directInput + "") !== outputVal) {
+            outputVal = outputVal === "Z" ? directInput : "X";
         }
 
         this.analyses[inputVals] = [...this.nodeNodeMap,];
         this.nodeNodeMap.length = 0;
 
-        return this.reconcileOutput(pmosOut, nmosOut, directInput);
+        return outputVal;
     }
 
     // Map a function to every transistor terminal.
