@@ -350,7 +350,7 @@ class Diagram {
         }
 
         // Initialize to null.
-        this.mapNodes(node, targetNode, null, inputVals);
+        this.mapNodes(node, targetNode, null);
 
         // Only proceed if the input is activated.
         // Ignore in case of output or supply, since these don't have
@@ -362,11 +362,11 @@ class Diagram {
                     if(node === otherNode) {
                         return;
                     }
-                    this.mapNodes(node, otherNode, false, inputVals);
+                    this.mapNodes(node, otherNode, false);
                 }.bind(this));
                 return false;
             } else if (evalResult === null) {
-                this.mapNodes(node, targetNode, undefined, inputVals);
+                this.mapNodes(node, targetNode, undefined);
                 return null;
             }
         }
@@ -376,16 +376,16 @@ class Diagram {
             let otherNode = edge.getOtherNode(node);
             let hasPath = this.pathExists(otherNode, targetNode);
             if (hasPath) {
-                this.mapNodes(node, targetNode, true, inputVals);
-                this.mapNodes(node, edge.getOtherNode(node), true, inputVals);
+                this.mapNodes(node, targetNode, true);
+                this.mapNodes(node, edge.getOtherNode(node), true);
                 /*jshint -W093 */
                 return pathFound = true;
                 /*jshint +W093 */
             }
             let result = hasPath !== false && this.computeOutputRecursive(otherNode, targetNode, inputVals);
             if (result) {
-                this.mapNodes(node, targetNode, true, inputVals);
-                this.mapNodes(node, edge.getOtherNode(node), true, inputVals);
+                this.mapNodes(node, targetNode, true);
+                this.mapNodes(node, edge.getOtherNode(node), true);
                 /*jshint -W093 */
                 return pathFound = true;
                 /*jshint +W093 */
@@ -401,7 +401,7 @@ class Diagram {
         } else if(hasNullPath) {
             return null;
         } else {
-            this.mapNodes(node, targetNode, false, inputVals);
+            this.mapNodes(node, targetNode, false);
             return false;
         }
     }
@@ -482,6 +482,9 @@ class Diagram {
                         this.nodeNodeMap[ii][jj] = undefined;
                     }
                 }
+            }
+            if(this.pathExists(node, outputNode) === undefined) {
+                this.mapNodes(node, outputNode, false);
             }
         }.bind(this));
 /*
