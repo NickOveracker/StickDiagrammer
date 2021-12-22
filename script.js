@@ -101,7 +101,6 @@ class Diagram {
         this.gndNet = new Net("GND", false);
         this.inputNets = [];
         this.outputNets = [];
-        this.triggers = [];
         this.analyses = [];
         this.nmosPullup = false;
         this.pmosPulldown = false;
@@ -332,61 +331,6 @@ class Diagram {
         for (let ii = 0; ii < this.nodeNodeMap.length; ii++) {
             syncEdges(ii, node2, node1);
         }
-
-        if(isPath !== undefined) {
-            this.executeTriggers(node1, node2, inputVals);
-        }
-    }
-
-    // Executes the triggers for a given path.
-    // Invoke when a dependency for computation is resolved.
-    executeTriggers(node, targetNode, inputVals) {
-        'use strict';
-        let pathEval, triggerList;
-
-        // Check if there are triggers to call, return otherwise.
-        triggerList = this.triggers[this.graph.getIndexByNode(node)];
-        if (triggerList === undefined) { return; }
-        triggerList = triggerList[this.graph.getIndexByNode(targetNode)];
-        if (triggerList === undefined) { return; }
-
-        // Call each trigger.
-        for (let ii = 0; ii < triggerList.length; ii++) {
-            pathEval = this.pathExists(triggerList[ii].node, triggerList[ii].targetNode);
-            if(pathEval === undefined || pathEval === null) {
-                this.mapNodes(node, targetNode, undefined, inputVals);
-                this.computeOutputRecursive(triggerList[ii].node, triggerList[ii].targetNode, inputVals);
-            }
-        }
-
-        // Delete all resolved triggers.
-        for (let ii = 0; ii < triggerList.length; ii++) {
-            pathEval = this.pathExists(triggerList[ii].node, triggerList[ii].targetNode);
-            if (pathEval === true || pathEval === false) {
-                triggerList.splice(ii, 1);
-                ii--;
-            }
-        }
-    }
-
-    // Registers a trigger to be called when a path is resolved.
-    registerTrigger(triggerNode1, triggerNode2, callNode1, callNode2) {
-        'use strict';
-        let triggerIndex1 = this.graph.getIndexByNode(triggerNode1);
-        let triggerIndex2 = this.graph.getIndexByNode(triggerNode2);
-
-        if(this.triggers[triggerIndex1] === undefined) {
-            this.triggers[triggerIndex1] = [];
-        }
-        if(this.triggers[triggerIndex2] === undefined) {
-            this.triggers[triggerIndex2] = [];
-        }
-        if(this.triggers[triggerIndex1][triggerIndex2] === undefined) {
-            this.triggers[triggerIndex1][triggerIndex2] = [];
-            this.triggers[triggerIndex2][triggerIndex1] = [];
-        }
-        this.triggers[triggerIndex1][triggerIndex2].push({node: callNode1, targetNode: callNode2,});
-        this.triggers[triggerIndex2][triggerIndex1].push({node: callNode1, targetNode: callNode2,});
     }
 
     // Recursively computes the output of a node.
@@ -422,8 +366,6 @@ class Diagram {
                 }.bind(this));
                 return false;
             } else if (evalResult === null) {
-                this.registerTrigger(node, this.vddNode, node, targetNode);
-                this.registerTrigger(node, this.gndNode, node, targetNode);
                 this.mapNodes(node, targetNode, undefined, inputVals);
                 return null;
             }
@@ -451,7 +393,6 @@ class Diagram {
 
             if(result === null || hasPath === null) {
                 hasNullPath = true;
-                this.registerTrigger(targetNode, edge.getOtherNode(node), node, targetNode);
             }
         }.bind(this));
 
@@ -506,8 +447,6 @@ class Diagram {
             relevantPathExists = this.computeOutputRecursive(gateNode, relevantNode, inputVals);
             if (relevantPathExists === null) {
                 hasNullPath = true;
-                this.registerTrigger(gateNode, relevantNode, node, this.vddNode);
-                this.registerTrigger(gateNode, relevantNode, node, this.gndNode);
             } else if(relevantPathExists) {
                 return true;
             }
@@ -524,7 +463,6 @@ class Diagram {
         'use strict';
         let outputVal = "Z";
         let directInput;
-        this.triggers.length = 0;
 
         //  Set up the map of connections between nodes.
         if(!!this.analyses[inputVals] && !!this.analyses[inputVals].length) {
@@ -538,28 +476,6 @@ class Diagram {
 
         this.graph.nodes.forEach(function(node) {
             this.computeOutputRecursive(node, outputNode, inputVals);
-            for(let ii = 0; ii < this.graph.nodes.length; ii++) {
-                for(let jj = 0; jj < this.graph.nodes.length; jj++) {
-                    if(this.nodeNodeMap[ii][jj] === null) {
-                        this.nodeNodeMap[ii][jj] = undefined;
-                    }
-                }
-            }
-        }.bind(this));
-
-        this.graph.nodes.forEach(function(node) {
-            this.computeOutputRecursive(node, this.vddNode, inputVals);
-            for(let ii = 0; ii < this.graph.nodes.length; ii++) {
-                for(let jj = 0; jj < this.graph.nodes.length; jj++) {
-                    if(this.nodeNodeMap[ii][jj] === null) {
-                        this.nodeNodeMap[ii][jj] = undefined;
-                    }
-                }
-            }
-        }.bind(this));
-
-        this.graph.nodes.forEach(function(node) {
-            this.computeOutputRecursive(node, this.gndNode, inputVals);
             for(let ii = 0; ii < this.graph.nodes.length; ii++) {
                 for(let jj = 0; jj < this.graph.nodes.length; jj++) {
                     if(this.nodeNodeMap[ii][jj] === null) {
