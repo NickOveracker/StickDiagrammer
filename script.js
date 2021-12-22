@@ -378,17 +378,10 @@ class Diagram {
         let hasNullPath;
         let pathFound;
 
-        // We found it?
-        if (node === targetNode) {
-            return true;
-        }
-
         hasPath = this.pathExists(node, targetNode);
         // Prevent too much recursion.
-        // If this is already being checked, the path will be null.
-        if (hasPath === null) {
-            return null;
-        } else if (hasPath !== undefined) {
+        // This will be either true, false, or null if it has been/is being checked.
+        if (hasPath !== undefined) {
         // Avoid infinite loops.
             return hasPath;
         }
@@ -539,7 +532,7 @@ class Diagram {
         let directInput;
         this.triggers.length = 0;
 
-        // Get this.pmos output.
+        // Get pmos output.
         if(!!this.analyses[inputVals] && !!this.analyses[inputVals].length) {
             this.nodeNodeMap = [... this.analyses[inputVals],];
         } else {
@@ -550,7 +543,7 @@ class Diagram {
         }
         pmosOut = this.computeOutputRecursive(this.vddNode, outputNode, inputVals) ? 1 : "Z";
 
-        // Get this.nmos output.
+        // Get nmos output.
         //this.nodeNodeMap.length = 0;
         this.graph.nodes.forEach(function(node, ii) {
             for (let jj = 0; jj < ii; jj++) {
