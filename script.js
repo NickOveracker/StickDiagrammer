@@ -547,6 +547,28 @@ class Diagram {
             }
         }.bind(this));
 
+        this.graph.nodes.forEach(function(node) {
+            this.computeOutputRecursive(node, vddNode, inputVals);
+            for(let ii = 0; ii < this.graph.nodes.length; ii++) {
+                for(let jj = 0; jj < this.graph.nodes.length; jj++) {
+                    if(this.nodeNodeMap[ii][jj] === null) {
+                        this.nodeNodeMap[ii][jj] = undefined;
+                    }
+                }
+            }
+        }.bind(this));
+
+        this.graph.nodes.forEach(function(node) {
+            this.computeOutputRecursive(node, gndNode, inputVals);
+            for(let ii = 0; ii < this.graph.nodes.length; ii++) {
+                for(let jj = 0; jj < this.graph.nodes.length; jj++) {
+                    if(this.nodeNodeMap[ii][jj] === null) {
+                        this.nodeNodeMap[ii][jj] = undefined;
+                    }
+                }
+            }
+        }.bind(this));
+
         // Determine the value of the output.
         if(this.pathExists(this.vddNode, outputNode)) {
             outputVal = "1";
