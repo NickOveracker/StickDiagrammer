@@ -300,7 +300,7 @@ class Diagram {
         return this.nodeNodeMap[this.graph.getIndexByNode(node1)][this.graph.getIndexByNode(node2)];
     }
 
-   mapNodes(node1, node2, isPath, inputVals) {
+    mapNodes(node1, node2, isPath) {
         'use strict';
         let currentMapping = this.pathExists(node1, node2);
 
@@ -484,7 +484,29 @@ class Diagram {
                 }
             }
         }.bind(this));
+/*
+        this.graph.nodes.forEach(function(node) {
+            this.computeOutputRecursive(node, this.vddNode, inputVals);
+            for(let ii = 0; ii < this.graph.nodes.length; ii++) {
+                for(let jj = 0; jj < this.graph.nodes.length; jj++) {
+                    if(this.nodeNodeMap[ii][jj] === null) {
+                        this.nodeNodeMap[ii][jj] = undefined;
+                    }
+                }
+            }
+        }.bind(this));
 
+        this.graph.nodes.forEach(function(node) {
+            this.computeOutputRecursive(node, this.gndNode, inputVals);
+            for(let ii = 0; ii < this.graph.nodes.length; ii++) {
+                for(let jj = 0; jj < this.graph.nodes.length; jj++) {
+                    if(this.nodeNodeMap[ii][jj] === null) {
+                        this.nodeNodeMap[ii][jj] = undefined;
+                    }
+                }
+            }
+        }.bind(this));
+*/
         // Determine the value of the output.
         if(this.pathExists(this.vddNode, outputNode)) {
             outputVal = "1";
