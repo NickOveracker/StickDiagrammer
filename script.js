@@ -340,15 +340,17 @@ class Diagram {
 
     executeTriggers(node, targetNode, inputVals) {
         'use strict';
+        let pathEval, triggerList;
+
         // Check if there are triggers to call, return otherwise.
-        let triggerList = this.triggers[this.graph.getIndexByNode(node)];
+        triggerList = this.triggers[this.graph.getIndexByNode(node)];
         if (triggerList === undefined) { return; }
         triggerList = triggerList[this.graph.getIndexByNode(targetNode)];
         if (triggerList === undefined) { return; }
 
         // Call each trigger.
         for (let ii = 0; ii < triggerList.length; ii++) {
-            let pathEval = this.pathExists(triggerList[ii].node, triggerList[ii].targetNode);
+            pathEval = this.pathExists(triggerList[ii].node, triggerList[ii].targetNode);
             if(pathEval === undefined || pathEval === null) {
                 this.mapNodes(node, targetNode, undefined, inputVals);
                 this.computeOutputRecursive(triggerList[ii].node, triggerList[ii].targetNode, inputVals);
