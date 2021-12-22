@@ -546,6 +546,7 @@ class Diagram {
         return out;
     }
 
+    // Computes the output of the selected output for a given set of inputs.
     computeOutput(inputVals, outputNode) {
         'use strict';
         let pmosOut;
