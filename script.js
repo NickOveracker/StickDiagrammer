@@ -338,6 +338,8 @@ class Diagram {
         }
     }
 
+    // Executes the triggers for a given path.
+    // Invoke when a dependency for computation is resolved.
     executeTriggers(node, targetNode, inputVals) {
         'use strict';
         let pathEval, triggerList;
@@ -367,6 +369,7 @@ class Diagram {
         }
     }
 
+    // Registers a trigger to be called when a path is resolved.
     registerTrigger(triggerNode1, triggerNode2, callNode1, callNode2) {
         'use strict';
         let triggerIndex1 = this.graph.getIndexByNode(triggerNode1);
@@ -386,6 +389,8 @@ class Diagram {
         this.triggers[triggerIndex2][triggerIndex1].push({node: callNode1, targetNode: callNode2,});
     }
 
+    // Recursively computes the output of a node.
+    // Assumption: targetNode is NOT a transistor.
     computeOutputRecursive(node, targetNode, inputVals) {
         'use strict';
         let hasPath;
@@ -460,6 +465,7 @@ class Diagram {
         }
     }
 
+    // Determines whether a transistor gate is active.
     evaluate(node, inputVals) {
         'use strict';
         let gateNet = node.cell.gate;
@@ -513,6 +519,7 @@ class Diagram {
         return false;
     }
 
+    // Reconciles the VDD and GND paths to the output.
     reconcileOutput(pOut, nOut, dIn) {
         'use strict';
         let out;
