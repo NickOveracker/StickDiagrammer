@@ -94,6 +94,7 @@ class Diagram {
         this.gndCell = {x: 1, y: startHeight - 2,};
         this.vddNode = null;
         this.gndNode = null;
+        this.inputNodes = [];
         this.outputNodes = [];
         this.nmos = new Set();
         this.pmos = new Set();
@@ -104,6 +105,7 @@ class Diagram {
         this.analyses = [];
         this.nmosPullup = false;
         this.pmosPulldown = false;
+        this.idealInputs = true;
 
         for (let ii = 0; ii < this.inputs.length; ii++) {
             this.inputNets.push(new Net(String.fromCharCode(65 + ii), true));
@@ -172,7 +174,7 @@ class Diagram {
         'use strict';
         let word, bit, coords;
         let offset = 5 +                                    // version, width, height, #in, #out
-                    2 * (packedArr[3] + packedArr[4] + 2); // X and Y for each IN,OUT,VDD,GND
+                     2 * (packedArr[3] + packedArr[4] + 2); // X and Y for each IN,OUT,VDD,GND
 
         this.layeredGrid.resize(packedArr[1], packedArr[2]);
         
@@ -333,6 +335,25 @@ class Diagram {
         }
     }
 
+    evaluateInput(node, inputVals) {
+        let evalInput;
+        let inputNum = this.inputNodes.indexOf(node);
+
+        inputNum = this.inputNodes.length - 1 - inputNum;
+
+        /*jslint bitwise: true */
+        evalInput = !!((inputVals >> inputNum) & 1);
+        /*jslint bitwise: false */
+
+        if(this.idealInputs && evalInput) {
+            return this.vddNode;
+        } else if(this.idealInputs) {
+            return this.gndNode;
+        } else {
+            return evalInput;
+        }
+    }
+
     // Recursively computes the output of a node.
     // Assumption: targetNode is NOT a transistor.
     computeOutputRecursive(node, targetNode, inputVals) {
@@ -340,8 +361,18 @@ class Diagram {
         let hasPath;
         let hasNullPath = false;
         let pathFound = false;
+        let inputNum;
+
+        // In case of ideal inputs, an input 0 is GND, and 1 is VDD.
+        inputNum = this.inputNodes.indexOf(node);
+        if(inputNum !== -1) {
+            if(this.evaluateInput(node, inputVals) === targetNode) {
+                this.mapNodes(node, targetNode, true);
+            }
+        }
 
         hasPath = this.pathExists(node, targetNode);
+
         // Prevent too much recursion.
         // This will be either true, false, or null if it has been/is being checked.
         if (hasPath !== undefined) {
@@ -462,7 +493,21 @@ class Diagram {
     computeOutput(inputVals, outputNode) {
         'use strict';
         let outputVal = "Z";
-        let directInput;
+        let highNodes = [this.vddNode,];
+        let lowNodes  = [this.gndNode,];
+
+        this.inputNodes.forEach(function(node, index) {
+            let inputNum = this.inputNodes.length - 1 - index;
+            /*jslint bitwise: true */
+            let evalInput = !!((inputVals >> inputNum) & 1);
+            /*jslint bitwise: false */
+
+            if(evalInput) {
+                highNodes.push(node);
+            } else {
+                lowNodes.push(node);
+            }
+        }.bind(this));
 
         //  Set up the map of connections between nodes.
         if(!!this.analyses[inputVals] && !!this.analyses[inputVals].length) {
@@ -489,57 +534,21 @@ class Diagram {
                 this.mapNodes(node, outputNode, false);
             }
         }.bind(this));
-/*
-        this.graph.nodes.forEach(function(node) {
-            this.computeOutputRecursive(node, this.vddNode, inputVals);
-            for(let ii = 0; ii < this.graph.nodes.length; ii++) {
-                for(let jj = 0; jj < this.graph.nodes.length; jj++) {
-                    if(this.nodeNodeMap[ii][jj] === null) {
-                        this.nodeNodeMap[ii][jj] = undefined;
-                    }
-                }
-            }
-        }.bind(this));
 
-        this.graph.nodes.forEach(function(node) {
-            this.computeOutputRecursive(node, this.gndNode, inputVals);
-            for(let ii = 0; ii < this.graph.nodes.length; ii++) {
-                for(let jj = 0; jj < this.graph.nodes.length; jj++) {
-                    if(this.nodeNodeMap[ii][jj] === null) {
-                        this.nodeNodeMap[ii][jj] = undefined;
-                    }
-                }
-            }
-        }.bind(this));
-*/
         // Determine the value of the output.
-        if(this.pathExists(this.vddNode, outputNode)) {
-            outputVal = "1";
-        }
-        if(this.pathExists(this.gndNode, outputNode)) {
-            outputVal = outputVal === "Z" ? "0" : "X";
-        }
-
-        // See if an input is directly connected to the output.
-        this.inputNets.some(function(inputNet, ii, arr) {
-            if(inputNet.containsNode(outputNode)) {
-                let inputNum = (arr.length - 1) - ii;
-                /*jslint bitwise: true */
-                let temp = (inputVals >> inputNum) & 1;
-                /*jslint bitwise: false */
-
-                if(directInput === undefined || directInput === temp) {
-                    directInput = temp;
-                } else {
-                    directInput = "X";
-                    return true;
-                }
+        highNodes.some(function(node) {
+            if(this.pathExists(node, outputNode)) {
+                outputVal = "1";
+                return true;
             }
-        });
+        }.bind(this));
 
-        if(directInput !== undefined && (directInput + "") !== outputVal) {
-            outputVal = outputVal === "Z" ? directInput : "X";
-        }
+        lowNodes.some(function(node) {
+            if(this.pathExists(node, outputNode)) {
+                outputVal = outputVal === "Z" ? "0" : "X";
+                return true;
+            }
+        }.bind(this));
 
         this.analyses[inputVals] = [...this.nodeNodeMap,];
         this.nodeNodeMap.length = 0;
@@ -652,17 +661,24 @@ class Diagram {
 
         this.resetNetlist();
 
-        // Add output nodes to the this.graph.
+        // Add input nodes to the graph.
+        this.inputNodes.length = 0;
+        this.inputs.forEach(function(input, index) {
+            this.inputNodes[index] = this.graph.addNode(this.layeredGrid.get(input.x, input.y, Diagram.CONTACT), true);
+            this.inputNets[index].addNode(this.inputNodes[index]);
+        }.bind(this));
+
+        // Add output nodes to the graph.
         this.outputNodes.length = 0;
         this.outputs.forEach(function(output, index) {
             this.outputNodes[index] = this.graph.addNode(this.layeredGrid.get(output.x, output.y, Diagram.CONTACT), true);
             this.outputNets[index].addNode(this.outputNodes[index]);
         }.bind(this));
 
-        // Each this.nmos and this.pmos represents a relation between term1 and term2.
+        // Each nmos and pmos represents a relation between term1 and term2.
         // If term1 is not in any of the nets,
         // then create a new net and add term1 to it.
-        // Loop through this.nmos first.
+        // Loop through nmos first.
         // Loop only through "term1" and "term2" for both transistor types.
         this.loopThroughTransistors(function (transistor, _, term) {
             // Skip for the gate terminal.
@@ -688,7 +704,7 @@ class Diagram {
             }
         }.bind(this));
 
-        // Now, loop through this.nmos and this.pmos again and change each transistors terminal values from cells to nets.
+        // Now, loop through nmos and pmos again and change each transistors terminal values from cells to nets.
         // This must be done after the above loop rather than as a part of it, because the loop above will overwrite the nets.
         this.loopThroughTransistors(function (transistor, _, term) {
             let net = this.getNet(transistor[term]);
@@ -707,22 +723,29 @@ class Diagram {
             }
         }.bind(this));
 
-        // Loop through this.pmos/this.nmos and find every this.pmos/this.nmos that shares a net (on term1 or term2).
+        // Loop through pmos/nmos and find every pmos/nmos that shares a net (on term1 or term2).
         this.loopThroughTransistors(function (_, transistor, termA) {
             // Skip for the gate terminal.
             if (termA === "gate") { return; }
 
             let net = transistor.cell[termA];
 
-            // If net is this.vddNet, add an edge to this.vddNode.
+            // If net is vddNet, add an edge to vddNode.
             if (net === this.vddNet) {
                 transistor.addEdge(this.vddNode);
             }
 
-            // If net is this.gndNet, add an edge to this.gndNode.
+            // If net is gndNet, add an edge to gndNode.
             if (net === this.gndNet) {
                 transistor.addEdge(this.gndNode);
             }
+
+            // Same for input.
+            this.inputNets.forEach(function (inputNet, index) {
+                if (net === inputNet) {
+                    transistor.addEdge(this.inputNodes[index]);
+                }
+            }.bind(this));
 
             // Same for output.
             this.outputNets.forEach(function (outputNet, index) {
