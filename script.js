@@ -16,7 +16,6 @@
  * 
  **************************************************************************************************/
 
-/* jshint bitwise: true */
 /* jshint curly: true */
 /* jshint eqeqeq: true */
 /* jshint esversion: 6 */
@@ -95,6 +94,7 @@ class Diagram {
         this.gndCell = {x: 1, y: startHeight - 2,};
         this.vddNode = null;
         this.gndNode = null;
+        this.inputNodes = [];
         this.outputNodes = [];
         this.nmos = new Set();
         this.pmos = new Set();
@@ -102,10 +102,10 @@ class Diagram {
         this.gndNet = new Net("GND", false);
         this.inputNets = [];
         this.outputNets = [];
-        this.triggers = [];
         this.analyses = [];
         this.nmosPullup = false;
         this.pmosPulldown = false;
+        this.idealInputs = true;
 
         for (let ii = 0; ii < this.inputs.length; ii++) {
             this.inputNets.push(new Net(String.fromCharCode(65 + ii), true));
@@ -116,6 +116,154 @@ class Diagram {
 
         this.view = new DiagramView(this, mainCanvas, gridCanvas);
         this.controller = new DiagramController(this, this.view, mainCanvas);
+    }
+
+    // Compact the grid to send to the server.
+    packGrid() {
+        'use strict';
+        let cell;
+        let terminals = this.getTerminals();
+        let byteCodeIndex = 0;
+        let packedArr = [];
+        let bitIndex = 0;
+        let size = this.layeredGrid.width * this.layeredGrid.height * (this.layeredGrid.layers - 1);
+
+        // Reduce each cell in each layer to a single bit.
+        for(let ii = 0; ii < size; ii++) {
+            // Get the cell and make room for the next bit.
+            cell = this.layeredGrid.grid[ii];
+            /*jslint bitwise: true */
+            packedArr[byteCodeIndex] <<= 1;
+            /*jslint bitwise: false */
+
+            // If set, set the LSB.
+            // It's 0 by default.
+            if(!!cell && cell.isSet) {
+                packedArr[byteCodeIndex]++;
+            }
+
+            // Increment the bit index and check if we need to move to the next word.
+            bitIndex++;
+            if(bitIndex > 31) {
+                bitIndex = 0;
+                byteCodeIndex++;
+            }
+        }
+
+        // Pad the last word with zeros to the right.
+        /*jslint bitwise: true */
+        packedArr[packedArr.length - 1] <<= (32 - bitIndex);
+        /*jslint bitwise: false */
+        
+        // Add the X and Y coordinates of each terminal.
+        for(let ii = terminals.length - 1; ii >= 0; ii--) {
+            packedArr.unshift(terminals[ii].y);
+            packedArr.unshift(terminals[ii].x);
+        }
+        // Add the count of outputs, inputs, and width/height info.
+        packedArr.unshift(this.outputs.length);
+        packedArr.unshift(this.inputs.length);
+        packedArr.unshift(this.layeredGrid.width);
+        packedArr.unshift(this.layeredGrid.height);
+        // Version number for this format.
+        packedArr.unshift(1);
+        return packedArr;
+    }
+
+    unpackGrid(packedArr) {
+        'use strict';
+        let word, bit, coords;
+        let offset = 5 +                                    // version, width, height, #in, #out
+                     2 * (packedArr[3] + packedArr[4] + 2); // X and Y for each IN,OUT,VDD,GND
+
+        this.layeredGrid.resize(packedArr[1], packedArr[2]);
+        
+        while(this.inputs.length > packedArr[3]) {
+            this.controller.removeTerminal();
+        }
+        while(this.outputs.length > packedArr[4]) {
+            this.controller.removeTerminal(true);
+        }
+            
+        while(this.inputs.length < packedArr[3]) {
+            this.controller.addTerminal();
+        }
+        while(this.outputs.length < packedArr[4]) {
+            this.controller.addTerminal(true);
+        }
+        
+        this.vddCell.x = packedArr[5];
+        this.vddCell.y = packedArr[6];
+        this.gndCell.x = packedArr[7];
+        this.gndCell.y = packedArr[8];
+        
+        for(let ii = 0; ii < packedArr[3]; ii++) {
+            this.inputs[ii].x = packedArr[2*ii +  9];
+            this.inputs[ii].y = packedArr[2*ii + 10];
+        }
+        
+        for(let ii = 0; ii < packedArr[4]; ii++) {
+            this.outputs[ii].x = packedArr[2*(ii + packedArr[3]) +  9];
+            this.outputs[ii].y = packedArr[2*(ii + packedArr[3]) + 10];
+        }
+        
+        for(let ii = 0; ii < 6*(packedArr[1] * packedArr[2]); ii++) {
+            word = Math.floor(ii / 32);
+            bit = 31 - (ii % 32);
+                    coords = this.layeredGrid.convertToCoordinates(ii);
+            
+            /*jslint bitwise: true */
+            if(!!((packedArr[offset + word] >> bit) & 1)) {
+            /*jslint bitwise: false */
+                    this.layeredGrid.grid[ii] = {
+                        isSet: true,
+                        x: coords.x,
+                        y: coords.y,
+                        layer: coords.layer,
+                    };
+            }
+            else {
+                delete this.layeredGrid.grid[ii];
+            }
+        }
+    }
+
+    // Sends a compacted version of the grid and terminal coordinates to the server.
+    save() {
+        'use strict';
+        let packedArr = this.packGrid();
+        let xhr = new XMLHttpRequest();
+
+        // Send packedArr as JSON.
+        xhr.open('POST', '/api/v1/save', true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onload = function() {
+            if (this.status === 200) {
+                console.log("Saved!");
+            } else {
+                console.log("Error saving!");
+            }
+        };
+        xhr.send(JSON.stringify(packedArr));
+    }
+
+    // Loads a grid from the server.
+    load() {
+        'use strict';
+        // Get the grid by sending a POST to /api/load_v1.
+        let xhr = new XMLHttpRequest();
+        xhr.open('POST', '/api/v1/load', true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onload = function() {
+            // Just print the response.
+            if (this.status === 200) {
+                console.log("Loaded!");
+            } else {
+                console.log("Error loading!");
+            }
+            diagram.unpackGrid(JSON.parse(xhr.responseText));
+        };
+        xhr.send();
     }
 
     // Helps with garbage collection
@@ -154,7 +302,7 @@ class Diagram {
         return this.nodeNodeMap[this.graph.getIndexByNode(node1)][this.graph.getIndexByNode(node2)];
     }
 
-   mapNodes(node1, node2, isPath, inputVals) {
+    mapNodes(node1, node2, isPath) {
         'use strict';
         let currentMapping = this.pathExists(node1, node2);
 
@@ -185,69 +333,55 @@ class Diagram {
         for (let ii = 0; ii < this.nodeNodeMap.length; ii++) {
             syncEdges(ii, node2, node1);
         }
+    }
 
-        if(isPath !== undefined) {
-            this.executeTriggers(node1, node2, inputVals);
+    evaluateInput(node, inputVals) {
+        let evalInput;
+        let inputNum = this.inputNodes.indexOf(node);
+
+        inputNum = this.inputNodes.length - 1 - inputNum;
+
+        /*jslint bitwise: true */
+        evalInput = !!((inputVals >> inputNum) & 1);
+        /*jslint bitwise: false */
+
+        if(this.idealInputs && evalInput) {
+            return this.vddNode;
+        } else if(this.idealInputs) {
+            return this.gndNode;
+        } else {
+            return evalInput;
         }
     }
 
-    executeTriggers(node, targetNode, inputVals) {
-        'use strict';
-        let triggerList = this.triggers[this.graph.getIndexByNode(node)];
-        if (triggerList === undefined) { return; }
-        triggerList = triggerList[this.graph.getIndexByNode(targetNode)];
-        if (triggerList === undefined) { return; }
-        for (let ii = 0; ii < triggerList.length; ii++) {
-            let pathEval = this.pathExists(triggerList[ii].node, triggerList[ii].targetNode);
-            if(pathEval === undefined || pathEval === null) {
-                this.mapNodes(node, targetNode, undefined, inputVals);
-                this.computeOutputRecursive(triggerList[ii].node, triggerList[ii].targetNode, inputVals);
-            }
-        }
-    }
-
-    registerTrigger(triggerNode1, triggerNode2, callNode1, callNode2) {
-        'use strict';
-        let triggerIndex1 = this.graph.getIndexByNode(triggerNode1);
-        let triggerIndex2 = this.graph.getIndexByNode(triggerNode2);
-
-        if(this.triggers[triggerIndex1] === undefined) {
-            this.triggers[triggerIndex1] = [];
-        }
-        if(this.triggers[triggerIndex2] === undefined) {
-            this.triggers[triggerIndex2] = [];
-        }
-        if(this.triggers[triggerIndex1][triggerIndex2] === undefined) {
-            this.triggers[triggerIndex1][triggerIndex2] = [];
-            this.triggers[triggerIndex2][triggerIndex1] = [];
-        }
-        this.triggers[triggerIndex1][triggerIndex2].push({node: callNode1, targetNode: callNode2,});
-        this.triggers[triggerIndex2][triggerIndex1].push({node: callNode1, targetNode: callNode2,});
-    }
-
+    // Recursively computes the output of a node.
+    // Assumption: targetNode is NOT a transistor.
     computeOutputRecursive(node, targetNode, inputVals) {
         'use strict';
         let hasPath;
-        let hasNullPath;
-        let pathFound;
+        let hasNullPath = false;
+        let pathFound = false;
+        let inputNum;
 
-        // We found it?
-        if (node === targetNode) {
-            return true;
+        // In case of ideal inputs, an input 0 is GND, and 1 is VDD.
+        inputNum = this.inputNodes.indexOf(node);
+        if(inputNum !== -1) {
+            if(this.evaluateInput(node, inputVals) === targetNode) {
+                this.mapNodes(node, targetNode, true);
+            }
         }
 
         hasPath = this.pathExists(node, targetNode);
+
         // Prevent too much recursion.
-        // If this is already being checked, the path will be null.
-        if (hasPath === null) {
-            return null;
-        } else if (hasPath !== undefined) {
+        // This will be either true, false, or null if it has been/is being checked.
+        if (hasPath !== undefined) {
         // Avoid infinite loops.
             return hasPath;
         }
 
         // Initialize to null.
-        this.mapNodes(node, targetNode, null, inputVals);
+        this.mapNodes(node, targetNode, null);
 
         // Only proceed if the input is activated.
         // Ignore in case of output or supply, since these don't have
@@ -259,53 +393,51 @@ class Diagram {
                     if(node === otherNode) {
                         return;
                     }
-                    this.mapNodes(node, otherNode, false, inputVals);
+                    this.mapNodes(node, otherNode, false);
                 }.bind(this));
                 return false;
             } else if (evalResult === null) {
-                this.registerTrigger(node, this.vddNode, node, targetNode);
-                this.registerTrigger(node, this.gndNode, node, targetNode);
-                this.mapNodes(node, targetNode, undefined, inputVals);
+                this.mapNodes(node, targetNode, undefined);
                 return null;
             }
         }
 
         // Recurse on all edges.
-        hasNullPath = false;
-        pathFound = false;
-        /*jshint -W093 */
         node.edges.some(function(edge) {
             let otherNode = edge.getOtherNode(node);
             let hasPath = this.pathExists(otherNode, targetNode);
             if (hasPath) {
-                this.mapNodes(node, targetNode, true, inputVals);
-                this.mapNodes(node, edge.getOtherNode(node), true, inputVals);
+                this.mapNodes(node, targetNode, true);
+                this.mapNodes(node, edge.getOtherNode(node), true);
+                /*jshint -W093 */
                 return pathFound = true;
+                /*jshint +W093 */
             }
             let result = hasPath !== false && this.computeOutputRecursive(otherNode, targetNode, inputVals);
             if (result) {
-                this.mapNodes(node, targetNode, true, inputVals);
-                this.mapNodes(node, edge.getOtherNode(node), true, inputVals);
+                this.mapNodes(node, targetNode, true);
+                this.mapNodes(node, edge.getOtherNode(node), true);
+                /*jshint -W093 */
                 return pathFound = true;
+                /*jshint +W093 */
             }
 
             if(result === null || hasPath === null) {
                 hasNullPath = true;
-                this.registerTrigger(targetNode, edge.getOtherNode(node), node, targetNode);
             }
         }.bind(this));
-        /*jshint +W093 */
 
         if(pathFound) {
             return true;
         } else if(hasNullPath) {
             return null;
         } else {
-            this.mapNodes(node, targetNode, false, inputVals);
+            this.mapNodes(node, targetNode, false);
             return false;
         }
     }
 
+    // Determines whether a transistor gate is active.
     evaluate(node, inputVals) {
         'use strict';
         let gateNet = node.cell.gate;
@@ -346,8 +478,6 @@ class Diagram {
             relevantPathExists = this.computeOutputRecursive(gateNode, relevantNode, inputVals);
             if (relevantPathExists === null) {
                 hasNullPath = true;
-                this.registerTrigger(gateNode, relevantNode, node, this.vddNode);
-                this.registerTrigger(gateNode, relevantNode, node, this.gndNode);
             } else if(relevantPathExists) {
                 return true;
             }
@@ -359,40 +489,27 @@ class Diagram {
         return false;
     }
 
-    reconcileOutput(pOut, nOut, dIn) {
-        'use strict';
-        let out;
-
-        // Reconcile (this.nmos and this.pmos step)
-        if (pOut === "Z") {
-            out = nOut;
-        } else if (nOut === "Z") {
-            out = pOut;
-        } else {
-            out = "X";
-        }
-
-        // Handle direct connection between input and output.
-        if(dIn !== undefined) {
-            if(out === "Z") {
-                out = dIn;
-            }
-            else if(out !== dIn) {
-                out = "X";
-            }
-        }
-        
-        return out;
-    }
-
+    // Computes the output of the selected output for a given set of inputs.
     computeOutput(inputVals, outputNode) {
         'use strict';
-        let pmosOut;
-        let nmosOut;
-        let directInput;
-        this.triggers.length = 0;
+        let outputVal = "Z";
+        let highNodes = [this.vddNode,];
+        let lowNodes  = [this.gndNode,];
 
-        // Get this.pmos output.
+        this.inputNodes.forEach(function(node, index) {
+            let inputNum = this.inputNodes.length - 1 - index;
+            /*jslint bitwise: true */
+            let evalInput = !!((inputVals >> inputNum) & 1);
+            /*jslint bitwise: false */
+
+            if(evalInput) {
+                highNodes.push(node);
+            } else {
+                lowNodes.push(node);
+            }
+        }.bind(this));
+
+        //  Set up the map of connections between nodes.
         if(!!this.analyses[inputVals] && !!this.analyses[inputVals].length) {
             this.nodeNodeMap = [... this.analyses[inputVals],];
         } else {
@@ -401,41 +518,42 @@ class Diagram {
                 this.nodeNodeMap[ii][ii] = true;
             }
         }
-        pmosOut = this.computeOutputRecursive(this.vddNode, outputNode, inputVals) ? 1 : "Z";
 
-        // Get this.nmos output.
-        //this.nodeNodeMap.length = 0;
-        this.graph.nodes.forEach(function(node, ii) {
-            for (let jj = 0; jj < ii; jj++) {
-                if(this.nodeNodeMap[ii][jj] === null) {
-                    this.nodeNodeMap[ii][jj] = this.nodeNodeMap[jj][ii] = undefined;
+        this.graph.nodes.forEach(function(node) {
+            this.computeOutputRecursive(node, outputNode, inputVals);
+
+            for(let ii = 0; ii < this.graph.nodes.length; ii++) {
+                for(let jj = 0; jj < this.graph.nodes.length; jj++) {
+                    if(this.nodeNodeMap[ii][jj] === null) {
+                        this.nodeNodeMap[ii][jj] = undefined;
+                    }
                 }
+            }
+
+            if(this.pathExists(node, outputNode) === undefined) {
+                this.mapNodes(node, outputNode, false);
             }
         }.bind(this));
-      
-        this.triggers.length = 0;
-        nmosOut = this.computeOutputRecursive(this.gndNode, outputNode, inputVals) ? 0 : "Z";
 
-        // Finally, see if an input is directly connected to the output.
-        for (let ii = 0; ii < this.inputNets.length; ii++) {
-            if(this.inputNets[ii].containsNode(outputNode)) {
-                let inputNum = (this.inputs.length - 1) - ii;
-                /*jslint bitwise: true */
-                let temp = (inputVals >> inputNum) & 1;
-                /*jslint bitwise: false */
-
-                if(directInput === undefined || directInput === temp) {
-                    directInput = temp;
-                } else {
-                    directInput = "X";
-                }
+        // Determine the value of the output.
+        highNodes.some(function(node) {
+            if(this.pathExists(node, outputNode)) {
+                outputVal = "1";
+                return true;
             }
-        }
+        }.bind(this));
+
+        lowNodes.some(function(node) {
+            if(this.pathExists(node, outputNode)) {
+                outputVal = outputVal === "Z" ? "0" : "X";
+                return true;
+            }
+        }.bind(this));
 
         this.analyses[inputVals] = [...this.nodeNodeMap,];
         this.nodeNodeMap.length = 0;
 
-        return this.reconcileOutput(pmosOut, nmosOut, directInput);
+        return outputVal;
     }
 
     // Map a function to every transistor terminal.
@@ -543,17 +661,24 @@ class Diagram {
 
         this.resetNetlist();
 
-        // Add output nodes to the this.graph.
+        // Add input nodes to the graph.
+        this.inputNodes.length = 0;
+        this.inputs.forEach(function(input, index) {
+            this.inputNodes[index] = this.graph.addNode(this.layeredGrid.get(input.x, input.y, Diagram.CONTACT), true);
+            this.inputNets[index].addNode(this.inputNodes[index]);
+        }.bind(this));
+
+        // Add output nodes to the graph.
         this.outputNodes.length = 0;
         this.outputs.forEach(function(output, index) {
             this.outputNodes[index] = this.graph.addNode(this.layeredGrid.get(output.x, output.y, Diagram.CONTACT), true);
             this.outputNets[index].addNode(this.outputNodes[index]);
         }.bind(this));
 
-        // Each this.nmos and this.pmos represents a relation between term1 and term2.
+        // Each nmos and pmos represents a relation between term1 and term2.
         // If term1 is not in any of the nets,
         // then create a new net and add term1 to it.
-        // Loop through this.nmos first.
+        // Loop through nmos first.
         // Loop only through "term1" and "term2" for both transistor types.
         this.loopThroughTransistors(function (transistor, _, term) {
             // Skip for the gate terminal.
@@ -579,7 +704,7 @@ class Diagram {
             }
         }.bind(this));
 
-        // Now, loop through this.nmos and this.pmos again and change each transistors terminal values from cells to nets.
+        // Now, loop through nmos and pmos again and change each transistors terminal values from cells to nets.
         // This must be done after the above loop rather than as a part of it, because the loop above will overwrite the nets.
         this.loopThroughTransistors(function (transistor, _, term) {
             let net = this.getNet(transistor[term]);
@@ -598,22 +723,29 @@ class Diagram {
             }
         }.bind(this));
 
-        // Loop through this.pmos/this.nmos and find every this.pmos/this.nmos that shares a net (on term1 or term2).
+        // Loop through pmos/nmos and find every pmos/nmos that shares a net (on term1 or term2).
         this.loopThroughTransistors(function (_, transistor, termA) {
             // Skip for the gate terminal.
             if (termA === "gate") { return; }
 
             let net = transistor.cell[termA];
 
-            // If net is this.vddNet, add an edge to this.vddNode.
+            // If net is vddNet, add an edge to vddNode.
             if (net === this.vddNet) {
                 transistor.addEdge(this.vddNode);
             }
 
-            // If net is this.gndNet, add an edge to this.gndNode.
+            // If net is gndNet, add an edge to gndNode.
             if (net === this.gndNet) {
                 transistor.addEdge(this.gndNode);
             }
+
+            // Same for input.
+            this.inputNets.forEach(function (inputNet, index) {
+                if (net === inputNet) {
+                    transistor.addEdge(this.inputNodes[index]);
+                }
+            }.bind(this));
 
             // Same for output.
             this.outputNets.forEach(function (outputNet, index) {
