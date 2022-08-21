@@ -5,10 +5,9 @@
 * Development: [Github.io](https://nickoveracker.github.io/StickDiagrammer)
 
 ## Legal Stuff
-* All rights are reserved by Nick Overacker.
-* Free for (personal ∧ non-professional ∧ non-commercial) use.
-* For (professional ⋁ commercial ⋁ institutional) use, please contact: [nick.overacker@okstate.edu](mailto:nick.overacker@okstate.edu)
-* A proper source-available or open-source license will be added at some point.
+* Copyright Nick Overacker & Miho Kobayashi.
+* This code is offered under the [PolyForm Strict License 1.0.0](https://polyformproject.org/licenses/strict/1.0.0/), which permits users to use this code for noncommercial purposes but reserves most right for the copyright holders.
+* For uses not permitted under the license, please contact: [nick.overacker@okstate.edu](mailto:nick.overacker@okstate.edu)
 
 ## Dogma of Development
 * Everything we do will be excellent.
