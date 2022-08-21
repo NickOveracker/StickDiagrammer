@@ -1,10 +1,15 @@
+/**********************************************************************************************************************
+ * Legal Stuff:
+ * 
+ *********************************************************************************************************************/
+
 /**************************************************************************************************
  * 
  * ## Legal Stuff
- * All rights are reserved by Nick Overacker.
- *
- * Free for AND(personal, non-professional, non-commercial) use.
- * For OR(professional, commercial, institutional) use, please contact: nick.overacker@okstate.edu
+ * Copyright Nick Overacker & Miho Kobayashi.
+ * This code is offered under the Strict License 1.0.0 (https://polyformproject.org/licenses/strict/1.0.0/),
+ * which permits users to use this code for noncommercial purposes but reserves most right for the copyright holders.
+ * For uses not permitted under the license, please contact: nick.overacker@okstate.edu
  *
  * ## Stipulations for updates
  *    - All builds must pass JSHint with no warnings (https://jshint.com/)
