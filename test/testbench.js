@@ -1,3 +1,12 @@
+/**********************************************************************************************************************
+ * Legal Stuff:
+ * 
+ * Copyright Nick Overacker & Miho Kobayashi.
+ * This code is offered under the Strict License 1.0.0 (https://polyformproject.org/licenses/strict/1.0.0/),
+ * which permits users to use this code for noncommercial purposes but reserves most right for the copyright holders.
+ * For uses not permitted under the license, please contact: nick.overacker@okstate.edu
+ *********************************************************************************************************************/
+
 /* jshint bitwise: true */
 /* jshint curly: true */
 /* jshint eqeqeq: true */
