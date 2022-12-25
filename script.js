@@ -8,7 +8,7 @@
  * ## Legal Stuff
  * Copyright Nick Overacker & Miho Kobayashi.
  * This code is offered under the Strict License 1.0.0 (https://polyformproject.org/licenses/strict/1.0.0/),
- * which permits users to use this code for noncommercial purposes but reserves most right for the copyright holders.
+ * which permits users to use this code for noncommercial purposes but reserves most rights for the copyright holders.
  * For uses not permitted under the license, please contact: nick.overacker@okstate.edu
  *
  * ## Stipulations for updates
@@ -494,15 +494,20 @@ class Diagram {
         return false;
     }
 
-    // Computes the output of the selected output for a given set of inputs.
+    // Computes the value of a particular output node for a given set of inputs.
+    // Each bit of inputVals is the value (1 or 0) of a single input node (A, B, C, etc).
+    // outputNode is the specific output node (Y, Z, etc) that we want to test.
     computeOutput(inputVals, outputNode) {
         'use strict';
-        let outputVal = "Z";
-        let highNodes = [this.vddNode,];
-        let lowNodes  = [this.gndNode,];
+        let outputVal = "Z";             // Assume that the node is floating at the start.
+        let highNodes = [this.vddNode,]; // Array for all nodes driven HIGH.
+        let lowNodes  = [this.gndNode,]; // Array for all nodes driven LOW.
 
+        // Add input nodes to the highNodes and lowNodes arrays according
+        // to their binary values. (1 = high, 0 = low)
         this.inputNodes.forEach(function(node, index) {
             let inputNum = this.inputNodes.length - 1 - index;
+
             /*jslint bitwise: true */
             let evalInput = !!((inputVals >> inputNum) & 1);
             /*jslint bitwise: false */
@@ -514,19 +519,31 @@ class Diagram {
             }
         }.bind(this));
 
-        //  Set up the map of connections between nodes.
+        //  Initialize the map of connections between nodes.
         if(!!this.analyses[inputVals] && !!this.analyses[inputVals].length) {
+            // This condition will only occur if this function is called
+            // more than once with the same arguments without calling clearAnalyses().
+            // It is impossible in normal use.
             this.nodeNodeMap = [... this.analyses[inputVals],];
+            console.error("Analyses were not cleared before calling computeOutput().");
         } else {
+            // Expected case:
+            // No nodal analysis has been done for outputNode for this set of inputVals.
+            // Mark each node as connected to itself.
             for (let ii = 0; ii < this.graph.nodes.length; ii++) {
                 this.nodeNodeMap[ii] = [];
                 this.nodeNodeMap[ii][ii] = true;
             }
         }
 
+        // Test each node for a path to outputNode
         this.graph.nodes.forEach(function(node) {
+            // Recursive over every possible path from the test node to outputNode.
             this.computeOutputRecursive(node, outputNode, inputVals);
 
+            // null paths are inconclusive; they mean that the recursion
+            // concluded before these paths were proven or disproven.
+            // Revert them to undefined for the next loop iteration.
             for(let ii = 0; ii < this.graph.nodes.length; ii++) {
                 for(let jj = 0; jj < this.graph.nodes.length; jj++) {
                     if(this.nodeNodeMap[ii][jj] === null) {
@@ -535,6 +552,8 @@ class Diagram {
                 }
             }
 
+            // Finally, if we have not found a connection between
+            // the test node and outputNode, there *is* no connection.
             if(this.pathExists(node, outputNode) === undefined) {
                 this.mapNodes(node, outputNode, false);
             }
@@ -543,6 +562,11 @@ class Diagram {
         // Determine the value of the output.
         highNodes.some(function(node) {
             if(this.pathExists(node, outputNode)) {
+                // Path is found from HIGH to outputNode,
+                // so we assign the output value to 1.
+                //
+                // This may not be the final value;
+                // see the lowNodes loop below.
                 outputVal = "1";
                 return true;
             }
@@ -550,14 +574,31 @@ class Diagram {
 
         lowNodes.some(function(node) {
             if(this.pathExists(node, outputNode)) {
+                // Path is found from LOW to outputNode.
+                // 
+                // If the current outputVal is "Z", that means
+                // no path was found from HIGH to outputNode,
+                // so there is no short from HIGH to LOW in this node.
+                // In this case, assign the output value to 0.
+                //
+                // If there IS a path from high to outputNode,
+                // then the node is being driven both HIGH and LOW.
+                // In this case, assign the output value to "X".
                 outputVal = outputVal === "Z" ? "0" : "X";
                 return true;
             }
         }.bind(this));
 
+        // Save all the results of the analysis for this combination
+        // of input values and output node so that we can highlight
+        // all connected nodes.
         this.analyses[inputVals] = [...this.nodeNodeMap,];
+
+        // Reset the node-node map so that it will be ready for
+        // the next time this function is called.
         this.nodeNodeMap.length = 0;
 
+        // Return 1, 0, "Z", or "X".
         return outputVal;
     }
 
