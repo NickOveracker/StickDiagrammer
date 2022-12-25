@@ -340,27 +340,41 @@ class Diagram {
         }
     }
 
+    // Evaluate the value of an input node.
+    // For ideal inputs, assume 0 = GND and 1 = VDD.
+    // Non-ideal inputs are not enabled for the current build.
     evaluateInput(node, inputVals) {
         let evalInput;
         let inputNum = this.inputNodes.indexOf(node);
 
+        // This becomes the shift amount
+        // Lower number inputs are actually in the
+        // most significant bits.
         inputNum = this.inputNodes.length - 1 - inputNum;
 
         /*jslint bitwise: true */
         evalInput = !!((inputVals >> inputNum) & 1);
         /*jslint bitwise: false */
-
+        
         if(this.idealInputs && evalInput) {
-            return this.vddNode;
+            return this.vddNode; // Ideal input === 1
         } else if(this.idealInputs) {
-            return this.gndNode;
+            return this.gndNode; // Ideal input === 0
         } else {
+            // Not really sure at this point how to handle this case.
+            // Fortunately, we don't have to in the current build.
             return evalInput;
         }
     }
 
-    // Recursively computes the output of a node.
+    // Recursively searches for a path from node to targetNode
+    // given a particular set of inputs.
+    //
     // Assumption: targetNode is NOT a transistor.
+    // This holds true because targetNode is always either
+    // and output node, the GND terminal, or the VDD terminal.
+    // NONE of these can be transistors because all of them
+    // are implemented as contacts, which destroy transistors.
     computeOutputRecursive(node, targetNode, inputVals) {
         'use strict';
         let hasPath;
@@ -368,32 +382,44 @@ class Diagram {
         let pathFound = false;
         let inputNum;
 
-        // In case of ideal inputs, an input 0 is GND, and 1 is VDD.
+        // Is the test node an input?
         inputNum = this.inputNodes.indexOf(node);
         if(inputNum !== -1) {
+            // Test node is an input.
+            // Is it also the same node as the targetNode?
             if(this.evaluateInput(node, inputVals) === targetNode) {
+                // Test node is an input and exactly the same node as the targetNode.
+                // We will not recurse in this case; we've found the path.
                 this.mapNodes(node, targetNode, true);
             }
         }
 
+        // Have we already found a path?
+        // (Could have been found in above input node test
+        // or in a previous recursion.)
         hasPath = this.pathExists(node, targetNode);
 
-        // Prevent too much recursion.
+        // Avoid infinite loops.
         // This will be either true, false, or null if it has been/is being checked.
         if (hasPath !== undefined) {
-        // Avoid infinite loops.
-            return hasPath;
+            return hasPath; // true, false, or null
         }
 
         // Initialize to null.
+        // This marks the node as currently being checked
+        // so that we won't recurse back into it.
         this.mapNodes(node, targetNode, null);
 
-        // Only proceed if the input is activated.
-        // Ignore in case of output or supply, since these don't have
-        // gates to evaluate. Simply arriving at them means they are active.
+        // If the test node is a transistor,
+        // only traverse if the gate is active.
+        // If it's inactive, exit this recursion.
         if (node.isTransistor()) {
+            // true for active, false for inactive.
             let evalResult = this.evaluate(node, inputVals);
+
             if (evalResult === false) {
+                // Inactive: Mark this transistor node as disconnected
+                //           from all nodes except for itself.
                 this.graph.nodes.forEach(function(otherNode) {
                     if(node === otherNode) {
                         return;
@@ -401,16 +427,25 @@ class Diagram {
                     this.mapNodes(node, otherNode, false);
                 }.bind(this));
                 return false;
+
             } else if (evalResult === null) {
+                // Unknown: This occurs when at least one tested path
+                //          was aborted due to a node already being
+                //          under investigation, and no connection was
+                //          found on any other path.
+                //
+                // This will be returned to later if it isn't an island.
                 this.mapNodes(node, targetNode, undefined);
                 return null;
             }
         }
 
-        // Recurse on all edges.
+        // Recurse on all node edges (or until a path is found).
         node.edges.some(function(edge) {
             let otherNode = edge.getOtherNode(node);
             let hasPath = this.pathExists(otherNode, targetNode);
+
+            // Easy case: We have already found a path from this otherNode.
             if (hasPath) {
                 this.mapNodes(node, targetNode, true);
                 this.mapNodes(node, edge.getOtherNode(node), true);
@@ -418,7 +453,11 @@ class Diagram {
                 return pathFound = true;
                 /*jshint +W093 */
             }
+            
+            // Recursive case: We do not yet know if there is a path from otherNode.
             let result = hasPath !== false && this.computeOutputRecursive(otherNode, targetNode, inputVals);
+
+            // Path found from otherNode?
             if (result) {
                 this.mapNodes(node, targetNode, true);
                 this.mapNodes(node, edge.getOtherNode(node), true);
@@ -427,18 +466,21 @@ class Diagram {
                 /*jshint +W093 */
             }
 
+            // Null outcome means that we ran into a node that is
+            // already being investigated and had to abort.
+            // It will be returned to later.
             if(result === null || hasPath === null) {
                 hasNullPath = true;
             }
         }.bind(this));
 
         if(pathFound) {
-            return true;
+            return true; // Done
         } else if(hasNullPath) {
-            return null;
+            return null; // Reporting back that a node is already under investigation.
         } else {
             this.mapNodes(node, targetNode, false);
-            return false;
+            return false; // Done
         }
     }
 
