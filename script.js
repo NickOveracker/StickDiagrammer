@@ -371,13 +371,18 @@ class Diagram {
         evalInput = !!((inputVals >> inputNum) & 1);
         /*jslint bitwise: false */
         
+        // Ideal input === 1
         if(this.idealInputs && evalInput) {
-            return this.vddNode; // Ideal input === 1
-        } else if(this.idealInputs) {
-            return this.gndNode; // Ideal input === 0
-        } else {
-            // Not really sure at this point how to handle this case.
-            // Fortunately, we don't have to in the current build.
+            return this.vddNode;
+        }
+        // Ideal input === 0
+        else if(this.idealInputs) {
+            return this.gndNode; 
+        }
+        // Non-ideal input.
+        // Not really sure at this point how to handle this case.
+        // Fortunately, we don't have to in the current build.
+        else {
             return evalInput;
         }
     }
@@ -430,7 +435,7 @@ class Diagram {
         // If it's inactive, exit this recursion.
         if (node.isTransistor()) {
             // true for active, false for inactive.
-            let evalResult = this.evaluate(node, inputVals);
+            let evalResult = this.gateIsActive(node, inputVals);
 
             if (evalResult === false) {
                 // Inactive: Mark this transistor node as disconnected
@@ -509,7 +514,7 @@ class Diagram {
     // the function returns true.
     //
     // Otherwise, it returns false.
-    evaluate(node, inputVals) {
+    gateIsActive(node, inputVals) {
         'use strict';
         let gateNet = node.cell.gate;
         let gateNodeIterator;
@@ -686,7 +691,7 @@ class Diagram {
     }
 
     // Map a function to every transistor terminal.
-    loopThroughTransistors(funct) {
+    forEachTransistor(funct) {
         'use strict';
         let terms = ["term1", "term2", "gate", ];
         let transistorLists = [this.nmos, this.pmos, ];
@@ -809,7 +814,7 @@ class Diagram {
         // then create a new net and add term1 to it.
         // Loop through nmos first.
         // Loop only through "term1" and "term2" for both transistor types.
-        this.loopThroughTransistors(function (transistor, _, term) {
+        this.forEachTransistor(function (transistor, _, term) {
             // Skip for the gate terminal.
             if (term === "gate") { return; }
 
@@ -835,7 +840,7 @@ class Diagram {
 
         // Now, loop through nmos and pmos again and change each transistors terminal values from cells to nets.
         // This must be done after the above loop rather than as a part of it, because the loop above will overwrite the nets.
-        this.loopThroughTransistors(function (transistor, _, term) {
+        this.forEachTransistor(function (transistor, _, term) {
             let net = this.getNet(transistor[term]);
 
             if (net === null) {
@@ -853,7 +858,7 @@ class Diagram {
         }.bind(this));
 
         // Loop through pmos/nmos and find every pmos/nmos that shares a net (on term1 or term2).
-        this.loopThroughTransistors(function (_, transistor, termA) {
+        this.forEachTransistor(function (_, transistor, termA) {
             // Skip for the gate terminal.
             if (termA === "gate") { return; }
 
@@ -884,7 +889,7 @@ class Diagram {
             }.bind(this));
 
             // Loop through iterator2 to find all other transistors that share a net.
-            this.loopThroughTransistors(function (_, transistor2, termB) {
+            this.forEachTransistor(function (_, transistor2, termB) {
                 // Skip for the gate terminal or self-comparison.
                 if (termB === "gate" || transistor === transistor2) { return; }
 
