@@ -609,9 +609,9 @@ class Diagram {
 
         //  Initialize the map of connections between nodes.
         if(!!this.analyses[inputVals] && !!this.analyses[inputVals].length) {
-            // This condition will only occur if this function is called
+            // This condition occurs when this function is called
             // more than once with the same arguments without calling clearAnalyses().
-            // It is impossible in normal use.
+            // I.e., this is for the case of multiple outputs.
             this.nodeNodeMap = [... this.analyses[inputVals],];
             console.error("Analyses were not cleared before calling computeOutput().");
         } else {
@@ -946,9 +946,8 @@ class Diagram {
             let nodeIterator1 = net1.nodes.values();
             let nodeIterator2 = net2.nodes.values();
 
-            // If net1 is an input net, we need to reverse the order of the nodes.
-            // This is because there are no nodes in input nets to begin with.
-            // Loop through this.inputNets and find the net1.
+            // TODO: Delete
+            /* This is no longer needed now that input nets have nodes.
             this.inputNets.some(function (net) {
                 if (net === net1) {
                     let temp = nodeIterator1;
@@ -960,8 +959,10 @@ class Diagram {
                     return true;
                 }
             });
+            */
 
             // Loop through net1's nodes.
+            // Outer loop - this is why it had to be swapped with net2 if it was an input.
             for (let node1 = nodeIterator1.next(); !node1.done; node1 = nodeIterator1.next()) {
                 net2.addNode(node1.value);
 
@@ -972,6 +973,7 @@ class Diagram {
                 }
             }
         }.bind(this);
+
         // Loop through every net.
         for (let ii = 0; ii < this.netlist.length; ii++) {
             // Loop through every net again.
