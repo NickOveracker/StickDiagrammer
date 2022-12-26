@@ -307,23 +307,38 @@ class Diagram {
         return this.nodeNodeMap[this.graph.getIndexByNode(node1)][this.graph.getIndexByNode(node2)];
     }
 
+    // This function updates the mappings between nodes in the graph to reflect whether a path exists between them.
+    // If a path exists, it is marked as true; if it does not exist, it is marked as false.
+    // If a path has not yet been determined, it is marked as null.
+    // The mappings are updated for both directions (node1 to node2 and node2 to node1).
+    // Additionally, if a path is found or ruled out between node1 and node2, the mappings for all other nodes
+    // connected to node1 or node2 are updated accordingly.
     mapNodes(node1, node2, isPath) {
         'use strict';
         let currentMapping = this.pathExists(node1, node2);
 
+        // If there is a mapping, do nothing and return
         if (currentMapping !== undefined && currentMapping !== null) {
             return;
         }
 
+        // Set the mappings (both directions) between node1 and node2 to isPath
         this.nodeNodeMap[this.graph.getIndexByNode(node1)][this.graph.getIndexByNode(node2)] = isPath;
         this.nodeNodeMap[this.graph.getIndexByNode(node2)][this.graph.getIndexByNode(node1)] = isPath;
 
+        // If isPath is null, return.
+        // This just means that the current mapping is under investigation,
+        // and a path has neither been found nor ruled out.
         if (isPath === null) { return; }
 
+        // Create a function to sync edges between nodes
         let syncEdges = function(ii, node1, node2) {
+            // If there is a path between ii and node1, set the path between ii and node2 to isPath
             if (this.nodeNodeMap[ii][this.graph.getIndexByNode(node1)] === true) {
                 this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] = isPath;
                 this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = isPath;
+            // If there is not a path between ii and node1 and isPath is true, set the path between ii and node2 to false
+            // (I.e., any path not connected to node1 is not connected to node2 if node1 and node2 are connected.)
             } else if (isPath && (this.nodeNodeMap[ii][this.graph.getIndexByNode(node1)] === false)) {
                 this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] = false;
                 this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = false;
@@ -334,7 +349,7 @@ class Diagram {
         for (let ii = 0; ii < this.nodeNodeMap.length; ii++) {
             syncEdges(ii, node1, node2);
         }
-        // Now do the inverse.
+        // Now do the reverse.
         for (let ii = 0; ii < this.nodeNodeMap.length; ii++) {
             syncEdges(ii, node2, node1);
         }
@@ -484,19 +499,32 @@ class Diagram {
         }
     }
 
-    // Determines whether a transistor gate is active.
+    // This function determines whether a transistor gate is active by evaluating 
+    // the paths between the gate's nodes and either the ground node or the power node.
+    //
+    // If any of the paths are still under investigation (marked as null) at the end
+    // of the evaluation, the function returns null.
+    //
+    // Otherwise, if any path between a gate node and the relevant power or ground node exists,
+    // the function returns true.
+    //
+    // Otherwise, it returns false.
     evaluate(node, inputVals) {
         'use strict';
         let gateNet = node.cell.gate;
         let gateNodeIterator;
         let hasNullPath;
 
+        // If the gate is an input, the gate's state depends on the input value.
         if (gateNet.isInput) {
             /*jslint bitwise: true */
             let inputNum = (this.inputs.length - 1) - (node.getName().charCodeAt(0) - 65);
 
-            // Pass-through positive for NMOS.
+            // Evaluate the relevant input bit as a boolean.
             let evalInput = !!((inputVals >> inputNum) & 1);
+
+            // Pass-through positive for NMOS.
+            // Invert for PMOS.
             return !(node.isNmos ^ evalInput);
             /*jslint bitwise: false */
         }
@@ -505,34 +533,47 @@ class Diagram {
         gateNodeIterator = gateNet.nodes.values();
         hasNullPath = false;
 
+        // Iterate through the nodes in the same net as the gate.
         for (let gateNode = gateNodeIterator.next(); !gateNode.done; gateNode = gateNodeIterator.next()) {
             gateNode = gateNode.value;
+
+            // Check if there is a known path between the current node and the ground node.
             let gateToGnd = this.pathExists(gateNode, this.gndNode);
+            // Check if there is a known path between the current node and the power node.
             let gateToVdd = this.pathExists(gateNode, this.vddNode);
             let relevantPathExists;
             let relevantNode;
 
+            // If either path is already under investigation, set hasNullPath to true.
             if(gateToGnd === null || gateToVdd === null) {
                 hasNullPath = true;
             }
             
+            // Determine the relevant power or ground node for the current gate type.
             if(node.isPmos) {
                 relevantNode = this.gndNode;
             } else {
                 relevantNode = this.vddNode;
             }
 
+            // Check if there is a path between the current node and the relevant power or ground node.
             relevantPathExists = this.computeOutputRecursive(gateNode, relevantNode, inputVals);
+            // If the path has not yet been determined, set hasNullPath to true
             if (relevantPathExists === null) {
                 hasNullPath = true;
-            } else if(relevantPathExists) {
+            }
+            // If the path exists, return true.
+            else if(relevantPathExists) {
                 return true;
             }
         }
 
+        // If any paths have not yet been determined, return null.
         if(hasNullPath) {
             return null;
         }
+
+        // Otherwise, return false.
         return false;
     }
 
