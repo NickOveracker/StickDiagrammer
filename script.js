@@ -660,7 +660,7 @@ class Diagram {
             // Recursive over every possible path from the test node to outputNode.
             this.computeOutputRecursive(node, outputNode, inputVals);
 
-            if(errorStatus !== null) {
+            if(this.errorStatus !== null) {
                 // Error: Abort
                 return;
             }
@@ -683,7 +683,7 @@ class Diagram {
             }
         }.bind(this));
 
-        if(errorStatus !== null) {
+        if(this.errorStatus !== null) {
             // Error: Abort
             return;
         }
