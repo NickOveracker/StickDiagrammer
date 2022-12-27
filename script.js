@@ -111,6 +111,7 @@ class Diagram {
         this.nmosPullup = false;
         this.pmosPulldown = false;
         this.idealInputs = true;
+        this.errorStatus = null;
 
         for (let ii = 0; ii < this.inputs.length; ii++) {
             this.inputNets.push(new Net(String.fromCharCode(65 + ii), true));
@@ -271,9 +272,11 @@ class Diagram {
         xhr.send();
     }
 
-    // Helps with garbage collection
+    // Clear previous anaysis.
     clearAnalyses() {
         'use strict';
+        this.errorStatus = null;
+
         this.analyses.forEach(analysis => {
             analysis.forEach(row => {
                 row.length = 0;
@@ -437,6 +440,11 @@ class Diagram {
             // true for active, false for inactive.
             let evalResult = this.gateIsActive(node, inputVals);
 
+            if(this.errorStatus !== null) {
+                // Error: Abort.
+                // Errors can only occur at this step.
+                return;
+            }
             if (evalResult === false) {
                 // Inactive: Mark this transistor node as disconnected
                 //           from all nodes except for itself.
@@ -546,11 +554,7 @@ class Diagram {
                         // Unmatched = unresolvable.
                         // Like, SUPER unresolvable.
                         // Crap on the floor and scream.
-                        alert("Unresolvable error:\n" +
-                            "Transistor in row " + node.cell.y + " col " + node.cell.x +
-                            " is driven both high and low by two or more inputs for input vector " +
-                            inputVals.toString(2)
-                        );
+                        this.errorStatus = {x: node.cell.x-1, y: node.cell.y-1, input: inputvals};
                     }
                 }
             }
@@ -641,7 +645,6 @@ class Diagram {
             // more than once with the same arguments without calling clearAnalyses().
             // I.e., this is for the case of multiple outputs.
             this.nodeNodeMap = [... this.analyses[inputVals],];
-            console.error("Analyses were not cleared before calling computeOutput().");
         } else {
             // Expected case:
             // No nodal analysis has been done for outputNode for this set of inputVals.
@@ -656,6 +659,11 @@ class Diagram {
         this.graph.nodes.forEach(function(node) {
             // Recursive over every possible path from the test node to outputNode.
             this.computeOutputRecursive(node, outputNode, inputVals);
+
+            if(errorStatus !== null) {
+                // Error: Abort
+                return;
+            }
 
             // null paths are inconclusive; they mean that the recursion
             // concluded before these paths were proven or disproven.
@@ -674,6 +682,11 @@ class Diagram {
                 this.mapNodes(node, outputNode, false);
             }
         }.bind(this));
+
+        if(errorStatus !== null) {
+            // Error: Abort
+            return;
+        }
 
         // Determine the value of the output.
         highNodes.some(function(node) {
@@ -2525,8 +2538,11 @@ function buildTruthTable() {
         let tableOutputRow = [];
 
         // Compute each output.
-        for (let jj = 0; jj < diagram.outputs.length; jj++) {
+        for (let jj = 0; (diagram.errorStatus === null) && (jj < diagram.outputs.length); jj++) {
             tableOutputRow[jj] = diagram.computeOutput(ii, diagram.outputNodes[jj]);
+        }
+        if(diagram.errorStatus !== null) {
+            return;
         }
 
         outputVals[ii] = tableOutputRow;
