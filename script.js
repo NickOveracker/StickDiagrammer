@@ -522,12 +522,40 @@ class Diagram {
 
         // If the gate is an input, the gate's state depends on the input value.
         if (gateNet.isInput) {
+            let evalInput = undefined;
+
+            // Check all inputs for a direct connection to the gate.
+            // Make sure all connected inputs are the same value.
+            for(let ii = 0; ii < this.inputs.length; ii++) {
+                if(gateNet.containsNode(this.inputNodes[ii])) {
+                    let inputNum = (this.inputs.length - 1) - ii;
+
+                    /*jslint bitwise: true */
+                    // Evaluate the relevant input bit as a boolean.
+                    let tempVal = !!((inputVals >> inputNum) & 1);
+                    /*jslint bitwise: false */
+
+                    // If this is the first connected input found,
+                    // assign its value to the gate.
+                    if(evalInput === undefined) {
+                        evalInput = tempVal;
+                    }
+                    // If this is NOT the first connected input found,
+                    // check to see if it matches prior input values.
+                    else if(evalInput !== tempVal) {
+                        // Unmatched = unresolvable.
+                        // Like, SUPER unresolvable.
+                        // Crap on the floor and scream.
+                        alert("Unresolvable error:\n" +
+                            "Transistor in row " + node.cell.y + " col " + node.cell.x +
+                            " is driven both high and low by two or more inputs for input vector " +
+                            inputVals.toString(2)
+                        );
+                    }
+                }
+            }
+
             /*jslint bitwise: true */
-            let inputNum = (this.inputs.length - 1) - (node.getName().charCodeAt(0) - 65);
-
-            // Evaluate the relevant input bit as a boolean.
-            let evalInput = !!((inputVals >> inputNum) & 1);
-
             // Pass-through positive for NMOS.
             // Invert for PMOS.
             return !(node.isNmos ^ evalInput);
@@ -2326,7 +2354,7 @@ class Node {
         this.cell = cell;
         this.edges = [];
         this.isPmos = !suppressTransistor && diagram.layeredGrid.get(cell.x, cell.y, Diagram.PDIFF).isSet;
-        this.isNmos = !suppressTransistor && diagram.layeredGrid.get(cell.x, cell.y, Diagram.NDIFF).isSet;
+        this.isNmos = !suppressTransistor && diagram.layeredGrid.get(cell.x,cell.y, Diagram.NDIFF).isSet;
     }
 
     // Destructor
@@ -2366,11 +2394,6 @@ class Node {
         if (index > -1) {
             this.edges.splice(index, 1);
         }
-    }
-
-    getName() {
-        'use strict';
-        return this.cell.gate.name;
     }
 }
 
