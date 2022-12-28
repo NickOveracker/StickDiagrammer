@@ -554,7 +554,7 @@ class Diagram {
                         // Unmatched = unresolvable.
                         // Like, SUPER unresolvable.
                         // Crap on the floor and scream.
-                        this.errorStatus = {x: node.cell.x-1, y: node.cell.y-1, input: inputvals};
+                        this.errorStatus = {x: node.cell.x-1, y: node.cell.y-1, input: inputVals};
                     }
                 }
             }
