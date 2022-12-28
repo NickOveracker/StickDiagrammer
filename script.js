@@ -517,35 +517,52 @@ class Diagram {
     gateIsActive(node, inputVals) {
         'use strict';
         let gateNet = node.cell.gate;
-        let gateNodeIterator;
+        let connectedNodeIterator;
         let hasNullPath;
 
         // If the gate is an input, the gate's state depends on the input value.
         if (gateNet.isInput) {
-            /*jslint bitwise: true */
-            let inputNum = (this.inputs.length - 1) - (node.getName().charCodeAt(0) - 65);
+            let inputNum, tempEval, evalInput;
+            let gateNode = this.graph.getNode(gateNet);
 
-            // Evaluate the relevant input bit as a boolean.
-            let evalInput = !!((inputVals >> inputNum) & 1);
+            for(let ii = 0; ii < this.inputs.length; ii++) {
+                if(!gateNode.isConnected(this.inputNodes[ii])) {
+                    continue;
+                }
+
+                inputNum = ii;
+
+                // Evaluate the relevant input bit as a boolean.
+                /*jslint bitwise: true */
+                tempEval = !!((inputVals >> inputNum) & 1);
+                /*jslint bitwise: false */
+
+                if(evalInput === undefined || evalInput === tempEval) {
+                    evalInput = tempEval;
+                } else {
+                    window.errorStatus = "We got one!";
+                }
+            }
 
             // Pass-through positive for NMOS.
             // Invert for PMOS.
+            /*jslint bitwise: true */
             return !(node.isNmos ^ evalInput);
             /*jslint bitwise: false */
         }
 
         // Otherwise, recurse and see if this is active.
-        gateNodeIterator = gateNet.nodes.values();
+        connectedNodeIterator = gateNet.nodes.values();
         hasNullPath = false;
 
         // Iterate through the nodes in the same net as the gate.
-        for (let gateNode = gateNodeIterator.next(); !gateNode.done; gateNode = gateNodeIterator.next()) {
-            gateNode = gateNode.value;
+        for (let connectedNode = connectedNodeIterator.next(); !connectedNode.done; connectedNode = connectedNodeIterator.next()) {
+            connectedNode = connectedNode.value;
 
             // Check if there is a known path between the current node and the ground node.
-            let gateToGnd = this.pathExists(gateNode, this.gndNode);
+            let gateToGnd = this.pathExists(connectedNode, this.gndNode);
             // Check if there is a known path between the current node and the power node.
-            let gateToVdd = this.pathExists(gateNode, this.vddNode);
+            let gateToVdd = this.pathExists(connectedNode, this.vddNode);
             let relevantPathExists;
             let relevantNode;
 
@@ -562,7 +579,7 @@ class Diagram {
             }
 
             // Check if there is a path between the current node and the relevant power or ground node.
-            relevantPathExists = this.computeOutputRecursive(gateNode, relevantNode, inputVals);
+            relevantPathExists = this.computeOutputRecursive(connectedNode, relevantNode, inputVals);
             // If the path has not yet been determined, set hasNullPath to true
             if (relevantPathExists === null) {
                 hasNullPath = true;
