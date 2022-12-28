@@ -111,7 +111,6 @@ class Diagram {
         this.nmosPullup = false;
         this.pmosPulldown = false;
         this.idealInputs = true;
-        this.conflictingInputs = false;
 
         for (let ii = 0; ii < this.inputs.length; ii++) {
             this.inputNets.push(new Net(String.fromCharCode(65 + ii), true));
@@ -518,22 +517,21 @@ class Diagram {
     gateIsActive(node, inputVals) {
         'use strict';
         let gateNet = node.cell.gate;
-        let connectedNodeIterator;
-        let hasNullPath;
+        let connectedNodeIterator, hasNullPath;
 
         // If the gate is an input, the gate's state depends on the input value.
         if (gateNet.isInput) {
-            let inputNum, tempEval, evalInput;
+            let tempEval, evalInput;
             let gateNode = gateNet.nodes.entries().next().value[1];
-            
-            for(let ii = 0; ii < this.inputs.length; ii++) {
-                if(!gateNode.isConnected(this.inputNodes[ii])) {
-                    continue;
+
+            this.inputNodes.forEach(function(node, index) {
+                if(!gateNode.isConnected(node)) {
+                    return;
                 }
 
                 // Evaluate the relevant input bit as a boolean.
                 /*jslint bitwise: true */
-                tempEval = !!((inputVals >> (this.inputs.length - ii - 1)) & 1);
+                tempEval = !!((inputVals >> (this.inputs.length - index - 1)) & 1);
                 /*jslint bitwise: false */
 
                 if(evalInput === undefined || evalInput === tempEval) {
@@ -542,8 +540,8 @@ class Diagram {
                     // Conflict found.
                     this.conflictingInputs = true;
                 }
-            }
-
+            }.bind(this));
+            
             // Pass-through positive for NMOS.
             // Invert for PMOS.
             /*jslint bitwise: true */
@@ -563,8 +561,7 @@ class Diagram {
             let gateToGnd = this.pathExists(connectedNode, this.gndNode);
             // Check if there is a known path between the current node and the power node.
             let gateToVdd = this.pathExists(connectedNode, this.vddNode);
-            let relevantPathExists;
-            let relevantNode;
+            let relevantPathExists, relevantNode;
 
             // If either path is already under investigation, set hasNullPath to true.
             if(gateToGnd === null || gateToVdd === null) {
