@@ -535,7 +535,7 @@ class Diagram {
             // Check all inputs for a direct connection to the gate.
             // Make sure all connected inputs are the same value.
             for(let ii = 0; ii < this.inputs.length; ii++) {
-                if(gateNet.containsNode(this.inputNodes[ii])) {
+                if(pathExists(node, this.inputNodes[ii])) {
                     let inputNum = (this.inputs.length - 1) - ii;
 
                     /*jslint bitwise: true */
@@ -1001,9 +1001,6 @@ class Diagram {
                 }
             });
             */
-
-            // TODO: LOOP THROUGH NODES SOMEWHERE TO SEE IF CONFLICTING INPUTS ARE CONNECTED
-            // only matters for transistors
 
             // Loop through net1's nodes.
             // Outer loop - this is why it had to be swapped with net2 if it was an input.
