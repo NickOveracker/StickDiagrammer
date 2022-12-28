@@ -2544,6 +2544,8 @@ function buildTruthTable() {
 // Table is a 2D array of single character strings.
 function refreshTruthTable(suppressSetNets) {
     'use strict';
+    let error = false;
+
     // Update the diagram.netlist.
     if(!suppressSetNets) {
         diagram.setNets();
@@ -2553,7 +2555,8 @@ function refreshTruthTable(suppressSetNets) {
     for(let ii = 0; ii < diagram.inputNets.length; ii++) {
         let net = diagram.inputNets[ii];
         if(net.isInput && net.hasPoly && net.hasDiff) {
-            alert(":( but also :)");
+            alert("Unresolvable error: A single input must not be connected to both poly and diffusion layers.");
+            error = true;
         }
     }
 
@@ -2563,6 +2566,10 @@ function refreshTruthTable(suppressSetNets) {
     let tableElement = document.getElementById("truth-table");
 
     tableElement.innerHTML = "";
+
+    if(error) {
+        return;
+    }
 
     let header = tableElement.createTHead();
     let headerRow = header.insertRow(0);
