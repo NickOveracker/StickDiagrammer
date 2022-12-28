@@ -2372,7 +2372,6 @@ class Node {
         'use strict';
         return this.cell.gate.name;
     }
-
 }
 
 // Each edge is a connection between two diagram.graph nodes.
@@ -2547,7 +2546,8 @@ function refreshTruthTable(suppressSetNets) {
 
     // If poly ever shares a net with diffusion, we have a problem.
     for(let ii = 0; ii < diagram.inputNets.length; ii++) {
-        if(diagram.inputNets[ii].hasPoly && diagram.inputNets[ii].hasDiff) {
+        let net = diagram.inputNets[ii];
+        if(net.isInput && net.hasPoly && net.hasDiff) {
             alert(":( but also :)");
         }
     }
