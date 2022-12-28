@@ -527,7 +527,9 @@ class Diagram {
 
             for(let ii = 0; ii < this.inputs.length; ii++) {
                 if(!gateNode.isConnected(this.inputNodes[ii])) {
+                    console.log("SKIP!")
                     continue;
+                    console.error("Oh no!")
                 }
 
                 inputNum = ii;
