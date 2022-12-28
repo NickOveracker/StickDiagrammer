@@ -2583,6 +2583,10 @@ function refreshTruthTable(suppressSetNets) {
     // Create a table with the correct number of rows and columns.
     // The first row should be a header.
     let table = buildTruthTable();
+    if(diagram.errorStatus !== null) {
+        // Error: Abort.
+        return;
+    }
     let tableElement = document.getElementById("truth-table");
 
     tableElement.innerHTML = "";
