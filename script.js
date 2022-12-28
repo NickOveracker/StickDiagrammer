@@ -111,6 +111,7 @@ class Diagram {
         this.nmosPullup = false;
         this.pmosPulldown = false;
         this.idealInputs = true;
+        this.conflictingInputs = false;
 
         for (let ii = 0; ii < this.inputs.length; ii++) {
             this.inputNets.push(new Net(String.fromCharCode(65 + ii), true));
@@ -608,6 +609,7 @@ class Diagram {
         let outputVal = "Z";             // Assume that the node is floating at the start.
         let highNodes = [this.vddNode,]; // Array for all nodes driven HIGH.
         let lowNodes  = [this.gndNode,]; // Array for all nodes driven LOW.
+        this.conflictingInputs = false;
 
         // Add input nodes to the highNodes and lowNodes arrays according
         // to their binary values. (1 = high, 0 = low)
@@ -704,7 +706,10 @@ class Diagram {
         this.nodeNodeMap.length = 0;
 
         // Return 1, 0, "Z", or "X".
-        return outputVal;
+        // There is still one unchecked case for "X",
+        // namely when two or more inputs directly drive
+        // a gate with opposite values.
+        return this.conflictingInputs ? "X" : outputVal;
     }
 
     // Map a function to every transistor terminal.
