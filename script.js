@@ -524,6 +524,8 @@ class Diagram {
         if (gateNet.isInput) {
             let inputNum, tempEval, evalInput;
             let gateNode = gateNet.nodes.entries().next().value;
+            window.gatenet = gateNet;
+            window.gatenode = gateNode;
 
             for(let ii = 0; ii < this.inputs.length; ii++) {
                 if(!gateNode.isConnected(this.inputNodes[ii])) {
