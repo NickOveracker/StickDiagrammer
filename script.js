@@ -535,7 +535,7 @@ class Diagram {
             // Check all inputs for a direct connection to the gate.
             // Make sure all connected inputs are the same value.
             for(let ii = 0; ii < this.inputs.length; ii++) {
-                if(pathExists(node, this.inputNodes[ii])) {
+                if(this.pathExists(node, this.inputNodes[ii])) {
                     let inputNum = (this.inputs.length - 1) - ii;
 
                     /*jslint bitwise: true */
