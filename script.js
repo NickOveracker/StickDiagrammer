@@ -111,7 +111,6 @@ class Diagram {
         this.nmosPullup = false;
         this.pmosPulldown = false;
         this.idealInputs = true;
-        this.errorStatus = null;
 
         for (let ii = 0; ii < this.inputs.length; ii++) {
             this.inputNets.push(new Net(String.fromCharCode(65 + ii), true));
@@ -275,8 +274,6 @@ class Diagram {
     // Clear previous anaysis.
     clearAnalyses() {
         'use strict';
-        this.errorStatus = null;
-
         this.analyses.forEach(analysis => {
             analysis.forEach(row => {
                 row.length = 0;
@@ -440,11 +437,6 @@ class Diagram {
             // true for active, false for inactive.
             let evalResult = this.gateIsActive(node, inputVals);
 
-            if(this.errorStatus !== null) {
-                // Error: Abort.
-                // Errors can only occur at this step.
-                return;
-            }
             if (evalResult === false) {
                 // Inactive: Mark this transistor node as disconnected
                 //           from all nodes except for itself.
@@ -530,36 +522,12 @@ class Diagram {
 
         // If the gate is an input, the gate's state depends on the input value.
         if (gateNet.isInput) {
-            let evalInput = undefined;
-
-            // Check all inputs for a direct connection to the gate.
-            // Make sure all connected inputs are the same value.
-            for(let ii = 0; ii < this.inputs.length; ii++) {
-                if(this.pathExists(node, this.inputNodes[ii])) {
-                    let inputNum = (this.inputs.length - 1) - ii;
-
-                    /*jslint bitwise: true */
-                    // Evaluate the relevant input bit as a boolean.
-                    let tempVal = !!((inputVals >> inputNum) & 1);
-                    /*jslint bitwise: false */
-
-                    // If this is the first connected input found,
-                    // assign its value to the gate.
-                    if(evalInput === undefined) {
-                        evalInput = tempVal;
-                    }
-                    // If this is NOT the first connected input found,
-                    // check to see if it matches prior input values.
-                    else if(evalInput !== tempVal) {
-                        // Unmatched = unresolvable.
-                        // Like, SUPER unresolvable.
-                        // Crap on the floor and scream.
-                        this.errorStatus = {x: node.cell.x-1, y: node.cell.y-1, input: inputVals};
-                    }
-                }
-            }
-
             /*jslint bitwise: true */
+            let inputNum = (this.inputs.length - 1) - (node.getName().charCodeAt(0) - 65);
+
+            // Evaluate the relevant input bit as a boolean.
+            let evalInput = !!((inputVals >> inputNum) & 1);
+
             // Pass-through positive for NMOS.
             // Invert for PMOS.
             return !(node.isNmos ^ evalInput);
@@ -660,11 +628,6 @@ class Diagram {
             // Recursive over every possible path from the test node to outputNode.
             this.computeOutputRecursive(node, outputNode, inputVals);
 
-            if(this.errorStatus !== null) {
-                // Error: Abort
-                return;
-            }
-
             // null paths are inconclusive; they mean that the recursion
             // concluded before these paths were proven or disproven.
             // Revert them to undefined for the next loop iteration.
@@ -682,11 +645,6 @@ class Diagram {
                 this.mapNodes(node, outputNode, false);
             }
         }.bind(this));
-
-        if(this.errorStatus !== null) {
-            // Error: Abort
-            return;
-        }
 
         // Determine the value of the output.
         highNodes.some(function(node) {
@@ -1071,6 +1029,7 @@ class Diagram {
 
         // If the layer is Diagram.NDIFF or Diagram.PDIFF and there is also a Diagram.POLY at the same location,
         // add the cell to transistors.
+        // (Except when there is also a contact)
         if (cell.layer === layer && cell.isSet) {
             if (this.layeredGrid.get(cell.x, cell.y, Diagram.POLY).isSet && !this.layeredGrid.get(cell.x, cell.y, Diagram.CONTACT).isSet) {
                 transistorArray.add(cell);
@@ -2455,6 +2414,8 @@ class Net {
         this.cells = new Set();
         this.nodes = new Set();
         this.isInput = isInput;
+        this.hasPoly = false;
+        this.hasDiff = false;
     }
 
     isIdentical(net) {
@@ -2499,6 +2460,8 @@ class Net {
     addCell(cell) {
         'use strict';
         this.cells.add(cell);
+        this.hasPoly = this.hasPoly || cell.layer === Diagram.POLY;
+        this.hasDiff = this.hasDiff || cell.layer === Diagram.NDIFF || cell.layer === Diagram.PDIFF;
     }
 
     containsCell(cell) {
@@ -2538,12 +2501,8 @@ function buildTruthTable() {
         let tableOutputRow = [];
 
         // Compute each output.
-        for (let jj = 0; (diagram.errorStatus === null) && (jj < diagram.outputs.length); jj++) {
+        for (let jj = 0; jj < diagram.outputs.length; jj++) {
             tableOutputRow[jj] = diagram.computeOutput(ii, diagram.outputNodes[jj]);
-        }
-        if(diagram.errorStatus !== null) {
-            console.error(diagram.errorStatus);
-            return;
         }
 
         outputVals[ii] = tableOutputRow;
@@ -2580,13 +2539,16 @@ function refreshTruthTable(suppressSetNets) {
         diagram.setNets();
     }
 
+    // If poly ever shares a net with diffusion, we have a problem.
+    for(ii = 0; ii < diagram.inputNets.length; ii++) {
+        if(diagram.inputNets[ii].hasPoly && diagram.inputNets[ii].hasDiff) {
+            alert(":( but also :)");
+        }
+    }
+
     // Create a table with the correct number of rows and columns.
     // The first row should be a header.
     let table = buildTruthTable();
-    if(diagram.errorStatus !== null) {
-        // Error: Abort.
-        return;
-    }
     let tableElement = document.getElementById("truth-table");
 
     tableElement.innerHTML = "";
