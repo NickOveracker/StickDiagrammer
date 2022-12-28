@@ -540,9 +540,7 @@ class Diagram {
                     evalInput = tempEval;
                 } else {
                     // Conflict found.
-                    // Take note of all conflicting inputs for this
-                    // node so we can go back and determine if it
-                    // directly affects the output.
+                    this.conflictingInputs = true;
                 }
             }
 
