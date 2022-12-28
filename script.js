@@ -2467,7 +2467,7 @@ class Net {
         'use strict';
         this.cells.add(cell);
 
-        if(!this.containsCell(this.layeredGrid.get(cell.x, cell.y, Diagram.CONTACT))) {
+        if(!this.containsCell(this.layeredGrid.get(cell.x, cell.y, Diagram.CONTACT).isSet)) {
             this.hasPoly = this.hasPoly || cell.layer === Diagram.POLY;
             this.hasDiff = this.hasDiff || cell.layer === Diagram.NDIFF || cell.layer === Diagram.PDIFF;
         }
