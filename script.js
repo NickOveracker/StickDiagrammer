@@ -1042,7 +1042,7 @@ class Diagram {
     // Exception for Diagram.CONTACT.
     // Returns true if the cell is a transistor.
     // Side effect: Adds a transistor (if found) to this.nmos or this.pmos.
-    checkTransistor(cell, layer, transistorArray) {
+    checkIfTransistor(cell, layer, transistorArray) {
         'use strict';
 
         // If the layer is Diagram.NDIFF or Diagram.PDIFF and there is also a Diagram.POLY at the same location,
@@ -1050,8 +1050,6 @@ class Diagram {
         // (Except when there is also a contact)
         if (cell.layer === layer && cell.isSet) {
             if (this.layeredGrid.get(cell.x, cell.y, Diagram.POLY).isSet && !this.layeredGrid.get(cell.x, cell.y, Diagram.CONTACT).isSet) {
-                transistorArray.add(cell);
-                this.graph.addNode(cell);
                 // Set the gate to the poly cell.
                 cell.gate = this.layeredGrid.get(cell.x, cell.y, Diagram.POLY);
 
@@ -1069,7 +1067,16 @@ class Diagram {
                 this.setTerminals(cell, cell.x - 1, cell.y, layer);
                 this.setTerminals(cell, cell.x + 1, cell.y, layer);
 
-                return true;
+                // If no term2 is set, then this is not a full transistor.
+                // Undo.
+                if(cell.term2 === undefined) {
+                    cell.term1 = undefined;
+                    cell.gate = undefined;
+                } else {
+                    transistorArray.add(cell);
+                    this.graph.addNode(cell);
+                    return true;
+                }
             }
         }
 
@@ -1116,8 +1123,8 @@ class Diagram {
         }
 
         // Check the cell for a transistor.
-        if (this.checkTransistor(cell, Diagram.NDIFF, this.nmos)) { return; }
-        if (this.checkTransistor(cell, Diagram.PDIFF, this.pmos)) { return; }
+        if (this.checkIfTransistor(cell, Diagram.NDIFF, this.nmos)) { return; }
+        if (this.checkIfTransistor(cell, Diagram.PDIFF, this.pmos)) { return; }
 
         // Add the cell to the net.
         net.addCell(cell);
