@@ -103,8 +103,8 @@ class Diagram {
         this.outputNodes = [];
         this.nmos = new Set();
         this.pmos = new Set();
-        this.vddNet = new Net("VDD", false, this.layeredGrid);
-        this.gndNet = new Net("GND", false, this.layeredGrid);
+        this.vddNet = new Net("VDD", false);
+        this.gndNet = new Net("GND", false);
         this.inputNets = [];
         this.outputNets = [];
         this.analyses = [];
@@ -113,10 +113,10 @@ class Diagram {
         this.idealInputs = true;
 
         for (let ii = 0; ii < this.inputs.length; ii++) {
-            this.inputNets.push(new Net(String.fromCharCode(65 + ii), true, this.layeredGrid));
+            this.inputNets.push(new Net(String.fromCharCode(65 + ii), true));
         }
         for (let ii = 0; ii < this.outputs.length; ii++) {
-            this.outputNets.push(new Net(String.fromCharCode(89 - ii), false, this.layeredGrid));
+            this.outputNets.push(new Net(String.fromCharCode(89 - ii), false));
         }
 
         this.view = new DiagramView(this, mainCanvas, gridCanvas);
@@ -817,7 +817,7 @@ class Diagram {
             // Skip for the gate terminal.
             if (term === "gate") { return; }
 
-            let net = new Net("?", false, this.layeredGrid);
+            let net = new Net("?", false);
 
             // If the transistor's term1/term2 is not in any of the nets,
             // then create a new net and add term1/term2 to it.
@@ -843,7 +843,7 @@ class Diagram {
             let net = this.getNet(transistor[term]);
 
             if (net === null) {
-                net = new Net("?", false, this.layeredGrid);
+                net = new Net("?", false);
                 this.setRecursively(transistor[term], net);
                 this.netlist.push(net);
             }
@@ -1235,7 +1235,7 @@ class DiagramController {
             });
             newTerm = termArr[0];
             this.placeTerminal(newTerm, newTerm, true);
-            netArr.unshift(new Net(name, false, this.layeredGrid));
+            netArr.unshift(new Net(name, false));
         } else {
             termArr = this.diagram.inputs;
             netArr  = this.diagram.inputNets;
@@ -1246,7 +1246,7 @@ class DiagramController {
             });
             newTerm = termArr[termArr.length - 1];
             this.placeTerminal(newTerm, newTerm, true);
-            netArr.push(new Net(name, true, this.layeredGrid));
+            netArr.push(new Net(name, true));
         }
 
         populateTermSelect();
@@ -2413,7 +2413,7 @@ class Edge {
 
 // Set of cells that are electrically connected to one another.
 class Net {
-    constructor(name, isInput, layeredGrid) {
+    constructor(name, isInput) {
         'use strict';
         this.name = name;
         this.cells = new Set();
@@ -2421,7 +2421,6 @@ class Net {
         this.isInput = isInput;
         this.hasPoly = false;
         this.hasDiff = false;
-        this.layeredGrid = layeredGrid;
     }
 
     isIdentical(net) {
@@ -2467,7 +2466,7 @@ class Net {
         'use strict';
         this.cells.add(cell);
 
-        if(!this.layeredGrid.get(cell.x, cell.y, Diagram.CONTACT).isSet) {
+        if(!layeredGrid.get(cell.x, cell.y, Diagram.CONTACT).isSet) {
             this.hasPoly = this.hasPoly || cell.layer === Diagram.POLY;
             this.hasDiff = this.hasDiff || cell.layer === Diagram.NDIFF || cell.layer === Diagram.PDIFF;
         }
