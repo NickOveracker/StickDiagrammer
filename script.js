@@ -2460,6 +2460,8 @@ class Net {
         'use strict';
         this.cells.clear();
         this.nodes.clear();
+        this.hasPoly = false;
+        this.hasDiff = false;
     }
 
     addCell(cell) {
