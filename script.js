@@ -523,27 +523,25 @@ class Diagram {
         // If the gate is an input, the gate's state depends on the input value.
         if (gateNet.isInput) {
             let inputNum, tempEval, evalInput;
-            let gateNode = gateNet.nodes.entries().next().value[0];
-
+            let gateNode = gateNet.nodes.entries().next().value[1];
+            
             for(let ii = 0; ii < this.inputs.length; ii++) {
                 if(!gateNode.isConnected(this.inputNodes[ii])) {
-                    console.log("SKIP!")
                     continue;
-                    console.error("Oh no!")
                 }
 
                 // Evaluate the relevant input bit as a boolean.
                 /*jslint bitwise: true */
-                tempEval = !!((inputVals >> ii) & 1);
+                tempEval = !!((inputVals >> (this.inputs.length - ii - 1)) & 1);
                 /*jslint bitwise: false */
-
-                console.log(`Input: ${inputVals}\ttempEval: ${tempEval}\tevalInput = ${evalInput}`);
 
                 if(evalInput === undefined || evalInput === tempEval) {
                     evalInput = tempEval;
-                    console.log(`evalInput updated to ${evalInput}`);
                 } else {
-                    window.errorStatus = "We got one!";
+                    // Conflict found.
+                    // Take note of all conflicting inputs for this
+                    // node so we can go back and determine if it
+                    // directly affects the output.
                 }
             }
 
@@ -2365,7 +2363,11 @@ class Node {
                 return true;
             }
         }
-        return false;
+
+        // There are no edges from this to otherNode,
+        // then either they are the same node or they
+        // are disconnected.
+        return this === otherNode;
     }
  
     isTransistor() {
