@@ -523,9 +523,7 @@ class Diagram {
         // If the gate is an input, the gate's state depends on the input value.
         if (gateNet.isInput) {
             let inputNum, tempEval, evalInput;
-            window.gatenet = gateNet;
-            console.log(gateNet);
-            let gateNode = this.graph.getNode(gateNet);
+            let gateNode = gateNet.nodes.entries().next().value;
 
             for(let ii = 0; ii < this.inputs.length; ii++) {
                 if(!gateNode.isConnected(this.inputNodes[ii])) {
