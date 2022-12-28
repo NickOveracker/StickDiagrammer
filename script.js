@@ -2542,6 +2542,7 @@ function buildTruthTable() {
             tableOutputRow[jj] = diagram.computeOutput(ii, diagram.outputNodes[jj]);
         }
         if(diagram.errorStatus !== null) {
+            console.error(diagram.errorStatus);
             return;
         }
 
