@@ -1002,6 +1002,10 @@ class Diagram {
             });
             */
 
+            // If one is an input, then both are.
+            net1.isInput = net1.isInput || net2.isInput;
+            net2.isInput = net1.isInput;
+
             // Loop through net1's nodes.
             // Outer loop - this is why it had to be swapped with net2 if it was an input.
             for (let node1 = nodeIterator1.next(); !node1.done; node1 = nodeIterator1.next()) {
