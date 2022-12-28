@@ -517,37 +517,51 @@ class Diagram {
     gateIsActive(node, inputVals) {
         'use strict';
         let gateNet = node.cell.gate;
-        let gateNodeIterator;
-        let hasNullPath;
+        let connectedNodeIterator, hasNullPath;
 
         // If the gate is an input, the gate's state depends on the input value.
         if (gateNet.isInput) {
-            /*jslint bitwise: true */
-            let inputNum = (this.inputs.length - 1) - (node.getName().charCodeAt(0) - 65);
+            let tempEval, evalInput;
+            let gateNode = gateNet.nodes.entries().next().value[1];
 
-            // Evaluate the relevant input bit as a boolean.
-            let evalInput = !!((inputVals >> inputNum) & 1);
+            this.inputNodes.forEach(function(node, index) {
+                if(!gateNode.isConnected(node)) {
+                    return;
+                }
 
+                // Evaluate the relevant input bit as a boolean.
+                /*jslint bitwise: true */
+                tempEval = !!((inputVals >> (this.inputs.length - index - 1)) & 1);
+                /*jslint bitwise: false */
+
+                if(evalInput === undefined || evalInput === tempEval) {
+                    evalInput = tempEval;
+                } else {
+                    // Conflict found.
+                    this.conflictingInputs = true;
+                }
+            }.bind(this));
+            
             // Pass-through positive for NMOS.
             // Invert for PMOS.
+            /*jslint bitwise: true */
             return !(node.isNmos ^ evalInput);
             /*jslint bitwise: false */
         }
 
         // Otherwise, recurse and see if this is active.
-        gateNodeIterator = gateNet.nodes.values();
+        connectedNodeIterator = gateNet.nodes.values();
         hasNullPath = false;
 
         // Iterate through the nodes in the same net as the gate.
-        for (let gateNode = gateNodeIterator.next(); !gateNode.done; gateNode = gateNodeIterator.next()) {
-            gateNode = gateNode.value;
+        for (let connectedNode = connectedNodeIterator.next(); !connectedNode.done; connectedNode = connectedNodeIterator.next()) {
+            connectedNode = connectedNode.value;
 
             // Check if there is a known path between the current node and the ground node.
-            let gateToGnd = this.pathExists(gateNode, this.gndNode);
+            let gateToGnd = this.pathExists(connectedNode, this.gndNode);
             // Check if there is a known path between the current node and the power node.
-            let gateToVdd = this.pathExists(gateNode, this.vddNode);
-            let relevantPathExists;
-            let relevantNode;
+            let gateToVdd = this.pathExists(connectedNode, this.vddNode);
+            let relevantPathExists, relevantNode;
 
             // If either path is already under investigation, set hasNullPath to true.
             if(gateToGnd === null || gateToVdd === null) {
@@ -562,7 +576,7 @@ class Diagram {
             }
 
             // Check if there is a path between the current node and the relevant power or ground node.
-            relevantPathExists = this.computeOutputRecursive(gateNode, relevantNode, inputVals);
+            relevantPathExists = this.computeOutputRecursive(connectedNode, relevantNode, inputVals);
             // If the path has not yet been determined, set hasNullPath to true
             if (relevantPathExists === null) {
                 hasNullPath = true;
@@ -590,6 +604,7 @@ class Diagram {
         let outputVal = "Z";             // Assume that the node is floating at the start.
         let highNodes = [this.vddNode,]; // Array for all nodes driven HIGH.
         let lowNodes  = [this.gndNode,]; // Array for all nodes driven LOW.
+        this.conflictingInputs = false;
 
         // Add input nodes to the highNodes and lowNodes arrays according
         // to their binary values. (1 = high, 0 = low)
@@ -686,7 +701,10 @@ class Diagram {
         this.nodeNodeMap.length = 0;
 
         // Return 1, 0, "Z", or "X".
-        return outputVal;
+        // There is still one unchecked case for "X",
+        // namely when two or more inputs directly drive
+        // a gate with opposite values.
+        return this.conflictingInputs ? "X" : outputVal;
     }
 
     // Map a function to every transistor terminal.
@@ -1024,7 +1042,7 @@ class Diagram {
     // Exception for Diagram.CONTACT.
     // Returns true if the cell is a transistor.
     // Side effect: Adds a transistor (if found) to this.nmos or this.pmos.
-    checkTransistor(cell, layer, transistorArray) {
+    checkIfTransistor(cell, layer, transistorArray) {
         'use strict';
 
         // If the layer is Diagram.NDIFF or Diagram.PDIFF and there is also a Diagram.POLY at the same location,
@@ -1032,8 +1050,6 @@ class Diagram {
         // (Except when there is also a contact)
         if (cell.layer === layer && cell.isSet) {
             if (this.layeredGrid.get(cell.x, cell.y, Diagram.POLY).isSet && !this.layeredGrid.get(cell.x, cell.y, Diagram.CONTACT).isSet) {
-                transistorArray.add(cell);
-                this.graph.addNode(cell);
                 // Set the gate to the poly cell.
                 cell.gate = this.layeredGrid.get(cell.x, cell.y, Diagram.POLY);
 
@@ -1051,7 +1067,16 @@ class Diagram {
                 this.setTerminals(cell, cell.x - 1, cell.y, layer);
                 this.setTerminals(cell, cell.x + 1, cell.y, layer);
 
-                return true;
+                // If no term2 is set, then this is not a full transistor.
+                // Undo.
+                if(cell.term2 === undefined) {
+                    cell.term1 = undefined;
+                    cell.gate = undefined;
+                } else {
+                    transistorArray.add(cell);
+                    this.graph.addNode(cell);
+                    return true;
+                }
             }
         }
 
@@ -1098,8 +1123,8 @@ class Diagram {
         }
 
         // Check the cell for a transistor.
-        if (this.checkTransistor(cell, Diagram.NDIFF, this.nmos)) { return; }
-        if (this.checkTransistor(cell, Diagram.PDIFF, this.pmos)) { return; }
+        if (this.checkIfTransistor(cell, Diagram.NDIFF, this.nmos)) { return; }
+        if (this.checkIfTransistor(cell, Diagram.PDIFF, this.pmos)) { return; }
 
         // Add the cell to the net.
         net.addCell(cell);
@@ -2345,7 +2370,11 @@ class Node {
                 return true;
             }
         }
-        return false;
+
+        // There are no edges from this to otherNode,
+        // then either they are the same node or they
+        // are disconnected.
+        return this === otherNode;
     }
  
     isTransistor() {
