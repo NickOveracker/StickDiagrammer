@@ -532,15 +532,16 @@ class Diagram {
                     console.error("Oh no!")
                 }
 
-                inputNum = ii;
-
                 // Evaluate the relevant input bit as a boolean.
                 /*jslint bitwise: true */
-                tempEval = !!((inputVals >> inputNum) & 1);
+                tempEval = !!((inputVals >> ii) & 1);
                 /*jslint bitwise: false */
+
+                console.log(`Input: ${inputVals}\ttempEval: ${tempEval}\tevalInput = ${evalInput}`);
 
                 if(evalInput === undefined || evalInput === tempEval) {
                     evalInput = tempEval;
+                    console.log(`evalInput updated to ${evalInput}`);
                 } else {
                     window.errorStatus = "We got one!";
                 }
