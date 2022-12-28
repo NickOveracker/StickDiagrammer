@@ -46,7 +46,8 @@
 * ~~Knowing that I spelled "accolades" correctly (I don't feel like Googling it)~~ *Resolved 2021/11/20*
 
 ## Known Bugs
-* Invalid output produced when two inputs directly drive the same gate
+* ~~Crashes silently when a transistor is missing a source or drain~~ *Resolved 2022/12/29*
+* ~~Invalid output produced when two inputs directly drive the same gate~~ *Resolved 2022/12/29*
 * ~~Invalid output produced when two inputs INdirectly drive the same gate~~ *Resolved 2022/12/28*
 * ~~Minor visual glitches while drawing (due to canvas refresh)~~ *Resolved 2021/11/27*
 * ~~Issue #7 (regarding NAND3 in complex circuit)~~ *Resolved 2021/11/23*
