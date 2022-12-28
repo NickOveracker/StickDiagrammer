@@ -1002,9 +1002,8 @@ class Diagram {
             });
             */
 
-            // If one is an input, then both are.
-            net1.isInput = net1.isInput || net2.isInput;
-            net2.isInput = net1.isInput;
+            // TODO: LOOP THROUGH NODES SOMEWHERE TO SEE IF CONFLICTING INPUTS ARE CONNECTED
+            // only matters for transistors
 
             // Loop through net1's nodes.
             // Outer loop - this is why it had to be swapped with net2 if it was an input.
