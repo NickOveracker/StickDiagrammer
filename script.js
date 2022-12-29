@@ -538,7 +538,7 @@ class Diagram {
                     evalInput = tempEval;
                 } else {
                     // Conflict found.
-                    this.conflictingInputs = true;
+                    this.gateConflict = true;
                 }
             }.bind(this));
             
@@ -582,7 +582,7 @@ class Diagram {
             // If the path exists, return true.
             else if(relevantPathExists) {
                 if(oppositePathExists) {
-                    this.conflictingInputs = true;
+                    this.gateConflict = true;
                 }
                 return true;
             }
@@ -605,7 +605,7 @@ class Diagram {
         let outputVal = "Z";             // Assume that the node is floating at the start.
         let highNodes = [this.vddNode,]; // Array for all nodes driven HIGH.
         let lowNodes  = [this.gndNode,]; // Array for all nodes driven LOW.
-        this.conflictingInputs = false;
+        this.gateConflict = false;
 
         // Add input nodes to the highNodes and lowNodes arrays according
         // to their binary values. (1 = high, 0 = low)
@@ -705,7 +705,7 @@ class Diagram {
         // There is still one unchecked case for "X",
         // namely when two or more inputs directly drive
         // a gate with opposite values.
-        return this.conflictingInputs ? "X" : outputVal;
+        return this.gateConflict ? "X" : outputVal;
     }
 
     // Map a function to every transistor terminal.
