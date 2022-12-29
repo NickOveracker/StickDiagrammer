@@ -2396,11 +2396,6 @@ class Node {
             this.edges.splice(index, 1);
         }
     }
-
-    getName() {
-        'use strict';
-        return this.cell.gate.name;
-    }
 }
 
 // Each edge is a connection between two diagram.graph nodes.
