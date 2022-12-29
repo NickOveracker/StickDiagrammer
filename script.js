@@ -538,7 +538,7 @@ class Diagram {
                     evalInput = tempEval;
                 } else {
                     // Conflict found.
-                    this.conflictingInputs = true;
+                    this.gateConflict = true;
                 }
             }.bind(this));
             
@@ -561,28 +561,29 @@ class Diagram {
             let gateToGnd = this.pathExists(connectedNode, this.gndNode);
             // Check if there is a known path between the current node and the power node.
             let gateToVdd = this.pathExists(connectedNode, this.vddNode);
-            let relevantPathExists, relevantNode;
+            let relevantPathExists, oppositePathExists, relevantNode, oppositeNode;
 
-            // If either path is already under investigation, set hasNullPath to true.
-            if(gateToGnd === null || gateToVdd === null) {
-                hasNullPath = true;
-            }
-            
             // Determine the relevant power or ground node for the current gate type.
             if(node.isPmos) {
                 relevantNode = this.gndNode;
+                oppositeNode = this.vddNode;
             } else {
                 relevantNode = this.vddNode;
+                oppositeNode = this.gndNode;
             }
 
             // Check if there is a path between the current node and the relevant power or ground node.
             relevantPathExists = this.computeOutputRecursive(connectedNode, relevantNode, inputVals);
+            oppositePathExists = this.computeOutputRecursive(connectedNode, oppositeNode, inputVals);
             // If the path has not yet been determined, set hasNullPath to true
             if (relevantPathExists === null) {
                 hasNullPath = true;
             }
             // If the path exists, return true.
             else if(relevantPathExists) {
+                if(oppositePathExists) {
+                    this.gateConflict = true;
+                }
                 return true;
             }
         }
@@ -604,7 +605,7 @@ class Diagram {
         let outputVal = "Z";             // Assume that the node is floating at the start.
         let highNodes = [this.vddNode,]; // Array for all nodes driven HIGH.
         let lowNodes  = [this.gndNode,]; // Array for all nodes driven LOW.
-        this.conflictingInputs = false;
+        this.gateConflict = false;
 
         // Add input nodes to the highNodes and lowNodes arrays according
         // to their binary values. (1 = high, 0 = low)
@@ -704,7 +705,7 @@ class Diagram {
         // There is still one unchecked case for "X",
         // namely when two or more inputs directly drive
         // a gate with opposite values.
-        return this.conflictingInputs ? "X" : outputVal;
+        return this.gateConflict ? "X" : outputVal;
     }
 
     // Map a function to every transistor terminal.
