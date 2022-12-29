@@ -561,23 +561,29 @@ class Diagram {
             let gateToGnd = this.pathExists(connectedNode, this.gndNode);
             // Check if there is a known path between the current node and the power node.
             let gateToVdd = this.pathExists(connectedNode, this.vddNode);
-            let relevantPathExists, relevantNode;
+            let relevantPathExists, oppositePathExists, relevantNode, oppositeNode;
 
             // Determine the relevant power or ground node for the current gate type.
             if(node.isPmos) {
                 relevantNode = this.gndNode;
+                oppositeNode = this.vddNode;
             } else {
                 relevantNode = this.vddNode;
+                oppositeNode = this.gndNode;
             }
 
             // Check if there is a path between the current node and the relevant power or ground node.
             relevantPathExists = this.computeOutputRecursive(connectedNode, relevantNode, inputVals);
+            oppositePathExists = this.computeOutputRecursive(connectedNode, oppositeNode, inputVals);
             // If the path has not yet been determined, set hasNullPath to true
             if (relevantPathExists === null) {
                 hasNullPath = true;
             }
             // If the path exists, return true.
             else if(relevantPathExists) {
+                if(oppositePathExists) {
+                    this.conflictingInputs = true;
+                }
                 return true;
             }
         }
