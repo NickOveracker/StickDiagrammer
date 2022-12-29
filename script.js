@@ -563,11 +563,6 @@ class Diagram {
             let gateToVdd = this.pathExists(connectedNode, this.vddNode);
             let relevantPathExists, relevantNode;
 
-            // If either path is already under investigation, set hasNullPath to true.
-            if(gateToGnd === null || gateToVdd === null) {
-                hasNullPath = true;
-            }
-            
             // Determine the relevant power or ground node for the current gate type.
             if(node.isPmos) {
                 relevantNode = this.gndNode;
