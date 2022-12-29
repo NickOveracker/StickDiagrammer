@@ -46,6 +46,7 @@
 * ~~Knowing that I spelled "accolades" correctly (I don't feel like Googling it)~~ *Resolved 2021/11/20*
 
 ## Known Bugs
+* ~~Invalid output when two conflicting signals other than direct inputs drive a single gate~~ *Resolved 2022/12/30*
 * ~~Crashes silently when a transistor is missing a source or drain~~ *Resolved 2022/12/29*
 * ~~Invalid output produced when two inputs directly drive the same gate~~ *Resolved 2022/12/29*
 * ~~Invalid output produced when two inputs INdirectly drive the same gate~~ *Resolved 2022/12/28*
