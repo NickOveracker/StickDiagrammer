@@ -140,7 +140,6 @@ DiagramController.prototype.getCellAtCursor = function(screenX, screenY) {
     return retVal;
 };
 
-Node.prototype.getName_old = Node.prototype.getName;
 Node.prototype.getName = function() {
     'use strict';
     let name = this.getName_old();
