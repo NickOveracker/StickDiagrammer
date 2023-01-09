@@ -73,7 +73,9 @@ function runTestbench(runTo) {
                      "SR latch Q'",
                      "D flip-flop",
                      "VDD & GND driving single PMOS gate",
+                     "Two inputs driving single PMOS gate",
                      "VDD & GND driving single NMOS gate",
+                     "Two inputs driving single NMOS gate",
     ];
     runTo = runTo || testCases.length;
 
@@ -1867,7 +1869,47 @@ function runTestbench(runTo) {
         2,
         "XXXXXXXXXXXXXXXX",
 
+        /* Two inputs driving single PMOS gate */
+        1,
+        function() {
+            diagram.inputs[0].x  = 14;
+            diagram.inputs[0].y  = 12;
+            diagram.inputs[1].x  = 14;
+            diagram.inputs[1].y  = 14;
+            diagram.inputs[2].x  = 28;
+            diagram.inputs[2].y  = 28;
+            diagram.inputs[3].x  = 28;
+            diagram.inputs[3].y  = 28;
+            diagram.outputs[0].x = 21;
+            diagram.outputs[0].y = 6;
+            diagram.vddCell.x    = 7;
+            diagram.vddCell.y    = 6;
+            diagram.gndCell.x    = 28;
+            diagram.gndCell.y    = 28;
+        },
+
+        2,
+        "1111XXXXXXXXZZZZ",
+
         /** GND and VDD on single NMOS gate **/
+        1,
+        function() {
+            diagram.inputs[0].x  = 7;
+            diagram.inputs[0].y  = 6;
+            diagram.inputs[1].x  = 28;
+            diagram.inputs[1].y  = 28;
+            diagram.inputs[2].x  = 28;
+            diagram.inputs[2].y  = 28;
+            diagram.inputs[3].x  = 28;
+            diagram.inputs[3].y  = 28;
+            diagram.outputs[0].x = 21;
+            diagram.outputs[0].y = 6;
+            diagram.vddCell.x    = 14;
+            diagram.vddCell.y    = 12;
+            diagram.gndCell.x    = 14;
+            diagram.gndCell.y    = 14;
+        },
+
         // Clear the canvas
         ["mousedown", {button:  2, clientX: mapX(1),   clientY: mapY(1)}],
         ["mousemove", {buttons: 2, clientX: mapX(29),  clientY: mapY(29)}],
@@ -1892,6 +1934,28 @@ function runTestbench(runTo) {
 
         2,
         "XXXXXXXXXXXXXXXX",
+
+        /* Two inputs driving single NMOS gate */
+        1,
+        function() {
+            diagram.inputs[0].x  = 14;
+            diagram.inputs[0].y  = 12;
+            diagram.inputs[1].x  = 14;
+            diagram.inputs[1].y  = 14;
+            diagram.inputs[2].x  = 28;
+            diagram.inputs[2].y  = 28;
+            diagram.inputs[3].x  = 28;
+            diagram.inputs[3].y  = 28;
+            diagram.outputs[0].x = 21;
+            diagram.outputs[0].y = 6;
+            diagram.vddCell.x    = 28;
+            diagram.vddCell.y    = 28;
+            diagram.gndCell.x    = 7;
+            diagram.gndCell.y    = 6;
+        },
+
+        2,
+        "ZZZZXXXXXXXX0000",
    ];
 
     /** RUN TESTBENCH **/
