@@ -641,6 +641,12 @@ function runTestbench(runTo) {
         ["mousemove", {buttons: 1, clientX: mapX(24),   clientY: mapY(5)}],
         ["mouseup",   {button:  0, clientX: mapX(24),   clientY: mapY(5)}],
 
+        0, // CONTACT
+        0, // PDIFF
+        0, // NDIFF
+        0, // POLY
+        0,
+ 
         2,
         "1111111111111110",
 
@@ -665,11 +671,6 @@ function runTestbench(runTo) {
         ["mousemove", {buttons: 2, clientX: mapX(29),  clientY: mapY(27)}],
         ["mouseup",   {button:  2, clientX: mapX(29),  clientY: mapY(27)}],
         
-        0, // CONTACT
-        0, // PDIFF
-        0, // NDIFF
-        0, // POLY
-        0,
         // METAL
         ["mousedown", {button:  0, clientX: mapX(29),   clientY: mapY(2)}],
         ["mousemove", {buttons: 1, clientX: mapX(29),   clientY: mapY(28)}],
