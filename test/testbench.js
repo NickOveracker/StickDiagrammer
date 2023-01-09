@@ -78,6 +78,7 @@ function runTestbench(runTo) {
                      "Two inputs driving single NMOS gate",
                      "Indirectly overdriven output via NMOS",
                      "Indirectly overdriven output via PMOS",
+                     "Indirectly overdriven gates",
     ];
     runTo = runTo || testCases.length;
 
@@ -2030,6 +2031,136 @@ function runTestbench(runTo) {
 
         2,
         "0XX100110101ZZZZ",
+
+        /* Indirectly overdriven gates */
+        1,
+        function() {
+            diagram.inputs[0].x  = 8;
+            diagram.inputs[0].y  = 14;
+            diagram.inputs[1].x  = 20;
+            diagram.inputs[1].y  = 14;
+            diagram.inputs[2].x  = 4;
+            diagram.inputs[2].y  = 1;
+            diagram.inputs[3].x  = 18;
+            diagram.inputs[3].y  = 1;
+            diagram.outputs[0].x = 26;
+            diagram.outputs[0].y = 14;
+            diagram.vddCell.x    = 12;
+            diagram.vddCell.y    = 1;
+            diagram.gndCell.x    = 12;
+            diagram.gndCell.y    = 27;
+        },
+
+        // Clear the canvas
+        ["mousedown", {button:  2, clientX: mapX(1),   clientY: mapY(1)}],
+        ["mousemove", {buttons: 2, clientX: mapX(29),  clientY: mapY(29)}],
+        ["mouseup",   {button:  2, clientX: mapX(29),  clientY: mapY(29)}],
+
+        // PDIFF
+        ["mousedown", {button:  0, clientX: mapX(1),  clientY: mapY(2)}],
+        ["mousemove", {buttons: 1, clientX: mapX(11), clientY: mapY(2)}],
+        ["mouseup",   {button:  0, clientX: mapX(11), clientY: mapY(2)}],
+
+        ["mousedown", {button:  0, clientX: mapX(13), clientY: mapY(2)}],
+        ["mousemove", {buttons: 1, clientX: mapX(17), clientY: mapY(2)}],
+        ["mouseup",   {button:  0, clientX: mapX(17), clientY: mapY(2)}],
+
+        ["mousedown", {button:  0, clientX: mapX(19), clientY: mapY(2)}],
+        ["mousemove", {buttons: 1, clientX: mapX(25), clientY: mapY(2)}],
+        ["mouseup",   {button:  0, clientX: mapX(25), clientY: mapY(2)}],
+
+        ["mousedown", {button:  0, clientX: mapX(27), clientY: mapY(2)}],
+        ["mousemove", {buttons: 1, clientX: mapX(29), clientY: mapY(2)}],
+        ["mouseup",   {button:  0, clientX: mapX(29), clientY: mapY(2)}],
+
+        0,
+
+        // NDIFF
+        ["mousedown", {button:  0, clientX: mapX(13), clientY: mapY(28)}],
+        ["mousemove", {buttons: 1, clientX: mapX(17), clientY: mapY(28)}],
+        ["mouseup",   {button:  0, clientX: mapX(17), clientY: mapY(28)}],
+
+        0,
+
+        // POLY
+        ["mousedown", {button:  0, clientX: mapX(9),  clientY: mapY(1)}],
+        ["mousemove", {buttons: 1, clientX: mapX(9),  clientY: mapY(29)}],
+        ["mouseup",   {button:  0, clientX: mapX(9),  clientY: mapY(29)}],
+
+        ["mousedown", {button:  0, clientX: mapX(15), clientY: mapY(1)}],
+        ["mousemove", {buttons: 1, clientX: mapX(15), clientY: mapY(29)}],
+        ["mouseup",   {button:  0, clientX: mapX(15), clientY: mapY(29)}],
+
+        ["mousedown", {button:  0, clientX: mapX(21), clientY: mapY(1)}],
+        ["mousemove", {buttons: 1, clientX: mapX(21), clientY: mapY(29)}],
+        ["mouseup",   {button:  0, clientX: mapX(21), clientY: mapY(29)}],
+
+        0,
+
+        // METAL1
+        ["mousedown", {button:  0, clientX: mapX(11), clientY: mapY(2)}],
+        ["mousemove", {buttons: 1, clientX: mapX(11), clientY: mapY(7)}],
+        ["mouseup",   {button:  0, clientX: mapX(11), clientY: mapY(7)}],
+
+        ["mousedown", {button:  0, clientX: mapX(11), clientY: mapY(7)}],
+        ["mousemove", {buttons: 1, clientX: mapX(15), clientY: mapY(7)}],
+        ["mouseup",   {button:  0, clientX: mapX(15), clientY: mapY(7)}],
+
+        ["mousedown", {button:  0, clientX: mapX(25), clientY: mapY(2)}],
+        ["mousemove", {buttons: 1, clientX: mapX(25), clientY: mapY(10)}],
+        ["mouseup",   {button:  0, clientX: mapX(25), clientY: mapY(10)}],
+
+        ["mousedown", {button:  0, clientX: mapX(15), clientY: mapY(10)}],
+        ["mousemove", {buttons: 1, clientX: mapX(25), clientY: mapY(10)}],
+        ["mouseup",   {button:  0, clientX: mapX(25), clientY: mapY(10)}],
+
+        ["mousedown", {button:  0, clientX: mapX(27), clientY: mapY(2)}],
+        ["mousemove", {buttons: 1, clientX: mapX(27), clientY: mapY(22)}],
+        ["mouseup",   {button:  0, clientX: mapX(27), clientY: mapY(22)}],
+
+        ["mousedown", {button:  0, clientX: mapX(17), clientY: mapY(22)}],
+        ["mousemove", {buttons: 1, clientX: mapX(27), clientY: mapY(22)}],
+        ["mouseup",   {button:  0, clientX: mapX(27), clientY: mapY(22)}],
+
+        0,
+
+        // METAL2
+        ["mousedown", {button:  0, clientX: mapX(17), clientY: mapY(2)}],
+        ["mousemove", {buttons: 1, clientX: mapX(17), clientY: mapY(28)}],
+        ["mouseup",   {button:  0, clientX: mapX(17), clientY: mapY(28)}],
+
+        0,
+
+        // CONTACT
+        ["mousedown", {button:  0, clientX: mapX(11), clientY: mapY(2)}],
+        ["mouseup",   {button:  0, clientX: mapX(11), clientY: mapY(2)}],
+
+        ["mousedown", {button:  0, clientX: mapX(17), clientY: mapY(2)}],
+        ["mouseup",   {button:  0, clientX: mapX(17), clientY: mapY(2)}],
+
+        ["mousedown", {button:  0, clientX: mapX(25), clientY: mapY(2)}],
+        ["mouseup",   {button:  0, clientX: mapX(25), clientY: mapY(2)}],
+
+        ["mousedown", {button:  0, clientX: mapX(27), clientY: mapY(2)}],
+        ["mouseup",   {button:  0, clientX: mapX(27), clientY: mapY(2)}],
+
+        ["mousedown", {button:  0, clientX: mapX(15), clientY: mapY(2)}],
+        ["mouseup",   {button:  0, clientX: mapX(15), clientY: mapY(2)}],
+
+        ["mousedown", {button:  0, clientX: mapX(15), clientY: mapY(7)}],
+        ["mouseup",   {button:  0, clientX: mapX(15), clientY: mapY(7)}],
+
+        ["mousedown", {button:  0, clientX: mapX(15), clientY: mapY(10)}],
+        ["mouseup",   {button:  0, clientX: mapX(15), clientY: mapY(10)}],
+
+        ["mousedown", {button:  0, clientX: mapX(17), clientY: mapY(22)}],
+        ["mouseup",   {button:  0, clientX: mapX(17), clientY: mapY(22)}],
+
+        ["mousedown", {button:  0, clientX: mapX(17), clientY: mapY(28)}],
+        ["mouseup",   {button:  0, clientX: mapX(17), clientY: mapY(28)}],
+
+        2,
+        "1XX011001010ZZZZ",
    ];
 
     /** RUN TESTBENCH **/
