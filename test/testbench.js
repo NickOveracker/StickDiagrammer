@@ -92,6 +92,26 @@ function runTestbench(runTo) {
     function mapY(y) {return Math.floor(y*diagram.view.cellHeight + diagram.view.canvas.getBoundingClientRect().top + diagram.view.cellHeight);}
 
     let events = [
+        1,
+        // Place terminals
+        function() {
+            diagram.inputs[0].x = 3;
+            diagram.inputs[0].y = 14;
+
+            diagram.outputs[0].x = 28;
+            diagram.outputs[0].y = 14;
+
+            for(let ii = 1; ii < diagram.inputs.length; ii++) {
+                diagram.inputs[ii].x = 0;
+                diagram.inputs[ii].y = 0;
+            }
+
+            diagram.vddCell.x    = 1;
+            diagram.vddCell.y    = 1;
+            diagram.gndCell.x    = 1;
+            diagram.gndCell.y    = 27;
+        },
+
         // Clear the canvas
         ["mousedown", {button:  2, clientX: mapX(1),   clientY: mapY(1)}],
         ["mousemove", {buttons: 2, clientX: mapX(29),  clientY: mapY(29)}],
@@ -225,9 +245,6 @@ function runTestbench(runTo) {
         ["mouseup",   {button:  0, clientX: mapX(26),  clientY: mapY(28)}],
 
         // PDIFF to METAL
-        ["mousedown", {button:  0, clientX: mapX(2),  clientY: mapY(5)}],
-        ["mouseup",   {button:  0, clientX: mapX(2),  clientY: mapY(5)}],
-
         ["mousedown", {button:  0, clientX: mapX(6),  clientY: mapY(5)}],
         ["mouseup",   {button:  0, clientX: mapX(6),  clientY: mapY(5)}],
 
@@ -381,37 +398,8 @@ function runTestbench(runTo) {
         ["mouseup",   {button:  0, clientX: mapX(27),  clientY: mapY(26)}],
 
         0, // METAL1
-
         0, // METAL2
-
         0,
-
-
-        1,
-
-        // Place terminals
-        function() {
-            diagram.inputs[0].x = 3;
-            diagram.inputs[0].y = 14;
-
-            diagram.outputs[0].x = 28;
-            diagram.outputs[0].y = 14;
-
-            for(let ii = 1; ii < diagram.inputs.length; ii++) {
-                diagram.inputs[ii].x = 0;
-                diagram.inputs[ii].y = 0;
-            }
-
-            diagram.vddCell.x    = 1;
-            diagram.vddCell.y    = 1;
-            diagram.gndCell.x    = 1;
-            diagram.gndCell.y    = 27;
-        },
-
-        // Clean up old contacts from terminals
-        ["mousedown", {button:  2, clientX: mapX(1),  clientY: mapY(6)}],
-        ["mousemove", {buttons: 2, clientX: mapX(3),  clientY: mapY(24)}],
-        ["mouseup",   {button:  2, clientX: mapX(3),  clientY: mapY(24)}],
 
         2,
         "1111111100000000",
