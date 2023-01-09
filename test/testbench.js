@@ -548,23 +548,17 @@ function runTestbench(runTo) {
         "1000000000000000",
 
         /* NAND-4 */
-        ["mousedown", {button:  2, clientX: mapX(7),   clientY: mapY(13)}],
-        ["mousemove", {buttons: 2, clientX: mapX(7),   clientY: mapY(24)}],
-        ["mouseup",   {button:  2, clientX: mapX(7),   clientY: mapY(24)}],
-
         ["mousedown", {button:  2, clientX: mapX(7),   clientY: mapY(12)}],
-        ["mouseup",   {button:  2, clientX: mapX(7),   clientY: mapY(12)}],
-
-        ["mousedown", {button:  2, clientX: mapX(19),  clientY: mapY(12)}],
-        ["mouseup",   {button:  2, clientX: mapX(19),  clientY: mapY(12)}],
+        ["mousemove", {buttons: 2, clientX: mapX(7),   clientY: mapY(25)}],
+        ["mouseup",   {button:  2, clientX: mapX(7),   clientY: mapY(25)}],
 
         ["mousedown", {button:  2, clientX: mapX(14),  clientY: mapY(13)}],
         ["mousemove", {buttons: 2, clientX: mapX(14),  clientY: mapY(27)}],
         ["mouseup",   {button:  2, clientX: mapX(14),  clientY: mapY(27)}],
 
-        ["mousedown", {button:  2, clientX: mapX(19),   clientY: mapY(13)}],
-        ["mousemove", {buttons: 2, clientX: mapX(19),   clientY: mapY(24)}],
-        ["mouseup",   {button:  2, clientX: mapX(19),   clientY: mapY(24)}],
+        ["mousedown", {button:  2, clientX: mapX(19),   clientY: mapY(12)}],
+        ["mousemove", {buttons: 2, clientX: mapX(19),   clientY: mapY(25)}],
+        ["mouseup",   {button:  2, clientX: mapX(19),   clientY: mapY(25)}],
 
         ["mousedown", {button:  2, clientX: mapX(24),   clientY: mapY(6)}],
         ["mousemove", {buttons: 2, clientX: mapX(24),   clientY: mapY(11)}],
