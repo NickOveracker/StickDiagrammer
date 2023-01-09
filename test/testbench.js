@@ -674,6 +674,11 @@ function runTestbench(runTo) {
         "XXXXXXXXXXXXXXXX",
 
         /** Various transistor shorts **/
+        0, // CONTACT
+        0, // PDIFF
+        0, // NDIFF
+        0, // POLY
+        0,
         // METAL
         // VDD to PDIFF
         ["mousedown", {button:  0, clientX: mapX(2),   clientY: mapY(5)}],
