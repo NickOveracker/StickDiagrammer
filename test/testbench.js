@@ -596,31 +596,24 @@ function runTestbench(runTo) {
         ["mousedown", {button:  0, clientX: mapX(24),  clientY: mapY(2)}],
         ["mouseup",   {button:  0, clientX: mapX(24),  clientY: mapY(2)}],
 
-        0,
-
-        0,
-
-        // NDIFF
+        0, // PDIFF
+        0, // NDIFF
         ["mousedown", {button:  0, clientX: mapX(2),  clientY: mapY(25)}],
         ["mousemove", {buttons: 1, clientX: mapX(24), clientY: mapY(25)}],
         ["mouseup",   {button:  0, clientX: mapX(24), clientY: mapY(25)}],
 
-        0,
-
-        0,
-
-        // METAL1
+        0, // POLY
+        0, // METAL1
         ["mousedown", {button:  0, clientX: mapX(6),   clientY: mapY(12)}],
         ["mouseup",   {button:  0, clientX: mapX(6),   clientY: mapY(12)}],
 
-        ["mousedown", {button:  2, clientX: mapX(7),   clientY: mapY(12)}],
-        ["mouseup",   {button:  2, clientX: mapX(7),   clientY: mapY(12)}],
+        ["mousedown", {button:  0, clientX: mapX(7),   clientY: mapY(12)}],
+        ["mouseup",   {button:  0, clientX: mapX(7),   clientY: mapY(12)}],
 
-        ["mousedown", {button:  2, clientX: mapX(19),  clientY: mapY(12)}],
-        ["mouseup",   {button:  2, clientX: mapX(19),  clientY: mapY(12)}],
+        ["mousedown", {button:  0, clientX: mapX(19),  clientY: mapY(12)}],
+        ["mouseup",   {button:  0, clientX: mapX(19),  clientY: mapY(12)}],
 
-        0,
-        // METAL2
+        0, // METAL2
         ["mousedown", {button:  0, clientX: mapX(6),   clientY: mapY(12)}],
         ["mousemove", {buttons: 1, clientX: mapX(6),   clientY: mapY(5)}],
         ["mouseup",   {button:  0, clientX: mapX(6),   clientY: mapY(5)}],
@@ -641,10 +634,11 @@ function runTestbench(runTo) {
         ["mousemove", {buttons: 1, clientX: mapX(24),   clientY: mapY(5)}],
         ["mouseup",   {button:  0, clientX: mapX(24),   clientY: mapY(5)}],
 
-        0, 
-        0, 
-        0, 
-        0,
+        0, // CONTACT
+        0, // PDIFF
+        0, // NDIFF
+        0, // POLY
+        0, // METAL1
  
         2,
         "1111111111111110",
