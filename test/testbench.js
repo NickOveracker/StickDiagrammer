@@ -48,31 +48,32 @@ function runTestbench(runTo) {
     let startTime;
     let testCases = ["Five-stage inverter",
                      "Four-stage buffer",
-                    "OR-4",
-                    "NOR-4",
-                    "NAND-4",
-                    "AND-4",
-                    "This test always fails",
-                    "Short-circuit #1",
-                    "Short-circuit #2",
-                    "Short-circuit #3",
-                    "Short-circuit #4",
-                    "Short-circuit #5",
-                    "Short-circuit #6",
-                    "Open-circuit #1",
-                    "Open-circuit #2",
-                    "Open-circuit #3",
-                    "Direct input #1",
-                    "Direct input #2",
-                    "Direct input #3",
-                    "Direct input #4",
-                    "A*B*(C+D)",
-                    "AOI4",
-                    "Between transistors",
-                    "SR latch Q",
-                    "SR latch Q'",
-                    "D flip-flop",
-                    "VDD & GND driving single PMOS gate",
+                     "OR-4",
+                     "NOR-4",
+                     "NAND-4",
+                     "AND-4",
+                     "This test always fails",
+                     "Short-circuit #1",
+                     "Short-circuit #2",
+                     "Short-circuit #3",
+                     "Short-circuit #4",
+                     "Short-circuit #5",
+                     "Short-circuit #6",
+                     "Open-circuit #1",
+                     "Open-circuit #2",
+                     "Open-circuit #3",
+                     "Direct input #1",
+                     "Direct input #2",
+                     "Direct input #3",
+                     "Direct input #4",
+                     "A*B*(C+D)",
+                     "AOI4",
+                     "Between transistors",
+                     "SR latch Q",
+                     "SR latch Q'",
+                     "D flip-flop",
+                     "VDD & GND driving single PMOS gate",
+                     "VDD & GND driving single NMOS gate",
     ];
     runTo = runTo || testCases.length;
 
@@ -1822,7 +1823,7 @@ function runTestbench(runTo) {
         2,
         "ZZZZ0000ZZZZ1111",
 
-        /** GND and VDD on gate **/
+        /** GND and VDD on single PMOS gate **/
         1,
         function() {
             diagram.inputs[0].x  = 7;
@@ -1836,7 +1837,7 @@ function runTestbench(runTo) {
             diagram.outputs[0].x = 21;
             diagram.outputs[0].y = 6;
             diagram.vddCell.x    = 14;
-            diagram.vddCell.y    = 14;
+            diagram.vddCell.y    = 12;
             diagram.gndCell.x    = 14;
             diagram.gndCell.y    = 14;
         },
@@ -1862,6 +1863,32 @@ function runTestbench(runTo) {
         ["mousedown", {button:  0, clientX: mapX(15), clientY: mapY(1)}],
         ["mousemove", {buttons: 1, clientX: mapX(15), clientY: mapY(29)}],
         ["mouseup",   {button:  0, clientX: mapX(15), clientY: mapY(29)}],
+
+        2,
+        "XXXXXXXXXXXXXXXX",
+
+        /** GND and VDD on single NMOS gate **/
+        // Clear the canvas
+        ["mousedown", {button:  2, clientX: mapX(1),   clientY: mapY(1)}],
+        ["mousemove", {buttons: 2, clientX: mapX(29),  clientY: mapY(29)}],
+        ["mouseup",   {button:  2, clientX: mapX(29),  clientY: mapY(29)}],
+
+        // POLY
+        ["mousedown", {button:  0, clientX: mapX(15), clientY: mapY(1)}],
+        ["mousemove", {buttons: 1, clientX: mapX(15), clientY: mapY(29)}],
+        ["mouseup",   {button:  0, clientX: mapX(15), clientY: mapY(29)}],
+
+        0,
+        0,
+        0,
+        0,
+        0,
+
+        // NDIFF
+        ["mousedown", {button:  0, clientX: mapX(1),  clientY: mapY(7)}],
+        ["mousemove", {buttons: 1, clientX: mapX(29), clientY: mapY(7)}],
+        ["mouseup",   {button:  0, clientX: mapX(29), clientY: mapY(7)}],
+
 
         2,
         "XXXXXXXXXXXXXXXX",
