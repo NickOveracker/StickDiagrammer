@@ -645,7 +645,6 @@ function runTestbench(runTo) {
         0, // PDIFF
         0, // NDIFF
         0, // POLY
-        0,
  
         2,
         "1111111111111110",
