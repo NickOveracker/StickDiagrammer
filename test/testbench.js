@@ -2029,7 +2029,7 @@ function runTestbench(runTo) {
         ["mouseup",   {button:  0, clientX: mapX(29), clientY: mapY(7)}],
 
         2,
-        "0XX1001101010XX1",
+        "0XX100110101ZZZZ",
    ];
 
     /** RUN TESTBENCH **/
