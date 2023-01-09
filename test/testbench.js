@@ -48,30 +48,38 @@ function runTestbench(runTo) {
     let startTime;
     let testCases = ["Five-stage inverter",
                      "Four-stage buffer",
-                    "OR-4",
-                    "NOR-4",
-                    "NAND-4",
-                    "AND-4",
-                    "This test always fails",
-                    "Short-circuit #1",
-                    "Short-circuit #2",
-                    "Short-circuit #3",
-                    "Short-circuit #4",
-                    "Short-circuit #5",
-                    "Short-circuit #6",
-                    "Open-circuit #1",
-                    "Open-circuit #2",
-                    "Open-circuit #3",
-                    "Direct input #1",
-                    "Direct input #2",
-                    "Direct input #3",
-                    "Direct input #4",
-                    "A*B*(C+D)",
-                    "AOI4",
-                    "Between transistors",
-                    "SR latch Q",
-                    "SR latch Q'",
-                    "D flip-flop",
+                     "OR-4",
+                     "NOR-4",
+                     "NAND-4",
+                     "AND-4",
+                     "This test always fails",
+                     "Short-circuit #1",
+                     "Short-circuit #2",
+                     "Short-circuit #3",
+                     "Short-circuit #4",
+                     "Short-circuit #5",
+                     "Short-circuit #6",
+                     "Open-circuit #1",
+                     "Open-circuit #2",
+                     "Open-circuit #3",
+                     "Direct input #1",
+                     "Direct input #2",
+                     "Direct input #3",
+                     "Direct input #4",
+                     "A*B*(C+D)",
+                     "AOI4",
+                     "Between transistors",
+                     "SR latch Q",
+                     "SR latch Q'",
+                     "D flip-flop",
+                     "VDD & GND driving single PMOS gate",
+                     "Two inputs driving single PMOS gate",
+                     "VDD & GND driving single NMOS gate",
+                     "Two inputs driving single NMOS gate",
+                     "Indirectly overdriven output via NMOS",
+                     "Indirectly overdriven output via PMOS",
+                     "Indirectly overdriven gates via PMOS",
+                     "Indirectly overdriven gates via NMOS",
     ];
     runTo = runTo || testCases.length;
 
@@ -1820,6 +1828,466 @@ function runTestbench(runTo) {
 
         2,
         "ZZZZ0000ZZZZ1111",
+
+        /** GND and VDD on single PMOS gate **/
+        1,
+        function() {
+            diagram.inputs[0].x  = 7;
+            diagram.inputs[0].y  = 6;
+            diagram.inputs[1].x  = 28;
+            diagram.inputs[1].y  = 28;
+            diagram.inputs[2].x  = 28;
+            diagram.inputs[2].y  = 28;
+            diagram.inputs[3].x  = 28;
+            diagram.inputs[3].y  = 28;
+            diagram.outputs[0].x = 21;
+            diagram.outputs[0].y = 6;
+            diagram.vddCell.x    = 14;
+            diagram.vddCell.y    = 12;
+            diagram.gndCell.x    = 14;
+            diagram.gndCell.y    = 14;
+        },
+
+        // Clear the canvas
+        ["mousedown", {button:  2, clientX: mapX(1),   clientY: mapY(1)}],
+        ["mousemove", {buttons: 2, clientX: mapX(29),  clientY: mapY(29)}],
+        ["mouseup",   {button:  2, clientX: mapX(29),  clientY: mapY(29)}],
+
+        0,
+        0,
+        0,
+
+        // PDIFF
+        ["mousedown", {button:  0, clientX: mapX(1),  clientY: mapY(7)}],
+        ["mousemove", {buttons: 1, clientX: mapX(29), clientY: mapY(7)}],
+        ["mouseup",   {button:  0, clientX: mapX(29), clientY: mapY(7)}],
+
+        0,
+        0,
+
+        // POLY
+        ["mousedown", {button:  0, clientX: mapX(15), clientY: mapY(1)}],
+        ["mousemove", {buttons: 1, clientX: mapX(15), clientY: mapY(29)}],
+        ["mouseup",   {button:  0, clientX: mapX(15), clientY: mapY(29)}],
+
+        2,
+        "XXXXXXXXXXXXXXXX",
+
+        /* Two inputs driving single PMOS gate */
+        1,
+        function() {
+            diagram.inputs[0].x  = 14;
+            diagram.inputs[0].y  = 12;
+            diagram.inputs[1].x  = 14;
+            diagram.inputs[1].y  = 14;
+            diagram.inputs[2].x  = 28;
+            diagram.inputs[2].y  = 28;
+            diagram.inputs[3].x  = 28;
+            diagram.inputs[3].y  = 28;
+            diagram.outputs[0].x = 21;
+            diagram.outputs[0].y = 6;
+            diagram.vddCell.x    = 7;
+            diagram.vddCell.y    = 6;
+            diagram.gndCell.x    = 28;
+            diagram.gndCell.y    = 28;
+        },
+
+        2,
+        "1111XXXXXXXXZZZZ",
+
+        /** GND and VDD on single NMOS gate **/
+        1,
+        function() {
+            diagram.inputs[0].x  = 7;
+            diagram.inputs[0].y  = 6;
+            diagram.inputs[1].x  = 28;
+            diagram.inputs[1].y  = 28;
+            diagram.inputs[2].x  = 28;
+            diagram.inputs[2].y  = 28;
+            diagram.inputs[3].x  = 28;
+            diagram.inputs[3].y  = 28;
+            diagram.outputs[0].x = 21;
+            diagram.outputs[0].y = 6;
+            diagram.vddCell.x    = 14;
+            diagram.vddCell.y    = 12;
+            diagram.gndCell.x    = 14;
+            diagram.gndCell.y    = 14;
+        },
+
+        // Clear the canvas
+        ["mousedown", {button:  2, clientX: mapX(1),   clientY: mapY(1)}],
+        ["mousemove", {buttons: 2, clientX: mapX(29),  clientY: mapY(29)}],
+        ["mouseup",   {button:  2, clientX: mapX(29),  clientY: mapY(29)}],
+
+        // POLY
+        ["mousedown", {button:  0, clientX: mapX(15), clientY: mapY(1)}],
+        ["mousemove", {buttons: 1, clientX: mapX(15), clientY: mapY(29)}],
+        ["mouseup",   {button:  0, clientX: mapX(15), clientY: mapY(29)}],
+
+        0,
+        0,
+        0,
+        0,
+        0,
+
+        // NDIFF
+        ["mousedown", {button:  0, clientX: mapX(1),  clientY: mapY(7)}],
+        ["mousemove", {buttons: 1, clientX: mapX(29), clientY: mapY(7)}],
+        ["mouseup",   {button:  0, clientX: mapX(29), clientY: mapY(7)}],
+
+
+        2,
+        "XXXXXXXXXXXXXXXX",
+
+        /* Two inputs driving single NMOS gate */
+        1,
+        function() {
+            diagram.inputs[0].x  = 14;
+            diagram.inputs[0].y  = 12;
+            diagram.inputs[1].x  = 14;
+            diagram.inputs[1].y  = 14;
+            diagram.inputs[2].x  = 28;
+            diagram.inputs[2].y  = 28;
+            diagram.inputs[3].x  = 28;
+            diagram.inputs[3].y  = 28;
+            diagram.outputs[0].x = 21;
+            diagram.outputs[0].y = 6;
+            diagram.vddCell.x    = 28;
+            diagram.vddCell.y    = 28;
+            diagram.gndCell.x    = 7;
+            diagram.gndCell.y    = 6;
+        },
+
+        2,
+        "ZZZZXXXXXXXX0000",
+
+        /** Indirectly overdriven output via NMOS **/
+        1,
+        function() {
+            diagram.inputs[0].x  = 6;
+            diagram.inputs[0].y  = 14;
+            diagram.inputs[1].x  = 22;
+            diagram.inputs[1].y  = 14;
+            diagram.inputs[2].x  = 3;
+            diagram.inputs[2].y  = 6;
+            diagram.inputs[3].x  = 25;
+            diagram.inputs[3].y  = 6;
+            diagram.outputs[0].x = 14;
+            diagram.outputs[0].y = 6;
+            diagram.vddCell.x    = 0;
+            diagram.vddCell.y    = 0;
+            diagram.gndCell.x    = 0;
+            diagram.gndCell.y    = 28;
+        },
+
+        // Clear the canvas
+        ["mousedown", {button:  2, clientX: mapX(1),   clientY: mapY(1)}],
+        ["mousemove", {buttons: 2, clientX: mapX(29),  clientY: mapY(29)}],
+        ["mouseup",   {button:  2, clientX: mapX(29),  clientY: mapY(29)}],
+
+        // NDIFF
+        ["mousedown", {button:  0, clientX: mapX(1),  clientY: mapY(7)}],
+        ["mousemove", {buttons: 1, clientX: mapX(29), clientY: mapY(7)}],
+        ["mouseup",   {button:  0, clientX: mapX(29), clientY: mapY(7)}],
+
+        0,
+
+        // POLY
+        ["mousedown", {button:  0, clientX: mapX(7),  clientY: mapY(1)}],
+        ["mousemove", {buttons: 1, clientX: mapX(7),  clientY: mapY(29)}],
+        ["mouseup",   {button:  0, clientX: mapX(7),  clientY: mapY(29)}],
+
+        ["mousedown", {button:  0, clientX: mapX(23), clientY: mapY(1)}],
+        ["mousemove", {buttons: 1, clientX: mapX(23), clientY: mapY(29)}],
+        ["mouseup",   {button:  0, clientX: mapX(23), clientY: mapY(29)}],
+
+        2,
+        "ZZZZ010100110XX1",
+
+        /** Indirectly overdriven output via PMOS **/
+
+        // Clear the canvas
+        ["mousedown", {button:  2, clientX: mapX(1),   clientY: mapY(1)}],
+        ["mousemove", {buttons: 2, clientX: mapX(29),  clientY: mapY(29)}],
+        ["mouseup",   {button:  2, clientX: mapX(29),  clientY: mapY(29)}],
+
+        // POLY
+        ["mousedown", {button:  0, clientX: mapX(7),  clientY: mapY(1)}],
+        ["mousemove", {buttons: 1, clientX: mapX(7),  clientY: mapY(29)}],
+        ["mouseup",   {button:  0, clientX: mapX(7),  clientY: mapY(29)}],
+
+        ["mousedown", {button:  0, clientX: mapX(23), clientY: mapY(1)}],
+        ["mousemove", {buttons: 1, clientX: mapX(23), clientY: mapY(29)}],
+        ["mouseup",   {button:  0, clientX: mapX(23), clientY: mapY(29)}],
+
+        0,
+        0,
+        0,
+        0,
+
+        // PDIFF
+        ["mousedown", {button:  0, clientX: mapX(1),  clientY: mapY(7)}],
+        ["mousemove", {buttons: 1, clientX: mapX(29), clientY: mapY(7)}],
+        ["mouseup",   {button:  0, clientX: mapX(29), clientY: mapY(7)}],
+
+        2,
+        "0XX100110101ZZZZ",
+
+        /* Indirectly overdriven gates via PMOS */
+        1,
+        function() {
+            diagram.inputs[0].x  = 8;
+            diagram.inputs[0].y  = 14;
+            diagram.inputs[1].x  = 20;
+            diagram.inputs[1].y  = 14;
+            diagram.inputs[2].x  = 4;
+            diagram.inputs[2].y  = 1;
+            diagram.inputs[3].x  = 18;
+            diagram.inputs[3].y  = 1;
+            diagram.outputs[0].x = 26;
+            diagram.outputs[0].y = 14;
+            diagram.vddCell.x    = 12;
+            diagram.vddCell.y    = 1;
+            diagram.gndCell.x    = 12;
+            diagram.gndCell.y    = 27;
+        },
+
+        // Clear the canvas
+        ["mousedown", {button:  2, clientX: mapX(1),   clientY: mapY(1)}],
+        ["mousemove", {buttons: 2, clientX: mapX(29),  clientY: mapY(29)}],
+        ["mouseup",   {button:  2, clientX: mapX(29),  clientY: mapY(29)}],
+
+        // PDIFF
+        ["mousedown", {button:  0, clientX: mapX(1),  clientY: mapY(2)}],
+        ["mousemove", {buttons: 1, clientX: mapX(11), clientY: mapY(2)}],
+        ["mouseup",   {button:  0, clientX: mapX(11), clientY: mapY(2)}],
+
+        ["mousedown", {button:  0, clientX: mapX(13), clientY: mapY(2)}],
+        ["mousemove", {buttons: 1, clientX: mapX(17), clientY: mapY(2)}],
+        ["mouseup",   {button:  0, clientX: mapX(17), clientY: mapY(2)}],
+
+        ["mousedown", {button:  0, clientX: mapX(19), clientY: mapY(2)}],
+        ["mousemove", {buttons: 1, clientX: mapX(25), clientY: mapY(2)}],
+        ["mouseup",   {button:  0, clientX: mapX(25), clientY: mapY(2)}],
+
+        ["mousedown", {button:  0, clientX: mapX(27), clientY: mapY(2)}],
+        ["mousemove", {buttons: 1, clientX: mapX(29), clientY: mapY(2)}],
+        ["mouseup",   {button:  0, clientX: mapX(29), clientY: mapY(2)}],
+
+        0,
+
+        // NDIFF
+        ["mousedown", {button:  0, clientX: mapX(13), clientY: mapY(28)}],
+        ["mousemove", {buttons: 1, clientX: mapX(17), clientY: mapY(28)}],
+        ["mouseup",   {button:  0, clientX: mapX(17), clientY: mapY(28)}],
+
+        0,
+
+        // POLY
+        ["mousedown", {button:  0, clientX: mapX(9),  clientY: mapY(1)}],
+        ["mousemove", {buttons: 1, clientX: mapX(9),  clientY: mapY(29)}],
+        ["mouseup",   {button:  0, clientX: mapX(9),  clientY: mapY(29)}],
+
+        ["mousedown", {button:  0, clientX: mapX(15), clientY: mapY(1)}],
+        ["mousemove", {buttons: 1, clientX: mapX(15), clientY: mapY(29)}],
+        ["mouseup",   {button:  0, clientX: mapX(15), clientY: mapY(29)}],
+
+        ["mousedown", {button:  0, clientX: mapX(21), clientY: mapY(1)}],
+        ["mousemove", {buttons: 1, clientX: mapX(21), clientY: mapY(29)}],
+        ["mouseup",   {button:  0, clientX: mapX(21), clientY: mapY(29)}],
+
+        0,
+
+        // METAL1
+        ["mousedown", {button:  0, clientX: mapX(11), clientY: mapY(2)}],
+        ["mousemove", {buttons: 1, clientX: mapX(11), clientY: mapY(7)}],
+        ["mouseup",   {button:  0, clientX: mapX(11), clientY: mapY(7)}],
+
+        ["mousedown", {button:  0, clientX: mapX(11), clientY: mapY(7)}],
+        ["mousemove", {buttons: 1, clientX: mapX(15), clientY: mapY(7)}],
+        ["mouseup",   {button:  0, clientX: mapX(15), clientY: mapY(7)}],
+
+        ["mousedown", {button:  0, clientX: mapX(25), clientY: mapY(2)}],
+        ["mousemove", {buttons: 1, clientX: mapX(25), clientY: mapY(10)}],
+        ["mouseup",   {button:  0, clientX: mapX(25), clientY: mapY(10)}],
+
+        ["mousedown", {button:  0, clientX: mapX(15), clientY: mapY(10)}],
+        ["mousemove", {buttons: 1, clientX: mapX(25), clientY: mapY(10)}],
+        ["mouseup",   {button:  0, clientX: mapX(25), clientY: mapY(10)}],
+
+        ["mousedown", {button:  0, clientX: mapX(27), clientY: mapY(2)}],
+        ["mousemove", {buttons: 1, clientX: mapX(27), clientY: mapY(22)}],
+        ["mouseup",   {button:  0, clientX: mapX(27), clientY: mapY(22)}],
+
+        ["mousedown", {button:  0, clientX: mapX(17), clientY: mapY(22)}],
+        ["mousemove", {buttons: 1, clientX: mapX(27), clientY: mapY(22)}],
+        ["mouseup",   {button:  0, clientX: mapX(27), clientY: mapY(22)}],
+
+        0,
+
+        // METAL2
+        ["mousedown", {button:  0, clientX: mapX(17), clientY: mapY(2)}],
+        ["mousemove", {buttons: 1, clientX: mapX(17), clientY: mapY(28)}],
+        ["mouseup",   {button:  0, clientX: mapX(17), clientY: mapY(28)}],
+
+        0,
+
+        // CONTACT
+        ["mousedown", {button:  0, clientX: mapX(11), clientY: mapY(2)}],
+        ["mouseup",   {button:  0, clientX: mapX(11), clientY: mapY(2)}],
+
+        ["mousedown", {button:  0, clientX: mapX(17), clientY: mapY(2)}],
+        ["mouseup",   {button:  0, clientX: mapX(17), clientY: mapY(2)}],
+
+        ["mousedown", {button:  0, clientX: mapX(25), clientY: mapY(2)}],
+        ["mouseup",   {button:  0, clientX: mapX(25), clientY: mapY(2)}],
+
+        ["mousedown", {button:  0, clientX: mapX(27), clientY: mapY(2)}],
+        ["mouseup",   {button:  0, clientX: mapX(27), clientY: mapY(2)}],
+
+        ["mousedown", {button:  0, clientX: mapX(15), clientY: mapY(7)}],
+        ["mouseup",   {button:  0, clientX: mapX(15), clientY: mapY(7)}],
+
+        ["mousedown", {button:  0, clientX: mapX(15), clientY: mapY(10)}],
+        ["mouseup",   {button:  0, clientX: mapX(15), clientY: mapY(10)}],
+
+        ["mousedown", {button:  0, clientX: mapX(17), clientY: mapY(22)}],
+        ["mouseup",   {button:  0, clientX: mapX(17), clientY: mapY(22)}],
+
+        ["mousedown", {button:  0, clientX: mapX(17), clientY: mapY(28)}],
+        ["mouseup",   {button:  0, clientX: mapX(17), clientY: mapY(28)}],
+
+        2,
+        "1XX011001010ZZZZ",
+
+        /* Indirectly overdriven gates via NMOS */
+        1,
+        function() {
+            diagram.inputs[0].x  = 8;
+            diagram.inputs[0].y  = 14;
+            diagram.inputs[1].x  = 20;
+            diagram.inputs[1].y  = 14;
+            diagram.inputs[2].x  = 4;
+            diagram.inputs[2].y  = 1;
+            diagram.inputs[3].x  = 18;
+            diagram.inputs[3].y  = 1;
+            diagram.outputs[0].x = 26;
+            diagram.outputs[0].y = 14;
+            diagram.vddCell.x    = 12;
+            diagram.vddCell.y    = 27;
+            diagram.gndCell.x    = 12;
+            diagram.gndCell.y    = 1;
+        },
+
+        // Clear the canvas
+        ["mousedown", {button:  2, clientX: mapX(1),   clientY: mapY(1)}],
+        ["mousemove", {buttons: 2, clientX: mapX(29),  clientY: mapY(29)}],
+        ["mouseup",   {button:  2, clientX: mapX(29),  clientY: mapY(29)}],
+
+        0,
+
+        // PDIFF
+        ["mousedown", {button:  0, clientX: mapX(13), clientY: mapY(28)}],
+        ["mousemove", {buttons: 1, clientX: mapX(17), clientY: mapY(28)}],
+        ["mouseup",   {button:  0, clientX: mapX(17), clientY: mapY(28)}],
+
+        0,
+
+        // NDIFF
+        ["mousedown", {button:  0, clientX: mapX(1),  clientY: mapY(2)}],
+        ["mousemove", {buttons: 1, clientX: mapX(11), clientY: mapY(2)}],
+        ["mouseup",   {button:  0, clientX: mapX(11), clientY: mapY(2)}],
+
+        ["mousedown", {button:  0, clientX: mapX(13), clientY: mapY(2)}],
+        ["mousemove", {buttons: 1, clientX: mapX(17), clientY: mapY(2)}],
+        ["mouseup",   {button:  0, clientX: mapX(17), clientY: mapY(2)}],
+
+        ["mousedown", {button:  0, clientX: mapX(19), clientY: mapY(2)}],
+        ["mousemove", {buttons: 1, clientX: mapX(25), clientY: mapY(2)}],
+        ["mouseup",   {button:  0, clientX: mapX(25), clientY: mapY(2)}],
+
+        ["mousedown", {button:  0, clientX: mapX(27), clientY: mapY(2)}],
+        ["mousemove", {buttons: 1, clientX: mapX(29), clientY: mapY(2)}],
+        ["mouseup",   {button:  0, clientX: mapX(29), clientY: mapY(2)}],
+
+        0,
+
+        // POLY
+        ["mousedown", {button:  0, clientX: mapX(9),  clientY: mapY(1)}],
+        ["mousemove", {buttons: 1, clientX: mapX(9),  clientY: mapY(29)}],
+        ["mouseup",   {button:  0, clientX: mapX(9),  clientY: mapY(29)}],
+
+        ["mousedown", {button:  0, clientX: mapX(15), clientY: mapY(1)}],
+        ["mousemove", {buttons: 1, clientX: mapX(15), clientY: mapY(29)}],
+        ["mouseup",   {button:  0, clientX: mapX(15), clientY: mapY(29)}],
+
+        ["mousedown", {button:  0, clientX: mapX(21), clientY: mapY(1)}],
+        ["mousemove", {buttons: 1, clientX: mapX(21), clientY: mapY(29)}],
+        ["mouseup",   {button:  0, clientX: mapX(21), clientY: mapY(29)}],
+
+        0,
+
+        // METAL1
+        ["mousedown", {button:  0, clientX: mapX(11), clientY: mapY(2)}],
+        ["mousemove", {buttons: 1, clientX: mapX(11), clientY: mapY(7)}],
+        ["mouseup",   {button:  0, clientX: mapX(11), clientY: mapY(7)}],
+
+        ["mousedown", {button:  0, clientX: mapX(11), clientY: mapY(7)}],
+        ["mousemove", {buttons: 1, clientX: mapX(15), clientY: mapY(7)}],
+        ["mouseup",   {button:  0, clientX: mapX(15), clientY: mapY(7)}],
+
+        ["mousedown", {button:  0, clientX: mapX(25), clientY: mapY(2)}],
+        ["mousemove", {buttons: 1, clientX: mapX(25), clientY: mapY(10)}],
+        ["mouseup",   {button:  0, clientX: mapX(25), clientY: mapY(10)}],
+
+        ["mousedown", {button:  0, clientX: mapX(15), clientY: mapY(10)}],
+        ["mousemove", {buttons: 1, clientX: mapX(25), clientY: mapY(10)}],
+        ["mouseup",   {button:  0, clientX: mapX(25), clientY: mapY(10)}],
+
+        ["mousedown", {button:  0, clientX: mapX(27), clientY: mapY(2)}],
+        ["mousemove", {buttons: 1, clientX: mapX(27), clientY: mapY(22)}],
+        ["mouseup",   {button:  0, clientX: mapX(27), clientY: mapY(22)}],
+
+        ["mousedown", {button:  0, clientX: mapX(17), clientY: mapY(22)}],
+        ["mousemove", {buttons: 1, clientX: mapX(27), clientY: mapY(22)}],
+        ["mouseup",   {button:  0, clientX: mapX(27), clientY: mapY(22)}],
+
+        0,
+
+        // METAL2
+        ["mousedown", {button:  0, clientX: mapX(17), clientY: mapY(2)}],
+        ["mousemove", {buttons: 1, clientX: mapX(17), clientY: mapY(28)}],
+        ["mouseup",   {button:  0, clientX: mapX(17), clientY: mapY(28)}],
+
+        0,
+
+        // CONTACT
+        ["mousedown", {button:  0, clientX: mapX(11), clientY: mapY(2)}],
+        ["mouseup",   {button:  0, clientX: mapX(11), clientY: mapY(2)}],
+
+        ["mousedown", {button:  0, clientX: mapX(17), clientY: mapY(2)}],
+        ["mouseup",   {button:  0, clientX: mapX(17), clientY: mapY(2)}],
+
+        ["mousedown", {button:  0, clientX: mapX(25), clientY: mapY(2)}],
+        ["mouseup",   {button:  0, clientX: mapX(25), clientY: mapY(2)}],
+
+        ["mousedown", {button:  0, clientX: mapX(27), clientY: mapY(2)}],
+        ["mouseup",   {button:  0, clientX: mapX(27), clientY: mapY(2)}],
+
+        ["mousedown", {button:  0, clientX: mapX(15), clientY: mapY(7)}],
+        ["mouseup",   {button:  0, clientX: mapX(15), clientY: mapY(7)}],
+
+        ["mousedown", {button:  0, clientX: mapX(15), clientY: mapY(10)}],
+        ["mouseup",   {button:  0, clientX: mapX(15), clientY: mapY(10)}],
+
+        ["mousedown", {button:  0, clientX: mapX(17), clientY: mapY(22)}],
+        ["mouseup",   {button:  0, clientX: mapX(17), clientY: mapY(22)}],
+
+        ["mousedown", {button:  0, clientX: mapX(17), clientY: mapY(28)}],
+        ["mouseup",   {button:  0, clientX: mapX(17), clientY: mapY(28)}],
+
+        2,
+        "ZZZZ101011001XX0",
    ];
 
     /** RUN TESTBENCH **/
