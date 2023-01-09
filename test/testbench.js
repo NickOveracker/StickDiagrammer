@@ -76,6 +76,7 @@ function runTestbench(runTo) {
                      "Two inputs driving single PMOS gate",
                      "VDD & GND driving single NMOS gate",
                      "Two inputs driving single NMOS gate",
+                     "Indirectly overdriven output via NMOS",
     ];
     runTo = runTo || testCases.length;
 
@@ -1956,6 +1957,49 @@ function runTestbench(runTo) {
 
         2,
         "ZZZZXXXXXXXX0000",
+
+        /** Indirectly overdriven output via NMOS **/
+        1,
+        function() {
+            diagram.inputs[0].x  = 6;
+            diagram.inputs[0].y  = 14;
+            diagram.inputs[1].x  = 22;
+            diagram.inputs[1].y  = 14;
+            diagram.inputs[2].x  = 3;
+            diagram.inputs[2].y  = 6;
+            diagram.inputs[3].x  = 25;
+            diagram.inputs[3].y  = 6;
+            diagram.outputs[0].x = 14;
+            diagram.outputs[0].y = 6;
+            diagram.vddCell.x    = 0;
+            diagram.vddCell.y    = 0;
+            diagram.gndCell.x    = 0;
+            diagram.gndCell.y    = 28;
+        },
+
+        // Clear the canvas
+        ["mousedown", {button:  2, clientX: mapX(1),   clientY: mapY(1)}],
+        ["mousemove", {buttons: 2, clientX: mapX(29),  clientY: mapY(29)}],
+        ["mouseup",   {button:  2, clientX: mapX(29),  clientY: mapY(29)}],
+
+        // NDIFF
+        ["mousedown", {button:  0, clientX: mapX(1),  clientY: mapY(7)}],
+        ["mousemove", {buttons: 1, clientX: mapX(29), clientY: mapY(7)}],
+        ["mouseup",   {button:  0, clientX: mapX(29), clientY: mapY(7)}],
+
+        0,
+
+        // POLY
+        ["mousedown", {button:  0, clientX: mapX(7),  clientY: mapY(1)}],
+        ["mousemove", {buttons: 1, clientX: mapX(7),  clientY: mapY(29)}],
+        ["mouseup",   {button:  0, clientX: mapX(7),  clientY: mapY(29)}],
+
+        ["mousedown", {button:  0, clientX: mapX(23), clientY: mapY(1)}],
+        ["mousemove", {buttons: 1, clientX: mapX(23), clientY: mapY(29)}],
+        ["mouseup",   {button:  0, clientX: mapX(23), clientY: mapY(29)}],
+
+        2,
+        "ZZZZ010100110XX1",
    ];
 
     /** RUN TESTBENCH **/
