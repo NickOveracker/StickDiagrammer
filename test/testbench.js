@@ -553,8 +553,8 @@ function runTestbench(runTo) {
         ["mouseup",   {button:  2, clientX: mapX(7),   clientY: mapY(25)}],
 
         ["mousedown", {button:  2, clientX: mapX(14),  clientY: mapY(13)}],
-        ["mousemove", {buttons: 2, clientX: mapX(14),  clientY: mapY(27)}],
-        ["mouseup",   {button:  2, clientX: mapX(14),  clientY: mapY(27)}],
+        ["mousemove", {buttons: 2, clientX: mapX(14),  clientY: mapY(28)}],
+        ["mouseup",   {button:  2, clientX: mapX(14),  clientY: mapY(28)}],
 
         ["mousedown", {button:  2, clientX: mapX(19),   clientY: mapY(12)}],
         ["mousemove", {buttons: 2, clientX: mapX(19),   clientY: mapY(25)}],
@@ -565,8 +565,8 @@ function runTestbench(runTo) {
         ["mouseup",   {button:  2, clientX: mapX(24),   clientY: mapY(11)}],
 
         ["mousedown", {button:  2, clientX: mapX(24),   clientY: mapY(26)}],
-        ["mousemove", {buttons: 2, clientX: mapX(24),   clientY: mapY(27)}],
-        ["mouseup",   {button:  2, clientX: mapX(24),   clientY: mapY(27)}],
+        ["mousemove", {buttons: 2, clientX: mapX(24),   clientY: mapY(28)}],
+        ["mouseup",   {button:  2, clientX: mapX(24),   clientY: mapY(28)}],
 
         // Diagram.CONTACTS
         ["mousedown", {button:  0, clientX: mapX(6),   clientY: mapY(5)}],
@@ -598,6 +598,10 @@ function runTestbench(runTo) {
 
         0, // POLY
         0, // METAL1
+        ["mousedown", {button:  0, clientX: mapX(2),  clientY: mapY(28)}],
+        ["mousemove", {buttons: 1, clientX: mapX(28), clientY: mapY(28)}],
+        ["mouseup",   {button:  0, clientX: mapX(28), clientY: mapY(28)}],
+
         ["mousedown", {button:  0, clientX: mapX(6),   clientY: mapY(12)}],
         ["mouseup",   {button:  0, clientX: mapX(6),   clientY: mapY(12)}],
 
