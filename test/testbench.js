@@ -245,6 +245,9 @@ function runTestbench(runTo) {
         ["mouseup",   {button:  0, clientX: mapX(26),  clientY: mapY(28)}],
 
         // PDIFF to METAL
+        ["mousedown", {button:  0, clientX: mapX(2),  clientY: mapY(5)}],
+        ["mouseup",   {button:  0, clientX: mapX(2),  clientY: mapY(5)}],
+
         ["mousedown", {button:  0, clientX: mapX(6),  clientY: mapY(5)}],
         ["mouseup",   {button:  0, clientX: mapX(6),  clientY: mapY(5)}],
 
