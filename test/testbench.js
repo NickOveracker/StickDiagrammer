@@ -164,9 +164,9 @@ function runTestbench(runTo) {
         ["mousemove", {buttons: 1, clientX: mapX(20),  clientY: mapY(2)}],
         ["mouseup",   {button:  0, clientX: mapX(20),  clientY: mapY(2)}],
 
-        ["mousedown", {button:  0, clientX: mapX(26),  clientY: mapY(2)}],
-        ["mousemove", {button:  1, clientX: mapX(26),  clientY: mapY(5)}],
-        ["mouseup",   {button:  0, clientX: mapX(26),  clientY: mapY(5)}],
+        ["mousedown", {button:  0, clientX: mapX(26),  clientY: mapY(5)}],
+        ["mousemove", {button:  1, clientX: mapX(26),  clientY: mapY(2)}],
+        ["mouseup",   {button:  0, clientX: mapX(26),  clientY: mapY(2)}],
 
         // GND to NDIFF
         ["mousedown", {button:  0, clientX: mapX(2),   clientY: mapY(25)}],
