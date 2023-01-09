@@ -72,6 +72,7 @@ function runTestbench(runTo) {
                     "SR latch Q",
                     "SR latch Q'",
                     "D flip-flop",
+                    "VDD & GND driving single PMOS gate",
     ];
     runTo = runTo || testCases.length;
 
@@ -1820,6 +1821,50 @@ function runTestbench(runTo) {
 
         2,
         "ZZZZ0000ZZZZ1111",
+
+        /** GND and VDD on gate **/
+        1,
+        function() {
+            diagram.inputs[0].x  = 7;
+            diagram.inputs[0].y  = 6;
+            diagram.inputs[1].x  = 28;
+            diagram.inputs[1].y  = 28;
+            diagram.inputs[2].x  = 28;
+            diagram.inputs[2].y  = 28;
+            diagram.inputs[3].x  = 28;
+            diagram.inputs[3].y  = 28;
+            diagram.outputs[0].x = 21;
+            diagram.outputs[0].y = 6;
+            diagram.vddCell.x    = 14;
+            diagram.vddCell.y    = 14;
+            diagram.gndCell.x    = 14;
+            diagram.gndCell.y    = 14;
+        },
+
+        // Clear the canvas
+        ["mousedown", {button:  2, clientX: mapX(1),   clientY: mapY(1)}],
+        ["mousemove", {buttons: 2, clientX: mapX(29),  clientY: mapY(29)}],
+        ["mouseup",   {button:  2, clientX: mapX(29),  clientY: mapY(29)}],
+
+        0,
+        0,
+        0,
+
+        // PDIFF
+        ["mousedown", {button:  0, clientX: mapX(1),  clientY: mapY(7)}],
+        ["mousemove", {buttons: 1, clientX: mapX(29), clientY: mapY(7)}],
+        ["mouseup",   {button:  0, clientX: mapX(29), clientY: mapY(7)}],
+
+        0,
+        0,
+
+        // POLY
+        ["mousedown", {button:  0, clientX: mapX(15), clientY: mapY(1)}],
+        ["mousemove", {buttons: 1, clientX: mapX(15), clientY: mapY(29)}],
+        ["mouseup",   {button:  0, clientX: mapX(15), clientY: mapY(29)}],
+
+        2,
+        "XXXXXXXXXXXXXXXX",
    ];
 
     /** RUN TESTBENCH **/
