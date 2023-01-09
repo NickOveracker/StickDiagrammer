@@ -465,20 +465,7 @@ function runTestbench(runTo) {
         0,
 
         0,
-
         // METAL
-        ["mousedown", {button:  0, clientX: mapX(24), clientY: mapY(25)}],
-        ["mousemove", {buttons: 1, clientX: mapX(24), clientY: mapY(27)}],
-        ["mouseup",   {button:  0, clientX: mapX(24), clientY: mapY(27)}],
-
-        ["mousedown", {button:  0, clientX: mapX(7),  clientY: mapY(12)}],
-        ["mousemove", {buttons: 1, clientX: mapX(7),  clientY: mapY(25)}],
-        ["mouseup",   {button:  0, clientX: mapX(7),  clientY: mapY(25)}],
-
-        ["mousedown", {button:  0, clientX: mapX(19), clientY: mapY(12)}],
-        ["mousemove", {buttons: 1, clientX: mapX(19), clientY: mapY(25)}],
-        ["mouseup",   {button:  0, clientX: mapX(19), clientY: mapY(25)}],
-
         ["mousedown", {button:  0, clientX: mapX(7),  clientY: mapY(12)}],
         ["mousemove", {buttons: 1, clientX: mapX(24), clientY: mapY(12)}],
         ["mouseup",   {button:  0, clientX: mapX(24), clientY: mapY(12)}],
@@ -493,10 +480,24 @@ function runTestbench(runTo) {
         ["mousedown", {button:  0, clientX: mapX(20),   clientY: mapY(28)}],
         ["mouseup",   {button:  0, clientX: mapX(20),   clientY: mapY(28)}],
 
-        0, // Metal2
+        0,
+        // Metal2
+        ["mousedown", {button:  0, clientX: mapX(24), clientY: mapY(25)}],
+        ["mousemove", {buttons: 1, clientX: mapX(24), clientY: mapY(28)}],
+        ["mouseup",   {button:  0, clientX: mapX(24), clientY: mapY(28)}],
+
+        ["mousedown", {button:  0, clientX: mapX(7),  clientY: mapY(12)}],
+        ["mousemove", {buttons: 1, clientX: mapX(7),  clientY: mapY(25)}],
+        ["mouseup",   {button:  0, clientX: mapX(7),  clientY: mapY(25)}],
+
+        ["mousedown", {button:  0, clientX: mapX(19), clientY: mapY(12)}],
+        ["mousemove", {buttons: 1, clientX: mapX(19), clientY: mapY(25)}],
+        ["mouseup",   {button:  0, clientX: mapX(19), clientY: mapY(25)}],
+
+ 
         0,
 
-        // Diagram.CONTACTS
+        // Contacts
         ["mousedown", {button:  0, clientX: mapX(7),  clientY: mapY(25)}],
         ["mouseup",   {button:  0, clientX: mapX(7),  clientY: mapY(25)}],
 
@@ -505,6 +506,12 @@ function runTestbench(runTo) {
 
         ["mousedown", {button:  0, clientX: mapX(24),   clientY: mapY(12)}],
         ["mouseup",   {button:  0, clientX: mapX(24),   clientY: mapY(12)}],
+
+        ["mousedown", {button:  0, clientX: mapX(24), clientY: mapY(28)}],
+        ["mouseup",   {button:  0, clientX: mapX(24), clientY: mapY(28)}],
+
+        ["mousedown", {button:  0, clientX: mapX(7),  clientY: mapY(12)}],
+        ["mouseup",   {button:  0, clientX: mapX(19), clientY: mapY(12)}],
 
         1,
 
@@ -530,7 +537,7 @@ function runTestbench(runTo) {
 
         // Place terminals
         function() {
-            diagram.outputs[0].x = 25;
+            diagram.outputs[0].x = 26;
             diagram.outputs[0].y = 14;
         },
 
