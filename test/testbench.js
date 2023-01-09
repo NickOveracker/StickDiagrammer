@@ -641,10 +641,10 @@ function runTestbench(runTo) {
         ["mousemove", {buttons: 1, clientX: mapX(24),   clientY: mapY(5)}],
         ["mouseup",   {button:  0, clientX: mapX(24),   clientY: mapY(5)}],
 
-        0, // CONTACT
-        0, // PDIFF
-        0, // NDIFF
-        0, // POLY
+        0, 
+        0, 
+        0, 
+        0,
  
         2,
         "1111111111111110",
