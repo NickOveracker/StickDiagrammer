@@ -418,6 +418,10 @@ function runTestbench(runTo) {
         ["mousemove", {buttons: 2, clientX: mapX(20),  clientY: mapY(4)}],
         ["mouseup",   {button:  2, clientX: mapX(20),  clientY: mapY(4)}],
 
+        ["mousedown", {button:  2, clientX: mapX(3),   clientY: mapY(2)}],
+        ["mousemove", {buttons: 2, clientX: mapX(25),  clientY: mapY(2)}],
+        ["mouseup",   {button:  2, clientX: mapX(25),  clientY: mapY(2)}],
+
         ["mousedown", {button:  2, clientX: mapX(5),   clientY: mapY(5)}],
         ["mousemove", {buttons: 2, clientX: mapX(9),   clientY: mapY(27)}],
         ["mouseup",   {button:  2, clientX: mapX(9),   clientY: mapY(27)}],
@@ -437,6 +441,12 @@ function runTestbench(runTo) {
         ["mousedown", {button:  2, clientX: mapX(23),   clientY: mapY(16)}],
         ["mousemove", {buttons: 2, clientX: mapX(24),   clientY: mapY(24)}],
         ["mouseup",   {button:  2, clientX: mapX(24),   clientY: mapY(24)}],
+
+        ["mousedown", {button:  2, clientX: mapX(8),    clientY: mapY(28)}],
+        ["mouseup",   {button:  2, clientX: mapX(8),    clientY: mapY(28)}],
+
+        ["mousedown", {button:  2, clientX: mapX(20),   clientY: mapY(28)}],
+        ["mouseup",   {button:  2, clientX: mapX(20),   clientY: mapY(28)}],
 
         0,
 
@@ -472,6 +482,16 @@ function runTestbench(runTo) {
         ["mousedown", {button:  0, clientX: mapX(7),  clientY: mapY(12)}],
         ["mousemove", {buttons: 1, clientX: mapX(24), clientY: mapY(12)}],
         ["mouseup",   {button:  0, clientX: mapX(24), clientY: mapY(12)}],
+
+        ["mousedown", {button:  0, clientX: mapX(3),   clientY: mapY(2)}],
+        ["mousemove", {buttons: 1, clientX: mapX(25),  clientY: mapY(2)}],
+        ["mouseup",   {button:  0, clientX: mapX(25),  clientY: mapY(2)}],
+
+        ["mousedown", {button:  0, clientX: mapX(8),    clientY: mapY(28)}],
+        ["mouseup",   {button:  0, clientX: mapX(8),    clientY: mapY(28)}],
+
+        ["mousedown", {button:  0, clientX: mapX(20),   clientY: mapY(28)}],
+        ["mouseup",   {button:  0, clientX: mapX(20),   clientY: mapY(28)}],
 
         0, // Metal2
         0,
