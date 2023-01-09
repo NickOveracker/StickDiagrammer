@@ -77,6 +77,7 @@ function runTestbench(runTo) {
                      "VDD & GND driving single NMOS gate",
                      "Two inputs driving single NMOS gate",
                      "Indirectly overdriven output via NMOS",
+                     "Indirectly overdriven output via PMOS",
     ];
     runTo = runTo || testCases.length;
 
@@ -2000,6 +2001,35 @@ function runTestbench(runTo) {
 
         2,
         "ZZZZ010100110XX1",
+
+        /** Indirectly overdriven output via PMOS **/
+
+        // Clear the canvas
+        ["mousedown", {button:  2, clientX: mapX(1),   clientY: mapY(1)}],
+        ["mousemove", {buttons: 2, clientX: mapX(29),  clientY: mapY(29)}],
+        ["mouseup",   {button:  2, clientX: mapX(29),  clientY: mapY(29)}],
+
+        // POLY
+        ["mousedown", {button:  0, clientX: mapX(7),  clientY: mapY(1)}],
+        ["mousemove", {buttons: 1, clientX: mapX(7),  clientY: mapY(29)}],
+        ["mouseup",   {button:  0, clientX: mapX(7),  clientY: mapY(29)}],
+
+        ["mousedown", {button:  0, clientX: mapX(23), clientY: mapY(1)}],
+        ["mousemove", {buttons: 1, clientX: mapX(23), clientY: mapY(29)}],
+        ["mouseup",   {button:  0, clientX: mapX(23), clientY: mapY(29)}],
+
+        0,
+        0,
+        0,
+        0,
+
+        // PDIFF
+        ["mousedown", {button:  0, clientX: mapX(1),  clientY: mapY(7)}],
+        ["mousemove", {buttons: 1, clientX: mapX(29), clientY: mapY(7)}],
+        ["mouseup",   {button:  0, clientX: mapX(29), clientY: mapY(7)}],
+
+        2,
+        "0XX1001101010XX1",
    ];
 
     /** RUN TESTBENCH **/
