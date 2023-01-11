@@ -19,6 +19,8 @@
 * Software entropy must not increase.
 
 ## Feature Wishlist
+* Interactive tutorial.
+* Allow users to select where to insert rows and columns.
 * Student/Teacher modes with generating/grading homework, practice problems, etc.
 * Draw CMOS circuit schematic corresponding to the painted topology.
 * Logical effort calculations (allow user to set constants)
