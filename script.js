@@ -2577,15 +2577,6 @@ function refreshTruthTable(suppressSetNets) {
         diagram.setNets();
     }
 
-    // If poly ever shares a net with diffusion, we have a problem.
-    for(let ii = 0; ii < diagram.inputNets.length; ii++) {
-        let net = diagram.inputNets[ii];
-        if(net.isInput && net.hasPoly && net.hasDiff) {
-            alert("Unresolvable error: A single input must not be connected to both poly and diffusion layers.");
-            error = true;
-        }
-    }
-
     // Create a table with the correct number of rows and columns.
     // The first row should be a header.
     let table = buildTruthTable();
