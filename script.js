@@ -1001,7 +1001,7 @@ class Diagram {
         'use strict';
         let cell = this.layeredGrid.get(x, y, layer);
         
-        if (cell.isSet) {
+        if (!!cell && cell.isSet) {
             if(this.layeredGrid.get(x, y, Diagram.POLY).isSet) {
                 // If the foolish user set a wide poly, then skip this cell and move on.
                 // This will help us get to the other side of the poly.
