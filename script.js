@@ -431,7 +431,7 @@ class Diagram {
         this.mapNodes(node, targetNode, null);
 
         // If the test node is a transistor,
-        // only traverse if the gate is active.
+        // only traverse the channel if the gate is active.
         // If it's inactive, exit this recursion.
         if (node.isTransistor()) {
             // true for active, false for inactive.
