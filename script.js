@@ -517,7 +517,8 @@ class Diagram {
     gateIsActive(node, inputVals) {
         'use strict';
         let gateNet = node.cell.gate;
-        let connectedNodeIterator, hasNullPath;
+        let connectedNodeIterator;
+        let relevantPathExists, oppositePathExists, relevantNode, oppositeNode;
 
         // If the gate is an input, the gate's state depends on the input value.
         if (gateNet.isInput) {
@@ -551,13 +552,10 @@ class Diagram {
 
         // Otherwise, recurse and see if this is active.
         connectedNodeIterator = gateNet.nodes.values();
-        hasNullPath = false;
 
         // Iterate through the nodes in the same net as the gate.
         for (let connectedNode = connectedNodeIterator.next(); !connectedNode.done; connectedNode = connectedNodeIterator.next()) {
             connectedNode = connectedNode.value;
-
-            let relevantPathExists, oppositePathExists, relevantNode, oppositeNode;
 
             // Determine the relevant power or ground node for the current gate type.
             if(node.isPmos) {
@@ -571,26 +569,13 @@ class Diagram {
             // Check if there is a path between the current node and the relevant power or ground node.
             relevantPathExists = this.computeOutputRecursive(connectedNode, relevantNode, inputVals);
             oppositePathExists = this.computeOutputRecursive(connectedNode, oppositeNode, inputVals);
-            // If the path has not yet been determined, set hasNullPath to true
-            if (relevantPathExists === null) {
-                hasNullPath = true;
-            }
-            // If the path exists, return true.
-            else if(relevantPathExists) {
-                if(oppositePathExists) {
-                    this.gateConflict = true;
-                }
-                return true;
-            }
+
+            // Gate conflict if paths exist to both VDD and GND.
+            this.gateConflict = relevantPathExists && oppositePathExists;
         }
 
-        // If any paths have not yet been determined, return null.
-        if(hasNullPath) {
-            return null;
-        }
-
-        // Otherwise, return false.
-        return false;
+        // Can be null if we could not complete the computation and determine an answer.
+        return relevantPathExists;
     }
 
     // Computes the value of a particular output node for a given set of inputs.
