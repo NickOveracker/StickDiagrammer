@@ -557,10 +557,6 @@ class Diagram {
         for (let connectedNode = connectedNodeIterator.next(); !connectedNode.done; connectedNode = connectedNodeIterator.next()) {
             connectedNode = connectedNode.value;
 
-            // Check if there is a known path between the current node and the ground node.
-            let gateToGnd = this.pathExists(connectedNode, this.gndNode);
-            // Check if there is a known path between the current node and the power node.
-            let gateToVdd = this.pathExists(connectedNode, this.vddNode);
             let relevantPathExists, oppositePathExists, relevantNode, oppositeNode;
 
             // Determine the relevant power or ground node for the current gate type.
