@@ -504,6 +504,7 @@ class Diagram {
         }
     }
 
+
     // This function determines whether a transistor gate is active by evaluating 
     // the paths between the gate's nodes and either the ground node or the power node.
     //
@@ -517,8 +518,7 @@ class Diagram {
     gateIsActive(node, inputVals) {
         'use strict';
         let gateNet = node.cell.gate;
-        let connectedNodeIterator;
-        let relevantPathExists, oppositePathExists, relevantNode, oppositeNode;
+        let connectedNodeIterator, hasNullPath;
 
         // If the gate is an input, the gate's state depends on the input value.
         if (gateNet.isInput) {
@@ -552,10 +552,17 @@ class Diagram {
 
         // Otherwise, recurse and see if this is active.
         connectedNodeIterator = gateNet.nodes.values();
+        hasNullPath = false;
 
         // Iterate through the nodes in the same net as the gate.
         for (let connectedNode = connectedNodeIterator.next(); !connectedNode.done; connectedNode = connectedNodeIterator.next()) {
             connectedNode = connectedNode.value;
+
+            // Check if there is a known path between the current node and the ground node.
+            let gateToGnd = this.pathExists(connectedNode, this.gndNode);
+            // Check if there is a known path between the current node and the power node.
+            let gateToVdd = this.pathExists(connectedNode, this.vddNode);
+            let relevantPathExists, oppositePathExists, relevantNode, oppositeNode;
 
             // Determine the relevant power or ground node for the current gate type.
             if(node.isPmos) {
@@ -570,12 +577,25 @@ class Diagram {
             relevantPathExists = this.computeOutputRecursive(connectedNode, relevantNode, inputVals);
             oppositePathExists = this.computeOutputRecursive(connectedNode, oppositeNode, inputVals);
 
-            // Gate conflict if paths exist to both VDD and GND.
-            this.gateConflict = relevantPathExists && oppositePathExists;
+            // If the path has not yet been determined, set hasNullPath to true
+            // Set and hold if any null path to the relevant node is found in *any* loop iteration.
+            if (relevantPathExists === null) {
+                hasNullPath = true;
+            }
+            // If the path exists, return true.
+            else if(relevantPathExists) {
+                this.gateConflict = oppositePathExists;
+                return true;
+            }
         }
 
-        // Can be null if we could not complete the computation and determine an answer.
-        return relevantPathExists;
+        // If any paths have not yet been determined, return null.
+        if(hasNullPath) {
+            return null;
+        }
+
+        // Otherwise, return false.
+        return false;
     }
 
     // Computes the value of a particular output node for a given set of inputs.
