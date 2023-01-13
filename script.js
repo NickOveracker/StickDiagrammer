@@ -562,7 +562,10 @@ class Diagram {
         // Initialize to null.
         // This marks the node as currently being checked
         // so that we won't recurse back into it.
-        this.mapNodes(node, targetNode, null);
+        // ("i" is analogous to null - leave "i" as-is)
+        if(hasPath !== "i") {
+            this.mapNodes(node, targetNode, null);
+        }
 
         // If the test node is a transistor,
         // only traverse the channel if the gate is active.
