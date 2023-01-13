@@ -310,9 +310,11 @@ class Diagram {
     // This function updates the mappings between nodes in the graph to reflect whether a path exists between them.
     // If a path exists, it is marked as true; if it does not exist, it is marked as false.
     // If a path has not yet been determined, it is marked as null.
-    // Special case for inputs: Inputs can be virtually linked to VDD or GND with an "I".
-    // This allows us to determine the value of a node without also implying connection to every
-    // other node connected to VDD or GND.
+    //
+    // "i" and "I" are used to map inputs to GND and VDD equivalent signals without linking to their actual nets.
+    // "i" is used when we are not sure whether or not a direct connection to the actual GND/VDD node exists.
+    // "I" is used when there is confirmed to be no direct connection.
+    // true is used when there *is* a direct connection.
     //
     // The mappings are updated for both directions (node1 to node2 and node2 to node1).
     // Additionally, if a path is found or ruled out between node1 and node2, the mappings for all other nodes
@@ -322,8 +324,14 @@ class Diagram {
         let currentMapping = this.pathExists(node1, node2);
 
         // If there is a mapping, do nothing and return
-        if (currentMapping !== undefined && currentMapping !== null && currentMapping !== "I") {
+        if (currentMapping !== undefined && currentMapping !== null && currentMapping !== "i") {
             return;
+        }
+
+        // If the current mapping is "i" and the new mapping is false,
+        // upgrade to "I" (confirmed input only with no direct connection)
+        if(currentMapping === "i" && isPath === false) {
+            isPath = "I";
         }
 
         // Set the mappings (both directions) between node1 and node2 to isPath
@@ -532,7 +540,7 @@ class Diagram {
             if(this.evaluateInput(node, inputVals) === targetNode) {
                 // Test node is an input and exactly the same node as the targetNode.
                 // We will not recurse in this case; we've found the path.
-                this.mapNodes(node, targetNode, "I");
+                this.mapNodes(node, targetNode, "i");
             }
         }
 
@@ -739,7 +747,7 @@ class Diagram {
                 for(let jj = 0; jj < this.graph.nodes.length; jj++) {
                     if(this.nodeNodeMap[ii][jj] === null) {
                         this.nodeNodeMap[ii][jj] = undefined;
-                    } else if(this.nodeNodeMap[ii][jj] === "I") {
+                    } else if(this.nodeNodeMap[ii][jj] === "i" || this.nodeNodeMap[ii][jj] === "I") {
                         this.nodeNodeMap[ii][jj] = true;
                     }
                 }
