@@ -555,7 +555,7 @@ class Diagram {
 
         // Avoid infinite loops.
         // This will be either true, false, or null if it has been/is being checked.
-        if (hasPath !== undefined) {
+        if (hasPath !== undefined && hasPath !== "i") {
             return hasPath; // true, false, or null
         }
 
