@@ -426,8 +426,8 @@ class Diagram {
 
         // If it is reachable at all, compare the paths for inactive and active states.
         if(targetNodeReachable) {
-            gndPathExistsActivated = this.recurseThroughEdges(node, this.gndNet, inputVals).pathFound;
-            vddPathExistsActivated = this.recurseThroughEdges(node, this.vddNet, inputVals).pathFound;
+            gndPathExistsActivated = this.recurseThroughEdges(node, this.gndNode, inputVals).pathFound;
+            vddPathExistsActivated = this.recurseThroughEdges(node, this.vddNode, inputVals).pathFound;
 
             // If there is a conflict when activated, then the target node is definitely overdriven.
             // As long as there is no conflict, proceed.
