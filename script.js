@@ -350,15 +350,18 @@ class Diagram {
 
         // Create a function to sync edges between nodes
         let syncEdges = function(ii, node1, node2) {
-            // If there is a path between ii and node1, set the path between ii and node2 to isPath
-            if (this.nodeNodeMap[ii][this.graph.getIndexByNode(node1)] === true) {
-                this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] = isPath;
-                this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = isPath;
-            // If there is not a path between ii and node1 and isPath is true, set the path between ii and node2 to false
-            // (I.e., any path not connected to node1 is not connected to node2 if node1 and node2 are connected.)
-            } else if (isPath === true && (this.nodeNodeMap[ii][this.graph.getIndexByNode(node1)] === false)) {
-                this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] = false;
-                this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = false;
+            // Only map in one direction if it's a virtual mapping.
+            if(!(isPath === "I" || isPath === "i") || !(this.outputNodes.includes(node1))) {
+                // If there is a path between ii and node1, set the path between ii and node2 to isPath
+                if (this.nodeNodeMap[ii][this.graph.getIndexByNode(node1)] === true) {
+                    this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] = isPath;
+                    this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = isPath;
+                // If there is not a path between ii and node1 and isPath is true, set the path between ii and node2 to false
+                // (I.e., any path not connected to node1 is not connected to node2 if node1 and node2 are connected.)
+                } else if (isPath === true && (this.nodeNodeMap[ii][this.graph.getIndexByNode(node1)] === false)) {
+                    this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] = false;
+                    this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = false;
+                }
             }
         }.bind(this);
 
@@ -366,11 +369,9 @@ class Diagram {
         for (let ii = 0; ii < this.nodeNodeMap.length; ii++) {
             syncEdges(ii, node1, node2);
         }
-        // Now do the reverse if this is a true mapping (not a virtual input mapping).
-        if(isPath !== "i" && isPath !== "I") {
-            for (let ii = 0; ii < this.nodeNodeMap.length; ii++) {
-                syncEdges(ii, node2, node1);
-            }
+        // Now do the reverse
+        for (let ii = 0; ii < this.nodeNodeMap.length; ii++) {
+            syncEdges(ii, node2, node1);
         }
     }
 
