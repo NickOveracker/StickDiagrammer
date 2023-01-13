@@ -310,6 +310,10 @@ class Diagram {
     // This function updates the mappings between nodes in the graph to reflect whether a path exists between them.
     // If a path exists, it is marked as true; if it does not exist, it is marked as false.
     // If a path has not yet been determined, it is marked as null.
+    // Special case for inputs: Inputs can be virtually linked to VDD or GND with an "I".
+    // This allows us to determine the value of a node without also implying connection to every
+    // other node connected to VDD or GND.
+    //
     // The mappings are updated for both directions (node1 to node2 and node2 to node1).
     // Additionally, if a path is found or ruled out between node1 and node2, the mappings for all other nodes
     // connected to node1 or node2 are updated accordingly.
@@ -318,7 +322,7 @@ class Diagram {
         let currentMapping = this.pathExists(node1, node2);
 
         // If there is a mapping, do nothing and return
-        if (currentMapping !== undefined && currentMapping !== null) {
+        if (currentMapping !== undefined && currentMapping !== null && currentMapping !== "I") {
             return;
         }
 
@@ -476,10 +480,10 @@ class Diagram {
 
             // Easy case: We have already found a path from this otherNode.
             if (hasPath) {
-                this.mapNodes(node, targetNode, true);
-                this.mapNodes(node, edge.getOtherNode(node), true);
+                this.mapNodes(node, targetNode, hasPath);
+                this.mapNodes(node, edge.getOtherNode(node), hasPath);
                 /*jshint -W093 */
-                return pathFound = true;
+                return pathFound = hasPath;
                 /*jshint +W093 */
             }
             
@@ -488,10 +492,10 @@ class Diagram {
 
             // Path found from otherNode?
             if (result) {
-                this.mapNodes(node, targetNode, true);
-                this.mapNodes(node, edge.getOtherNode(node), true);
+                this.mapNodes(node, targetNode, result);
+                this.mapNodes(node, edge.getOtherNode(node), result);
                 /*jshint -W093 */
-                return pathFound = true;
+                return pathFound = result;
                 /*jshint +W093 */
             }
 
@@ -528,7 +532,7 @@ class Diagram {
             if(this.evaluateInput(node, inputVals) === targetNode) {
                 // Test node is an input and exactly the same node as the targetNode.
                 // We will not recurse in this case; we've found the path.
-                this.mapNodes(node, targetNode, true);
+                this.mapNodes(node, targetNode, "I");
             }
         }
 
@@ -581,7 +585,7 @@ class Diagram {
         recursionResults = this.recurseThroughEdges(node, targetNode, inputVals);
 
         if(recursionResults.pathFound) {
-            return true; // Done
+            return recursionResults.pathFound; // Done
         } else if(recursionResults.hasNullPath) {
             return null; // Reporting back that a node is already under investigation.
         } else {
@@ -730,10 +734,13 @@ class Diagram {
             // null paths are inconclusive; they mean that the recursion
             // concluded before these paths were proven or disproven.
             // Revert them to undefined for the next loop iteration.
+            // "I" results can be treated as "true" at this stage.
             for(let ii = 0; ii < this.graph.nodes.length; ii++) {
                 for(let jj = 0; jj < this.graph.nodes.length; jj++) {
                     if(this.nodeNodeMap[ii][jj] === null) {
                         this.nodeNodeMap[ii][jj] = undefined;
+                    } else if(this.nodeNodeMap[ii][jj] === "I") {
+                        this.nodeNodeMap[ii][jj] = true;
                     }
                 }
             }
