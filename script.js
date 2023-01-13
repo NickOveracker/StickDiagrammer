@@ -327,7 +327,10 @@ class Diagram {
 
         // If there is a mapping, do nothing and return
         if (currentMapping !== undefined && currentMapping !== null && currentMapping !== "i") {
-            return;
+            // False can be updated to "I".
+            if(currentMapping !== false || isPath !== "I") {
+                return;
+            }
         }
 
         // If the current mapping is "i" and the new mapping is false,
