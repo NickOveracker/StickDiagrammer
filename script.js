@@ -350,12 +350,17 @@ class Diagram {
 
         // Create a function to sync edges between nodes
         let syncEdges = function(ii, node1, node2) {
+            let mapSwitch;
             // Only map in one direction if it's a virtual mapping.
             if(!(isPath === "I" || isPath === "i") || !(this.vddNode === node1 || this.gndNode === node1)) {
                 // If there is a path between ii and node1, set the path between ii and node2 to isPath
                 if (this.nodeNodeMap[ii][this.graph.getIndexByNode(node1)] === true) {
-                    this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] = isPath;
-                    this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = isPath;
+                    mapSwitch = this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] === "I";
+                    mapSwitch = mapSwitch || this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] === "i";
+                    mapSwitch = mapSwitch && (isPath === false);
+
+                    this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] = mapSwitch ? "I" : isPath;
+                    this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = mapSwitch ? "I" : isPath;
                 // If there is not a path between ii and node1 and isPath is true, set the path between ii and node2 to false
                 // (I.e., any path not connected to node1 is not connected to node2 if node1 and node2 are connected.)
                 } else if (isPath === true && (this.nodeNodeMap[ii][this.graph.getIndexByNode(node1)] === false)) {
