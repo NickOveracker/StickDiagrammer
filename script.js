@@ -353,7 +353,7 @@ class Diagram {
                 this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = isPath;
             // If there is not a path between ii and node1 and isPath is true, set the path between ii and node2 to false
             // (I.e., any path not connected to node1 is not connected to node2 if node1 and node2 are connected.)
-            } else if (isPath && (this.nodeNodeMap[ii][this.graph.getIndexByNode(node1)] === false)) {
+            } else if (isPath === true && (this.nodeNodeMap[ii][this.graph.getIndexByNode(node1)] === false)) {
                 this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] = false;
                 this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = false;
             }
