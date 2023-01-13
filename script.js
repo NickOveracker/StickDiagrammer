@@ -604,8 +604,10 @@ class Diagram {
         } else if(recursionResults.hasNullPath) {
             return null; // Reporting back that a node is already under investigation.
         } else {
+            // Direct path does not exist.
             this.mapNodes(node, targetNode, false);
-            return false; // Done
+            // Not returning false directly bc it might be "I".
+            return this.pathExists(node, targetNode);
         }
     }
 
