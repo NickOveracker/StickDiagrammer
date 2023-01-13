@@ -319,6 +319,8 @@ class Diagram {
     // The mappings are updated for both directions (node1 to node2 and node2 to node1).
     // Additionally, if a path is found or ruled out between node1 and node2, the mappings for all other nodes
     // connected to node1 or node2 are updated accordingly.
+    //
+    // As the calling code is written, "i" is only assigned when node1 is an input and node2 is VDD or GND.
     mapNodes(node1, node2, isPath) {
         'use strict';
         let currentMapping = this.pathExists(node1, node2);
@@ -361,9 +363,11 @@ class Diagram {
         for (let ii = 0; ii < this.nodeNodeMap.length; ii++) {
             syncEdges(ii, node1, node2);
         }
-        // Now do the reverse.
-        for (let ii = 0; ii < this.nodeNodeMap.length; ii++) {
-            syncEdges(ii, node2, node1);
+        // Now do the reverse if this is a true mapping (not a virtual input mapping).
+        if(isPath !== "i" && isPath !== "I") {
+            for (let ii = 0; ii < this.nodeNodeMap.length; ii++) {
+                syncEdges(ii, node2, node1);
+            }
         }
     }
 
