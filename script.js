@@ -427,16 +427,9 @@ class Diagram {
     //
     // Unset this.overdrivenPath if the conflict is resolvable.
     attemptGateConflictResolution(node, targetNode, inputVals) {
-        let targetNodeReachable         = false;
-        let gndPathExistsDeactivated1   = false;
-        let vddPathExistsDeactivated1   = false;
-        let gndPathExistsDeactivated2   = false;
-        let vddPathExistsDeactivated2   = false;
-        let gndPathExistsActivated      = false;
-        let vddPathExistsActivated      = false;
-        let nodeTerm1, nodeTerm2;
-        let nodeIterator;
-        let condition;
+        let targetNodeReachable, gndPathExistsDeactivated1, vddPathExistsDeactivated1, gndPathExistsDeactivated2,
+            vddPathExistsDeactivated2, gndPathExistsActivated, vddPathExistsActivated,
+            nodeTerm1, nodeTerm2, nodeIterator, condition;
         // We will need to restore the old map after half of the
         // operation below, but there is no need to restore it at the
         // end. We will have determined that either there is a conflict
@@ -482,10 +475,12 @@ class Diagram {
                 }
 
                 this.deactivateGate(node);
-                gndPathExistsDeactivated1 = this.recurseThroughEdges(nodeTerm1, this.gndNode, inputVals).pathFound;
-                vddPathExistsDeactivated1 = this.recurseThroughEdges(nodeTerm1, this.vddNode, inputVals).pathFound;
-                gndPathExistsDeactivated2 = this.recurseThroughEdges(nodeTerm2, this.gndNode, inputVals).pathFound;
-                vddPathExistsDeactivated2 = this.recurseThroughEdges(nodeTerm2, this.vddNode, inputVals).pathFound;
+                this.recurseThroughEdges(node, this.gndNode, inputVals);
+                this.recurseThroughEdges(node, this.vddNode, inputVals);
+                gndPathExistsDeactivated1 = this.pathExists(nodeTerm1, this.gndNode);
+                vddPathExistsDeactivated1 = this.pathExists(nodeTerm1, this.vddNode);
+                gndPathExistsDeactivated2 = this.pathExists(nodeTerm2, this.gndNode);
+                vddPathExistsDeactivated2 = this.pathExists(nodeTerm2, this.vddode);
 
                 // If there is a conflict when activated, then the target node is definitely overdriven.
                 // Additionally, if the paths differ between active and inactive state,
@@ -777,7 +772,7 @@ class Diagram {
         }
 
         // Test each node for a path to outputNode
-        this.graph.nodes.forEach(function(node) {
+        let testPath = function(node) {
             // Recursive over every possible path from the test node to outputNode.
             this.computeOutputRecursive(node, outputNode, inputVals);
 
@@ -789,8 +784,6 @@ class Diagram {
                 for(let jj = 0; jj < this.graph.nodes.length; jj++) {
                     if(this.nodeNodeMap[ii][jj] === null) {
                         this.nodeNodeMap[ii][jj] = undefined;
-                    } else if(this.nodeNodeMap[ii][jj] === "i" || this.nodeNodeMap[ii][jj] === "I") {
-                        this.nodeNodeMap[ii][jj] = true;
                     }
                 }
             }
@@ -800,7 +793,19 @@ class Diagram {
             if(this.pathExists(node, outputNode) === undefined) {
                 this.mapNodes(node, outputNode, false);
             }
-        }.bind(this));
+        }.bind(this);
+  
+        this.inputNodes.forEach(testPath);
+  			this.inputNodes.forEach(testPath);
+  			let temp = outputNode;
+  			outputNode = this.vddNode;
+        this.inputNodes.forEach(testPath);
+  			outputNode = this.gndNode;
+  			this.inputNodes.forEach(testPath);
+  			outputNode = temp;
+  			testPath(this.vddNode);
+  			testPath(this.gndNode);
+  			this.outputNodes.forEach(testPath);
 
         // Determine the value of the output.
         highNodes.some(function(node) {
