@@ -352,11 +352,10 @@ class Diagram {
         let syncEdges = function(ii, node1, node2) {
             let mapSwitch;
             // Only map in one direction if it's a virtual mapping.
-            if(!(isPath === "I" || isPath === "i") || !(this.vddNode === node1 || this.gndNode === node1)) {
+            if((this.vddNode !== node1 && this.gndNode !== node1) || String(isPath).toLowerCase() !== "i") {
                 // If there is a path between ii and node1, set the path between ii and node2 to isPath
                 if (this.nodeNodeMap[ii][this.graph.getIndexByNode(node1)] === true) {
-                    mapSwitch = this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] === "I";
-                    mapSwitch = mapSwitch || this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] === "i";
+                    mapSwitch = String(this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)]).toLowerCase() === "i";
                     mapSwitch = mapSwitch && (isPath === false);
 
                     this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] = mapSwitch ? "I" : isPath;
@@ -373,10 +372,8 @@ class Diagram {
         // Map the path to node2 appropriately for all nodes mapped to node1.
         for (let ii = 0; ii < this.nodeNodeMap.length; ii++) {
             syncEdges(ii, node1, node2);
-        }
-        // Now do the reverse
-        for (let ii = 0; ii < this.nodeNodeMap.length; ii++) {
-            syncEdges(ii, node2, node1);
+            // Now do the reverse direction.
+            syncEdges(this.nodeNodeMap.length - ii - 1, node2, node1);
         }
     }
 
@@ -570,8 +567,8 @@ class Diagram {
             // Test node is an input.
             // Is it also the same node as the targetNode?
             if(this.evaluateInput(node, inputVals) === targetNode) {
-                // Test node is an input and exactly the same node as the targetNode.
-                // We will not recurse in this case; we've found the path.
+                // Test node is an input and is the same value as the target
+                // VDD or GND node.
                 this.mapNodes(node, targetNode, "i");
             }
         }
