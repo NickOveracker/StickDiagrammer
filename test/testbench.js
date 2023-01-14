@@ -2359,20 +2359,20 @@ function runTestbench(runTo) {
 
         // Clear the canvas
         ["mousedown", {button:  2, clientX: mapX(1),   clientY: mapY(1)}],
-        ["mousemove", {buttons: 2, clientX: mapX(28),  clientY: mapY(28)}],
-        ["mouseup",   {button:  2, clientX: mapX(28),  clientY: mapY(28)}],
+        ["mousemove", {buttons: 2, clientX: mapX(29),  clientY: mapY(29)}],
+        ["mouseup",   {button:  2, clientX: mapX(29),  clientY: mapY(29)}],
 
         0, // PDIFF
-        ["mousedown", {button:  0, clientX: mapX(1), clientY: mapY(12)}],
-        ["mousemove", {buttons: 1, clientX: mapX(28), clientY: mapY(12)}],
-        ["mouseup",   {button:  0, clientX: mapX(28), clientY: mapY(12)}],
+        ["mousedown", {button:  0, clientX: mapX(1), clientY: mapY(14)}],
+        ["mousemove", {buttons: 1, clientX: mapX(29), clientY: mapY(14)}],
+        ["mouseup",   {button:  0, clientX: mapX(29), clientY: mapY(14)}],
 
         0, //NDIFF
         0, // POLY
 
         ["mousedown", {button:  0, clientX: mapX(8), clientY: mapY(1)}],
-        ["mousemove", {buttons: 1, clientX: mapX(8), clientY: mapY(28)}],
-        ["mouseup",   {button:  1, clientX: mapX(8), clientY: mapY(28)}],
+        ["mousemove", {buttons: 1, clientX: mapX(8), clientY: mapY(29)}],
+        ["mouseup",   {button:  1, clientX: mapX(8), clientY: mapY(29)}],
         
         2,
         "ZZZZZZZZZZZZZZZZ",
