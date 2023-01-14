@@ -445,7 +445,10 @@ class Diagram {
         // doesn't change depending on the gate's state).
         // There is no case in which we need to consider the gate
         // to be specifically open or closed after returning.
-        let backupNodeNodeMap = [...this.nodeNodeMap,];
+        let backupNodeNodeMap = [];
+  			for(let ii = 0; ii < this.nodeNodeMap.length; ii++) {
+             backupNodeNodeMap[ii] = [...this.nodeNodeMap[ii],];
+        }
 
         // Assume the path is resolvable to begin.
         this.overdrivenPath = false;
@@ -474,7 +477,9 @@ class Diagram {
             if(!gndPathExistsActivated || !vddPathExistsActivated) {
                 // The active paths are fine.
                 // Now try with the gate inactive.
-                this.nodeNodeMap = [...backupNodeNodeMap,];
+                for(let ii = 0; ii < backupNodeNodeMap.length; ii++) {
+                    this.nodeNodeMap[ii] = [...backupNodeNodeMap[ii],];
+                }
 
                 this.deactivateGate(node);
                 gndPathExistsDeactivated1 = this.recurseThroughEdges(nodeTerm1, this.gndNode, inputVals).pathFound;
@@ -485,8 +490,10 @@ class Diagram {
                 // If there is a conflict when activated, then the target node is definitely overdriven.
                 // Additionally, if the paths differ between active and inactive state,
                 // the target node is overdriven.
-                condition = Boolean(gndPathExistsDeactivated1) === Boolean(gndPathExistsDeactivated2) === Boolean(gndPathExistsActivated);
-                condition = condition && (Boolean(vddPathExistsDeactivated1) === Boolean(vddPathExistsDeactivated2) === Boolean(vddPathExistsActivated));
+                condition = Boolean(gndPathExistsDeactivated1) === Boolean(gndPathExistsDeactivated2) && 
+                            Boolean(gndPathExistsDeactivated1) === Boolean(gndPathExistsActivated);
+                condition = condition && Boolean(vddPathExistsDeactivated1) === Boolean(vddPathExistsDeactivated2) &&
+                            Boolean(vddPathExistsDeactivated1) === Boolean(vddPathExistsActivated);
 
                 if(condition) {
                     // Conflict resolved! The path to targetNode is not overdriven.
@@ -713,7 +720,7 @@ class Diagram {
             }
             // If the path exists, return true.
             else if(relevantPathExists) {
-                this.overdrivenPath = oppositePathExists;
+                this.overdrivenPath = oppositePathExists === true;
                 return true;
             }
         }
@@ -2519,8 +2526,11 @@ class Node {
     addEdge(node) {
         'use strict';
         let edge = new Edge(this, node);
-        this.edges.push(edge);
-        node.edges.push(edge);
+
+        if(!this.isConnected(node)) {
+            this.edges.push(edge);
+            node.edges.push(edge);
+        }
     }
 
     removeEdge(edge) {
