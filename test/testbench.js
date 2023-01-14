@@ -2398,11 +2398,20 @@ function runTestbench(runTo) {
             diagram.gndCell.y    = 0;
         },
 
+        // Clear some of the poly to remove old contacts
+        ["mousedown", {button:  2, clientX: mapX(8),  clientY: mapY(15)}],
+        ["mousemove", {buttons: 2, clientX: mapX(8),  clientY: mapY(29)}],
+        ["mouseup",   {button:  2, clientX: mapX(8),  clientY: mapY(29)}],
+
         // POLY
         ["mousedown", {button:  0, clientX: mapX(6), clientY: mapY(1)}],
         ["mousemove", {buttons: 1, clientX: mapX(6), clientY: mapY(29)}],
         ["mouseup",   {button:  1, clientX: mapX(6), clientY: mapY(29)}],
         
+        ["mousedown", {button:  0, clientX: mapX(8), clientY: mapY(15)}],
+        ["mousemove", {buttons: 1, clientX: mapX(8), clientY: mapY(29)}],
+        ["mouseup",   {button:  1, clientX: mapX(8), clientY: mapY(29)}],
+
         2,
         "ZZZZZZZZZZZZZZZZ",
 
