@@ -435,6 +435,7 @@ class Diagram {
         let gndPathExistsActivated      = false;
         let vddPathExistsActivated      = false;
         let nodeTerm1, nodeTerm2;
+        let nodeIterator;
         let condition;
         // We will need to restore the old map after half of the
         // operation below, but there is no need to restore it at the
