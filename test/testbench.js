@@ -80,6 +80,7 @@ function runTestbench(runTo) {
                      "Indirectly overdriven output via PMOS",
                      "Indirectly overdriven gates via PMOS",
                      "Indirectly overdriven gates via NMOS",
+                     "Overdriven dead-end transistor",
     ];
     runTo = runTo || testCases.length;
 
@@ -2336,6 +2337,45 @@ function runTestbench(runTo) {
 
         2,
         "ZZZZ101011001XX0",
+
+        /* Overdriven dead-end transistor */
+         1,
+        function() {
+            diagram.inputs[0].x  = 8;
+            diagram.inputs[0].y  = 6;
+            diagram.inputs[1].x  = 8;
+            diagram.inputs[1].y  = 12;
+            diagram.inputs[2].x  = 8;
+            diagram.inputs[2].y  = 18;
+            diagram.inputs[3].x  = 8;
+            diagram.inputs[3].y  = 24;
+            diagram.outputs[0].x = 20;
+            diagram.outputs[0].y = 14;
+            diagram.vddCell.x    = 1;
+            diagram.vddCell.y    = 1;
+            diagram.gndCell.x    = 2;
+            diagram.gndCell.y    = 1;
+        },
+
+        // Clear the canvas
+        ["mousedown", {button:  2, clientX: mapX(1),   clientY: mapY(1)}],
+        ["mousemove", {buttons: 2, clientX: mapX(29),  clientY: mapY(29)}],
+        ["mouseup",   {button:  2, clientX: mapX(29),  clientY: mapY(29)}],
+
+        0, // PDIFF
+        ["mousedown", {button:  0, clientX: mapX(0), clientY: mapY(13)}],
+        ["mousemove", {buttons: 1, clientX: mapX(28), clientY: mapY(13)}],
+        ["mouseup",   {button:  0, clientX: mapX(28), clientY: mapY(13)}],
+
+        0, //NDIFF
+        0, // POLY
+
+        ["mousedown", {button:  0, clientX: mapX(7), clientY: mapY(0)}],
+        ["mousemove", {buttons: 1, clientX: mapX(7), clientY: mapY(28)}],
+        ["mouseup",   {button:  1, clientX: mapX(7), clientY: mapY(28)}],
+        
+        2,
+        "ZZZZZZZZZZZZZZZZ",
    ];
 
     /** RUN TESTBENCH **/
