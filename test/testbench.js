@@ -82,6 +82,7 @@ function runTestbench(runTo) {
                      "Indirectly overdriven gates via NMOS",
                      "Overdriven dead-end transistor",
                      "Two overdriven dead-end transistors in series",
+                     "Two overdriven transistors in series with VDD",
     ];
     runTo = runTo || testCases.length;
 
