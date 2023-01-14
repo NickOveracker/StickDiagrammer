@@ -453,13 +453,18 @@ class Diagram {
         // First, see if any of the adjacent nodes that are not currently null-mapped
         // (i.e., not under investigation) have a path to targetNode.
         targetNodeReachable = this.recurseThroughEdges(node, targetNode, inputVals).pathFound;
-        nodeTerm1 = this.getNet(node.cell.term1).nodes;
-        nodeTerm2 = this.getNet(node.cell.term2).nodes;
+        nodeTerm1 = node.cell.term1.nodes;
+        nodeTerm2 = node.cell.term2.nodes;
 
         // If it is reachable at all, compare the paths for inactive and active states.
-        if(targetNodeReachable && nodeTerm1.length > 1 && nodeTerm2.length > 1) {
-            nodeTerm1 = nodeTerm1[0] === node ? nodeTerm1[1] : nodeTerm1[0];
-            nodeTerm2 = nodeTerm2[0] === node ? nodeTerm2[1] : nodeTerm2[0];
+        if(targetNodeReachable && nodeTerm1.size > 1 && nodeTerm2.size > 1) {
+            nodeIterator = nodeTerm1.values();
+            nodeTerm1 = nodeIterator.next().value;
+            nodeTerm1 = nodeTerm1 === node ? nodeIterator.next().value : nodeTerm1;
+          
+            nodeIterator = nodeTerm2.values();
+            nodeTerm2 = nodeIterator.next().value;
+            nodeTerm2 = nodeTerm2 === node ? nodeIterator.next().value : nodeTerm2;
 
             gndPathExistsActivated = this.recurseThroughEdges(node, this.gndNode, inputVals).pathFound;
             vddPathExistsActivated = this.recurseThroughEdges(node, this.vddNode, inputVals).pathFound;
