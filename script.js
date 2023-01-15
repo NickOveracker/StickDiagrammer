@@ -77,6 +77,14 @@ class Diagram {
     static get DELETE()       { return 6; } // always make this the last layer
     static get maxTerminals() { return 8; }
 
+    /*
+    static get DIRECT_PATH()        { return { indeterminate: false, hasPath: true,  direct: true,  }};
+    static get VIRTUAL_PATH()       { return { indeterminate: true,  hasPath: true,  direct: false, }};
+    static get VIRTUAL_PATH_ONLY()  { return { indeterminate: false, hasPath: true,  direct: false, }};
+    static get NO_PATH()            { return { indeterminate: false, hasPath: false,                }};
+    static get COMPUTING_PATH()     { return { indeterminate: true,                                 }}
+    */
+
     constructor(mainCanvas, gridCanvas) {
         'use strict';
         let startWidth  = 29;
@@ -427,6 +435,7 @@ class Diagram {
         let targetNodeReachable, gndPathExistsDeactivated1, vddPathExistsDeactivated1, gndPathExistsDeactivated2,
             vddPathExistsDeactivated2, gndPathExistsActivated, vddPathExistsActivated,
             nodeTerm1, nodeTerm2, nodeIterator, condition;
+
         // We will need to restore the old map after half of the
         // operation below, but there is no need to restore it at the
         // end. We will have determined that either there is a conflict
@@ -436,9 +445,14 @@ class Diagram {
         // There is no case in which we need to consider the gate
         // to be specifically open or closed after returning.
         let backupNodeNodeMap = [];
-  			for(let ii = 0; ii < this.nodeNodeMap.length; ii++) {
-             backupNodeNodeMap[ii] = [...this.nodeNodeMap[ii],];
-        }
+
+        let mapCopy = function(from, to) {
+            for(let ii = 0; ii < from.length; ii++) {
+                to[ii] = [...from,];
+            }
+        };
+
+        mapCopy(this.nodeNodeMap, backupNodeNodeMap);
 
         // Assume the path is resolvable to begin.
         this.overdrivenPath = false;
@@ -446,16 +460,14 @@ class Diagram {
         // First, see if any of the adjacent nodes that are not currently null-mapped
         // (i.e., not under investigation) have a path to targetNode.
         targetNodeReachable = this.recurseThroughEdges(node, targetNode, inputVals).pathFound;
-        nodeTerm1 = node.cell.term1.nodes;
-        nodeTerm2 = node.cell.term2.nodes;
 
         // If it is reachable at all, compare the paths for inactive and active states.
-        if(targetNodeReachable && nodeTerm1.size > 1 && nodeTerm2.size > 1) {
-            nodeIterator = nodeTerm1.values();
+        if(targetNodeReachable && Math.min(node.cell.term1.nodes.size, node.cell.term2.nodes.size) > 1) {
+            nodeIterator = node.cell.term1.nodes.values();
             nodeTerm1 = nodeIterator.next().value;
             nodeTerm1 = nodeTerm1 === node ? nodeIterator.next().value : nodeTerm1;
           
-            nodeIterator = nodeTerm2.values();
+            nodeIterator = node.cell.term2.nodes.values();
             nodeTerm2 = nodeIterator.next().value;
             nodeTerm2 = nodeTerm2 === node ? nodeIterator.next().value : nodeTerm2;
 
@@ -464,12 +476,10 @@ class Diagram {
 
             // If there is a conflict when activated, then the target node is definitely overdriven.
             // As long as there is no conflict, proceed.
-            if(!gndPathExistsActivated || !vddPathExistsActivated) {
+            if(!(gndPathExistsActivated && vddPathExistsActivated)) {
                 // The active paths are fine.
                 // Now try with the gate inactive.
-                for(let ii = 0; ii < backupNodeNodeMap.length; ii++) {
-                    this.nodeNodeMap[ii] = [...backupNodeNodeMap[ii],];
-                }
+                mapCopy(backupNodeNodeMap, this.nodeNodeMap);
 
                 this.deactivateGate(node);
                 this.recurseThroughEdges(node, this.gndNode, inputVals);
@@ -483,23 +493,21 @@ class Diagram {
                 // Additionally, if the paths differ between active and inactive state,
                 // the target node is overdriven.
                 condition = Boolean(gndPathExistsDeactivated1) === Boolean(gndPathExistsDeactivated2) && 
-                            Boolean(gndPathExistsDeactivated1) === Boolean(gndPathExistsActivated);
-                condition = condition && Boolean(vddPathExistsDeactivated1) === Boolean(vddPathExistsDeactivated2) &&
+                            Boolean(gndPathExistsDeactivated1) === Boolean(gndPathExistsActivated)    &&
+                            Boolean(vddPathExistsDeactivated1) === Boolean(vddPathExistsDeactivated2) &&
                             Boolean(vddPathExistsDeactivated1) === Boolean(vddPathExistsActivated);
-
-                if(condition) {
-                    // Conflict resolved! The path to targetNode is not overdriven.
-                    // Need to explicitly set back to false because a recursive path may have
-                    // set it to true.
-                    this.overdrivenPath = false;
-                    return;
-                }
             }
 
-            // If we are here, the conflict is unresolvable.
-            // Need to explicitly set back to false because a recursive path may have
-            // set it to true.
-            this.overdrivenPath = true;
+            // condition === true:
+            //    Conflict resolved! The path to targetNode is not overdriven.
+            //    Need to explicitly set back to false because a recursive path may have
+            //    set it to true.
+            //
+            // condition === false or condition === undefined
+            //    If we are here, the conflict is unresolvable.
+            //    Need to explicitly set back to false because
+            //    a recursive path may have set it to true.
+            this.overdrivenPath = !Boolean(condition);
             return;
         }
 
@@ -581,7 +589,7 @@ class Diagram {
         // Avoid infinite loops.
         // This will be either true, false, or null if it has been/is being checked.
         if (hasPath !== undefined && hasPath !== "i") {
-            return hasPath; // true, false, or null
+            return hasPath; // true, false, null, or "I"
         }
 
         // Initialize to null.
