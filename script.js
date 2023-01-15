@@ -78,11 +78,11 @@ class Diagram {
     static get maxTerminals() { return 8; }
 
     /*
-    static get DIRECT_PATH()        { return { indeterminate: false, hasPath: true,  direct: true,  }};
-    static get VIRTUAL_PATH()       { return { indeterminate: true,  hasPath: true,  direct: false, }};
-    static get VIRTUAL_PATH_ONLY()  { return { indeterminate: false, hasPath: true,  direct: false, }};
-    static get NO_PATH()            { return { indeterminate: false, hasPath: false,                }};
-    static get COMPUTING_PATH()     { return { indeterminate: true,                                 }}
+    static get DIRECT_PATH()        { return { indeterminate: false, hasPath: true,  direct: true,  }}; // Originally [true]
+    static get VIRTUAL_PATH()       { return { indeterminate: true,  hasPath: true,  direct: false, }}; // Originally ["i"]
+    static get VIRTUAL_PATH_ONLY()  { return { indeterminate: false, hasPath: true,  direct: false, }}; // Originally ["I"]
+    static get NO_PATH()            { return { indeterminate: false, hasPath: false,                }}; // Originally [false]
+    static get COMPUTING_PATH()     { return { indeterminate: true,                                 }}; // Originally [null]
     */
 
     constructor(mainCanvas, gridCanvas) {
