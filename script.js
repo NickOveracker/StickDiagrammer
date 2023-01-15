@@ -77,6 +77,14 @@ class Diagram {
     static get DELETE()       { return 6; } // always make this the last layer
     static get maxTerminals() { return 8; }
 
+    /*
+    static get DIRECT_PATH()        { return { indeterminate: false, hasPath: true,  direct: true,  }}; // Originally [true]
+    static get VIRTUAL_PATH()       { return { indeterminate: true,  hasPath: true,  direct: false, }}; // Originally ["i"]
+    static get VIRTUAL_PATH_ONLY()  { return { indeterminate: false, hasPath: true,  direct: false, }}; // Originally ["I"]
+    static get NO_PATH()            { return { indeterminate: false, hasPath: false,                }}; // Originally [false]
+    static get COMPUTING_PATH()     { return { indeterminate: true,                                 }}; // Originally [null]
+    */
+
     constructor(mainCanvas, gridCanvas) {
         'use strict';
         let startWidth  = 29;
@@ -310,16 +318,33 @@ class Diagram {
     // This function updates the mappings between nodes in the graph to reflect whether a path exists between them.
     // If a path exists, it is marked as true; if it does not exist, it is marked as false.
     // If a path has not yet been determined, it is marked as null.
+    //
+    // "i" and "I" are used to map inputs to GND and VDD equivalent signals without linking to their actual nets.
+    // "i" is used when we are not sure whether or not a direct connection to the actual GND/VDD node exists.
+    // "I" is used when there is confirmed to be no direct connection.
+    // true is used when there *is* a direct connection.
+    //
     // The mappings are updated for both directions (node1 to node2 and node2 to node1).
     // Additionally, if a path is found or ruled out between node1 and node2, the mappings for all other nodes
     // connected to node1 or node2 are updated accordingly.
+    //
+    // As the calling code is written, "i" is only assigned when node1 is an input and node2 is VDD or GND.
     mapNodes(node1, node2, isPath) {
         'use strict';
         let currentMapping = this.pathExists(node1, node2);
 
         // If there is a mapping, do nothing and return
-        if (currentMapping !== undefined && currentMapping !== null) {
-            return;
+        if (currentMapping !== undefined && currentMapping !== null && currentMapping !== "i") {
+            // False can be updated to "I".
+            if(currentMapping !== false || isPath !== "I") {
+                return;
+            }
+        }
+
+        // If the current mapping is "i" and the new mapping is false,
+        // upgrade to "I" (confirmed input only with no direct connection)
+        if(currentMapping === "i" && isPath === false) {
+            isPath = "I";
         }
 
         // Set the mappings (both directions) between node1 and node2 to isPath
@@ -333,25 +358,30 @@ class Diagram {
 
         // Create a function to sync edges between nodes
         let syncEdges = function(ii, node1, node2) {
-            // If there is a path between ii and node1, set the path between ii and node2 to isPath
-            if (this.nodeNodeMap[ii][this.graph.getIndexByNode(node1)] === true) {
-                this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] = isPath;
-                this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = isPath;
-            // If there is not a path between ii and node1 and isPath is true, set the path between ii and node2 to false
-            // (I.e., any path not connected to node1 is not connected to node2 if node1 and node2 are connected.)
-            } else if (isPath && (this.nodeNodeMap[ii][this.graph.getIndexByNode(node1)] === false)) {
-                this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] = false;
-                this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = false;
+            let mapSwitch;
+            // Only map in one direction if it's a virtual mapping.
+            if((this.vddNode !== node1 && this.gndNode !== node1) || String(isPath).toLowerCase() !== "i") {
+                // If there is a path between ii and node1, set the path between ii and node2 to isPath
+                if (this.nodeNodeMap[ii][this.graph.getIndexByNode(node1)] === true) {
+                    mapSwitch = String(this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)]).toLowerCase() === "i";
+                    mapSwitch = mapSwitch && (isPath === false);
+
+                    this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] = mapSwitch ? "I" : isPath;
+                    this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = mapSwitch ? "I" : isPath;
+                // If there is not a path between ii and node1 and isPath is true, set the path between ii and node2 to false
+                // (I.e., any path not connected to node1 is not connected to node2 if node1 and node2 are connected.)
+                } else if (isPath === true && (this.nodeNodeMap[ii][this.graph.getIndexByNode(node1)] === false)) {
+                    this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] = false;
+                    this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = false;
+                }
             }
         }.bind(this);
 
         // Map the path to node2 appropriately for all nodes mapped to node1.
         for (let ii = 0; ii < this.nodeNodeMap.length; ii++) {
             syncEdges(ii, node1, node2);
-        }
-        // Now do the reverse.
-        for (let ii = 0; ii < this.nodeNodeMap.length; ii++) {
-            syncEdges(ii, node2, node1);
+            // Now do the reverse direction.
+            syncEdges(this.nodeNodeMap.length - ii - 1, node2, node1);
         }
     }
 
@@ -387,6 +417,144 @@ class Diagram {
         }
     }
 
+    deactivateGate(node) {
+        this.graph.nodes.forEach(function(otherNode) {
+            if(node === otherNode) {
+                return;
+            }
+            this.mapNodes(node, otherNode, false);
+        }.bind(this));
+    }
+
+    // Check whether it matters if a particular gate conflict exists.
+    // If it does not affect the output, we can safely continue computation.
+    // If it does, then the output value on the truth table should be X.
+    //
+    // Unset this.overdrivenPath if the conflict is resolvable.
+    attemptGateConflictResolution(node, targetNode, inputVals) {
+        let targetNodeReachable, gndPathExistsDeactivated1, vddPathExistsDeactivated1, gndPathExistsDeactivated2,
+            vddPathExistsDeactivated2, gndPathExistsActivated, vddPathExistsActivated,
+            nodeTerm1, nodeTerm2, nodeIterator, condition;
+
+        // We will need to restore the old map after half of the
+        // operation below, but there is no need to restore it at the
+        // end. We will have determined that either there is a conflict
+        // (i.e., the output will be assigned X),
+        // or that the gate doesn't matter at all (i.e., the output
+        // doesn't change depending on the gate's state).
+        // There is no case in which we need to consider the gate
+        // to be specifically open or closed after returning.
+        let backupNodeNodeMap = [];
+
+        let mapCopy = function(from, to) {
+            for(let ii = 0; ii < from.length; ii++) {
+                to[ii] = [...from,];
+            }
+        };
+
+        mapCopy(this.nodeNodeMap, backupNodeNodeMap);
+
+        // Assume the path is resolvable to begin.
+        this.overdrivenPath = false;
+        
+        // First, see if any of the adjacent nodes that are not currently null-mapped
+        // (i.e., not under investigation) have a path to targetNode.
+        targetNodeReachable = this.recurseThroughEdges(node, targetNode, inputVals).pathFound;
+
+        // If it is reachable at all, compare the paths for inactive and active states.
+        if(targetNodeReachable && Math.min(node.cell.term1.nodes.size, node.cell.term2.nodes.size) > 1) {
+            nodeIterator = node.cell.term1.nodes.values();
+            nodeTerm1 = nodeIterator.next().value;
+            nodeTerm1 = nodeTerm1 === node ? nodeIterator.next().value : nodeTerm1;
+          
+            nodeIterator = node.cell.term2.nodes.values();
+            nodeTerm2 = nodeIterator.next().value;
+            nodeTerm2 = nodeTerm2 === node ? nodeIterator.next().value : nodeTerm2;
+
+            gndPathExistsActivated = this.recurseThroughEdges(node, this.gndNode, inputVals).pathFound;
+            vddPathExistsActivated = this.recurseThroughEdges(node, this.vddNode, inputVals).pathFound;
+
+            // If there is a conflict when activated, then the target node is definitely overdriven.
+            // As long as there is no conflict, proceed.
+            if(!(gndPathExistsActivated && vddPathExistsActivated)) {
+                // The active paths are fine.
+                // Now try with the gate inactive.
+                mapCopy(backupNodeNodeMap, this.nodeNodeMap);
+
+                this.deactivateGate(node);
+                this.recurseThroughEdges(node, this.gndNode, inputVals);
+                this.recurseThroughEdges(node, this.vddNode, inputVals);
+                gndPathExistsDeactivated1 = this.pathExists(nodeTerm1, this.gndNode);
+                vddPathExistsDeactivated1 = this.pathExists(nodeTerm1, this.vddNode);
+                gndPathExistsDeactivated2 = this.pathExists(nodeTerm2, this.gndNode);
+                vddPathExistsDeactivated2 = this.pathExists(nodeTerm2, this.vddode);
+
+                // If there is a conflict when activated, then the target node is definitely overdriven.
+                // Additionally, if the paths differ between active and inactive state,
+                // the target node is overdriven.
+                condition = Boolean(gndPathExistsDeactivated1) === Boolean(gndPathExistsDeactivated2) && 
+                            Boolean(gndPathExistsDeactivated1) === Boolean(gndPathExistsActivated)    &&
+                            Boolean(vddPathExistsDeactivated1) === Boolean(vddPathExistsDeactivated2) &&
+                            Boolean(vddPathExistsDeactivated1) === Boolean(vddPathExistsActivated);
+            }
+
+            // condition === true:
+            //    Conflict resolved! The path to targetNode is not overdriven.
+            //    Need to explicitly set back to false because a recursive path may have
+            //    set it to true.
+            //
+            // condition === false or condition === undefined
+            //    If we are here, the conflict is unresolvable.
+            //    Need to explicitly set back to false because
+            //    a recursive path may have set it to true.
+            this.overdrivenPath = !Boolean(condition);
+            return;
+        }
+
+        // No path to targetNode === No problem
+        this.overdrivenPath = false;
+    }
+
+    recurseThroughEdges(node, targetNode, inputVals) {
+        let pathFound = false;
+        let hasNullPath = false;
+
+        node.edges.some(function(edge) {
+            let otherNode = edge.getOtherNode(node);
+            let hasPath = this.pathExists(otherNode, targetNode);
+
+            // Easy case: We have already found a path from this otherNode.
+            if (hasPath) {
+                this.mapNodes(node, targetNode, hasPath);
+                this.mapNodes(node, edge.getOtherNode(node), hasPath);
+                /*jshint -W093 */
+                return pathFound = hasPath;
+                /*jshint +W093 */
+            }
+            
+            // Recursive case: We do not yet know if there is a path from otherNode.
+            let result = hasPath !== false && this.computeOutputRecursive(otherNode, targetNode, inputVals);
+
+            // Path found from otherNode?
+            if (result) {
+                this.mapNodes(node, targetNode, result);
+                this.mapNodes(node, edge.getOtherNode(node), result);
+                /*jshint -W093 */
+                return pathFound = result;
+                /*jshint +W093 */
+            }
+
+            // Null outcome means that we ran into a node that is
+            // already being investigated and had to abort.
+            // It will be returned to later.
+            if(result === null || hasPath === null) {
+                hasNullPath = true;
+            }
+        }.bind(this));
+
+        return {pathFound: pathFound, hasNullPath: hasNullPath,};
+    }
+
     // Recursively searches for a path from node to targetNode
     // given a particular set of inputs.
     //
@@ -398,9 +566,8 @@ class Diagram {
     computeOutputRecursive(node, targetNode, inputVals) {
         'use strict';
         let hasPath;
-        let hasNullPath = false;
-        let pathFound = false;
         let inputNum;
+        let recursionResults;
 
         // Is the test node an input?
         inputNum = this.inputNodes.indexOf(node);
@@ -408,9 +575,9 @@ class Diagram {
             // Test node is an input.
             // Is it also the same node as the targetNode?
             if(this.evaluateInput(node, inputVals) === targetNode) {
-                // Test node is an input and exactly the same node as the targetNode.
-                // We will not recurse in this case; we've found the path.
-                this.mapNodes(node, targetNode, true);
+                // Test node is an input and is the same value as the target
+                // VDD or GND node.
+                this.mapNodes(node, targetNode, "i");
             }
         }
 
@@ -421,33 +588,35 @@ class Diagram {
 
         // Avoid infinite loops.
         // This will be either true, false, or null if it has been/is being checked.
-        if (hasPath !== undefined) {
-            return hasPath; // true, false, or null
+        if (hasPath !== undefined && hasPath !== "i") {
+            return hasPath; // true, false, null, or "I"
         }
 
         // Initialize to null.
         // This marks the node as currently being checked
         // so that we won't recurse back into it.
-        this.mapNodes(node, targetNode, null);
+        // ("i" is analogous to null - leave "i" as-is)
+        if(hasPath !== "i") {
+            this.mapNodes(node, targetNode, null);
+        }
 
         // If the test node is a transistor,
-        // only traverse if the gate is active.
+        // only traverse the channel if the gate is active.
         // If it's inactive, exit this recursion.
         if (node.isTransistor()) {
             // true for active, false for inactive.
+            // Also, false when setting overdrivenPath.
             let evalResult = this.gateIsActive(node, inputVals);
+
+            if(this.overdrivenPath) {
+                this.attemptGateConflictResolution(node, targetNode, inputVals);
+            }
 
             if (evalResult === false) {
                 // Inactive: Mark this transistor node as disconnected
                 //           from all nodes except for itself.
-                this.graph.nodes.forEach(function(otherNode) {
-                    if(node === otherNode) {
-                        return;
-                    }
-                    this.mapNodes(node, otherNode, false);
-                }.bind(this));
+                this.deactivateGate(node);
                 return false;
-
             } else if (evalResult === null) {
                 // Unknown: This occurs when at least one tested path
                 //          was aborted due to a node already being
@@ -461,48 +630,20 @@ class Diagram {
         }
 
         // Recurse on all node edges (or until a path is found).
-        node.edges.some(function(edge) {
-            let otherNode = edge.getOtherNode(node);
-            let hasPath = this.pathExists(otherNode, targetNode);
+        recursionResults = this.recurseThroughEdges(node, targetNode, inputVals);
 
-            // Easy case: We have already found a path from this otherNode.
-            if (hasPath) {
-                this.mapNodes(node, targetNode, true);
-                this.mapNodes(node, edge.getOtherNode(node), true);
-                /*jshint -W093 */
-                return pathFound = true;
-                /*jshint +W093 */
-            }
-            
-            // Recursive case: We do not yet know if there is a path from otherNode.
-            let result = hasPath !== false && this.computeOutputRecursive(otherNode, targetNode, inputVals);
-
-            // Path found from otherNode?
-            if (result) {
-                this.mapNodes(node, targetNode, true);
-                this.mapNodes(node, edge.getOtherNode(node), true);
-                /*jshint -W093 */
-                return pathFound = true;
-                /*jshint +W093 */
-            }
-
-            // Null outcome means that we ran into a node that is
-            // already being investigated and had to abort.
-            // It will be returned to later.
-            if(result === null || hasPath === null) {
-                hasNullPath = true;
-            }
-        }.bind(this));
-
-        if(pathFound) {
-            return true; // Done
-        } else if(hasNullPath) {
+        if(recursionResults.pathFound) {
+            return recursionResults.pathFound; // Done
+        } else if(recursionResults.hasNullPath) {
             return null; // Reporting back that a node is already under investigation.
         } else {
+            // Direct path does not exist.
             this.mapNodes(node, targetNode, false);
-            return false; // Done
+            // Not returning false directly bc it might be "I".
+            return this.pathExists(node, targetNode);
         }
     }
+
 
     // This function determines whether a transistor gate is active by evaluating 
     // the paths between the gate's nodes and either the ground node or the power node.
@@ -538,14 +679,14 @@ class Diagram {
                     evalInput = tempEval;
                 } else {
                     // Conflict found.
-                    this.gateConflict = true;
+                    this.overdrivenPath = true;
                 }
             }.bind(this));
             
             // Pass-through positive for NMOS.
             // Invert for PMOS.
             /*jslint bitwise: true */
-            return !(node.isNmos ^ evalInput);
+            return !this.overdrivenPath && !(node.isNmos ^ evalInput);
             /*jslint bitwise: false */
         }
 
@@ -555,9 +696,9 @@ class Diagram {
 
         // Iterate through the nodes in the same net as the gate.
         for (let connectedNode = connectedNodeIterator.next(); !connectedNode.done; connectedNode = connectedNodeIterator.next()) {
-            connectedNode = connectedNode.value;
 
             let relevantPathExists, oppositePathExists, relevantNode, oppositeNode;
+            connectedNode = connectedNode.value;
 
             // Determine the relevant power or ground node for the current gate type.
             if(node.isPmos) {
@@ -571,15 +712,15 @@ class Diagram {
             // Check if there is a path between the current node and the relevant power or ground node.
             relevantPathExists = this.computeOutputRecursive(connectedNode, relevantNode, inputVals);
             oppositePathExists = this.computeOutputRecursive(connectedNode, oppositeNode, inputVals);
+
             // If the path has not yet been determined, set hasNullPath to true
+            // Set and hold if any null path to the relevant node is found in *any* loop iteration.
             if (relevantPathExists === null) {
                 hasNullPath = true;
             }
             // If the path exists, return true.
             else if(relevantPathExists) {
-                if(oppositePathExists) {
-                    this.gateConflict = true;
-                }
+                this.overdrivenPath = oppositePathExists === true;
                 return true;
             }
         }
@@ -601,7 +742,7 @@ class Diagram {
         let outputVal = "Z";             // Assume that the node is floating at the start.
         let highNodes = [this.vddNode,]; // Array for all nodes driven HIGH.
         let lowNodes  = [this.gndNode,]; // Array for all nodes driven LOW.
-        this.gateConflict = false;
+        this.overdrivenPath = false;
 
         // Add input nodes to the highNodes and lowNodes arrays according
         // to their binary values. (1 = high, 0 = low)
@@ -636,13 +777,14 @@ class Diagram {
         }
 
         // Test each node for a path to outputNode
-        this.graph.nodes.forEach(function(node) {
+        let testPath = function(node) {
             // Recursive over every possible path from the test node to outputNode.
             this.computeOutputRecursive(node, outputNode, inputVals);
 
             // null paths are inconclusive; they mean that the recursion
             // concluded before these paths were proven or disproven.
             // Revert them to undefined for the next loop iteration.
+            // "I" results can be treated as "true" at this stage.
             for(let ii = 0; ii < this.graph.nodes.length; ii++) {
                 for(let jj = 0; jj < this.graph.nodes.length; jj++) {
                     if(this.nodeNodeMap[ii][jj] === null) {
@@ -656,7 +798,19 @@ class Diagram {
             if(this.pathExists(node, outputNode) === undefined) {
                 this.mapNodes(node, outputNode, false);
             }
-        }.bind(this));
+        }.bind(this);
+  
+        this.inputNodes.forEach(testPath);
+  			this.inputNodes.forEach(testPath);
+  			let temp = outputNode;
+  			outputNode = this.vddNode;
+        this.inputNodes.forEach(testPath);
+  			outputNode = this.gndNode;
+  			this.inputNodes.forEach(testPath);
+  			outputNode = temp;
+  			testPath(this.vddNode);
+  			testPath(this.gndNode);
+  			this.outputNodes.forEach(testPath);
 
         // Determine the value of the output.
         highNodes.some(function(node) {
@@ -701,7 +855,7 @@ class Diagram {
         // There is still one unchecked case for "X",
         // namely when two or more inputs directly drive
         // a gate with opposite values.
-        return this.gateConflict ? "X" : outputVal;
+        return this.overdrivenPath ? "X" : outputVal;
     }
 
     // Map a function to every transistor terminal.
@@ -2382,8 +2536,11 @@ class Node {
     addEdge(node) {
         'use strict';
         let edge = new Edge(this, node);
-        this.edges.push(edge);
-        node.edges.push(edge);
+
+        if(!this.isConnected(node)) {
+            this.edges.push(edge);
+            node.edges.push(edge);
+        }
     }
 
     removeEdge(edge) {
@@ -2570,15 +2727,6 @@ function refreshTruthTable(suppressSetNets) {
     // Update the diagram.netlist.
     if(!suppressSetNets) {
         diagram.setNets();
-    }
-
-    // If poly ever shares a net with diffusion, we have a problem.
-    for(let ii = 0; ii < diagram.inputNets.length; ii++) {
-        let net = diagram.inputNets[ii];
-        if(net.isInput && net.hasPoly && net.hasDiff) {
-            alert("Unresolvable error: A single input must not be connected to both poly and diffusion layers.");
-            error = true;
-        }
     }
 
     // Create a table with the correct number of rows and columns.
