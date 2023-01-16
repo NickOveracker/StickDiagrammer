@@ -111,8 +111,8 @@ class Diagram {
         this.outputNodes = [];
         this.nmos = new Set();
         this.pmos = new Set();
-        this.vddNet = new Net("VDD", false);
-        this.gndNet = new Net("GND", false);
+        this.vddNet = new Net("VDD", true);
+        this.gndNet = new Net("GND", true);
         this.inputNets = [];
         this.outputNets = [];
         this.analyses = [];
@@ -434,7 +434,9 @@ class Diagram {
     attemptGateConflictResolution(node, targetNode, inputVals) {
         let targetNodeReachable, gndPathExistsDeactivated1, vddPathExistsDeactivated1, gndPathExistsDeactivated2,
             vddPathExistsDeactivated2, gndPathExistsActivated, vddPathExistsActivated,
-            nodeTerm1, nodeTerm2, nodeIterator, condition;
+            gndPathExistsActivated1, vddPathExistsActivated1, gndPathExistsActivated2, vddPathExistsActivated2,
+            nodeTerm1, nodeTerm2, nodeIterator, condition, od0, od1, od2;
+        od0 = od1 = od2 = false;
 
         // We will need to restore the old map after half of the
         // operation below, but there is no need to restore it at the
@@ -448,7 +450,7 @@ class Diagram {
 
         let mapCopy = function(from, to) {
             for(let ii = 0; ii < from.length; ii++) {
-                to[ii] = [...from,];
+                to[ii] = [...from[ii],];
             }
         };
 
@@ -459,27 +461,41 @@ class Diagram {
         
         // First, see if any of the adjacent nodes that are not currently null-mapped
         // (i.e., not under investigation) have a path to targetNode.
+        nodeIterator = node.cell.term1.nodes.values();
+        nodeTerm1 = nodeIterator.next().value;
+        nodeTerm1 = nodeTerm1 === node ? nodeIterator.next().value : nodeTerm1;
+      
+        nodeIterator = node.cell.term2.nodes.values();
+        nodeTerm2 = nodeIterator.next().value;
+        nodeTerm2 = nodeTerm2 === node ? nodeIterator.next().value : nodeTerm2;
+
+        this.mapNodes(node, nodeTerm1, true);
+        this.mapNodes(node, nodeTerm2, true);
+                      
         targetNodeReachable = this.recurseThroughEdges(node, targetNode, inputVals).pathFound;
+    
+        od0 = this.overdrivenPath;
+        this.overdrivenPath = false;
 
         // If it is reachable at all, compare the paths for inactive and active states.
         if(targetNodeReachable && Math.min(node.cell.term1.nodes.size, node.cell.term2.nodes.size) > 1) {
-            nodeIterator = node.cell.term1.nodes.values();
-            nodeTerm1 = nodeIterator.next().value;
-            nodeTerm1 = nodeTerm1 === node ? nodeIterator.next().value : nodeTerm1;
-          
-            nodeIterator = node.cell.term2.nodes.values();
-            nodeTerm2 = nodeIterator.next().value;
-            nodeTerm2 = nodeTerm2 === node ? nodeIterator.next().value : nodeTerm2;
+            gndPathExistsActivated1 = this.recurseThroughEdges(nodeTerm1, this.gndNode, inputVals).pathFound;
+            gndPathExistsActivated2 = this.recurseThroughEdges(nodeTerm2, this.gndNode, inputVals).pathFound;
+            vddPathExistsActivated1 = this.recurseThroughEdges(nodeTerm1, this.vddNode, inputVals).pathFound;
+            vddPathExistsActivated2 = this.recurseThroughEdges(nodeTerm2, this.vddNode, inputVals).pathFound;
 
-            gndPathExistsActivated = this.recurseThroughEdges(node, this.gndNode, inputVals).pathFound;
-            vddPathExistsActivated = this.recurseThroughEdges(node, this.vddNode, inputVals).pathFound;
+            gndPathExistsActivated = gndPathExistsActivated1 || gndPathExistsActivated2;
+            vddPathExistsActivated = vddPathExistsActivated1 || vddPathExistsActivated2;
+            
+            mapCopy(backupNodeNodeMap, this.nodeNodeMap);
+            od1 = this.overdrivenPath;
+            this.overdrivenPath = false;
 
             // If there is a conflict when activated, then the target node is definitely overdriven.
             // As long as there is no conflict, proceed.
             if(!(gndPathExistsActivated && vddPathExistsActivated)) {
                 // The active paths are fine.
                 // Now try with the gate inactive.
-                mapCopy(backupNodeNodeMap, this.nodeNodeMap);
 
                 this.deactivateGate(node);
                 this.recurseThroughEdges(node, this.gndNode, inputVals);
@@ -487,7 +503,10 @@ class Diagram {
                 gndPathExistsDeactivated1 = this.pathExists(nodeTerm1, this.gndNode);
                 vddPathExistsDeactivated1 = this.pathExists(nodeTerm1, this.vddNode);
                 gndPathExistsDeactivated2 = this.pathExists(nodeTerm2, this.gndNode);
-                vddPathExistsDeactivated2 = this.pathExists(nodeTerm2, this.vddode);
+                vddPathExistsDeactivated2 = this.pathExists(nodeTerm2, this.vddNode);
+                
+                mapCopy(backupNodeNodeMap, this.nodeNodeMap);
+                od2 = this.overdrivenPath;
 
                 // If there is a conflict when activated, then the target node is definitely overdriven.
                 // Additionally, if the paths differ between active and inactive state,
@@ -507,12 +526,12 @@ class Diagram {
             //    If we are here, the conflict is unresolvable.
             //    Need to explicitly set back to false because
             //    a recursive path may have set it to true.
-            this.overdrivenPath = !Boolean(condition);
+            this.overdrivenPath =  !condition || od0 || od1 || od2;
             return;
         }
 
         // No path to targetNode === No problem
-        this.overdrivenPath = false;
+        this.overdrivenPath = od0 || false;
     }
 
     recurseThroughEdges(node, targetNode, inputVals) {
@@ -682,6 +701,13 @@ class Diagram {
                     this.overdrivenPath = true;
                 }
             }.bind(this));
+
+            this.overdrivenPath = this.overdrivenPath ||
+                gateNet.containsNode(this.vddNode) && evalInput === false ||
+                gateNet.containsNode(this.gndNode) && evalInput === true ||
+                gateNet.containsNode(this.vddNode) && gateNet.containsNode(this.gndNode);
+
+            evalInput = (evalInput || gateNet.containsNode(this.vddNode)) && !gateNet.containsNode(this.gndNode);
             
             // Pass-through positive for NMOS.
             // Invert for PMOS.
@@ -801,16 +827,21 @@ class Diagram {
         }.bind(this);
   
         this.inputNodes.forEach(testPath);
-  			this.inputNodes.forEach(testPath);
-  			let temp = outputNode;
-  			outputNode = this.vddNode;
-        this.inputNodes.forEach(testPath);
-  			outputNode = this.gndNode;
-  			this.inputNodes.forEach(testPath);
-  			outputNode = temp;
-  			testPath(this.vddNode);
-  			testPath(this.gndNode);
-  			this.outputNodes.forEach(testPath);
+        let temp = outputNode;
+        if(!this.overdrivenPath) {
+            outputNode = this.vddNode;
+            this.inputNodes.forEach(testPath);
+            outputNode = this.gndNode;
+            this.inputNodes.forEach(testPath);
+        }
+        outputNode = temp;
+        if(!this.overdrivenPath) {
+            testPath(this.vddNode);
+        }
+        if(!this.overdrivenPath) {
+            testPath(this.gndNode);
+        }
+        //!this.overdrivenPath && this.outputNodes.forEach(testPath); Unimportant???
 
         // Determine the value of the output.
         highNodes.some(function(node) {
@@ -2121,7 +2152,7 @@ class DiagramView {
         }
 
         for(let ii = 0; ii < path.length; ii++) {
-            if(!path[ii]) {
+            if(path[ii] !== true) {
                 continue;
             }
             for(let jj = 0; jj < this.diagram.netlist.length; jj++) {
