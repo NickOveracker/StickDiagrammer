@@ -2506,12 +2506,12 @@ function runTestbench(runTo) {
 
         // Clear some of the poly to remove old contacts
         ["mousedown", {button:  2, clientX: mapX(6),  clientY: mapY(1)}],
-        ["mousemove", {buttons: 2, clientX: mapX(6),  clientY: mapY(15)}],
-        ["mouseup",   {button:  2, clientX: mapX(6),  clientY: mapY(15)}],
+        ["mousemove", {buttons: 2, clientX: mapX(6),  clientY: mapY(13)}],
+        ["mouseup",   {button:  2, clientX: mapX(6),  clientY: mapY(13)}],
         
         ["mousedown", {button:  2, clientX: mapX(8),  clientY: mapY(1)}],
-        ["mousemove", {buttons: 2, clientX: mapX(8),  clientY: mapY(15)}],
-        ["mouseup",   {button:  2, clientX: mapX(8),  clientY: mapY(15)}],
+        ["mousemove", {buttons: 2, clientX: mapX(8),  clientY: mapY(13)}],
+        ["mouseup",   {button:  2, clientX: mapX(8),  clientY: mapY(13)}],
 
         ["mousedown", {button:  2, clientX: mapX(6),  clientY: mapY(15)}],
         ["mousemove", {buttons: 2, clientX: mapX(6),  clientY: mapY(29)}],
