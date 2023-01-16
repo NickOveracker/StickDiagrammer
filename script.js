@@ -111,8 +111,8 @@ class Diagram {
         this.outputNodes = [];
         this.nmos = new Set();
         this.pmos = new Set();
-        this.vddNet = new Net("VDD", false);
-        this.gndNet = new Net("GND", false);
+        this.vddNet = new Net("VDD", true);
+        this.gndNet = new Net("GND", true);
         this.inputNets = [];
         this.outputNets = [];
         this.analyses = [];
@@ -701,6 +701,13 @@ class Diagram {
                     this.overdrivenPath = true;
                 }
             }.bind(this));
+
+            this.overdrivenPath = this.overdrivenPath ||
+                gateNet.containsNode(this.vddNode) && evalInput === false ||
+                gateNet.containsNode(this.gndNode) && evalInput === true ||
+                gateNet.containsNode(this.vddNode) && gateNet.containsNode(this.gndNode);
+
+            evalInput = (evalInput && this.containsNode(this.vddNode)) || !gateNet.containsNode(this.gndNode);
             
             // Pass-through positive for NMOS.
             // Invert for PMOS.
