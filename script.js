@@ -707,7 +707,7 @@ class Diagram {
                 gateNet.containsNode(this.gndNode) && evalInput === true ||
                 gateNet.containsNode(this.vddNode) && gateNet.containsNode(this.gndNode);
 
-            evalInput = (evalInput && this.containsNode(this.vddNode)) || !gateNet.containsNode(this.gndNode);
+            evalInput = (evalInput || gateNet.containsNode(this.vddNode)) && !gateNet.containsNode(this.gndNode);
             
             // Pass-through positive for NMOS.
             // Invert for PMOS.
