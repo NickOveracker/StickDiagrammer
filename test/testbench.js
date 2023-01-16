@@ -82,7 +82,8 @@ function runTestbench(runTo) {
                      "Indirectly overdriven gates via NMOS",
                      "Overdriven dead-end transistor",
                      "Two overdriven dead-end transistors in series",
-                     "Two overdriven transistors in series with VDD (KNOWN BUG)",
+                     "Two overdriven transistors in series with VDD",
+                     "Two overdriven transistors in series with VDD w/ grounded gate (KNOWN BUG)",
     ];
     runTo = runTo || testCases.length;
 
@@ -2436,6 +2437,28 @@ function runTestbench(runTo) {
 
         2,
         "1XXZXXXZXXXZZZZZ",
+
+        /* Two overdriven transistors in series with VDD w/ grounded gate */
+         1,
+        function() {
+            diagram.inputs[0].x  = 7;
+            diagram.inputs[0].y  = 5;
+            diagram.inputs[1].x  = 7;
+            diagram.inputs[1].y  = 11;
+            diagram.inputs[2].x  = 5;
+            diagram.inputs[2].y  = 17;
+            diagram.inputs[3].x  = 5;
+            diagram.inputs[3].y  = 23;
+            diagram.outputs[0].x = 19;
+            diagram.outputs[0].y = 13;
+            diagram.vddCell.x    = 1;
+            diagram.vddCell.y    = 13;
+            diagram.gndCell.x    = 7;
+            diagram.gndCell.y    = 17;
+        },
+
+        2,
+        "1XXZXXXZXXXZXXXZ",
    ];
 
     /** RUN TESTBENCH **/
