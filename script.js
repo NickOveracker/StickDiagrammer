@@ -819,20 +819,22 @@ class Diagram {
             }
         }.bind(this);
   
-  			this.inputNodes.forEach(testPath);
-  			let temp = outputNode;
-  			if(!this.overdrivenPath) {
-                outputNode = this.vddNode;
-                this.inputNodes.forEach(testPath);
-      			outputNode = this.gndNode;
-      			this.inputNodes.forEach(testPath);
-      			outputNode = temp;
-                if(!this.overdrivenPath) {
-          			!this.overdrivenPath && testPath(this.vddNode);
-                    !this.overdrivenPath && testPath(this.gndNode);
-                    //!this.overdrivenPath && this.outputNodes.forEach(testPath); Unimportant???
-                }
-            }
+        this.inputNodes.forEach(testPath);
+        let temp = outputNode;
+        if(!this.overdrivenPath) {
+            outputNode = this.vddNode;
+            this.inputNodes.forEach(testPath);
+            outputNode = this.gndNode;
+            this.inputNodes.forEach(testPath);
+        }
+        outputNode = temp;
+        if(!this.overdrivenPath) {
+            testPath(this.vddNode);
+        }
+        if(!this.overdrivenPath) {
+            testPath(this.gndNode);
+        }
+        //!this.overdrivenPath && this.outputNodes.forEach(testPath); Unimportant???
 
         // Determine the value of the output.
         highNodes.some(function(node) {
