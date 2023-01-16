@@ -435,8 +435,8 @@ class Diagram {
         let targetNodeReachable, gndPathExistsDeactivated1, vddPathExistsDeactivated1, gndPathExistsDeactivated2,
             vddPathExistsDeactivated2, gndPathExistsActivated, vddPathExistsActivated,
             gndPathExistsActivated1, vddPathExistsActivated1, gndPathExistsActivated2, vddPathExistsActivated2,
-            nodeTerm1, nodeTerm2, nodeIterator, condition, od1, od2;
-        od1 = od2 = false;
+            nodeTerm1, nodeTerm2, nodeIterator, condition, od0, od1, od2;
+        od0 = od1 = od2 = false;
 
         // We will need to restore the old map after half of the
         // operation below, but there is no need to restore it at the
