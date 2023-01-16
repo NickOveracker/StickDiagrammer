@@ -2491,7 +2491,7 @@ function runTestbench(runTo) {
             diagram.inputs[0].x  = 1;
             diagram.inputs[0].y  = 13;
             diagram.inputs[1].x  = 5;
-            diagram.inputs[1].y  = 13;
+            diagram.inputs[1].y  = 5;
             diagram.inputs[2].x  = 0;
             diagram.inputs[2].y  = 0;
             diagram.inputs[3].x  = 0;
@@ -2513,7 +2513,7 @@ function runTestbench(runTo) {
             diagram.inputs[0].x  = 1;
             diagram.inputs[0].y  = 13;
             diagram.inputs[1].x  = 5;
-            diagram.inputs[1].y  = 13;
+            diagram.inputs[1].y  = 5;
             diagram.inputs[2].x  = 5;
             diagram.inputs[2].y  = 23;
             diagram.inputs[3].x  = 0;
