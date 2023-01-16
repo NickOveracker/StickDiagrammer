@@ -48,6 +48,8 @@
 * ~~Knowing that I spelled "accolades" correctly (I don't feel like Googling it)~~ *Resolved 2021/11/20*
 
 ## Known Bugs
+* Incorrect output when GND and VDD are directly assigned to the same gate in series with overdriven transistor.
+* ~~GND or VDD incorrectly override input nodes directly assigned to the same gate as them.~~ *Resolved 2023/1/16*
 * ~~Incorrectly assigns Z for certain configurations of overdriven transistors when X is expected.~~ *Resolved 2023/1/15*
 * ~~Incorrectly assigns X instead of Z for circuits with a dead-end overdriven transistor.~~ *Resolved 2023/1/14*
 * ~~Evaluator aborts when poly is placed over the end of NDIFF or PDIFF on the edge of the canvas.~~ *Resolved 2023/1/10*

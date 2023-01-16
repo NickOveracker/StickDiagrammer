@@ -81,10 +81,12 @@ function runTestbench(runTo) {
                      "Indirectly overdriven gates via PMOS",
                      "Indirectly overdriven gates via NMOS",
                      "Overdriven dead-end transistor",
-                     "One overdriven transistor in series with VDD w/ grounded gate (KNOWN BUG)",
+                     "One overdriven transistor in series with VDD w/ grounded gate",
                      "Two overdriven dead-end transistors in series",
                      "Two overdriven transistors in series with VDD",
-                     "Two overdriven transistors in series with VDD w/ grounded gate (KNOWN BUG)",
+                     "Two overdriven transistors in series with VDD w/ grounded gate",
+                     "One transistor driven by VDD & GND in series w/ singly-driven gate & direct input",
+                     "One transistor driven by VDD & GND in series w/ overdriven gate & direct input (KNOWN BUG)",
     ];
     runTo = runTo || testCases.length;
 
@@ -2482,6 +2484,51 @@ function runTestbench(runTo) {
 
         2,
         "1XXZXXXZXXXZXXXZ",
+
+        /* One transistor driven by VDD & GND in series w/ singly-driven gate & direct input */
+        1,
+        function() {
+            diagram.inputs[0].x  = 1;
+            diagram.inputs[0].y  = 13;
+            diagram.inputs[1].x  = 5;
+            diagram.inputs[1].y  = 13;
+            diagram.inputs[2].x  = 0;
+            diagram.inputs[2].y  = 0;
+            diagram.inputs[3].x  = 0;
+            diagram.inputs[3].y  = 0;
+            diagram.outputs[0].x = 19;
+            diagram.outputs[0].y = 13;
+            diagram.vddCell.x    = 7;
+            diagram.vddCell.y    = 5;
+            diagram.gndCell.x    = 7;
+            diagram.gndCell.y    = 23;
+        },
+
+        2,
+        "XXXXZZZZXXXXZZZZ",
+
+        /* One transistor driven by VDD & GND in series w/ overdriven gate & direct input */
+        1,
+        function() {
+            diagram.inputs[0].x  = 1;
+            diagram.inputs[0].y  = 13;
+            diagram.inputs[1].x  = 5;
+            diagram.inputs[1].y  = 13;
+            diagram.inputs[2].x  = 5;
+            diagram.inputs[2].y  = 23;
+            diagram.inputs[3].x  = 0;
+            diagram.inputs[3].y  = 0;
+            diagram.outputs[0].x = 19;
+            diagram.outputs[0].y = 13;
+            diagram.vddCell.x    = 7;
+            diagram.vddCell.y    = 5;
+            diagram.gndCell.x    = 7;
+            diagram.gndCell.y    = 23;
+        },
+
+        2,
+        "XXXXXXZZXXXXXXZZ",
+
    ];
 
     /** RUN TESTBENCH **/
