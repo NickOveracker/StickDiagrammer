@@ -434,7 +434,6 @@ class Diagram {
     attemptGateConflictResolution(node, targetNode, inputVals) {
         let targetNodeReachable, gndPathExistsDeactivated1, vddPathExistsDeactivated1, gndPathExistsDeactivated2,
             vddPathExistsDeactivated2, gndPathExistsActivated, vddPathExistsActivated,
-            gndPathExistsActivated1, vddPathExistsActivated1, gndPathExistsActivated2, vddPathExistsActivated2,
             nodeTerm1, nodeTerm2, nodeIterator, condition, od0, od1, od2;
         od0 = od1 = od2 = false;
 
@@ -479,14 +478,11 @@ class Diagram {
 
         // If it is reachable at all, compare the paths for inactive and active states.
         if(targetNodeReachable && Math.min(node.cell.term1.nodes.size, node.cell.term2.nodes.size) > 1) {
-            gndPathExistsActivated1 = this.recurseThroughEdges(nodeTerm1, this.gndNode, inputVals).pathFound;
-            gndPathExistsActivated2 = this.recurseThroughEdges(nodeTerm2, this.gndNode, inputVals).pathFound;
-            vddPathExistsActivated1 = this.recurseThroughEdges(nodeTerm1, this.vddNode, inputVals).pathFound;
-            vddPathExistsActivated2 = this.recurseThroughEdges(nodeTerm2, this.vddNode, inputVals).pathFound;
+            gndPathExistsActivated = this.recurseThroughEdges(nodeTerm1, this.gndNode, inputVals).pathFound ||
+                this.recurseThroughEdges(nodeTerm2, this.gndNode, inputVals).pathFound;
+            vddPathExistsActivated = this.recurseThroughEdges(nodeTerm1, this.vddNode, inputVals).pathFound ||
+                this.recurseThroughEdges(nodeTerm2, this.vddNode, inputVals).pathFound;
 
-            gndPathExistsActivated = gndPathExistsActivated1 || gndPathExistsActivated2;
-            vddPathExistsActivated = vddPathExistsActivated1 || vddPathExistsActivated2;
-            
             mapCopy(backupNodeNodeMap, this.nodeNodeMap);
             od1 = this.overdrivenPath;
             this.overdrivenPath = false;
