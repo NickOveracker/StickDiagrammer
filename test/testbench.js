@@ -2526,7 +2526,7 @@ function runTestbench(runTo) {
         ["mousemove", {buttons: 1, clientX: mapX(6), clientY: mapY(29)}],
         ["mouseup",   {button:  1, clientX: mapX(6), clientY: mapY(29)}],
         
-        ["mousedown", {button:  0, clientX: mapX(8), clientY: mapY(15)}],
+        ["mousedown", {button:  0, clientX: mapX(8), clientY: mapY(1)}],
         ["mousemove", {buttons: 1, clientX: mapX(8), clientY: mapY(29)}],
         ["mouseup",   {button:  1, clientX: mapX(8), clientY: mapY(29)}],
 
