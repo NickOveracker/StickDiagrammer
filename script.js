@@ -821,8 +821,17 @@ class Diagram {
                 this.mapNodes(node, outputNode, false);
             }
         }.bind(this);
+
+        for(let ii = 0; ii < this.inputNodes.length; ii++) {
+            if(inputVals >> (this.inputNodes.length - 1 - ii) & 1) {
+                this.mapNodes(this.inputNodes[ii], this.vddNode, "i");
+            } else this.mapNodes(this.inputNodes[ii], this.gndNode, "i");
+        }
   
         this.inputNodes.forEach(testPath);
+        if(!this.overdrivenPath) {
+            //this.graph.nodes.slice(2,this.graph.nodes.length-this.inputNodes.length-this.outputNodes.length).forEach(testPath);
+        }
         let temp = outputNode;
         if(!this.overdrivenPath) {
             outputNode = this.vddNode;
