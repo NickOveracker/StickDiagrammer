@@ -19,6 +19,7 @@
 * Software entropy must not increase.
 
 ## Feature Wishlist
+* Replace pullup/pulldown alert popups with less obtrusive warnings.
 * HDL generation.
 * Interactive tutorial.
 * Allow users to select where to insert rows and columns.
