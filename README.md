@@ -19,6 +19,7 @@
 * Software entropy must not increase.
 
 ## Feature Wishlist
+* HDL generation.
 * Interactive tutorial.
 * Allow users to select where to insert rows and columns.
 * Student/Teacher modes with generating/grading homework, practice problems, etc.
@@ -48,7 +49,7 @@
 * ~~Knowing that I spelled "accolades" correctly (I don't feel like Googling it)~~ *Resolved 2021/11/20*
 
 ## Known Bugs
-* Incorrect output when GND and VDD are directly assigned to the same gate in series with overdriven transistor.
+* ~~Incorrect output when GND and VDD are directly assigned to the same gate in series with overdriven transistor.~~ *Resolved 2023/1/17*
 * ~~GND or VDD incorrectly override input nodes directly assigned to the same gate as them.~~ *Resolved 2023/1/16*
 * ~~Incorrectly assigns Z for certain configurations of overdriven transistors when X is expected.~~ *Resolved 2023/1/15*
 * ~~Incorrectly assigns X instead of Z for circuits with a dead-end overdriven transistor.~~ *Resolved 2023/1/14*
