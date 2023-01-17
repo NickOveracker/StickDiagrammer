@@ -86,7 +86,7 @@ function runTestbench(runTo) {
                      "Two overdriven transistors in series with VDD",
                      "Two overdriven transistors in series with VDD w/ grounded gate",
                      "One transistor driven by VDD & GND in series w/ singly-driven gate & direct input",
-                     "One transistor driven by VDD & GND in series w/ overdriven gate & direct input (KNOWN BUG)",
+                     "One transistor driven by VDD & GND in series w/ overdriven gate & direct input",
     ];
     runTo = runTo || testCases.length;
 
