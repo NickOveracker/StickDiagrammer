@@ -601,7 +601,7 @@ class Diagram {
         let outputVal = "Z";             // Assume that the node is floating at the start.
         let highNodes = [this.vddNode,]; // Array for all nodes driven HIGH.
         let lowNodes  = [this.gndNode,]; // Array for all nodes driven LOW.
-        this.overdrivenPath = false;
+        this.gateConflict = false;
 
         // Add input nodes to the highNodes and lowNodes arrays according
         // to their binary values. (1 = high, 0 = low)
@@ -636,14 +636,13 @@ class Diagram {
         }
 
         // Test each node for a path to outputNode
-        let testPath = function(node) {
+        this.graph.nodes.forEach(function(node) {
             // Recursive over every possible path from the test node to outputNode.
             this.computeOutputRecursive(node, outputNode, inputVals);
 
             // null paths are inconclusive; they mean that the recursion
             // concluded before these paths were proven or disproven.
             // Revert them to undefined for the next loop iteration.
-            // "I" results can be treated as "true" at this stage.
             for(let ii = 0; ii < this.graph.nodes.length; ii++) {
                 for(let jj = 0; jj < this.graph.nodes.length; jj++) {
                     if(this.nodeNodeMap[ii][jj] === null) {
@@ -657,33 +656,7 @@ class Diagram {
             if(this.pathExists(node, outputNode) === undefined) {
                 this.mapNodes(node, outputNode, false);
             }
-        }.bind(this);
-
-        for(let ii = 0; ii < this.inputNodes.length; ii++) {
-            if(inputVals >> (this.inputNodes.length - 1 - ii) & 1) {
-                this.mapNodes(this.inputNodes[ii], this.vddNode, "i");
-            } else this.mapNodes(this.inputNodes[ii], this.gndNode, "i");
-        }
-  
-        this.inputNodes.forEach(testPath);
-        if(!this.overdrivenPath) {
-            //this.graph.nodes.slice(2,this.graph.nodes.length-this.inputNodes.length-this.outputNodes.length).forEach(testPath);
-        }
-        let temp = outputNode;
-        if(!this.overdrivenPath) {
-            outputNode = this.vddNode;
-            this.inputNodes.forEach(testPath);
-            outputNode = this.gndNode;
-            this.inputNodes.forEach(testPath);
-        }
-        outputNode = temp;
-        if(!this.overdrivenPath) {
-            testPath(this.vddNode);
-        }
-        if(!this.overdrivenPath) {
-            testPath(this.gndNode);
-        }
-        //!this.overdrivenPath && this.outputNodes.forEach(testPath); Unimportant???
+        }.bind(this));
 
         // Determine the value of the output.
         highNodes.some(function(node) {
@@ -728,7 +701,7 @@ class Diagram {
         // There is still one unchecked case for "X",
         // namely when two or more inputs directly drive
         // a gate with opposite values.
-        return this.overdrivenPath ? "X" : outputVal;
+        return this.gateConflict ? "X" : outputVal;
     }
 
     // Map a function to every transistor terminal.
