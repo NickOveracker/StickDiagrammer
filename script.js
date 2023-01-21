@@ -92,6 +92,7 @@ class Diagram {
     }
 
     initCells() {
+        'use strict';
         let startWidth  = 29;
         let startHeight = 29;
 
@@ -112,6 +113,7 @@ class Diagram {
     }
 
     initNets() {
+        'use strict';
         this.vddNet = new Net("VDD", true);
         this.gndNet = new Net("GND", true);
         this.inputNets = [];
@@ -129,6 +131,7 @@ class Diagram {
    }
 
     initNodes() {
+        'use strict';
         this.graph = new Graph();
         this.inputNodes = [];
         this.outputNodes = [];
@@ -390,6 +393,7 @@ class Diagram {
     // Evaluate the value of an input node.
     // Returns the rail node (VDD or GND) that it is virtually mapped to.
     evaluateInput(node, inputVals) {
+        'use strict';
         let evalInput;
         let inputNum = this.inputNodes.indexOf(node);
 
@@ -406,6 +410,7 @@ class Diagram {
     }
 
     deactivateGate(node) {
+        'use strict';
         this.graph.nodes.forEach(function(otherNode) {
             if(node === otherNode) {
                 return;
@@ -420,6 +425,7 @@ class Diagram {
     //
     // Unset this.overdrivenPath if the conflict is resolvable.
     attemptGateConflictResolution(node, targetNode, inputVals) {
+        'use strict';
         let targetNodeReachable, nodeTerm1, nodeTerm2, od,
             gndPathOk, vddPathOk, gndPathExistsActivated, vddPathExistsActivated;
 
@@ -499,6 +505,7 @@ class Diagram {
     }
 
     recurseThroughEdges(node, targetNode, inputVals) {
+        'use strict';
         let pathFound;
         let hasNullPath = false;
 
@@ -623,6 +630,7 @@ class Diagram {
     }
 
     evalInputDrivenGate(node, inputVals, gateNet) {
+        'use strict';
         let tempEval, evalInput;
         let gateNode = gateNet.nodes.entries().next().value[1];
 
@@ -1119,21 +1127,6 @@ class Diagram {
         let linkNodes = function(net1, net2) {
             let nodeIterator1 = net1.nodes.values();
             let nodeIterator2 = net2.nodes.values();
-
-            // TODO: Delete
-            /* This is no longer needed now that input nets have nodes.
-            this.inputNets.some(function (net) {
-                if (net === net1) {
-                    let temp = nodeIterator1;
-                    nodeIterator1 = nodeIterator2;
-                    nodeIterator2 = temp;
-                    temp = net1;
-                    net1 = net2;
-                    net2 = temp;
-                    return true;
-                }
-            });
-            */
 
             // Loop through net1's nodes.
             // Outer loop - this is why it had to be swapped with net2 if it was an input.
