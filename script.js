@@ -591,7 +591,7 @@ class Diagram {
         // Avoid infinite loops.
         // Return if this is currently being checked
         // or if a definitive answer has already been found.
-        if (mapping.indeterminate && (mapping !== this.UNCHECKED)) {
+        if (mapping !== this.VIRTUAL_PATH && mapping !== this.UNCHECKED) {
             return mapping;
         }
 
