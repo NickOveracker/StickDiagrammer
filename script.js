@@ -763,13 +763,13 @@ class Diagram {
             // Expected case:
             // No nodal analysis has been done for outputNode for this set of inputVals.
             // Mark each node as connected to itself.
-            for (let ii = 0; ii < this.graph.nodes.length; ii++) {
+            this.graph.nodes.forEach(function(_, ii) {
                 this.nodeNodeMap[ii] = [];
 
-                for(let jj = 0; jj < this.graph.nodes.length; jj++) {
+                this.graph.nodes.forEach(function(_, jj) {
                     this.nodeNodeMap[ii][jj] = ii === jj ? this.DIRECT_PATH : this.UNCHECKED;
-                }
-            }
+                }.bind(this));
+            }.bind(this));
         }
 
         // Test each node for a path to outputNode
@@ -781,13 +781,13 @@ class Diagram {
             // concluded before these paths were proven or disproven.
             // Revert them to undefined for the next loop iteration.
             // VIRTUAL_PATH_ONLY results can be treated as "true" at this stage.
-            for(let ii = 0; ii < this.graph.nodes.length; ii++) {
-                for(let jj = 0; jj < this.graph.nodes.length; jj++) {
+            this.graph.nodes.forEach(function(_, ii) {
+                this.graph.nodes.forEach(function(_, jj) {
                     if(this.nodeNodeMap[ii][jj] === this.COMPUTING_PATH) {
                         this.nodeNodeMap[ii][jj] = this.UNCHECKED;
                     }
-                }
-            }
+                }.bind(this));
+            }.bind(this));
 
             // Finally, if we have not found a connection between
             // the test node and outputNode, there *is* no connection.
@@ -807,9 +807,6 @@ class Diagram {
         }
   
         this.inputNodes.forEach(testPath);
-        if(!this.overdrivenPath) {
-            //this.graph.nodes.slice(2,this.graph.nodes.length-this.inputNodes.length-this.outputNodes.length).forEach(testPath);
-        }
         let temp = outputNode;
         if(!this.overdrivenPath) {
             outputNode = this.vddNode;
