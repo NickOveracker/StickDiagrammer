@@ -425,10 +425,10 @@ class Diagram {
     //
     // Unset this.overdrivenPath if the conflict is resolvable.
     attemptGateConflictResolution(node, targetNode, inputVals) {
-        let targetNodeReachable, gndPathExistsDeactivated1, vddPathExistsDeactivated1, gndPathExistsDeactivated2,
-            vddPathExistsDeactivated2, gndPathExistsActivated, vddPathExistsActivated,
-            nodeTerm1, nodeTerm2, nodeIterator, condition, od0, od1, od2;
-        od0 = od1 = od2 = false;
+        let targetNodeReachable, nodeTerm1, nodeTerm2, nodeIterator, od,
+            gndPathOk, vddPathOk, gndPathExistsActivated, vddPathExistsActivated;
+        od = false;
+        gndPathOk = vddPathOk = true;
 
         // We will need to restore the old map after half of the
         // operation below, but there is no need to restore it at the
@@ -445,6 +445,16 @@ class Diagram {
                 to[ii] = [...from[ii],];
             }
         };
+
+        // Source and drain nodes are interchangeable.
+        // They're just named  that way here for readability
+        let allPathsOk = function(sourceNode, drainNode, targetNode, activePathExists) {
+            let path1 = this.getMapping(sourceNode, targetNode).hasPath;
+            let path2 = this.getMapping(drainNode,  targetNode).hasPath;
+
+            return Boolean(path1) === Boolean(path2) &&
+                   Boolean(path1) === Boolean(activePathExists);
+        }.bind(this);
 
         mapCopy(this.nodeNodeMap, backupNodeNodeMap);
 
@@ -466,60 +476,35 @@ class Diagram {
                       
         targetNodeReachable = this.recurseThroughEdges(node, targetNode, inputVals).hasPath;
     
-        od0 = this.overdrivenPath;
+        od = this.overdrivenPath;
         this.overdrivenPath = false;
 
         // If it is reachable at all, compare the paths for inactive and active states.
         if(targetNodeReachable && Math.min(node.cell.term1.nodes.size, node.cell.term2.nodes.size) > 1) {
-            gndPathExistsActivated = this.recurseThroughEdges(nodeTerm1, this.gndNode, inputVals).hasPath ||
-                this.recurseThroughEdges(nodeTerm2, this.gndNode, inputVals).hasPath;
-            vddPathExistsActivated = this.recurseThroughEdges(nodeTerm1, this.vddNode, inputVals).hasPath ||
-                this.recurseThroughEdges(nodeTerm2, this.vddNode, inputVals).hasPath;
+            gndPathExistsActivated = this.recurseThroughEdges(nodeTerm1, this.gndNode, inputVals).hasPath;
+            vddPathExistsActivated = this.recurseThroughEdges(nodeTerm1, this.vddNode, inputVals).hasPath;
 
             mapCopy(backupNodeNodeMap, this.nodeNodeMap);
-            od1 = this.overdrivenPath;
+            od = od || this.overdrivenPath;
             this.overdrivenPath = false;
 
             // If there is a conflict when activated, then the target node is definitely overdriven.
             // As long as there is no conflict, proceed.
-            if(!(gndPathExistsActivated && vddPathExistsActivated)) {
+            if(!gndPathExistsActivated || !vddPathExistsActivated) {
                 // The active paths are fine.
                 // Now try with the gate inactive.
                 this.deactivateGate(node);
                 this.recurseThroughEdges(node, this.gndNode, inputVals);
                 this.recurseThroughEdges(node, this.vddNode, inputVals);
-                gndPathExistsDeactivated1 = this.getMapping(nodeTerm1, this.gndNode).hasPath;
-                vddPathExistsDeactivated1 = this.getMapping(nodeTerm1, this.vddNode).hasPath;
-                gndPathExistsDeactivated2 = this.getMapping(nodeTerm2, this.gndNode).hasPath;
-                vddPathExistsDeactivated2 = this.getMapping(nodeTerm2, this.vddNode).hasPath;
+                gndPathOk = allPathsOk(nodeTerm1, nodeTerm2, this.gndNode, gndPathExistsActivated);
+                vddPathOk = allPathsOk(nodeTerm1, nodeTerm2, this.vddNode, vddPathExistsActivated);
                 
                 mapCopy(backupNodeNodeMap, this.nodeNodeMap);
-                od2 = this.overdrivenPath;
-
-                // If there is a conflict when activated, then the target node is definitely overdriven.
-                // Additionally, if the paths differ between active and inactive state,
-                // the target node is overdriven.
-                condition = Boolean(gndPathExistsDeactivated1) === Boolean(gndPathExistsDeactivated2) && 
-                            Boolean(gndPathExistsDeactivated1) === Boolean(gndPathExistsActivated)    &&
-                            Boolean(vddPathExistsDeactivated1) === Boolean(vddPathExistsDeactivated2) &&
-                            Boolean(vddPathExistsDeactivated1) === Boolean(vddPathExistsActivated);
+                od = od || this.overdrivenPath;
             }
-
-            // condition === true:
-            //    Conflict resolved! The path to targetNode is not overdriven.
-            //    Need to explicitly set back to false because a recursive path may have
-            //    set it to true.
-            //
-            // condition === false or condition === undefined
-            //    If we are here, the conflict is unresolvable.
-            //    Need to explicitly set back to false because
-            //    a recursive path may have set it to true.
-            this.overdrivenPath =  !condition || od0 || od1 || od2;
-            return;
         }
 
-        // No path to targetNode === No problem
-        this.overdrivenPath = od0 || false;
+        this.overdrivenPath = od || !gndPathOk || !vddPathOk;
     }
 
     recurseThroughEdges(node, targetNode, inputVals) {
