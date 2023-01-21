@@ -553,7 +553,10 @@ class Diagram {
         } else if(hasNullPath) {
             return this.COMPUTING_PATH;
         } else {
-            return this.NO_PATH;
+            this.mapNodes(node, targetNode, this.NO_PATH);
+            // Don't return NO_PATH directly, because it may
+            // have been reassigned to VIRTUAL_PATH_ONLY.
+            return this.getMapping(node, targetNode);
         }
     }
 
@@ -568,19 +571,13 @@ class Diagram {
     computeOutputRecursive(node, targetNode, inputVals) {
         'use strict';
         let mapping;
-        let inputNum;
-        let recursionResults;
 
         // Is the test node an input?
-        inputNum = this.inputNodes.indexOf(node);
-        if(inputNum !== -1) {
-            // Test node is an input.
-            // Is it also the same node as the targetNode?
-            if(this.evaluateInput(node, inputVals) === targetNode) {
-                // Test node is an input and is the same value as the target
-                // VDD or GND node.
-                this.mapNodes(node, targetNode, this.VIRTUAL_PATH);
-            }
+        // If so, is it also the same node as the targetNode?
+        if(this.inputNodes.indexOf(node) >= 0 && this.evaluateInput(node, inputVals) === targetNode) {
+            // Test node is an input and is the same value as the target
+            // VDD or GND node.
+            this.mapNodes(node, targetNode, this.VIRTUAL_PATH);
         }
 
         // Have we already found a path?
@@ -591,7 +588,7 @@ class Diagram {
         // Avoid infinite loops.
         // Return if this is currently being checked
         // or if a definitive answer has already been found.
-        if (mapping !== this.VIRTUAL_PATH && mapping !== this.UNCHECKED) {
+        if (mapping === this.COMPUTING_PATH || mapping.indeterminate === false) {
             return mapping;
         }
 
@@ -633,14 +630,7 @@ class Diagram {
         }
 
         // Recurse on all node edges (or until a path is found).
-        recursionResults = this.recurseThroughEdges(node, targetNode, inputVals);
-
-        if(recursionResults === this.NO_PATH) {
-            this.mapNodes(node, targetNode, this.NO_PATH);
-        }
-
-        // Not returning recursionResults directly bc NO_PATH might have been changed to VIRTUAL_PATH_ONLY
-        return this.getMapping(node, targetNode);
+        return this.recurseThroughEdges(node, targetNode, inputVals);
     }
 
 
@@ -810,9 +800,13 @@ class Diagram {
         }.bind(this);
 
         for(let ii = 0; ii < this.inputNodes.length; ii++) {
+            /*jslint bitwise: true */
             if(inputVals >> (this.inputNodes.length - 1 - ii) & 1) {
                 this.mapNodes(this.inputNodes[ii], this.vddNode, this.VIRTUAL_PATH);
-            } else this.mapNodes(this.inputNodes[ii], this.gndNode, this.VIRTUAL_PATH);
+            } else {
+                this.mapNodes(this.inputNodes[ii], this.gndNode, this.VIRTUAL_PATH);
+            }
+            /*jslint bitwise: false */
         }
   
         this.inputNodes.forEach(testPath);
