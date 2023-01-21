@@ -19,6 +19,7 @@
 * Software entropy must not increase.
 
 ## Feature Wishlist
+* Show which layers are set in highlighted cell.
 * Replace pullup/pulldown alert popups with less obtrusive warnings.
 * HDL generation.
 * Interactive tutorial.
@@ -50,6 +51,7 @@
 * ~~Knowing that I spelled "accolades" correctly (I don't feel like Googling it)~~ *Resolved 2021/11/20*
 
 ## Known Bugs
+* Incorrect output for two input-overdriven transistors in series with a VDD+GND overdriven transistor in series with direct input.
 * ~~Incorrect output when GND and VDD are directly assigned to the same gate in series with overdriven transistor.~~ *Resolved 2023/1/17*
 * ~~GND or VDD incorrectly override input nodes directly assigned to the same gate as them.~~ *Resolved 2023/1/16*
 * ~~Incorrectly assigns Z for certain configurations of overdriven transistors when X is expected.~~ *Resolved 2023/1/15*
