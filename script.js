@@ -627,6 +627,41 @@ class Diagram {
         return this.recurseThroughEdges(node, targetNode, inputVals);
     }
 
+    evalInputDrivenGate(node, inputVals, gateNet) {
+        let tempEval, evalInput;
+        let gateNode = gateNet.nodes.entries().next().value[1];
+
+        this.inputNodes.forEach(function(node, index) {
+            if(!gateNode.isConnected(node)) {
+                return;
+            }
+
+            // Evaluate the relevant input bit as a boolean.
+            /*jslint bitwise: true */
+            tempEval = !!((inputVals >> (this.inputs.length - index - 1)) & 1);
+            /*jslint bitwise: false */
+
+            if(evalInput === undefined || evalInput === tempEval) {
+                evalInput = tempEval;
+            } else {
+                // Conflict found.
+                this.overdrivenPath = true;
+            }
+        }.bind(this));
+
+        this.overdrivenPath = this.overdrivenPath ||
+            gateNet.containsNode(this.vddNode) && evalInput === false ||
+            gateNet.containsNode(this.gndNode) && evalInput === true ||
+            gateNet.containsNode(this.vddNode) && gateNet.containsNode(this.gndNode);
+
+        evalInput = (evalInput || gateNet.containsNode(this.vddNode)) && !gateNet.containsNode(this.gndNode);
+        
+        // Pass-through positive for NMOS.
+        // Invert for PMOS.
+        /*jslint bitwise: true */
+        return !this.overdrivenPath && !(node.isNmos ^ evalInput);
+        /*jslint bitwise: false */
+    }
 
     // This function determines whether a transistor gate is active by evaluating 
     // the paths between the gate's nodes and either the ground node or the power node.
@@ -645,39 +680,7 @@ class Diagram {
 
         // If the gate is an input, the gate's state depends on the input value.
         if (gateNet.isInput) {
-            let tempEval, evalInput;
-            let gateNode = gateNet.nodes.entries().next().value[1];
-
-            this.inputNodes.forEach(function(node, index) {
-                if(!gateNode.isConnected(node)) {
-                    return;
-                }
-
-                // Evaluate the relevant input bit as a boolean.
-                /*jslint bitwise: true */
-                tempEval = !!((inputVals >> (this.inputs.length - index - 1)) & 1);
-                /*jslint bitwise: false */
-
-                if(evalInput === undefined || evalInput === tempEval) {
-                    evalInput = tempEval;
-                } else {
-                    // Conflict found.
-                    this.overdrivenPath = true;
-                }
-            }.bind(this));
-
-            this.overdrivenPath = this.overdrivenPath ||
-                gateNet.containsNode(this.vddNode) && evalInput === false ||
-                gateNet.containsNode(this.gndNode) && evalInput === true ||
-                gateNet.containsNode(this.vddNode) && gateNet.containsNode(this.gndNode);
-
-            evalInput = (evalInput || gateNet.containsNode(this.vddNode)) && !gateNet.containsNode(this.gndNode);
-            
-            // Pass-through positive for NMOS.
-            // Invert for PMOS.
-            /*jslint bitwise: true */
-            return !this.overdrivenPath && !(node.isNmos ^ evalInput);
-            /*jslint bitwise: false */
+            return this.evalInputDrivenGate(node, inputVals, gateNet);
         }
 
         // Otherwise, recurse and see if this is active.
