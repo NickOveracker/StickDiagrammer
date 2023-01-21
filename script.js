@@ -79,8 +79,27 @@ class Diagram {
 
     constructor(mainCanvas, gridCanvas) {
         'use strict';
+        this.DIRECT_PATH         = { indeterminate: false, hasPath: true,  direct: true,  }; // Originally [true]
+        this.VIRTUAL_PATH        = { indeterminate: true,  hasPath: true,  direct: false, }; // Originally ["i"]
+        this.VIRTUAL_PATH_ONLY   = { indeterminate: false, hasPath: true,  direct: false, }; // Originally ["I"]
+        this.NO_PATH             = { indeterminate: false, hasPath: false,                }; // Originally [false]
+        this.COMPUTING_PATH      = { indeterminate: true,                                 }; // Originally [null]
+        this.UNCHECKED           = { indeterminate: true,                                 }; // Originally [undefined]
+
+        this.initCells();
+        this.initNets();
+        this.initNodes();
+
+        this.nmosPullup = this.pmosPulldown = false;
+        
+        this.view = new DiagramView(this, mainCanvas, gridCanvas);
+        this.controller = new DiagramController(this, this.view, mainCanvas);
+    }
+
+    initCells() {
         let startWidth  = 29;
         let startHeight = 29;
+
         this.inputs = [
             { x: 2, y: 8,  }, // A
             { x: 2, y: 12, }, // B
@@ -91,25 +110,17 @@ class Diagram {
             { x: 26, y: 14, }, // Y
         ];
 
-        this.layeredGrid = new LayeredGrid(this, startWidth, startHeight, Diagram.layers.length);
-        this.nodeNodeMap = [];
-        this.netlist = [];
-        this.graph = new Graph();
         this.vddCell = {x: 1, y: 1,};
         this.gndCell = {x: 1, y: startHeight - 2,};
-        this.vddNode = null;
-        this.gndNode = null;
-        this.inputNodes = [];
-        this.outputNodes = [];
-        this.nmos = new Set();
-        this.pmos = new Set();
+
+        this.layeredGrid = new LayeredGrid(this, startWidth, startHeight, Diagram.layers.length);
+    }
+
+    initNets() {
         this.vddNet = new Net("VDD", true);
         this.gndNet = new Net("GND", true);
         this.inputNets = [];
         this.outputNets = [];
-        this.analyses = [];
-        this.nmosPullup = false;
-        this.pmosPulldown = false;
 
         for (let ii = 0; ii < this.inputs.length; ii++) {
             this.inputNets.push(new Net(String.fromCharCode(65 + ii), true));
@@ -118,16 +129,18 @@ class Diagram {
             this.outputNets.push(new Net(String.fromCharCode(89 - ii), false));
         }
 
-        this.view = new DiagramView(this, mainCanvas, gridCanvas);
-        this.controller = new DiagramController(this, this.view, mainCanvas);
+        this.netlist = [];
+        this.analyses = [];
+   }
 
-        this.DIRECT_PATH         = { indeterminate: false, hasPath: true,  direct: true,  }; // Originally [true]
-        this.VIRTUAL_PATH        = { indeterminate: true,  hasPath: true,  direct: false, }; // Originally ["i"]
-        this.VIRTUAL_PATH_ONLY   = { indeterminate: false, hasPath: true,  direct: false, }; // Originally ["I"]
-        this.NO_PATH             = { indeterminate: false, hasPath: false,                }; // Originally [false]
-        this.COMPUTING_PATH      = { indeterminate: true,                                 }; // Originally [null]
-        this.UNCHECKED           = { indeterminate: true,                                 }; // Originally [undefined]
-    }
+    initNodes() {
+        this.graph = new Graph();
+        this.inputNodes = [];
+        this.outputNodes = [];
+        this.nmos = new Set();
+        this.pmos = new Set();
+        this.nodeNodeMap = [];
+   }
 
     // Compact the grid to send to the server.
     packGrid() {
