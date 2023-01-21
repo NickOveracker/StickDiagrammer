@@ -310,8 +310,7 @@ class Diagram {
 
     getMapping(node1, node2) {
         'use strict';
-        let mapping = this.nodeNodeMap[this.graph.getIndexByNode(node1)][this.graph.getIndexByNode(node2)];
-        return mapping === undefined ? this.UNCHECKED : mapping;
+        return this.nodeNodeMap[this.graph.getIndexByNode(node1)][this.graph.getIndexByNode(node2)];
     }
 
     // This function updates the mappings between nodes in the graph to reflect whether a path exists between them.
@@ -323,7 +322,6 @@ class Diagram {
     mapNodes(node1, node2, setPath) {
         'use strict';
         let currentMapping = this.getMapping(node1, node2);
-        let newMapping;
 
         // If there is a mapping, do nothing and return
         // One exception: If the current mapping is NO_PATH and the new mapping is VIRTUAL_PATH_ONLY,
@@ -556,7 +554,7 @@ class Diagram {
             return this.COMPUTING_PATH;
         } else {
             return this.NO_PATH;
-        };
+        }
     }
 
     // Recursively searches for a path from node to targetNode
@@ -780,7 +778,10 @@ class Diagram {
             // Mark each node as connected to itself.
             for (let ii = 0; ii < this.graph.nodes.length; ii++) {
                 this.nodeNodeMap[ii] = [];
-                this.nodeNodeMap[ii][ii] = this.DIRECT_PATH;
+
+                for(let jj = 0; jj < this.graph.nodes.length; jj++) {
+                    this.nodeNodeMap[ii][jj] = ii === jj ? this.DIRECT_PATH : this.UNCHECKED;
+                }
             }
         }
 
@@ -796,7 +797,7 @@ class Diagram {
             for(let ii = 0; ii < this.graph.nodes.length; ii++) {
                 for(let jj = 0; jj < this.graph.nodes.length; jj++) {
                     if(this.nodeNodeMap[ii][jj] === this.COMPUTING_PATH) {
-                        this.nodeNodeMap[ii][jj] = undefined;
+                        this.nodeNodeMap[ii][jj] = this.UNCHECKED;
                     }
                 }
             }
@@ -810,8 +811,8 @@ class Diagram {
 
         for(let ii = 0; ii < this.inputNodes.length; ii++) {
             if(inputVals >> (this.inputNodes.length - 1 - ii) & 1) {
-                this.mapNodes(this.inputNodes[ii], this.vddNode, "i");
-            } else this.mapNodes(this.inputNodes[ii], this.gndNode, "i");
+                this.mapNodes(this.inputNodes[ii], this.vddNode, this.VIRTUAL_PATH);
+            } else this.mapNodes(this.inputNodes[ii], this.gndNode, this.VIRTUAL_PATH);
         }
   
         this.inputNodes.forEach(testPath);
