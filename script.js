@@ -2123,6 +2123,10 @@ class DiagramView {
         }
     }
 
+    // Mark the cells connected to the output node for a given set of inputs
+    // so they can be highlighted in the canvas.
+    //
+    // path: The row of the relevant nodeNodeMap corresponding to the chosen output node.
     setHighlight(path) {
         'use strict';
         this.netHighlightGrid.length = 0;
@@ -2132,7 +2136,8 @@ class DiagramView {
         }
 
         for(let ii = 0; ii < path.length; ii++) {
-            if(path[ii] !== true) {
+            // Only highlight nets directly connected to the output.
+            if(path[ii] !== diagram.DIRECT_PATH) {
                 continue;
             }
             for(let jj = 0; jj < this.diagram.netlist.length; jj++) {
