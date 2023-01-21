@@ -425,10 +425,8 @@ class Diagram {
     //
     // Unset this.overdrivenPath if the conflict is resolvable.
     attemptGateConflictResolution(node, targetNode, inputVals) {
-        let targetNodeReachable, nodeTerm1, nodeTerm2, nodeIterator, od,
+        let targetNodeReachable, nodeTerm1, nodeTerm2, od,
             gndPathOk, vddPathOk, gndPathExistsActivated, vddPathExistsActivated;
-        od = false;
-        gndPathOk = vddPathOk = true;
 
         // We will need to restore the old map after half of the
         // operation below, but there is no need to restore it at the
@@ -463,13 +461,8 @@ class Diagram {
         
         // First, see if any of the adjacent nodes that are not currently null-mapped
         // (i.e., not under investigation) have a path to targetNode.
-        nodeIterator = node.cell.term1.nodes.values();
-        nodeTerm1 = nodeIterator.next().value;
-        nodeTerm1 = nodeTerm1 === node ? nodeIterator.next().value : nodeTerm1;
-      
-        nodeIterator = node.cell.term2.nodes.values();
-        nodeTerm2 = nodeIterator.next().value;
-        nodeTerm2 = nodeTerm2 === node ? nodeIterator.next().value : nodeTerm2;
+        nodeTerm1 = node.getTerm1Node();
+        nodeTerm2 = node.getTerm2Node();
 
         this.mapNodes(node, nodeTerm1, this.DIRECT_PATH);
         this.mapNodes(node, nodeTerm2, this.DIRECT_PATH);
@@ -502,9 +495,12 @@ class Diagram {
                 mapCopy(backupNodeNodeMap, this.nodeNodeMap);
                 od = od || this.overdrivenPath;
             }
+
+            od =  !(gndPathOk && vddPathOk) || od;
         }
 
-        this.overdrivenPath = od || !gndPathOk || !vddPathOk;
+        // No path to targetNode === No problem
+        this.overdrivenPath = od;
     }
 
     recurseThroughEdges(node, targetNode, inputVals) {
@@ -2564,6 +2560,18 @@ class Node {
         if (index > -1) {
             this.edges.splice(index, 1);
         }
+    }
+
+    getTerm1Node() {
+        let nodeIterator = this.cell.term1.nodes.values();
+        let nodeTerm1 = nodeIterator.next().value;
+        return nodeTerm1 === this ? nodeIterator.next().value : nodeTerm1;
+    }
+
+    getTerm2Node() {
+        let nodeIterator = this.cell.term2.nodes.values();
+        let nodeTerm2 = nodeIterator.next().value;
+        return nodeTerm2 === this ? nodeIterator.next().value : nodeTerm2;
     }
 }
 
