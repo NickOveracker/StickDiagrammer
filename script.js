@@ -76,7 +76,7 @@ class Diagram {
         'use strict';
         this.DIRECT_PATH         = { indeterminate: false, hasPath: true,  direct: true,  label: "1" }; // Originally [true]
         this.VIRTUAL_PATH        = { indeterminate: true,  hasPath: true,  direct: false, label: "v" }; // Originally ["i"]
-        this.VIRTUAL_PATH_ONLY   = { indeterminate: false, hasPath: true,  direct: false, label: "V" }; // Originally ["I"]
+        this.VIRTUAL_PATH_ONLY   = { indeterminate: false, hasPath: true,  direct: false, label: "I" }; // Originally ["I"]
         this.NO_PATH             = { indeterminate: false, hasPath: false,                label: "0" }; // Originally [false]
         this.COMPUTING_PATH      = { indeterminate: true,                                 label: "?" }; // Originally [null]
         this.UNCHECKED           = { indeterminate: true,                                 label: "_" }; // Originally [undefined]
@@ -360,6 +360,82 @@ class Diagram {
 
         // Create a function to sync edges between nodes
         let syncEdges = function(ii, node1, node2) {
+            // Get the existing mappings between the remapped nodes and node ii.
+            let node1Mapping = this.nodeNodeMap[ii][this.graph.getIndexByNode(node1)];
+            let node2Mapping = this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)];
+
+            // Case 1: Node2 already has a positive mapping to node ii.
+            //         In this case, only override to turn it from VIRTUAL_PATH to VIRTUAL_PATH_ONLY or DIRECT_PATH.
+            if(node2Mapping === this.VIRTUAL_PATH) {
+                if(setPath === this.DIRECT_PATH && node1Mapping === this.DIRECT_PATH) {
+                    this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] = this.DIRECT_PATH;
+                    this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = this.DIRECT_PATH;
+                }
+                else if(setPath === this.DIRECT_PATH && node1Mapping === this.NO_PATH) {
+                    this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] = this.VIRTUAL_PATH_ONLY;
+                    this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = this.VIRTUAL_PATH_ONLY;
+                }
+                else if(setPath === this.NO_PATH && node1Mapping === this.DIRECT_PATH) {
+                    this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] = this.VIRTUAL_PATH_ONLY;
+                    this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = this.VIRTUAL_PATH_ONLY;
+                }
+                else if(setPath === this.VIRTUAL_PATH_ONLY && node1Mapping === this.DIRECT_PATH) {
+                    this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] = this.VIRTUAL_PATH_ONLY;
+                    this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = this.VIRTUAL_PATH_ONLY;
+                }
+            }
+            // Case 2: Node2 has a NO_PATH mapping to node ii.
+            //         In this case, allow it to change to VIRTUAL_PATH_ONLY.
+            //         DO NOT do this to propagate virtual paths from VDD and GND.
+            if(node2Mapping === this.NO_PATH && node1 !== this.vddNode && node1 !== this.gndNode) {
+                if(setPath === this.DIRECT_PATH && node1Mapping === this.VIRTUAL_PATH) {
+                    this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] = this.VIRTUAL_PATH_ONLY;
+                    this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = this.VIRTUAL_PATH_ONLY;
+                }
+                else if(setPath === this.DIRECT_PATH && node1Mapping === this.VIRTUAL_PATH_ONLY) {
+                    this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] = this.VIRTUAL_PATH_ONLY;
+                    this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = this.VIRTUAL_PATH_ONLY;
+                }
+            }
+            // Case 3: Node2 is UNCHECKED or COMPUTING_PATH.
+            //         In this case, copy any of the other mappings from node 1.
+            //         Exception: Do not copy virtual paths from VDD and GND.
+            if(node2Mapping === this.UNCHECKED || node2Mapping === this.COMPUTING_PATH) {
+                if(setPath === this.DIRECT_PATH) {
+                    if(node1Mapping === this.DIRECT_PATH || node1Mapping === this.NO_PATH) {
+                        this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] = node1Mapping;
+                        this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = node1Mapping;
+                    }
+                    if((node1 !== this.vddNode && node1 !== this.gndNode) && (node1Mapping === this.VIRTUAL_PATH || node1Mapping === this.VIRTUAL_PATH_ONLY)) {
+                        this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] = node1Mapping;
+                        this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = node1Mapping;
+                    }
+                }
+                else if(setPath === this.NO_PATH) {
+                    if(node1Mapping === this.DIRECT_PATH) {
+                        this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] = this.NO_PATH;
+                        this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = this.NO_PATH;
+                    }
+                }
+                else if(setPath === this.VIRTUAL_PATH_ONLY) {
+                    if(node1Mapping === this.DIRECT_PATH && (node1 === this.vddNode || node1 === this.gndNode)) {
+                        this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] = this.NO_PATH;
+                        this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = this.NO_PATH;
+                    }
+                    else if(node1Mapping === this.DIRECT_PATH) {
+                        this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] = this.VIRTUAL_PATH_ONLY;
+                        this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = this.VIRTUAL_PATH_ONLY;
+                    }
+                }
+                 else if(setPath === this.VIRTUAL_PATH) {
+                    if(node1Mapping === this.DIRECT_PATH && node1 !== this.vddNode && node1 !== this.gndNode) {
+                        this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] = this.VIRTUAL_PATH;
+                        this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = this.VIRTUAL_PATH;
+                    }
+                }
+            }
+
+            /*
             let mapSwitch;
             // Mapping is unidirectional for virtual mappings.
             // Do not proceed if this is a virtual mapping from VDD or GND. 
@@ -380,6 +456,7 @@ class Diagram {
                     this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = this.NO_PATH;
                 }
             }
+            */
         }.bind(this);
 
         // Map the path to node2 appropriately for all nodes mapped to node1.
@@ -451,8 +528,8 @@ class Diagram {
             let path1 = this.getMapping(sourceNode, targetNode).hasPath;
             let path2 = this.getMapping(drainNode,  targetNode).hasPath;
 
-            return Boolean(path1) === Boolean(path2) &&
-                   Boolean(path1) === Boolean(activePathExists);
+            return path1 === path2 &&
+                   path1 === activePathExists;
         }.bind(this);
 
         mapCopy(this.nodeNodeMap, backupNodeNodeMap);
