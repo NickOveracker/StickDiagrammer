@@ -74,12 +74,12 @@ class Diagram {
 
     constructor(mainCanvas, gridCanvas) {
         'use strict';
-        this.DIRECT_PATH         = { indeterminate: false, hasPath: true,  direct: true,  }; // Originally [true]
-        this.VIRTUAL_PATH        = { indeterminate: true,  hasPath: true,  direct: false, }; // Originally ["i"]
-        this.VIRTUAL_PATH_ONLY   = { indeterminate: false, hasPath: true,  direct: false, }; // Originally ["I"]
-        this.NO_PATH             = { indeterminate: false, hasPath: false,                }; // Originally [false]
-        this.COMPUTING_PATH      = { indeterminate: true,                                 }; // Originally [null]
-        this.UNCHECKED           = { indeterminate: true,                                 }; // Originally [undefined]
+        this.DIRECT_PATH         = { indeterminate: false, hasPath: true,  direct: true,  label: "H" }; // Originally [true]
+        this.VIRTUAL_PATH        = { indeterminate: true,  hasPath: true,  direct: false, label: "i" }; // Originally ["i"]
+        this.VIRTUAL_PATH_ONLY   = { indeterminate: false, hasPath: true,  direct: false, label: "I" }; // Originally ["I"]
+        this.NO_PATH             = { indeterminate: false, hasPath: false,                label: "L" }; // Originally [false]
+        this.COMPUTING_PATH      = { indeterminate: true,                                 label: "?" }; // Originally [null]
+        this.UNCHECKED           = { indeterminate: true,                                 label: "_" }; // Originally [undefined]
 
         this.initCells();
         this.initNets();
@@ -1081,11 +1081,28 @@ class Diagram {
                     }
                 }
             });
+
+            // Add a blank node and edge if there are no other nodes on this net
+            // (besides the transistor itself).
+            if(net.nodes.size === 1) {
+                let node = this.assignEmptyNode(net);
+                transistor.addEdge(node);
+            }
         }.bind(this));
 
         this.linkIdenticalNets();
         this.checkPolarity();
     } // end function setNets
+
+    // Add a node to a net that does not yet have any nodes.
+    assignEmptyNode(net) {
+        'use strict';
+
+        let node = this.graph.addNode(net.cells.values().next().value, true);
+        net.addNode(node);
+
+        return node;
+    }
 
     checkPolarity() {
         'use strict';
@@ -2568,7 +2585,7 @@ class Node {
     }
 }
 
-// Each edge is a connection between two diagram.graph nodes.
+// Each edge is a connection between two graph nodes.
 class Edge {
     constructor(node1, node2) {
         'use strict';
