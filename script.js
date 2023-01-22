@@ -74,10 +74,10 @@ class Diagram {
 
     constructor(mainCanvas, gridCanvas) {
         'use strict';
-        this.DIRECT_PATH         = { indeterminate: false, hasPath: true,  direct: true,  label: "H" }; // Originally [true]
-        this.VIRTUAL_PATH        = { indeterminate: true,  hasPath: true,  direct: false, label: "i" }; // Originally ["i"]
-        this.VIRTUAL_PATH_ONLY   = { indeterminate: false, hasPath: true,  direct: false, label: "I" }; // Originally ["I"]
-        this.NO_PATH             = { indeterminate: false, hasPath: false,                label: "L" }; // Originally [false]
+        this.DIRECT_PATH         = { indeterminate: false, hasPath: true,  direct: true,  label: "1" }; // Originally [true]
+        this.VIRTUAL_PATH        = { indeterminate: true,  hasPath: true,  direct: false, label: "v" }; // Originally ["i"]
+        this.VIRTUAL_PATH_ONLY   = { indeterminate: false, hasPath: true,  direct: false, label: "V" }; // Originally ["I"]
+        this.NO_PATH             = { indeterminate: false, hasPath: false,                label: "0" }; // Originally [false]
         this.COMPUTING_PATH      = { indeterminate: true,                                 label: "?" }; // Originally [null]
         this.UNCHECKED           = { indeterminate: true,                                 label: "_" }; // Originally [undefined]
 
