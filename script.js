@@ -133,7 +133,7 @@ class Diagram {
     initNodes() {
         'use strict';
         this.graph = new Graph();
-        this.inputNodes = [];
+        this.inputNodes  = [];
         this.outputNodes = [];
         this.nmos = new Set();
         this.pmos = new Set();
@@ -829,6 +829,10 @@ class Diagram {
 
         // Test each node for a path to outputNode
         let testPath = function(node) {
+          	if(this.overdrivenPath) {
+              return;
+            }
+
             // Recursive over every possible path from the test node to outputNode.
             this.computeOutputRecursive(node, outputNode, inputVals);
 
@@ -861,22 +865,19 @@ class Diagram {
             /*jslint bitwise: false */
         }
   
+        // Compute output
         this.inputNodes.forEach(testPath);
-        let temp = outputNode;
+        testPath(this.vddNode);
+        testPath(this.gndNode);
+  
+        // If there are no overdriven paths,
+        // proceed to map out every path to the output.
+        // We can ignore overdriven paths here because
+        // the new nodes we are testing are not inputs.
         if(!this.overdrivenPath) {
-            outputNode = this.vddNode;
-            this.inputNodes.forEach(testPath);
-            outputNode = this.gndNode;
-            this.inputNodes.forEach(testPath);
+            this.graph.nodes.forEach(testPath);
+            this.overdrivenPath = false;
         }
-        outputNode = temp;
-        if(!this.overdrivenPath) {
-            testPath(this.vddNode);
-        }
-        if(!this.overdrivenPath) {
-            testPath(this.gndNode);
-        }
-        //!this.overdrivenPath && this.outputNodes.forEach(testPath); Unimportant???
 
         // Determine the value of the output.
         highNodes.some(function(node) {
@@ -1149,10 +1150,8 @@ class Diagram {
     // Add a node to a net that does not yet have any nodes.
     assignEmptyNode(net) {
         'use strict';
-
         let node = this.graph.addNode(net.cells.values().next().value, true);
         net.addNode(node);
-
         return node;
     }
 
