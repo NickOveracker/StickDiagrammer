@@ -74,12 +74,12 @@ class Diagram {
 
     constructor(mainCanvas, gridCanvas) {
         'use strict';
-        this.DIRECT_PATH         = { indeterminate: false, hasPath: true,  direct: true,  }; // Originally [true]
-        this.VIRTUAL_PATH        = { indeterminate: true,  hasPath: true,  direct: false, }; // Originally ["i"]
-        this.VIRTUAL_PATH_ONLY   = { indeterminate: false, hasPath: true,  direct: false, }; // Originally ["I"]
-        this.NO_PATH             = { indeterminate: false, hasPath: false,                }; // Originally [false]
-        this.COMPUTING_PATH      = { indeterminate: true,                                 }; // Originally [null]
-        this.UNCHECKED           = { indeterminate: true,                                 }; // Originally [undefined]
+        this.DIRECT_PATH         = { indeterminate: false, hasPath: true,  direct: true,  label: "1", }; // Originally [true]
+        this.VIRTUAL_PATH        = { indeterminate: true,  hasPath: true,  direct: false, label: "v", }; // Originally ["i"]
+        this.VIRTUAL_PATH_ONLY   = { indeterminate: false, hasPath: true,  direct: false, label: "I", }; // Originally ["I"]
+        this.NO_PATH             = { indeterminate: false, hasPath: false,                label: "0", }; // Originally [false]
+        this.COMPUTING_PATH      = { indeterminate: true,                                 label: "?", }; // Originally [null]
+        this.UNCHECKED           = { indeterminate: true,                                 label: "_", }; // Originally [undefined]
 
         this.initCells();
         this.initNets();
@@ -358,35 +358,85 @@ class Diagram {
         // and a path has neither been found nor ruled out.
         if (setPath === this.COMPUTING_PATH) { return; }
 
-        // Create a function to sync edges between nodes
-        let syncEdges = function(ii, node1, node2) {
-            let mapSwitch;
-            // Mapping is unidirectional for virtual mappings.
-            // Do not proceed if this is a virtual mapping from VDD or GND. 
-            if((this.vddNode !== node1 && this.gndNode !== node1) || setPath.direct !== false) {
-                if (this.nodeNodeMap[ii][this.graph.getIndexByNode(node1)] === this.DIRECT_PATH) {
-                    // If there is a virtual path from node ii to node2,
-                    // finding that there is no direct path means we can upgrade it to
-                    // VIRTUAL_PATH_ONLY (only virtual, no direct path)
-                    mapSwitch = this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)].direct === false;
-                    mapSwitch = mapSwitch && (setPath === this.NO_PATH);
-
-                    this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] = mapSwitch ? this.VIRTUAL_PATH_ONLY : setPath;
-                    this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = mapSwitch ? this.VIRTUAL_PATH_ONLY : setPath;
-                // If there is not a path between ii and node1 and setPath is DIRECT_PATH, set the path between ii and node2 to NO_PATH.
-                // (I.e., any path not connected to node1 is not connected to node2 if node1 and node2 are connected.)
-                } else if (setPath === this.DIRECT_PATH && (this.nodeNodeMap[ii][this.graph.getIndexByNode(node1)] === this.NO_PATH)) {
-                    this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] = this.NO_PATH;
-                    this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = this.NO_PATH;
-                }
-            }
-        }.bind(this);
-
         // Map the path to node2 appropriately for all nodes mapped to node1.
         for (let ii = 0; ii < this.nodeNodeMap.length; ii++) {
-            syncEdges(ii, node1, node2);
+            this.syncEdges(ii, node1, node2, setPath);
             // Now do the reverse direction.
-            syncEdges(this.nodeNodeMap.length - ii - 1, node2, node1);
+            this.syncEdges(this.nodeNodeMap.length - ii - 1, node2, node1, setPath);
+        }
+    }
+
+    syncEdges(ii, node1, node2, setPath) {
+        'use strict';
+
+        // Get the existing mappings between the remapped nodes and node ii.
+        let node1Mapping = this.nodeNodeMap[ii][this.graph.getIndexByNode(node1)];
+        let node2Mapping = this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)];
+        let mapFromRail = node1 === this.gndNode || node1 === this.vddNode;
+
+        let remap = function(mapping) {
+            this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] = mapping;
+            this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = mapping;
+        }.bind(this);
+        
+        if(node1Mapping.hasPath === undefined || setPath.hasPath === undefined) {
+            return;
+        }
+
+        // Case 1: Node2 already has a positive mapping to node ii.
+        //         In this case, only override to turn it from VIRTUAL_PATH to VIRTUAL_PATH_ONLY or DIRECT_PATH.
+        if(node2Mapping === this.VIRTUAL_PATH) {
+            if(node1Mapping === this.DIRECT_PATH) {
+                if(setPath === this.DIRECT_PATH) {
+                    remap(this.DIRECT_PATH);
+                }
+                else if(setPath === this.NO_PATH) {
+                    remap(this.VIRTUAL_PATH_ONLY);
+                }
+                else if(setPath === this.VIRTUAL_PATH_ONLY) {
+                    remap(this.VIRTUAL_PATH_ONLY);
+                }
+            }
+            else if(node1Mapping === this.NO_PATH && setPath === this.DIRECT_PATH) {
+                remap(this.VIRTUAL_PATH_ONLY);
+            }
+        }
+        // Case 2: Node2 has a NO_PATH mapping to node ii.
+        //         In this case, allow it to change to VIRTUAL_PATH_ONLY.
+        //         DO NOT do this to propagate virtual paths from VDD and GND.
+        if(node2Mapping === this.NO_PATH && !mapFromRail) {
+            if(setPath === this.DIRECT_PATH && node1Mapping.direct === false) {
+                remap(this.VIRTUAL_PATH_ONLY);
+            }
+        }
+        // Case 3: Node2 is UNCHECKED or COMPUTING_PATH.
+        //         In this case, copy any of the other mappings from node 1.
+        //         Exception: Do not copy virtual paths from VDD and GND.
+        if(node2Mapping.hasPath === undefined) {
+            if(setPath === this.DIRECT_PATH) {
+                if(node1Mapping === this.DIRECT_PATH || node1Mapping === this.NO_PATH) {
+                    remap(node1Mapping);
+                }
+                else if(node1Mapping.direct === false && !mapFromRail) {
+                    remap(node1Mapping);
+                }
+            }
+            else if(node1Mapping === this.DIRECT_PATH) {
+                if(setPath === this.NO_PATH) {
+                    remap(this.NO_PATH);
+                }
+                else if(setPath === this.VIRTUAL_PATH_ONLY) {
+                    if(mapFromRail) {
+                        remap(this.NO_PATH);
+                    }
+                    else {
+                        remap(this.VIRTUAL_PATH_ONLY);
+                    }
+                }
+                else if(!mapFromRail) {
+                    remap(this.VIRTUAL_PATH);
+                }
+            }
         }
     }
 
@@ -415,7 +465,8 @@ class Diagram {
             if(node === otherNode) {
                 return;
             }
-            this.mapNodes(node, otherNode, this.NO_PATH);
+            this.nodeNodeMap[this.graph.getIndexByNode(node)][this.graph.getIndexByNode(otherNode)] = this.NO_PATH;
+            this.nodeNodeMap[this.graph.getIndexByNode(otherNode)][this.graph.getIndexByNode(node)] = this.NO_PATH;
         }.bind(this));
     }
 
@@ -451,8 +502,8 @@ class Diagram {
             let path1 = this.getMapping(sourceNode, targetNode).hasPath;
             let path2 = this.getMapping(drainNode,  targetNode).hasPath;
 
-            return Boolean(path1) === Boolean(path2) &&
-                   Boolean(path1) === Boolean(activePathExists);
+            return path1 === path2 &&
+                   path1 === activePathExists;
         }.bind(this);
 
         mapCopy(this.nodeNodeMap, backupNodeNodeMap);
@@ -502,6 +553,7 @@ class Diagram {
 
         // No path to targetNode === No problem
         this.overdrivenPath = od;
+        mapCopy(backupNodeNodeMap, this.nodeNodeMap);
     }
 
     recurseThroughEdges(node, targetNode, inputVals) {
@@ -1081,11 +1133,28 @@ class Diagram {
                     }
                 }
             });
+
+            // Add a blank node and edge if there are no other nodes on this net
+            // (besides the transistor itself).
+            if(net.nodes.size === 1) {
+                let node = this.assignEmptyNode(net);
+                transistor.addEdge(node);
+            }
         }.bind(this));
 
         this.linkIdenticalNets();
         this.checkPolarity();
     } // end function setNets
+
+    // Add a node to a net that does not yet have any nodes.
+    assignEmptyNode(net) {
+        'use strict';
+
+        let node = this.graph.addNode(net.cells.values().next().value, true);
+        net.addNode(node);
+
+        return node;
+    }
 
     checkPolarity() {
         'use strict';
@@ -2568,7 +2637,7 @@ class Node {
     }
 }
 
-// Each edge is a connection between two diagram.graph nodes.
+// Each edge is a connection between two graph nodes.
 class Edge {
     constructor(node1, node2) {
         'use strict';

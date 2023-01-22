@@ -61,38 +61,6 @@ Graph.prototype.print = function() {
     console.log('}');
 };
 
-Diagram.prototype.printNodeNodeMap = function(inputVals) {
-    'use strict';
-    let str = "   ";
-    for(let ii = 0; ii < this.analyses[inputVals].length; ii++) {
-        str += ii + " ";
-        if(ii < 9) {
-            str += " ";
-        }
-    }
-    str += "\n";
-    for(let ii = 0; ii < this.analyses[inputVals].length; ii++) {
-        str += ii + " ";
-        if(ii <= 9) {
-            str += " ";
-        }
-        for(let jj = 0; jj < this.analyses[inputVals].length; jj++) {
-            if(this.analyses[inputVals][ii][jj] === null) {
-                str += "?  ";
-            } else if(this.analyses[inputVals][ii][jj] === undefined) {
-                str += "   ";
-            } else if(this.analyses[inputVals][ii][jj] === true) {
-                str += "1  ";
-            } else {
-                str += "0  ";
-            }
-        }
-        str += "\n";
-    }
-  
-    console.log(str);
-};
-
 // Print a grid with in all cells that are in a given net.
 Diagram.prototype.printGrid = function(netNum) {
     'use strict';
@@ -210,3 +178,14 @@ window.onload = function() {
     window.addEventListener("keydown", recordEvent);
     window.addEventListener("keyup", recordEvent);
 };
+
+Diagram.prototype.mapString = function(row) {
+  let str = "";
+  
+  for(let jj = 0; jj < this.nodeNodeMap[row].length; jj++) {
+    str += this.nodeNodeMap[row][jj].label;
+    str += " ";
+  }
+  
+  return str;
+}

@@ -51,7 +51,8 @@
 * ~~Knowing that I spelled "accolades" correctly (I don't feel like Googling it)~~ *Resolved 2021/11/20*
 
 ## Known Bugs
-* Incorrect output for two input-overdriven transistors in series with a VDD+GND overdriven transistor in series with direct input.
+* Highlighted nets are no longer comprehensive.
+* ~~Incorrect output for two input-overdriven transistors in series with a VDD+GND overdriven transistor in series with direct input.~~ *Resolved 2023/1/22*
 * ~~Incorrect output when GND and VDD are directly assigned to the same gate in series with overdriven transistor.~~ *Resolved 2023/1/17*
 * ~~GND or VDD incorrectly override input nodes directly assigned to the same gate as them.~~ *Resolved 2023/1/16*
 * ~~Incorrectly assigns Z for certain configurations of overdriven transistors when X is expected.~~ *Resolved 2023/1/15*
