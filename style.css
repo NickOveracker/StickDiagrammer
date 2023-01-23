@@ -685,9 +685,10 @@ body.light {
     .active-layers {
         width: 11vh;
         height: 20vh;
-        margin-left: 2vh;
-        margin-top: 47.5vh;
+        margin-left: -13vh;
+        margin-top: 30vhh;
         background-color: red;
+        position: absolute;
     }
     /*-------------Canvas-END---------------*/
 
