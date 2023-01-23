@@ -2225,6 +2225,12 @@ class DiagramView {
         let currentCell = this.diagram.controller.getCellAtCursor(this.diagram.controller.currentX, this.diagram.controller.currentY);
 
         if(currentCell) {
+            if(currentCell.contact) {
+                document.getElementById("CONTACT").style.backgroundColor = this.getColor(Diagram.CONTACT, true);
+            } else {
+                document.getElementById("CONTACT").style.backgroundColor = "transparent";
+            }
+
             if(currentCell.metal2) {
                 document.getElementById("METAL2").style.backgroundColor = this.getColor(Diagram.METAL2, true);
             } else {

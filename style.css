@@ -687,7 +687,13 @@ body.light {
         height: 20vh;
         margin-left: -13vh;
         margin-top: 30vh;
-        background-color: red;
+        position: absolute;
+    }
+
+    #CONTACT {
+        height: 20vh;
+        width: 5vh;
+        margin-left: 2vh;
         position: absolute;
     }
 
