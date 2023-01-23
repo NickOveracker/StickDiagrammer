@@ -2118,7 +2118,6 @@ class DiagramView {
         let containerWidth = document.getElementById('canvas-container').clientWidth;
         let containerHeight = document.getElementById('canvas-container').clientHeight;
         let containerSize = Math.min(containerWidth, containerHeight);
-        //let sizeChanged = this.canvasWidth !== containerSize || this.canvasHeight !== containerSize;
        
         this.canvas.width = containerSize;
         this.canvas.height = containerSize;
@@ -2128,9 +2127,6 @@ class DiagramView {
         this.canvasHeight = containerSize;
 
         this.drawGrid();
-        /*if(sizeChanged) {
-            this.drawGrid();
-        }*/
     }
 
     decorateContact(x, y) {
@@ -2228,11 +2224,6 @@ class DiagramView {
 
         let currentCell = this.diagram.controller.getCellAtCursor(this.diagram.controller.currentX, this.diagram.controller.currentY);
         
-        if(currentCell !== this.str) {
-            this.str = JSON.stringify(currentCell);
-            console.log(this.str);
-        }
-
         // Draw each layer in order.
         let bounds = {
             left: 0,
