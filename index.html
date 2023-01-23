@@ -14,31 +14,31 @@
 <body class="dark">
 
     <div id="main-container">
-        <!-----Header------------>
+        <!-- Header -->
         <div class="overall-header">
             <div class="header-left"><i class="fas fa-cloud-moon header-button clickable" id="dark-mode-btn"></i></div>
             <div class="logo header-center">Stixu Stick Diagrammer</div>
             <div class="header-right"><i id="main-menu-btn" class="fas fa-bars header-button clickable"></i></div>
         </div>
-        <!-----Header-END-------->
+        <!-- Header-END -->
 
         <section class="main">
-            <div class="main-1">
-
-                <!---------canvas-sample (width:600px height 600px--------->
-                <div class="sample">
-                    <div id="canvas-container" class="sample-content">
+            <!-- canvas -->
+            <div id="canvas-group-wrapper">
+                <div class="canvas-group">
+                    <!--<div class="active-layers"></div>-->
+                    <div id="canvas-wrapper" class="canvas-wrapper">
                         <canvas id="canvas"></canvas>
                         <canvas id="grid-canvas"></canvas>
                     </div>
                 </div>
-                <!-------canvas end--------->
             </div>
+            <!-- canvas end -->
 
-        <!-------Right-side-------->
+        <!-- Right-side -->
             <section class="controls">
 
-            <!--------Edit-open--------------------------------------->
+            <!-- Edit-open -->
             <div id="terminal-menu" class="edit-open closed">
                 <i class="fas fa-times clickable" id="close-term-menu-btn"></i>
                 <div class="terminal">
@@ -65,9 +65,9 @@
                     </div>
                 </div>
             </div>
-            <!--------Edit-open-end------------------------------------------>
+            <!-- Edit-open-end -->
 
-                <!---colorBtn----->
+                <!-- colorBtn -->
                 <div class="colorChange" id="colorChange">
                     <i class="fas fa-circle clickable"></i>
                     <i class="fas fa-circle clickable"></i>
@@ -76,9 +76,9 @@
                     <i class="fas fa-circle clickable"></i>
                     <i class="fas fa-circle clickable"></i>
                 </div>
-                <!---colorBtn END----->
+                <!-- colorBtn END -->
 
-                <!-----Edit-section----->
+                <!-- Edit-section -->
                 <div class="edit-btn">
                     <div class="edit-btn-content small">
                         <i id="undo-btn" class="fas fa-undo edit-back clickable small"></i>
@@ -95,10 +95,10 @@
                         <i id="redo-btn" class="fas fa-redo edit-back clickable small"></i>
                     </div>
                 </div>
-                <!-----Edit-section-END----->
+                <!-- Edit-section-END -->
                 <div class="offscreen">
                     <div class="rowBtn-1">
-                        <!---row-btn--->
+                        <!-- row-btn -->
                         <div class="rowBtn">
                             <div class="row-content">
                                 <h3>Rows: <span id="num-rows"><!-- AUTO --></span></h3>
@@ -108,8 +108,7 @@
                                 <i class="fas fa-minus icon-back clickable" id="remove-row"></i>
                             </div>
                         </div>
-                        <!------>
-                        <!---colum-btn--->
+                        <!-- colum-btn -->
                         <div class="rowBtn">
                             <div class="row-content">
                                 <h3>Cols: <span id="num-cols"><!-- AUTO --></span></h3>
@@ -119,10 +118,9 @@
                                 <i class="fas fa-minus icon-back clickable" id="remove-column"></i>
                             </div>
                         </div>
-                        <!------>
                     </div>
 
-                    <!---Shift grid-btn--->
+                    <!-- Shift grid-btn -->
                     <div class="rowBtn-2">
                         <div class="row-content">
                             <h3>Shift grid</h3>
@@ -134,7 +132,6 @@
                             <i class="fas fa-chevron-right icon-back clickable" id="shift-right"></i>
                         </div>
                     </div>
-                    <!------>
 
                     <div class="evaluate-btn clickable" id="evaluate-btn">Evaluate</div>
                     
@@ -146,19 +143,21 @@
                     <div id="results"><!-- AUTO --></div>
                 </div>
             </section>
-            <!-------Right-side-END-------->
+            <!-- Right-side-END -->
         </section>
     </div>
 
-    <!--------------Main-Menu--------------->
+    <!-- Main-Menu -->
     <section class="menu scrollable closed" id="main-menu">
         <i class="fas fa-times clickable" id="close-main-menu-btn"></i>
 
         <div class="menu-content">
-            <li class="clickable" id="open-instructions-btn">Instructions</li>
-            <li class="clickable" id="open-about-page-btn">About</li>
-            <li class="clickable"><a href="mailto:nick.overacker@okstate.edu">Bug Report</a></li>
-            <li class="clickable"><a href="mailto:nick.overacker@okstate.edu">Contact</a></li>
+            <ul>
+                <li class="clickable" id="open-instructions-btn">Instructions</li>
+                <li class="clickable" id="open-about-page-btn">About</li>
+                <li class="clickable"><a href="mailto:nick.overacker@okstate.edu">Bug Report</a></li>
+                <li class="clickable"><a href="mailto:nick.overacker@okstate.edu">Contact</a></li>
+            </ul>
 
             <div class="menu-btn-content">
                 <div class="box-btn clickable options-btn" id="open-options-btn">
@@ -167,7 +166,7 @@
                     </i>
                 </div>
                 <!--<div class="teacher-btn clickable"><i class="fas fa-glasses menu-text"><span>&nbsp;Teacher Mode</span></i></div>-->
-            <h1>Support this project!</h1>
+                <h1>Support this project!</h1>
                 <div class="box-btn clickable">
                     <a href="https://patreon.com/twentynine" target="_blank">
                         <i class="fab fa-patreon menu-text">
@@ -185,7 +184,7 @@
             </div>
         </div>
     </section>
-    <!------------------Main-menu-end------------------------->
+    <!-- Main-menu-end -->
 
     <section class="menu scrollable closed column-flex" id="instructions">
         <i class="fas fa-times clickable" id="close-instructions-btn"></i>
@@ -273,10 +272,11 @@
     <section class="menu scrollable closed" id="options-menu">
         <i class="fas fa-times clickable" id="close-options-btn"></i>
         <div class="menu-content">
-        <ul>
-            <li class="clickable" id="select-palette-btn">Palette: <span id="palette-setting">Tol</span></li>
-            <li class="clickable" id="toggle-transparency-btn">Layer transparency: <span id="transparency-setting">ON</span></li>
-        </ul>
+            <ul>
+                <li class="clickable" id="select-palette-btn">Palette: <span id="palette-setting">Tol</span></li>
+                <li class="clickable" id="toggle-transparency-btn">Layer transparency: <span id="transparency-setting">ON</span></li>
+            </ul>
+        </div>
     </section>
 
 </body>
