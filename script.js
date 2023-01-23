@@ -2223,6 +2223,39 @@ class DiagramView {
         this.resizeCanvas();
 
         let currentCell = this.diagram.controller.getCellAtCursor(this.diagram.controller.currentX, this.diagram.controller.currentY);
+
+        if(currentCell) {
+            if(currentCell.metal2) {
+                document.getElementById("METAL2").style.backgroundColor = this.getColor(Diagram.METAL2, true);
+            } else {
+                document.getElementById("METAL2").style.backgroundColor = "transparent";
+            }
+
+            if(currentCell.metal1) {
+                document.getElementById("METAL1").style.backgroundColor = this.getColor(Diagram.METAL1, true);
+            } else {
+                document.getElementById("METAL1").style.backgroundColor = "transparent";
+            }
+
+            if(currentCell.poly) {
+                document.getElementById("POLY").style.backgroundColor = this.getColor(Diagram.POLY, true);
+            } else {
+                document.getElementById("POLY").style.backgroundColor = "transparent";
+            }
+
+            if(currentCell.pdiff) {
+                document.getElementById("DIFF").style.backgroundColor = this.getColor(Diagram.PDIFF, true);
+            } else if(currentCell.ndiff) {
+                document.getElementById("DIFF").style.backgroundColor = this.getColor(Diagram.NDIFF, true);
+            } else {
+                document.getElementById("DIFF").style.backgroundColor = "transparent";
+            }
+        } else {
+            document.getElementById("METAL2").style.backgroundColor = "transparent";
+            document.getElementById("METAL1").style.backgroundColor = "transparent";
+            document.getElementById("POLY").style.backgroundColor = "transparent";
+            document.getElementById("DIFF").style.backgroundColor = "transparent";
+        }
         
         // Draw each layer in order.
         let bounds = {

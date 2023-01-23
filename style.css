@@ -690,6 +690,14 @@ body.light {
         background-color: red;
         position: absolute;
     }
+
+    .cmos-layer {
+        height: 5vh;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
     /*-------------Canvas-END---------------*/
 
     .evaluate-btn{
