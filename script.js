@@ -1591,7 +1591,16 @@ class DiagramController {
 
             let x = Math.floor((screenX - this.view.canvas.getBoundingClientRect().left - this.view.cellWidth) / this.view.cellWidth);
             let y = Math.floor((screenY - this.view.canvas.getBoundingClientRect().top - this.view.cellHeight) / this.view.cellHeight);
-            this.currentCell = { x: x, y: y, };
+            this.currentCell = {
+                x: x,
+                y: y,
+                pdiff:   this.diagram.layeredGrid.get(x, y, Diagram.PDIFF).isSet,
+                ndiff:   this.diagram.layeredGrid.get(x, y, Diagram.NDIFF).isSet,
+                poly:    this.diagram.layeredGrid.get(x, y, Diagram.POLY).isSet,
+                metal1:  this.diagram.layeredGrid.get(x, y, Diagram.METAL1).isSet,
+                metal2:  this.diagram.layeredGrid.get(x, y, Diagram.METAL2).isSet,
+                contact: this.diagram.layeredGrid.get(x, y, Diagram.CONTACT).isSet,
+            };
         } else {
             this.currentCell = null;
         }
@@ -2218,36 +2227,10 @@ class DiagramView {
         this.resizeCanvas();
 
         let currentCell = this.diagram.controller.getCellAtCursor(this.diagram.controller.currentX, this.diagram.controller.currentY);
-        if(currentCell !== null) {
-            let str = "";
-            let layer = this.diagram.layeredGrid.get(currentCell.x, currentCell.y, Diagram.PDIFF);
-            if(layer && layer.isSet) {
-                str += "PDIFF\t";
-            }
-            layer = this.diagram.layeredGrid.get(currentCell.x, currentCell.y, Diagram.NDIFF);
-            if(layer && layer.isSet) {
-                str += "NDIFF\t";
-            }
-            layer = this.diagram.layeredGrid.get(currentCell.x, currentCell.y, Diagram.POLY);
-            if(layer && layer.isSet) {
-                str += "POLY\t";
-            }
-            layer = this.diagram.layeredGrid.get(currentCell.x, currentCell.y, Diagram.METAL1);
-            if(layer && layer.isSet) {
-                str += "METAL1\t";
-            }
-            layer = this.diagram.layeredGrid.get(currentCell.x, currentCell.y, Diagram.METAL2);
-            if(layer && layer.isSet) {
-                str += "METAL2\t";
-            }
-            layer = this.diagram.layeredGrid.get(currentCell.x, currentCell.y, Diagram.CONTACT);
-            if(layer && layer.isSet) {
-                str += "CONTACT\t";
-            }
-            if(str.length > 0 && this.str !== str) {
-                console.log(str);
-                this.str = str;
-            }
+        
+        if(currentCell !== this.str) {
+            this.str = JSON.stringify(currentCell);
+            console.log(this.str);
         }
 
         // Draw each layer in order.
