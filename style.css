@@ -354,7 +354,12 @@ span.small
     display: none;
 }
 
-.no-controls .canvas-container {
+.no-controls .canvas-group {
+    width: 100%;
+    margin-left: 0;
+}
+
+.no-controls .canvas-wrapper {
     width: 100%;
     height: min(85vh,100vw);
     margin-left: auto;
@@ -667,11 +672,14 @@ body.light {
     }
 
     /*-------------Canvas---------------*/
-    .canvas-container{
-        width: min(80vh, 80vw);
-        height: min(80vh, 80vw);
+    .canvas-group {
         margin-top: 15vh;
         margin-left: 15vh;
+    }
+
+    .canvas-wrapper {
+        width: min(80vh, 80vw);
+        height: min(80vh, 80vw);
     }
     /*-------------Canvas-END---------------*/
 
@@ -817,7 +825,13 @@ body.light {
         flex-direction: column;
     }
 
-    .canvas-container{
+    .canvas-group {
+        width: 100%;
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .canvas-wrapper{
         width:100%;
         height: min(62vh, 100vw);
         margin-left: 0;
