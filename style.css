@@ -681,6 +681,14 @@ body.light {
         width: min(80vh, 80vw);
         height: min(80vh, 80vw);
     }
+
+    .active-layers {
+        width: 11vh;
+        height: 20vh;
+        margin-left: 2vh;
+        margin-top: 47.5vh;
+        background-color: red;
+    }
     /*-------------Canvas-END---------------*/
 
     .evaluate-btn{
