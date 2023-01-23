@@ -1838,6 +1838,7 @@ class DiagramController {
         // Save the current X and Y coordinates.
         this.currentX = coords.x;
         this.currentY = coords.y;
+        this.getCellAtCursor(coords.x, coords.y);
 
         // If the mouse is pressed and the mouse is between cells 1 and gridsize - 1,
         if (this.isPrimaryInput(event) || event.buttons === 2) {
@@ -2219,22 +2220,28 @@ class DiagramView {
         let currentCell = this.diagram.controller.getCellAtCursor(this.diagram.controller.currentX, this.diagram.controller.currentY);
         if(currentCell !== null) {
             let str = "";
-            if(this.diagram.layeredGrid.get(currentCell.x, currentCell.y, Diagram.PDIFF).isSet) {
+            let layer = this.diagram.layeredGrid.get(currentCell.x, currentCell.y, Diagram.PDIFF);
+            if(layer && layer.isSet) {
                 str += "PDIFF\t";
             }
-            if(this.diagram.layeredGrid.get(currentCell.x, currentCell.y, Diagram.NDIFF).isSet) {
+            layer = this.diagram.layeredGrid.get(currentCell.x, currentCell.y, Diagram.NDIFF);
+            if(layer && layer.isSet) {
                 str += "NDIFF\t";
             }
-            if(this.diagram.layeredGrid.get(currentCell.x, currentCell.y, Diagram.POLY).isSet) {
+            layer = this.diagram.layeredGrid.get(currentCell.x, currentCell.y, Diagram.POLY);
+            if(layer && layer.isSet) {
                 str += "POLY\t";
             }
-            if(this.diagram.layeredGrid.get(currentCell.x, currentCell.y, Diagram.METAL1).isSet) {
+            layer = this.diagram.layeredGrid.get(currentCell.x, currentCell.y, Diagram.METAL1);
+            if(layer && layer.isSet) {
                 str += "METAL1\t";
             }
-            if(this.diagram.layeredGrid.get(currentCell.x, currentCell.y, Diagram.METAL2).isSet) {
+            layer = this.diagram.layeredGrid.get(currentCell.x, currentCell.y, Diagram.METAL2);
+            if(layer && layer.isSet) {
                 str += "METAL2\t";
             }
-            if(this.diagram.layeredGrid.get(currentCell.x, currentCell.y, Diagram.CONTACT).isSet) {
+            layer = this.diagram.layeredGrid.get(currentCell.x, currentCell.y, Diagram.CONTACT);
+            if(layer && layer.isSet) {
                 str += "CONTACT\t";
             }
             if(str.length > 0 && this.str !== str) {
