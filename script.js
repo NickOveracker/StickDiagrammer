@@ -1379,6 +1379,7 @@ class DiagramController {
         this.placeTermMode    = false;
         this.selectedTerminal = null;
         this.shiftCommands    = [];
+        this.currentCell      = null;
 
         // Set up shift commands
         this.shiftCommands[37] = ((e) => {
@@ -1590,9 +1591,11 @@ class DiagramController {
 
             let x = Math.floor((screenX - this.view.canvas.getBoundingClientRect().left - this.view.cellWidth) / this.view.cellWidth);
             let y = Math.floor((screenY - this.view.canvas.getBoundingClientRect().top - this.view.cellHeight) / this.view.cellHeight);
-            return { x: x, y: y, };
+            this.currentCell = { x: x, y: y, };
+        } else {
+            this.currentCell = null;
         }
-        return null;
+        return this.currentCell;
     }
 
     clearIfPainted(clientX, clientY) {
@@ -1749,7 +1752,7 @@ class DiagramController {
         }.bind(this), true);
     }
 
-    drag(currentCell, event) {
+    drag(event) {
         'use strict';
         if (this.startX === -1) {
             return;
@@ -1757,7 +1760,7 @@ class DiagramController {
 
         if (!this.dragging) {
             // don't start dragging unless the mouse has moved outside the cell
-            if(currentCell.x === this.startX && currentCell.y === this.startY) {
+            if(this.currentCell.x === this.startX && this.currentCell.y === this.startY) {
                 return;
             }
             this.dragging = true;
@@ -1835,13 +1838,12 @@ class DiagramController {
         // Save the current X and Y coordinates.
         this.currentX = coords.x;
         this.currentY = coords.y;
-        let currentCell = this.getCellAtCursor(this.currentX, this.currentY);
 
         // If the mouse is pressed and the mouse is between cells 1 and gridsize - 1,
         if (this.isPrimaryInput(event) || event.buttons === 2) {
             // Ignore if not inside the canvas
             if (this.inBounds(coords.x, coords.y)) {
-                this.drag(currentCell, event);
+                this.drag(this.currentCell, event);
             }
         }
     }
@@ -2161,7 +2163,7 @@ class DiagramView {
             this.ctx.fillRect((ii+1) * this.cellWidth, (jj+1) * this.cellHeight - 1, this.cellWidth + 1, this.cellHeight + 2);
         } else if(!this.diagram.controller.dragging && layer === Diagram.layers.length - 1) {
             // Draw a faint highlight on the cell at the cursor location.
-            currentCell = this.diagram.controller.getCellAtCursor(this.diagram.controller.currentX, this.diagram.controller.currentY);
+            currentCell = this.diagram.controller.currentCell;
             if(ii === currentCell.x && jj === currentCell.y) {
                 this.ctx.fillStyle = darkMode ? "rgba(255, 255, 255, 0.5)" : "rgba(0, 0, 0, 0.5)";
                 this.ctx.fillRect((ii+1) * this.cellWidth, (jj+1) * this.cellHeight - 1, this.cellWidth + 1, this.cellHeight + 2);
@@ -2215,6 +2217,29 @@ class DiagramView {
         this.resizeCanvas();
 
         let currentCell = this.diagram.controller.getCellAtCursor(this.diagram.controller.currentX, this.diagram.controller.currentY);
+        let str = "";
+        if(this.diagram.layeredGrid.get(currentCell.x, currentCell.y, Diagram.PDIFF).isSet) {
+            str += "PDIFF\t";
+        }
+        if(this.diagram.layeredGrid.get(currentCell.x, currentCell.y, Diagram.NDIFF).isSet) {
+            str += "NDIFF\t";
+        }
+        if(this.diagram.layeredGrid.get(currentCell.x, currentCell.y, Diagram.POLY).isSet) {
+            str += "POLY\t";
+        }
+        if(this.diagram.layeredGrid.get(currentCell.x, currentCell.y, Diagram.METAL1).isSet) {
+            str += "METAL1\t";
+        }
+        if(this.diagram.layeredGrid.get(currentCell.x, currentCell.y, Diagram.METAL2).isSet) {
+            str += "METAL2\t";
+        }
+        if(this.diagram.layeredGrid.get(currentCell.x, currentCell.y, Diagram.CONTACT).isSet) {
+            str += "CONTACT\t";
+        }
+        if(str.length > 0 && this.str !== str) {
+            console.log(str);
+            this.str = str;
+        }
 
         // Draw each layer in order.
         let bounds = {
