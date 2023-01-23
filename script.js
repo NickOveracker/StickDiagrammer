@@ -1994,7 +1994,7 @@ class DiagramView {
         this.gridCanvas = gridCanvas;
         this.ctx = this.canvas.getContext("2d");
         this.gridCtx = this.gridCanvas.getContext('2d');
-        this.canvasWidth = Math.min(document.getElementById('canvas-container').clientWidth, document.getElementById('canvas-container').clientHeight);
+        this.canvasWidth = Math.min(document.getElementById('canvas-wrapper').clientWidth, document.getElementById('canvas-wrapper').clientHeight);
         this.canvasHeight = this.canvasWidth;
         this.cellWidth  = this.canvasWidth  / (this.diagram.layeredGrid.width  + 2);
         this.cellHeight = this.canvasHeight / (this.diagram.layeredGrid.height + 2);
@@ -2115,8 +2115,8 @@ class DiagramView {
             document.body.classList.remove('no-controls');
         }
 
-        let containerWidth = document.getElementById('canvas-container').clientWidth;
-        let containerHeight = document.getElementById('canvas-container').clientHeight;
+        let containerWidth = document.getElementById('canvas-wrapper').clientWidth;
+        let containerHeight = document.getElementById('canvas-wrapper').clientHeight;
         let containerSize = Math.min(containerWidth, containerHeight);
        
         this.canvas.width = containerSize;
