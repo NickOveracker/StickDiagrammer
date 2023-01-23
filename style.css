@@ -354,12 +354,7 @@ span.small
     display: none;
 }
 
-.no-controls .sample {
-    width: 100%;
-    margin-left: 0;
-}
-
-.no-controls .sample-content {
+.no-controls .canvas-container {
     width: 100%;
     height: min(85vh,100vw);
     margin-left: auto;
@@ -672,14 +667,11 @@ body.light {
     }
 
     /*-------------Canvas---------------*/
-    .sample{
-        margin-top: 15vh;
-        margin-left: 15vh;
-    }
-
-    .sample-content{
+    .canvas-container{
         width: min(80vh, 80vw);
         height: min(80vh, 80vw);
+        margin-top: 15vh;
+        margin-left: 15vh;
     }
     /*-------------Canvas-END---------------*/
 
@@ -825,13 +817,7 @@ body.light {
         flex-direction: column;
     }
 
-    .sample{
-        width: 100%;
-        margin-left: 0;
-        margin-right: 0;
-    }
-
-    .sample-content{
+    .canvas-container{
         width:100%;
         height: min(62vh, 100vw);
         margin-left: 0;
