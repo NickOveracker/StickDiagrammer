@@ -1843,7 +1843,7 @@ class DiagramController {
         if (this.isPrimaryInput(event) || event.buttons === 2) {
             // Ignore if not inside the canvas
             if (this.inBounds(coords.x, coords.y)) {
-                this.drag(this.currentCell, event);
+                this.drag(event);
             }
         }
     }
