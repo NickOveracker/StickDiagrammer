@@ -1379,6 +1379,7 @@ class DiagramController {
         this.placeTermMode    = false;
         this.selectedTerminal = null;
         this.shiftCommands    = [];
+        this.currentCell      = null;
 
         // Set up shift commands
         this.shiftCommands[37] = ((e) => {
@@ -1577,10 +1578,10 @@ class DiagramController {
     inBounds(screenX, screenY) {
         'use strict';
         let boundingBox = this.view.canvas.getBoundingClientRect();
-        return screenX > boundingBox.left &&
-               screenX < boundingBox.right &&
-               screenY > boundingBox.top &&
-               screenY < boundingBox.bottom;
+        return screenX > boundingBox.left   + this.view.cellWidth &&
+               screenX < boundingBox.right  - this.view.cellWidth &&
+               screenY > boundingBox.top    + this.view.cellHeight &&
+               screenY < boundingBox.bottom - this.view.cellHeight;
     }
 
     getCellAtCursor(screenX, screenY) {
@@ -1590,9 +1591,20 @@ class DiagramController {
 
             let x = Math.floor((screenX - this.view.canvas.getBoundingClientRect().left - this.view.cellWidth) / this.view.cellWidth);
             let y = Math.floor((screenY - this.view.canvas.getBoundingClientRect().top - this.view.cellHeight) / this.view.cellHeight);
-            return { x: x, y: y, };
+            this.currentCell = {
+                x: x,
+                y: y,
+                pdiff:   this.diagram.layeredGrid.get(x, y, Diagram.PDIFF).isSet,
+                ndiff:   this.diagram.layeredGrid.get(x, y, Diagram.NDIFF).isSet,
+                poly:    this.diagram.layeredGrid.get(x, y, Diagram.POLY).isSet,
+                metal1:  this.diagram.layeredGrid.get(x, y, Diagram.METAL1).isSet,
+                metal2:  this.diagram.layeredGrid.get(x, y, Diagram.METAL2).isSet,
+                contact: this.diagram.layeredGrid.get(x, y, Diagram.CONTACT).isSet,
+            };
+        } else {
+            this.currentCell = null;
         }
-        return null;
+        return this.currentCell;
     }
 
     clearIfPainted(clientX, clientY) {
@@ -1749,7 +1761,7 @@ class DiagramController {
         }.bind(this), true);
     }
 
-    drag(currentCell, event) {
+    drag(event) {
         'use strict';
         if (this.startX === -1) {
             return;
@@ -1757,7 +1769,7 @@ class DiagramController {
 
         if (!this.dragging) {
             // don't start dragging unless the mouse has moved outside the cell
-            if(currentCell.x === this.startX && currentCell.y === this.startY) {
+            if(this.currentCell.x === this.startX && this.currentCell.y === this.startY) {
                 return;
             }
             this.dragging = true;
@@ -1835,13 +1847,13 @@ class DiagramController {
         // Save the current X and Y coordinates.
         this.currentX = coords.x;
         this.currentY = coords.y;
-        let currentCell = this.getCellAtCursor(this.currentX, this.currentY);
+        this.getCellAtCursor(coords.x, coords.y);
 
         // If the mouse is pressed and the mouse is between cells 1 and gridsize - 1,
         if (this.isPrimaryInput(event) || event.buttons === 2) {
             // Ignore if not inside the canvas
             if (this.inBounds(coords.x, coords.y)) {
-                this.drag(currentCell, event);
+                this.drag(event);
             }
         }
     }
@@ -1982,7 +1994,7 @@ class DiagramView {
         this.gridCanvas = gridCanvas;
         this.ctx = this.canvas.getContext("2d");
         this.gridCtx = this.gridCanvas.getContext('2d');
-        this.canvasWidth = Math.min(document.getElementById('canvas-container').clientWidth, document.getElementById('canvas-container').clientHeight);
+        this.canvasWidth = Math.min(document.getElementById('canvas-wrapper').clientWidth, document.getElementById('canvas-wrapper').clientHeight);
         this.canvasHeight = this.canvasWidth;
         this.cellWidth  = this.canvasWidth  / (this.diagram.layeredGrid.width  + 2);
         this.cellHeight = this.canvasHeight / (this.diagram.layeredGrid.height + 2);
@@ -2103,10 +2115,9 @@ class DiagramView {
             document.body.classList.remove('no-controls');
         }
 
-        let containerWidth = document.getElementById('canvas-container').clientWidth;
-        let containerHeight = document.getElementById('canvas-container').clientHeight;
+        let containerWidth = document.getElementById('canvas-wrapper').clientWidth;
+        let containerHeight = document.getElementById('canvas-wrapper').clientHeight;
         let containerSize = Math.min(containerWidth, containerHeight);
-        //let sizeChanged = this.canvasWidth !== containerSize || this.canvasHeight !== containerSize;
        
         this.canvas.width = containerSize;
         this.canvas.height = containerSize;
@@ -2116,9 +2127,6 @@ class DiagramView {
         this.canvasHeight = containerSize;
 
         this.drawGrid();
-        /*if(sizeChanged) {
-            this.drawGrid();
-        }*/
     }
 
     decorateContact(x, y) {
@@ -2161,7 +2169,7 @@ class DiagramView {
             this.ctx.fillRect((ii+1) * this.cellWidth, (jj+1) * this.cellHeight - 1, this.cellWidth + 1, this.cellHeight + 2);
         } else if(!this.diagram.controller.dragging && layer === Diagram.layers.length - 1) {
             // Draw a faint highlight on the cell at the cursor location.
-            currentCell = this.diagram.controller.getCellAtCursor(this.diagram.controller.currentX, this.diagram.controller.currentY);
+            currentCell = this.diagram.controller.currentCell;
             if(ii === currentCell.x && jj === currentCell.y) {
                 this.ctx.fillStyle = darkMode ? "rgba(255, 255, 255, 0.5)" : "rgba(0, 0, 0, 0.5)";
                 this.ctx.fillRect((ii+1) * this.cellWidth, (jj+1) * this.cellHeight - 1, this.cellWidth + 1, this.cellHeight + 2);
@@ -2215,7 +2223,7 @@ class DiagramView {
         this.resizeCanvas();
 
         let currentCell = this.diagram.controller.getCellAtCursor(this.diagram.controller.currentX, this.diagram.controller.currentY);
-
+        
         // Draw each layer in order.
         let bounds = {
             left: 0,
