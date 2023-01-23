@@ -2217,28 +2217,30 @@ class DiagramView {
         this.resizeCanvas();
 
         let currentCell = this.diagram.controller.getCellAtCursor(this.diagram.controller.currentX, this.diagram.controller.currentY);
-        let str = "";
-        if(this.diagram.layeredGrid.get(currentCell.x, currentCell.y, Diagram.PDIFF).isSet) {
-            str += "PDIFF\t";
-        }
-        if(this.diagram.layeredGrid.get(currentCell.x, currentCell.y, Diagram.NDIFF).isSet) {
-            str += "NDIFF\t";
-        }
-        if(this.diagram.layeredGrid.get(currentCell.x, currentCell.y, Diagram.POLY).isSet) {
-            str += "POLY\t";
-        }
-        if(this.diagram.layeredGrid.get(currentCell.x, currentCell.y, Diagram.METAL1).isSet) {
-            str += "METAL1\t";
-        }
-        if(this.diagram.layeredGrid.get(currentCell.x, currentCell.y, Diagram.METAL2).isSet) {
-            str += "METAL2\t";
-        }
-        if(this.diagram.layeredGrid.get(currentCell.x, currentCell.y, Diagram.CONTACT).isSet) {
-            str += "CONTACT\t";
-        }
-        if(str.length > 0 && this.str !== str) {
-            console.log(str);
-            this.str = str;
+        if(currentCell !== null) {
+            let str = "";
+            if(this.diagram.layeredGrid.get(currentCell.x, currentCell.y, Diagram.PDIFF).isSet) {
+                str += "PDIFF\t";
+            }
+            if(this.diagram.layeredGrid.get(currentCell.x, currentCell.y, Diagram.NDIFF).isSet) {
+                str += "NDIFF\t";
+            }
+            if(this.diagram.layeredGrid.get(currentCell.x, currentCell.y, Diagram.POLY).isSet) {
+                str += "POLY\t";
+            }
+            if(this.diagram.layeredGrid.get(currentCell.x, currentCell.y, Diagram.METAL1).isSet) {
+                str += "METAL1\t";
+            }
+            if(this.diagram.layeredGrid.get(currentCell.x, currentCell.y, Diagram.METAL2).isSet) {
+                str += "METAL2\t";
+            }
+            if(this.diagram.layeredGrid.get(currentCell.x, currentCell.y, Diagram.CONTACT).isSet) {
+                str += "CONTACT\t";
+            }
+            if(str.length > 0 && this.str !== str) {
+                console.log(str);
+                this.str = str;
+            }
         }
 
         // Draw each layer in order.
