@@ -2460,7 +2460,7 @@ class LayeredGrid {
         this.moveWithinBounds(this.diagram.gndCell, newBounds);
     }
     
-    insertRemoveRowColAt(rowColndex, isInsert, isRow) {
+    insertRemoveRowColAt(rowColIndex, isInsert, isRow) {
         // Add or remove?
         let addend    = isInsert ? 1 : -1;
         
@@ -2472,24 +2472,37 @@ class LayeredGrid {
         if(isInsert) {
             // Update grid size first so we have room to shift
             this.resize(newWidth, newHeight);
-            // TODO: Shift contents right/down from the selected row/col
+            // Shift rigth/down from the selected row/cell
+            this.shift(isRow ? 0 : 1, isRow ? 1 : 0, rowColIndex, isRow);
         }
         else {
-            // TODO: Shift left/up into the selected row/cell
+            // Shift left/up into the selected row/cell
+            this.shift(isRow ? 0 : -1, isRow ? -1 : 0, rowColIndex + 1, isRow);
             // Update the grid size last now that we have shifted the contents.
             this.resize(newWidth, newHeight);
         }
     }
 
     // Shift the grid by a given offset
-    shift(xOffset, yOffset) {
+    shift(xOffset, yOffset, startIndex, isRowIndex) {
         'use strict';
         let oldGrid = this.grid;
+        let startX = 0;
+        let startY = 0;
+        
         this.grid = new Array(this.width * this.height * this.layers);
+        
+        if(Boolean(startIndex)) {
+            if(isRowIndex) {
+                startY = startIndex;
+            } else {
+                startX = startIndex;
+            }
+        }
 
         for(let layer = 0; layer < this.layers; layer++) {
-            for(let y = 0; y < this.height; y++) {
-                for(let x = 0; x < this.width; x++) {
+            for(let y = startY; y < this.height; y++) {
+                for(let x = startX; x < this.width; x++) {
                     if(x - xOffset < 0 || x - xOffset >= this.width || y - yOffset < 0 || y - yOffset >= this.height) {
                         continue;
                     }
