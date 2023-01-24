@@ -2503,7 +2503,7 @@ class LayeredGrid {
         for(let layer = 0; layer < this.layers; layer++) {
             for(let y = 0; y < this.height; y++) {
                 for(let x = 0; x < this.width; x++) {
-                    if(x < startX || y < startY) {
+                    if(x <= startX || y <= startY) {
                         if(oldGrid[x + (y * this.width) + (layer * this.width * this.height)]) {
                             this.set(x, y, layer);
                             continue;
@@ -2526,7 +2526,7 @@ class LayeredGrid {
     shiftTerminals(xOffset, yOffset, startIndex, isRowIndex) {
         'use strict';
         let shiftTerminal = function(terminal) {
-            if(isRowIndex && terminal.y < startIndex || !isRowIndex && terminal.x < startIndex) {
+            if(isRowIndex && terminal.y <= startIndex || !isRowIndex && terminal.x <= startIndex) {
                 return;
             }
             if(terminal.x + xOffset >= 0 && terminal.x + xOffset < this.width) {
