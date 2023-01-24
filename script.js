@@ -2459,6 +2459,27 @@ class LayeredGrid {
         this.moveWithinBounds(this.diagram.vddCell, newBounds);
         this.moveWithinBounds(this.diagram.gndCell, newBounds);
     }
+    
+    insertRemoveRowColAt(rowColndex, isInsert, isRow) {
+        // Add or remove?
+        let addend    = isInsert ? 1 : -1;
+        
+        // Set the new width and height.
+        let newWidth  = isRow    ? this.width           : this.width + addend;
+        let newHeight = isRow    ? this.height + addend : this.height;
+        
+        // If it's an insert, add the row/column before shifting the existing contents.
+        if(isInsert) {
+            // Update grid size first so we have room to shift
+            this.resize(newWidth, newHeight);
+            // TODO: Shift contents right/down from the selected row/col
+        }
+        else {
+            // TODO: Shift left/up into the selected row/cell
+            // Update the grid size last now that we have shifted the contents.
+            this.resize(newWidth, newHeight);
+        }
+    }
 
     // Shift the grid by a given offset
     shift(xOffset, yOffset) {
