@@ -2257,6 +2257,7 @@ class DiagramView {
                 document.getElementById("DIFF").style.backgroundColor = "transparent";
             }
         } else {
+            document.getElementById("CONTACT").style.backgroundColor = "transparent";
             document.getElementById("METAL2").style.backgroundColor = "transparent";
             document.getElementById("METAL1").style.backgroundColor = "transparent";
             document.getElementById("POLY").style.backgroundColor = "transparent";
