@@ -2531,17 +2531,35 @@ class LayeredGrid {
         for(let layer = 0; layer < this.layers; layer++) {
             for(let y = 0; y < this.height; y++) {
                 for(let x = 0; x < this.width; x++) {
+                    // Before the start row or column: Don't shift (set same as original)
                     if(x < startX || y < startY) {
                         if(oldGrid[x + (y * this.width) + (layer * this.width * this.height)]) {
                             this.set(x, y, layer);
                         }
-                    } else if(x >= (xOffset + startX) && !isRowIndex || y >= (yOffset + startY) && isRowIndex) {
+                    }
+                    // On or after the start row or column: Shift
+                    // Offsets the start point depending on whether this is an insertion or deletion.
+                    else if(x >= (xOffset + startX) && !isRowIndex || y >= (yOffset + startY) && isRowIndex) {
+                        // Out of bounds.
                         if(x - xOffset < 0 || x - xOffset >= this.width || y - yOffset < 0 || y - yOffset >= this.height) {
                             continue;
                         }
+                        // Shifted cells.
                         if(oldGrid[x - xOffset + ((y - yOffset) * this.width) + (layer * this.width * this.height)]) {
                             this.set(x, y, layer);
                         }
+                    }
+                    // In the case of an insertion, a blank row or column is inserted at the start index.
+                    // We want to auto-extend lines that originally passed through.
+                    else if(isRowIndex) {
+                        oldGrid[x + (y * this.width) + (layer * this.width * this.height)] &&
+                            oldGrid[x + ((y - 1) * this.width) + (layer * this.width * this.height)] &&
+                            this.set(x, y, layer);
+                    }
+                    else {
+                        oldGrid[x + (y * this.width) + (layer * this.width * this.height)] &&
+                            oldGrid[x - 1 + (y * this.width) + (layer * this.width * this.height)] &&
+                            this.set(x, y, layer);
                     }
                 }
             }
