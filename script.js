@@ -1435,6 +1435,34 @@ class DiagramController {
                 this.placeTerminal(e, this.diagram.vddCell);
             }
         }).bind(this);
+
+        this.shiftCommands[74] = ((e) => {
+            if(e.type.includes('down')) {
+                let coords = this.getCellAtCursor(this.currentX, this.currentY);
+                this.diagram.layeredGrid.insertRemoveRowColAt(coords.y, true, true);
+            }
+        }).bind(this);
+
+        this.shiftCommands[75] = ((e) => {
+            if(e.type.includes('down')) {
+                let coords = this.getCellAtCursor(this.currentX, this.currentY);
+                this.diagram.layeredGrid.insertRemoveRowColAt(coords.y, true, false);
+            }
+        }).bind(this);
+
+        this.shiftCommands[76] = ((e) => {
+            if(e.type.includes('down')) {
+                let coords = this.getCellAtCursor(this.currentX, this.currentY);
+                this.diagram.layeredGrid.insertRemoveRowColAt(coords.x, false, true);
+            }
+        }).bind(this);
+
+        this.shiftCommands[59] = ((e) => {
+            if(e.type.includes('down')) {
+                let coords = this.getCellAtCursor(this.currentX, this.currentY);
+                this.diagram.layeredGrid.insertRemoveRowColAt(coords.x, false, false);
+            }
+        }).bind(this);
     }
 
     removeTerminal(isOutput) {
@@ -1893,23 +1921,12 @@ class DiagramController {
 
     ctrlCommandHandler(event) {
         'use strict';
-        let coords = this.getCoordsFromEvent(event);
-        
         if (event.keyCode === 90) {
             // z
             this.undo();
         } else if (event.keyCode === 89) {
             // y
             this.redo();
-        } else if (event.keyCode === 74) {
-            coords = this.getCoordsFromEvent(event);
-            this.diagram.layeredGrid.insertRemoveRowColAt(coords.y, true, true);
-        } else if (event.keyCode === 75) {
-            this.diagram.layeredGrid.insertRemoveRowColAt(coords.y, true, false);
-        } else if (event.keyCode === 76) {
-            this.diagram.layeredGrid.insertRemoveRowColAt(coords.x, false, true);
-        } else if (event.keyCode === 59) {
-            this.diagram.layeredGrid.insertRemoveRowColAt(coords.x, false, false);
         }
     }
 
