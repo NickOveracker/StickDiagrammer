@@ -2507,7 +2507,7 @@ class LayeredGrid {
                         if(oldGrid[x + (y * this.width) + (layer * this.width * this.height)]) {
                             this.set(x, y, layer);
                         }
-                    } else if(x > startX && !isRowIndex || y > startY && isRowIndex) {
+                    } else if(x >= (xOffset + startX) && !isRowIndex || y >= (yOffset + startY) && isRowIndex) {
                         if(x - xOffset < 0 || x - xOffset >= this.width || y - yOffset < 0 || y - yOffset >= this.height) {
                             continue;
                         }
