@@ -2477,7 +2477,7 @@ class LayeredGrid {
         }
         else {
             // Shift left/up into the selected row/cell
-            this.shift(isRow ? 0 : -1, isRow ? -1 : 0, rowColIndex + 1, isRow);
+            this.shift(isRow ? 0 : -1, isRow ? -1 : 0, rowColIndex, isRow);
             // Update the grid size last now that we have shifted the contents.
             this.resize(newWidth, newHeight);
         }
