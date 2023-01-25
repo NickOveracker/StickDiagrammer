@@ -1893,12 +1893,23 @@ class DiagramController {
 
     ctrlCommandHandler(event) {
         'use strict';
+        let coords;
+        
         if (event.keyCode === 90) {
             // z
             this.undo();
         } else if (event.keyCode === 89) {
             // y
             this.redo();
+        } else if (event.keyCode === 74) {
+            coords = this.getCoordsFromEvent(event);
+            this.diagram.layeredGrid.insertRemoveRowColAt(coords.y, true, true);
+        } else if (event.keyCode === 75) {
+            this.diagram.layeredGrid.insertRemoveRowColAt(coords.y, true, false);
+        } else if (event.keyCode === 76) {
+            this.diagram.layeredGrid.insertRemoveRowColAt(coords.x, false, true);
+        } else if (event.keyCode === 59) {
+            this.diagram.layeredGrid.insertRemoveRowColAt(coords.x, false, false);
         }
     }
 
