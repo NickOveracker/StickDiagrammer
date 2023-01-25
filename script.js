@@ -1893,7 +1893,7 @@ class DiagramController {
 
     ctrlCommandHandler(event) {
         'use strict';
-        let coords;
+        let coords = this.getCoordsFromEvent(event);
         
         if (event.keyCode === 90) {
             // z
