@@ -370,6 +370,56 @@ class Diagram {
         this.nodeNodeMap[mapNode1Index][mapNode2Index] = mapping;
         this.nodeNodeMap[mapNode2Index][mapNode1Index] = mapping;
     }
+    
+    updateVirtualPath(compareNodeMapping, nodeToMap, remapNode, setPath) {
+        if(compareNodeMapping === this.DIRECT_PATH) {
+            if(setPath === this.DIRECT_PATH) {
+                this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.DIRECT_PATH);
+            }
+            else if(setPath === this.NO_PATH) {
+                this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.VIRTUAL_PATH_ONLY);
+            }
+            else if(setPath === this.VIRTUAL_PATH_ONLY) {
+                this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.VIRTUAL_PATH_ONLY);
+            }
+        }
+        else if(compareNodeMapping === this.NO_PATH && setPath === this.DIRECT_PATH) {
+            this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.VIRTUAL_PATH_ONLY);
+        }
+    }
+    
+    updateNoPath(compareNodeMapping, nodeToMap, remapNode, setPath) {
+        if(setPath === this.DIRECT_PATH && compareNodeMapping.direct === false) {
+            this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.VIRTUAL_PATH_ONLY);
+        }
+    }
+    
+    updateUndefinedPath(compareNodeMapping, nodeToMap, remapNode, setPath, mapFromRail) {
+        if(setPath === this.DIRECT_PATH) {
+            if(compareNodeMapping === this.DIRECT_PATH || compareNodeMapping === this.NO_PATH) {
+                this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), compareNodeMapping);
+            }
+            else if(compareNodeMapping.direct === false && !mapFromRail) {
+                this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), compareNodeMapping);
+            }
+        }
+        else if(compareNodeMapping === this.DIRECT_PATH) {
+            if(setPath === this.NO_PATH) {
+                this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.NO_PATH);
+            }
+            else if(setPath === this.VIRTUAL_PATH_ONLY) {
+                if(mapFromRail) {
+                    this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.NO_PATH);
+                }
+                else {
+                    this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.VIRTUAL_PATH_ONLY);
+                }
+            }
+            else if(!mapFromRail) {
+                this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.VIRTUAL_PATH);
+            }
+        }
+    }
 
     syncEdges(nodeToMap, compareNode, remapNode, setPath) {
         'use strict';
@@ -386,57 +436,19 @@ class Diagram {
         // Case 1: Node2 already has a positive mapping to node ii.
         //         In this case, only override to turn it from VIRTUAL_PATH to VIRTUAL_PATH_ONLY or DIRECT_PATH.
         if(remapNodeMapping === this.VIRTUAL_PATH) {
-            if(compareNodeMapping === this.DIRECT_PATH) {
-                if(setPath === this.DIRECT_PATH) {
-                    this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.DIRECT_PATH);
-                }
-                else if(setPath === this.NO_PATH) {
-                    this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.VIRTUAL_PATH_ONLY);
-                }
-                else if(setPath === this.VIRTUAL_PATH_ONLY) {
-                    this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.VIRTUAL_PATH_ONLY);
-                }
-            }
-            else if(compareNodeMapping === this.NO_PATH && setPath === this.DIRECT_PATH) {
-                this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.VIRTUAL_PATH_ONLY);
-            }
+            this.updateVirtualPath(compareNodeMapping, nodeToMap, remapNode, setPath);
         }
         // Case 2: Node2 has a NO_PATH mapping to node ii.
         //         In this case, allow it to change to VIRTUAL_PATH_ONLY.
         //         DO NOT do this to propagate virtual paths from VDD and GND.
         if(remapNodeMapping === this.NO_PATH && !mapFromRail) {
-            if(setPath === this.DIRECT_PATH && compareNodeMapping.direct === false) {
-                this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.VIRTUAL_PATH_ONLY);
-            }
+            this.updateNoPath(compareNodeMapping, nodeToMap, remapNode, setPath);
         }
         // Case 3: Node2 is UNCHECKED or COMPUTING_PATH.
         //         In this case, copy any of the other mappings from node 1.
         //         Exception: Do not copy virtual paths from VDD and GND.
         if(remapNodeMapping.hasPath === undefined) {
-            if(setPath === this.DIRECT_PATH) {
-                if(compareNodeMapping === this.DIRECT_PATH || compareNodeMapping === this.NO_PATH) {
-                    this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), compareNodeMapping);
-                }
-                else if(compareNodeMapping.direct === false && !mapFromRail) {
-                    this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), compareNodeMapping);
-                }
-            }
-            else if(compareNodeMapping === this.DIRECT_PATH) {
-                if(setPath === this.NO_PATH) {
-                    this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.NO_PATH);
-                }
-                else if(setPath === this.VIRTUAL_PATH_ONLY) {
-                    if(mapFromRail) {
-                        this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.NO_PATH);
-                    }
-                    else {
-                        this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.VIRTUAL_PATH_ONLY);
-                    }
-                }
-                else if(!mapFromRail) {
-                    this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.VIRTUAL_PATH);
-                }
-            }
+            this.updateUndefinedPath(compareNodeMapping, nodeToMap, remapNode, setPath, mapFromRail);
         }
     }
 
