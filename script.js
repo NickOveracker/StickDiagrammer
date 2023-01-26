@@ -77,7 +77,7 @@ class Diagram {
         this.DIRECT_PATH         = { indeterminate: false, hasPath: true,  direct: true,  label: "1", }; // Originally [true]
         this.VIRTUAL_PATH        = { indeterminate: true,  hasPath: true,  direct: false, label: "v", }; // Originally ["i"]
         this.VIRTUAL_PATH_ONLY   = { indeterminate: false, hasPath: true,  direct: false, label: "I", }; // Originally ["I"]
-        this.NO_PATH             = { indeterminate: false, hasPath: false,                label: "0", }; // Originally [false]
+        this.NO_PATH             = { indeterminate: false, hasPath: false, direct: true,  label: "0", }; // Originally [false]
         this.COMPUTING_PATH      = { indeterminate: true,                                 label: "?", }; // Originally [null]
         this.UNCHECKED           = { indeterminate: true,                                 label: "_", }; // Originally [undefined]
 
@@ -365,6 +365,10 @@ class Diagram {
             this.syncEdges(this.nodeNodeMap.length - ii - 1, node2, node1, setPath);
         }
     }
+    
+    isRailNode(node) {
+        return node === this.gndNode || node === this.vddNode;
+    }
 
     remap(mapNode1Index, mapNode2Index, mapping) {
         this.nodeNodeMap[mapNode1Index][mapNode2Index] = mapping;
@@ -394,9 +398,12 @@ class Diagram {
         }
     }
     
-    updateUndefinedPath(compareNodeMapping, nodeToMap, remapNode, setPath, mapFromRail) {
+    updateUndefinedPath(compareNode, nodeToMap, remapNode, setPath) {
+        let compareNodeMapping = this.nodeNodeMap[nodeToMap][this.graph.getIndexByNode(compareNode)];
+        let mapFromRail = this.isRailNode(compareNode);
+        
         if(setPath === this.DIRECT_PATH) {
-            if(compareNodeMapping === this.DIRECT_PATH || compareNodeMapping === this.NO_PATH) {
+            if(compareNodeMapping.direct) {
                 this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), compareNodeMapping);
             }
             else if(compareNodeMapping.direct === false && !mapFromRail) {
@@ -427,7 +434,7 @@ class Diagram {
         // Get the existing mappings between the remapped nodes and node ii.
         let compareNodeMapping = this.nodeNodeMap[nodeToMap][this.graph.getIndexByNode(compareNode)];
         let remapNodeMapping = this.nodeNodeMap[nodeToMap][this.graph.getIndexByNode(remapNode)];
-        let mapFromRail = compareNode === this.gndNode || compareNode === this.vddNode;
+        let mapFromRail = this.isRailNode(compareNode);
         
         if(compareNodeMapping.hasPath === undefined || setPath.hasPath === undefined) {
             return;
@@ -448,7 +455,7 @@ class Diagram {
         //         In this case, copy any of the other mappings from node 1.
         //         Exception: Do not copy virtual paths from VDD and GND.
         if(remapNodeMapping.hasPath === undefined) {
-            this.updateUndefinedPath(compareNodeMapping, nodeToMap, remapNode, setPath, mapFromRail);
+            this.updateUndefinedPath(compareNode, nodeToMap, remapNode, setPath);
         }
     }
 
