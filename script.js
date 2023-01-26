@@ -77,7 +77,7 @@ class Diagram {
         this.DIRECT_PATH         = { indeterminate: false, hasPath: true,  direct: true,  label: "1", }; // Originally [true]
         this.VIRTUAL_PATH        = { indeterminate: true,  hasPath: true,  direct: false, label: "v", }; // Originally ["i"]
         this.VIRTUAL_PATH_ONLY   = { indeterminate: false, hasPath: true,  direct: false, label: "I", }; // Originally ["I"]
-        this.NO_PATH             = { indeterminate: false, hasPath: false,                label: "0", }; // Originally [false]
+        this.NO_PATH             = { indeterminate: false, hasPath: false, direct: true,  label: "0", }; // Originally [false]
         this.COMPUTING_PATH      = { indeterminate: true,                                 label: "?", }; // Originally [null]
         this.UNCHECKED           = { indeterminate: true,                                 label: "_", }; // Originally [undefined]
 
@@ -365,78 +365,103 @@ class Diagram {
             this.syncEdges(this.nodeNodeMap.length - ii - 1, node2, node1, setPath);
         }
     }
-
-    syncEdges(ii, node1, node2, setPath) {
+    
+    isRailNode(node) {
         'use strict';
+        return node === this.gndNode || node === this.vddNode;
+    }
 
-        // Get the existing mappings between the remapped nodes and node ii.
-        let node1Mapping = this.nodeNodeMap[ii][this.graph.getIndexByNode(node1)];
-        let node2Mapping = this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)];
-        let mapFromRail = node1 === this.gndNode || node1 === this.vddNode;
-
-        let remap = function(mapping) {
-            this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] = mapping;
-            this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = mapping;
-        }.bind(this);
+    remap(mapNode1Index, mapNode2Index, mapping) {
+        'use strict';
+        this.nodeNodeMap[mapNode1Index][mapNode2Index] = mapping;
+        this.nodeNodeMap[mapNode2Index][mapNode1Index] = mapping;
+    }
+    
+    updateVirtualPath(compareNodeMapping, nodeToMap, remapNode, setPath) {
+        'use strict';
+        if(compareNodeMapping === this.DIRECT_PATH) {
+            if(setPath === this.DIRECT_PATH) {
+                this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.DIRECT_PATH);
+            }
+            else if(setPath === this.NO_PATH) {
+                this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.VIRTUAL_PATH_ONLY);
+            }
+            else if(setPath === this.VIRTUAL_PATH_ONLY) {
+                this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.VIRTUAL_PATH_ONLY);
+            }
+        }
+        else if(compareNodeMapping === this.NO_PATH && setPath === this.DIRECT_PATH) {
+            this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.VIRTUAL_PATH_ONLY);
+        }
+    }
+    
+    updateNoPath(compareNode, nodeToMap, remapNode, setPath) {
+        'use strict';
+        let compareNodeMapping = this.nodeNodeMap[nodeToMap][this.graph.getIndexByNode(compareNode)];
+        let mapFromRail = this.isRailNode(compareNode);
         
-        if(node1Mapping.hasPath === undefined || setPath.hasPath === undefined) {
+        if(!mapFromRail && setPath === this.DIRECT_PATH && compareNodeMapping.direct === false) {
+            this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.VIRTUAL_PATH_ONLY);
+        }
+    }
+    
+    updateUndefinedPath(compareNode, nodeToMap, remapNode, setPath) {
+        'use strict';
+        let compareNodeMapping = this.nodeNodeMap[nodeToMap][this.graph.getIndexByNode(compareNode)];
+        let mapFromRail = this.isRailNode(compareNode);
+        
+        if(setPath === this.DIRECT_PATH) {
+            if(compareNodeMapping.direct) {
+                this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), compareNodeMapping);
+            }
+            else if(compareNodeMapping.direct === false && !mapFromRail) {
+                this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), compareNodeMapping);
+            }
+        }
+        else if(compareNodeMapping === this.DIRECT_PATH) {
+            if(setPath === this.NO_PATH) {
+                this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.NO_PATH);
+            }
+            else if(setPath === this.VIRTUAL_PATH_ONLY) {
+                if(mapFromRail) {
+                    this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.NO_PATH);
+                }
+                else {
+                    this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.VIRTUAL_PATH_ONLY);
+                }
+            }
+            else if(!mapFromRail) {
+                this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.VIRTUAL_PATH);
+            }
+        }
+    }
+
+    syncEdges(nodeToMap, compareNode, remapNode, setPath) {
+        'use strict';
+        // Get the existing mappings between the remapped nodes and node ii.
+        let compareNodeMapping = this.nodeNodeMap[nodeToMap][this.graph.getIndexByNode(compareNode)];
+        let remapNodeMapping = this.nodeNodeMap[nodeToMap][this.graph.getIndexByNode(remapNode)];
+        
+        // Case 0: Insufficient information to remap nodes.
+        if(compareNodeMapping.hasPath === undefined || setPath.hasPath === undefined) {
             return;
         }
-
         // Case 1: Node2 already has a positive mapping to node ii.
         //         In this case, only override to turn it from VIRTUAL_PATH to VIRTUAL_PATH_ONLY or DIRECT_PATH.
-        if(node2Mapping === this.VIRTUAL_PATH) {
-            if(node1Mapping === this.DIRECT_PATH) {
-                if(setPath === this.DIRECT_PATH) {
-                    remap(this.DIRECT_PATH);
-                }
-                else if(setPath === this.NO_PATH) {
-                    remap(this.VIRTUAL_PATH_ONLY);
-                }
-                else if(setPath === this.VIRTUAL_PATH_ONLY) {
-                    remap(this.VIRTUAL_PATH_ONLY);
-                }
-            }
-            else if(node1Mapping === this.NO_PATH && setPath === this.DIRECT_PATH) {
-                remap(this.VIRTUAL_PATH_ONLY);
-            }
+        else if(remapNodeMapping === this.VIRTUAL_PATH) {
+            this.updateVirtualPath(compareNodeMapping, nodeToMap, remapNode, setPath);
         }
         // Case 2: Node2 has a NO_PATH mapping to node ii.
         //         In this case, allow it to change to VIRTUAL_PATH_ONLY.
         //         DO NOT do this to propagate virtual paths from VDD and GND.
-        if(node2Mapping === this.NO_PATH && !mapFromRail) {
-            if(setPath === this.DIRECT_PATH && node1Mapping.direct === false) {
-                remap(this.VIRTUAL_PATH_ONLY);
-            }
+        else if(remapNodeMapping === this.NO_PATH) {
+            this.updateNoPath(compareNode, nodeToMap, remapNode, setPath);
         }
         // Case 3: Node2 is UNCHECKED or COMPUTING_PATH.
         //         In this case, copy any of the other mappings from node 1.
         //         Exception: Do not copy virtual paths from VDD and GND.
-        if(node2Mapping.hasPath === undefined) {
-            if(setPath === this.DIRECT_PATH) {
-                if(node1Mapping === this.DIRECT_PATH || node1Mapping === this.NO_PATH) {
-                    remap(node1Mapping);
-                }
-                else if(node1Mapping.direct === false && !mapFromRail) {
-                    remap(node1Mapping);
-                }
-            }
-            else if(node1Mapping === this.DIRECT_PATH) {
-                if(setPath === this.NO_PATH) {
-                    remap(this.NO_PATH);
-                }
-                else if(setPath === this.VIRTUAL_PATH_ONLY) {
-                    if(mapFromRail) {
-                        remap(this.NO_PATH);
-                    }
-                    else {
-                        remap(this.VIRTUAL_PATH_ONLY);
-                    }
-                }
-                else if(!mapFromRail) {
-                    remap(this.VIRTUAL_PATH);
-                }
-            }
+        else if(remapNodeMapping.hasPath === undefined) {
+            this.updateUndefinedPath(compareNode, nodeToMap, remapNode, setPath);
         }
     }
 

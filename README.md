@@ -19,6 +19,7 @@
 * Software entropy must not increase.
 
 ## Feature Wishlist
+* Share small diagrams by URL arguments and QR codes.
 * Show which layers are set in highlighted cell.
 * Replace pullup/pulldown alert popups with less obtrusive warnings.
 * HDL generation.
@@ -43,6 +44,7 @@
 * ~~Show every layer in a cell, not just the top.~~ *Resolved 2021/11/21*
 
 ## Absolute Pie in the Sky
+* Sequenced output for state-dependent circuits like DFFs.
 * Alternate braille display???
 * Allow users to save designs, and use their outputs as inputs to other designs to produce complex, modular circuitry.
 * Generate Magic files (todo: check legality) from design for a given technology.
