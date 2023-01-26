@@ -366,75 +366,75 @@ class Diagram {
         }
     }
 
-    syncEdges(ii, node1, node2, setPath) {
+    remap(mapNode1Index, mapNode2Index, mapping) {
+        this.nodeNodeMap[mapNode1Index][mapNode2Index] = mapping;
+        this.nodeNodeMap[mapNode2Index][mapNode1Index] = mapping;
+    }
+
+    syncEdges(nodeToMap, compareNode, remapNode, setPath) {
         'use strict';
 
         // Get the existing mappings between the remapped nodes and node ii.
-        let node1Mapping = this.nodeNodeMap[ii][this.graph.getIndexByNode(node1)];
-        let node2Mapping = this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)];
-        let mapFromRail = node1 === this.gndNode || node1 === this.vddNode;
-
-        let remap = function(mapping) {
-            this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] = mapping;
-            this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = mapping;
-        }.bind(this);
+        let compareNodeMapping = this.nodeNodeMap[nodeToMap][this.graph.getIndexByNode(compareNode)];
+        let remapNodeMapping = this.nodeNodeMap[nodeToMap][this.graph.getIndexByNode(remapNode)];
+        let mapFromRail = compareNode === this.gndNode || compareNode === this.vddNode;
         
-        if(node1Mapping.hasPath === undefined || setPath.hasPath === undefined) {
+        if(compareNodeMapping.hasPath === undefined || setPath.hasPath === undefined) {
             return;
         }
 
         // Case 1: Node2 already has a positive mapping to node ii.
         //         In this case, only override to turn it from VIRTUAL_PATH to VIRTUAL_PATH_ONLY or DIRECT_PATH.
-        if(node2Mapping === this.VIRTUAL_PATH) {
-            if(node1Mapping === this.DIRECT_PATH) {
+        if(remapNodeMapping === this.VIRTUAL_PATH) {
+            if(compareNodeMapping === this.DIRECT_PATH) {
                 if(setPath === this.DIRECT_PATH) {
-                    remap(this.DIRECT_PATH);
+                    this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.DIRECT_PATH);
                 }
                 else if(setPath === this.NO_PATH) {
-                    remap(this.VIRTUAL_PATH_ONLY);
+                    this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.VIRTUAL_PATH_ONLY);
                 }
                 else if(setPath === this.VIRTUAL_PATH_ONLY) {
-                    remap(this.VIRTUAL_PATH_ONLY);
+                    this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.VIRTUAL_PATH_ONLY);
                 }
             }
-            else if(node1Mapping === this.NO_PATH && setPath === this.DIRECT_PATH) {
-                remap(this.VIRTUAL_PATH_ONLY);
+            else if(compareNodeMapping === this.NO_PATH && setPath === this.DIRECT_PATH) {
+                this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.VIRTUAL_PATH_ONLY);
             }
         }
         // Case 2: Node2 has a NO_PATH mapping to node ii.
         //         In this case, allow it to change to VIRTUAL_PATH_ONLY.
         //         DO NOT do this to propagate virtual paths from VDD and GND.
-        if(node2Mapping === this.NO_PATH && !mapFromRail) {
-            if(setPath === this.DIRECT_PATH && node1Mapping.direct === false) {
-                remap(this.VIRTUAL_PATH_ONLY);
+        if(remapNodeMapping === this.NO_PATH && !mapFromRail) {
+            if(setPath === this.DIRECT_PATH && compareNodeMapping.direct === false) {
+                this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.VIRTUAL_PATH_ONLY);
             }
         }
         // Case 3: Node2 is UNCHECKED or COMPUTING_PATH.
         //         In this case, copy any of the other mappings from node 1.
         //         Exception: Do not copy virtual paths from VDD and GND.
-        if(node2Mapping.hasPath === undefined) {
+        if(remapNodeMapping.hasPath === undefined) {
             if(setPath === this.DIRECT_PATH) {
-                if(node1Mapping === this.DIRECT_PATH || node1Mapping === this.NO_PATH) {
-                    remap(node1Mapping);
+                if(compareNodeMapping === this.DIRECT_PATH || compareNodeMapping === this.NO_PATH) {
+                    this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), compareNodeMapping);
                 }
-                else if(node1Mapping.direct === false && !mapFromRail) {
-                    remap(node1Mapping);
+                else if(compareNodeMapping.direct === false && !mapFromRail) {
+                    this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), compareNodeMapping);
                 }
             }
-            else if(node1Mapping === this.DIRECT_PATH) {
+            else if(compareNodeMapping === this.DIRECT_PATH) {
                 if(setPath === this.NO_PATH) {
-                    remap(this.NO_PATH);
+                    this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.NO_PATH);
                 }
                 else if(setPath === this.VIRTUAL_PATH_ONLY) {
                     if(mapFromRail) {
-                        remap(this.NO_PATH);
+                        this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.NO_PATH);
                     }
                     else {
-                        remap(this.VIRTUAL_PATH_ONLY);
+                        this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.VIRTUAL_PATH_ONLY);
                     }
                 }
                 else if(!mapFromRail) {
-                    remap(this.VIRTUAL_PATH);
+                    this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.VIRTUAL_PATH);
                 }
             }
         }
