@@ -367,15 +367,18 @@ class Diagram {
     }
     
     isRailNode(node) {
+        'use strict';
         return node === this.gndNode || node === this.vddNode;
     }
 
     remap(mapNode1Index, mapNode2Index, mapping) {
+        'use strict';
         this.nodeNodeMap[mapNode1Index][mapNode2Index] = mapping;
         this.nodeNodeMap[mapNode2Index][mapNode1Index] = mapping;
     }
     
     updateVirtualPath(compareNodeMapping, nodeToMap, remapNode, setPath) {
+        'use strict';
         if(compareNodeMapping === this.DIRECT_PATH) {
             if(setPath === this.DIRECT_PATH) {
                 this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.DIRECT_PATH);
@@ -392,13 +395,18 @@ class Diagram {
         }
     }
     
-    updateNoPath(compareNodeMapping, nodeToMap, remapNode, setPath) {
-        if(setPath === this.DIRECT_PATH && compareNodeMapping.direct === false) {
+    updateNoPath(compareNode, nodeToMap, remapNode, setPath) {
+        'use strict';
+        let compareNodeMapping = this.nodeNodeMap[nodeToMap][this.graph.getIndexByNode(compareNode)];
+        let mapFromRail = this.isRailNode(compareNode);
+        
+        if(!mapFromRail && setPath === this.DIRECT_PATH && compareNodeMapping.direct === false) {
             this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.VIRTUAL_PATH_ONLY);
         }
     }
     
     updateUndefinedPath(compareNode, nodeToMap, remapNode, setPath) {
+        'use strict';
         let compareNodeMapping = this.nodeNodeMap[nodeToMap][this.graph.getIndexByNode(compareNode)];
         let mapFromRail = this.isRailNode(compareNode);
         
@@ -430,31 +438,29 @@ class Diagram {
 
     syncEdges(nodeToMap, compareNode, remapNode, setPath) {
         'use strict';
-
         // Get the existing mappings between the remapped nodes and node ii.
         let compareNodeMapping = this.nodeNodeMap[nodeToMap][this.graph.getIndexByNode(compareNode)];
         let remapNodeMapping = this.nodeNodeMap[nodeToMap][this.graph.getIndexByNode(remapNode)];
-        let mapFromRail = this.isRailNode(compareNode);
         
+        // Case 0: Insufficient information to remap nodes.
         if(compareNodeMapping.hasPath === undefined || setPath.hasPath === undefined) {
             return;
         }
-
         // Case 1: Node2 already has a positive mapping to node ii.
         //         In this case, only override to turn it from VIRTUAL_PATH to VIRTUAL_PATH_ONLY or DIRECT_PATH.
-        if(remapNodeMapping === this.VIRTUAL_PATH) {
+        else if(remapNodeMapping === this.VIRTUAL_PATH) {
             this.updateVirtualPath(compareNodeMapping, nodeToMap, remapNode, setPath);
         }
         // Case 2: Node2 has a NO_PATH mapping to node ii.
         //         In this case, allow it to change to VIRTUAL_PATH_ONLY.
         //         DO NOT do this to propagate virtual paths from VDD and GND.
-        if(remapNodeMapping === this.NO_PATH && !mapFromRail) {
-            this.updateNoPath(compareNodeMapping, nodeToMap, remapNode, setPath);
+        else if(remapNodeMapping === this.NO_PATH) {
+            this.updateNoPath(compareNode, nodeToMap, remapNode, setPath);
         }
         // Case 3: Node2 is UNCHECKED or COMPUTING_PATH.
         //         In this case, copy any of the other mappings from node 1.
         //         Exception: Do not copy virtual paths from VDD and GND.
-        if(remapNodeMapping.hasPath === undefined) {
+        else if(remapNodeMapping.hasPath === undefined) {
             this.updateUndefinedPath(compareNode, nodeToMap, remapNode, setPath);
         }
     }
