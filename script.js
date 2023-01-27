@@ -1610,7 +1610,7 @@ class DiagramController {
         }
     }
 
-    inBounds(screenX, screenY) {
+    pixelIsInBounds(screenX, screenY) {
         'use strict';
         let boundingBox = this.view.canvas.getBoundingClientRect();
         return screenX > boundingBox.left &&
@@ -1622,7 +1622,7 @@ class DiagramController {
     getCellAtCursor(screenX, screenY) {
         'use strict';
         // Ignore if not inside the canvas
-        if (this.inBounds(screenX, screenY)) {
+        if (this.pixelIsInBounds(screenX, screenY)) {
 
             let x = Math.floor((screenX - this.view.canvas.getBoundingClientRect().left - this.view.cellWidth) / this.view.cellWidth);
             let y = Math.floor((screenY - this.view.canvas.getBoundingClientRect().top - this.view.cellHeight) / this.view.cellHeight);
@@ -1638,7 +1638,7 @@ class DiagramController {
         let anyLayerSet = false;
 
         // Ignore if not inside the canvas
-        if (this.inBounds(clientX, clientY)) {
+        if (this.pixelIsInBounds(clientX, clientY)) {
             let x = Math.floor((clientX - this.view.canvas.getBoundingClientRect().left - this.view.cellWidth) / this.view.cellWidth);
             let y = Math.floor((clientY - this.view.canvas.getBoundingClientRect().top - this.view.cellHeight) / this.view.cellHeight);
 
@@ -1732,14 +1732,14 @@ class DiagramController {
         'use strict';
         let coords = this.getCoordsFromEvent(event);
 
-        if(this.inBounds(coords.x, coords.y)) {
+        if(this.pixelIsInBounds(coords.x, coords.y)) {
             event.preventDefault();
         }
      
         if (this.isPrimaryInput(event) || event.button === 2) {
             if (this.dragging) {
                 this.endDrag(coords.x, coords.y, event);
-            } else if (this.inBounds(coords.x, coords.y)) {
+            } else if (this.pixelIsInBounds(coords.x, coords.y)) {
                 this.cellClickHandler(event);
             } else if(event.button === 2) {
                 this.changeLayer();
@@ -1824,7 +1824,7 @@ class DiagramController {
     endDrag(currentX, currentY, event) {
         'use strict';
         // If the mouse was released outside the canvas, undo and return.
-        if(!this.inBounds(currentX, currentY)) {
+        if(!this.pixelIsInBounds(currentX, currentY)) {
             this.undo();
             return;
         }
@@ -1860,7 +1860,7 @@ class DiagramController {
         'use strict';
         let coords = this.getCoordsFromEvent(event);
 
-        if(this.inBounds(coords.x, coords.y)) {
+        if(this.pixelIsInBounds(coords.x, coords.y)) {
             event.preventDefault();
         }
 
@@ -1876,7 +1876,7 @@ class DiagramController {
         // If the mouse is pressed and the mouse is between cells 1 and gridsize - 1,
         if (this.isPrimaryInput(event) || event.buttons === 2) {
             // Ignore if not inside the canvas
-            if (this.inBounds(coords.x, coords.y)) {
+            if (this.pixelIsInBounds(coords.x, coords.y)) {
                 this.drag(currentCell, event);
             }
         }
@@ -1966,7 +1966,7 @@ class DiagramController {
 
         if (this.isPrimaryInput(event) || event.button === 2) {
             // Return if not between cells 1 and gridsize - 1
-            if (this.inBounds(coords.x, coords.y)) {
+            if (this.pixelIsInBounds(coords.x, coords.y)) {
                 event.preventDefault();
                 this.startX = Math.floor((coords.x - this.view.canvas.getBoundingClientRect().left - this.view.cellWidth) / this.view.cellWidth);
                 this.startY = Math.floor((coords.y - this.view.canvas.getBoundingClientRect().top - this.view.cellHeight) / this.view.cellHeight);
@@ -2519,12 +2519,18 @@ class LayeredGrid {
         }
     }
 
+    coordsAreInBounds(x, y) {
+        'use strict';
+        return x >= 0 && x < this.width && y >= 0 && y < this.height;
+    }
+
     // Shift the grid by a given offset
     shift(xOffset, yOffset, startIndex, isRowIndex) {
         'use strict';
         let oldGrid = this.grid;
         let startX = 0;
         let startY = 0;
+        let coords, x, y, layer, oldCell, aboveOldCell, leftOfOldCell, offsetCell, setCell;
         
         this.grid = new Array(this.width * this.height * this.layers);
         
@@ -2536,40 +2542,40 @@ class LayeredGrid {
             }
         }
 
-        for(let layer = 0; layer < this.layers; layer++) {
-            for(let y = 0; y < this.height; y++) {
-                for(let x = 0; x < this.width; x++) {
-                    // Before the start row or column: Don't shift (set same as original)
-                    if(x < startX || y < startY) {
-                        if(oldGrid[x + (y * this.width) + (layer * this.width * this.height)]) {
-                            this.set(x, y, layer);
-                        }
-                    }
-                    // On or after the start row or column: Shift
-                    // Offsets the start point depending on whether this is an insertion or deletion.
-                    else if(x >= (xOffset + startX) && !isRowIndex || y >= (yOffset + startY) && isRowIndex) {
-                        // Out of bounds.
-                        if(x - xOffset < 0 || x - xOffset >= this.width || y - yOffset < 0 || y - yOffset >= this.height) {
-                            continue;
-                        }
-                        // Shifted cells.
-                        if(oldGrid[x - xOffset + ((y - yOffset) * this.width) + (layer * this.width * this.height)]) {
-                            this.set(x, y, layer);
-                        }
-                    }
-                    // In the case of an insertion, a blank row or column is inserted at the start index.
-                    // We want to auto-extend lines that originally passed through.
-                    else if(isRowIndex) {
-                        oldGrid[x + (y * this.width) + (layer * this.width * this.height)] &&
-                            oldGrid[x + ((y - 1) * this.width) + (layer * this.width * this.height)] &&
-                            this.set(x, y, layer);
-                    }
-                    else {
-                        oldGrid[x + (y * this.width) + (layer * this.width * this.height)] &&
-                            oldGrid[x - 1 + (y * this.width) + (layer * this.width * this.height)] &&
-                            this.set(x, y, layer);
-                    }
-                }
+        for(let index = 0; index < this.grid.length; index++) {
+            coords = this.convertToCoordinates(index);
+            x = coords.x;
+            y = coords.y;
+            layer = coords.layer;
+
+            oldCell       = oldGrid[x           +  (y            * this.width) + (layer * this.width * this.height)];
+            aboveOldCell  = oldGrid[x           + ((y - 1)       * this.width) + (layer * this.width * this.height)];
+            leftOfOldCell = oldGrid[x - 1       +  (y            * this.width) + (layer * this.width * this.height)];
+            offsetCell    = oldGrid[x - xOffset + ((y - yOffset) * this.width) + (layer * this.width * this.height)];
+
+            //////////////////////////////////////
+            // Determine whether to set the cell.
+            //////////////////////////////////////
+
+            // Before the start row or column: Don't shift (set same as original)
+            setCell = this.coordsAreInBounds(x - startX, y - startY) && Boolean(oldCell);
+
+            // On or after the start row or column: Shift
+            // Offsets the start point depending on whether this is an insertion or deletion.
+            setCell = setCell || (
+                Boolean(offsetCell) && this.coordsAreInBounds(x - xOffset - startX) && !isRowIndex ||
+                this.coordsAreInBounds(y - yOffset - startY) && isRowIndex
+            );
+
+            // In the case of an insertion, a blank row or column is inserted at the start index.
+            // We want to auto-extend lines that originally passed through.
+            setCell = setCell || (Boolean(oldCell) && (isRowIndex && Boolean(aboveOldCell) || Boolean(leftOfOldCell)));
+
+            // Skip if out of bounds.
+            setCell = setCell && this.coordsAreInBounds(x - xOffset, y - yOffset);
+
+            if(setCell) {
+                this.set(x, y, layer);
             }
         }
 
@@ -2583,14 +2589,15 @@ class LayeredGrid {
             if(isRowIndex && terminal.y <= startIndex || !isRowIndex && terminal.x <= startIndex) {
                 return;
             }
-            if(terminal.x + xOffset >= 0 && terminal.x + xOffset < this.width) {
+            if(this.coordsAreInBounds(terminal.x + xOffset, 0)) {
                 terminal.x += xOffset;
             } else if(terminal.x + xOffset < 0) {
                 terminal.x = 0;
             } else {
                 terminal.x = this.width - 1;
             }
-            if(terminal.y + yOffset >= 0 && terminal.y + yOffset < this.height) {
+
+            if(this.coordsAreInBounds(0, terminal.y + yOffset)) {
                 terminal.y += yOffset;
             } else if(terminal.y + yOffset < 0) {
                 terminal.y = 0;
