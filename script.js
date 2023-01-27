@@ -2553,28 +2553,27 @@ class LayeredGrid {
             leftOfOldCell = oldGrid[x - 1       +  (y            * this.width) + (layer * this.width * this.height)];
             offsetCell    = oldGrid[x - xOffset + ((y - yOffset) * this.width) + (layer * this.width * this.height)];
 
-            //////////////////////////////////////
-            // Determine whether to set the cell.
-            //////////////////////////////////////
-
-            // Before the start row or column: Don't shift (set same as original)
-            setCell = this.coordsAreInBounds(x - startX, y - startY) && Boolean(oldCell);
-
+						// Before the start row or column: Don't shift (set same as original)
+            if(x < startX || y < startY) {
+              if(oldCell) {
+                this.set(x, y, layer);
+              }
+            }
             // On or after the start row or column: Shift
             // Offsets the start point depending on whether this is an insertion or deletion.
-            setCell = setCell || (
-                Boolean(offsetCell) && this.coordsAreInBounds(x - xOffset - startX) && !isRowIndex ||
-                this.coordsAreInBounds(y - yOffset - startY) && isRowIndex
-            );
-
+            else if(x >= (xOffset + startX) && !isRowIndex || y >= (yOffset + startY) && isRowIndex) {
+              // Out of bounds.
+              if(x - xOffset < 0 || x - xOffset >= this.width || y - yOffset < 0 || y - yOffset >= this.height) {
+                continue;
+              }
+              // Shifted cells.
+              if(offsetCell) {
+                this.set(x, y, layer);
+              }
+            }
             // In the case of an insertion, a blank row or column is inserted at the start index.
             // We want to auto-extend lines that originally passed through.
-            setCell = setCell || (Boolean(oldCell) && (isRowIndex && Boolean(aboveOldCell) || Boolean(leftOfOldCell)));
-
-            // Skip if out of bounds.
-            setCell = setCell && this.coordsAreInBounds(x - xOffset, y - yOffset);
-
-            if(setCell) {
+            else if(oldCell && (isRowIndex && aboveOldCell || !isRowIndex && leftOfOldCell)) {
                 this.set(x, y, layer);
             }
         }
