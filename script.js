@@ -2277,6 +2277,10 @@ class DiagramView {
         // set the outer border of the canvas to the cursor color
         this.drawBorder();
         this.drawLabels();
+
+        document.getElementById("num-rows").innerHTML = this.layeredGrid.height;
+        document.getElementById("num-cols").innerHTML = this.layeredGrid.width;
+
         window.requestAnimationFrame(this.refreshCanvas.bind(this));
     }
 }
@@ -2530,7 +2534,7 @@ class LayeredGrid {
         let oldGrid = this.grid;
         let startX = 0;
         let startY = 0;
-        let coords, x, y, layer, oldCell, aboveOldCell, leftOfOldCell, offsetCell, setCell;
+        let coords, x, y, layer, oldCell, aboveOldCell, leftOfOldCell, offsetCell;
         
         this.grid = new Array(this.width * this.height * this.layers);
         
@@ -3034,25 +3038,21 @@ function setUpControls() {
     'use strict';
     document.getElementById("remove-row").onclick = function() {
         this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height - 1);
-        document.getElementById("num-rows").innerHTML = this.layeredGrid.height;
         this.view.drawGrid();
     }.bind(diagram);
 
     document.getElementById("add-row").onclick = function() {
         this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height + 1);
-        document.getElementById("num-rows").innerHTML = this.layeredGrid.height;
         this.view.drawGrid();
     }.bind(diagram);
 
     document.getElementById("remove-column").onclick = function() {
         this.layeredGrid.resize(this.layeredGrid.width - 1, this.layeredGrid.height);
-        document.getElementById("num-cols").innerHTML = this.layeredGrid.width;
         this.view.drawGrid();
     }.bind(diagram);
 
     document.getElementById("add-column").onclick = function() {
         this.layeredGrid.resize(this.layeredGrid.width + 1, this.layeredGrid.height);
-        document.getElementById("num-cols").innerHTML = this.layeredGrid.width;
         this.view.drawGrid();
     }.bind(diagram);
 
@@ -3358,8 +3358,6 @@ window.onload = function () {
     diagram.layeredGrid.set(diagram.vddCell.x, diagram.vddCell.y, Diagram.CONTACT);
     diagram.layeredGrid.set(diagram.gndCell.x, diagram.gndCell.y, Diagram.CONTACT);
 
-    document.getElementById("num-rows").innerHTML = diagram.layeredGrid.height;
-    document.getElementById("num-cols").innerHTML = diagram.layeredGrid.width;
     setUpControls();
 
     populateTermSelect();
