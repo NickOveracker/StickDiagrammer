@@ -2585,7 +2585,7 @@ class LayeredGrid {
             // In the case of an insertion, a blank row or column is inserted at the start index.
             // We want to auto-extend lines that originally passed through.
             // Don't extend CONTACT layer.
-            else if(!isInShiftRange && oldCell && extendCell && layer !== Diagram.CONTACT) {
+            else if(oldCell && extendCell && layer !== Diagram.CONTACT) {
                 this.set(x, y, layer);
             }
         }
