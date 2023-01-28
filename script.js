@@ -2567,12 +2567,8 @@ class LayeredGrid {
             // Offsets the start point depending on whether this is an insertion or deletion.
             else if(this.coordsAreInBounds(x - xOffset - startX, 0) && !isRowIndex ||
                     this.coordsAreInBounds(0, y - yOffset - startY) && isRowIndex) {
-              // Out of bounds.
-              if(!this.coordsAreInBounds(x - xOffset, y - yOffset)) {
-                continue;
-              }
               // Shifted cells.
-              if(offsetCell) {
+              if(offsetCell && this.coordsAreInBounds(x - xOffset, y - yOffset)) {
                 this.set(x, y, layer);
               }
             }
