@@ -2575,19 +2575,18 @@ class LayeredGrid {
                 this.set(x, y, layer);
               }
             }
-            // On or after the start row or column: Shift
-            // Offsets the start point depending on whether this is an insertion or deletion.
-            else if(isInShiftRange) {
-                if(offsetCell && this.coordsAreInBounds(x - xOffset, y - yOffset)) {
-                    this.set(x, y, layer);
-                }
-            }
             // In the case of an insertion, a blank row or column is inserted at the start index.
             // We want to auto-extend lines that originally passed through.
             // Don't extend CONTACT layer.
-            else if(oldCell && extendCell && layer !== Diagram.CONTACT) {
+            else if(!isInShiftRange && oldCell && extendCell && layer !== Diagram.CONTACT) {
                 this.set(x, y, layer);
             }
+            // On or after the start row or column: Shift
+            // Offsets the start point depending on whether this is an insertion or deletion.
+            else if(offsetCell && this.coordsAreInBounds(x - xOffset, y - yOffset)) {
+                this.set(x, y, layer);
+            }
+
         }
 
         this.shiftTerminals(xOffset, yOffset, startIndex, isRowIndex);
