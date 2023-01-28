@@ -2603,27 +2603,29 @@ class LayeredGrid {
     shiftTerminals(xOffset, yOffset, startIndex, isRowIndex) {
         'use strict';
         let shiftTerminal = function(terminal) {
-            if(isRowIndex && terminal.y <= startIndex && !isRowIndex && terminal.x <= startIndex) {
-                return;
-            }
-            if(this.coordsAreInBounds(terminal.x + xOffset, 0)) {
-                terminal.x += xOffset;
-            } else if(terminal.x + xOffset < 0) {
-                terminal.x = 0;
-            } else {
-                terminal.x = this.width - 1;
-            }
-
-            if(this.coordsAreInBounds(0, terminal.y + yOffset)) {
-                terminal.y += yOffset;
-            } else if(terminal.y + yOffset < 0) {
-                terminal.y = 0;
-            } else {
-                terminal.y = this.height - 1;
+            // Starting from a column.
+            if(!isRowIndex && terminal.x >= startIndex) {
+                if(this.coordsAreInBounds(terminal.x + xOffset, 0)) {
+                    terminal.x += xOffset;
+                } else if(terminal.x + xOffset < 0) {
+                    terminal.x = 0;
+                } else {
+                    terminal.x = this.width - 1;
+                }
             }
 
-            // Make sure there is still a Diagram.CONTACT at the new coordinates
-            // (may have shifted off the screen)
+            // Starting from a row, or default starting point
+            if((isRowIndex || isRowIndex === undefined) && terminal.y >= startIndex) {
+                if(this.coordsAreInBounds(0, terminal.y + yOffset)) {
+                    terminal.y += yOffset;
+                } else if(terminal.y + yOffset < 0) {
+                    terminal.y = 0;
+                } else {
+                    terminal.y = this.height - 1;
+                }
+            }
+
+            // Make sure there is still a CONTACT at the terminal.
             this.set(terminal.x, terminal.y, Diagram.CONTACT);
         }.bind(this);
 
