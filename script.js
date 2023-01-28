@@ -2557,7 +2557,7 @@ class LayeredGrid {
             leftOfOldCell = oldGrid[x - 1       +  (y            * this.width) + (layer * this.width * this.height)];
             offsetCell    = oldGrid[x - xOffset + ((y - yOffset) * this.width) + (layer * this.width * this.height)];
 
-						// Before the start row or column: Don't shift (set same as original)
+            // Before the start row or column: Don't shift (set same as original)
             if(x < startX || y < startY) {
               if(oldCell) {
                 this.set(x, y, layer);
@@ -2567,7 +2567,7 @@ class LayeredGrid {
             // Offsets the start point depending on whether this is an insertion or deletion.
             else if(x >= (xOffset + startX) && !isRowIndex || y >= (yOffset + startY) && isRowIndex) {
               // Out of bounds.
-              if(x - xOffset < 0 || x - xOffset >= this.width || y - yOffset < 0 || y - yOffset >= this.height) {
+              if(!this.coordsAreInBounds(x - xOffset, y - yOffset) {
                 continue;
               }
               // Shifted cells.
