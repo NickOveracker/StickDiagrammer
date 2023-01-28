@@ -2532,19 +2532,11 @@ class LayeredGrid {
     shift(xOffset, yOffset, startIndex, isRowIndex) {
         'use strict';
         let oldGrid = this.grid;
-        let startX = 0;
-        let startY = 0;
+        let startX = Boolean(isRowIndex)  * startIndex;
+        let startY = !Boolean(isRowIndex) * startIndex;
         let coords, x, y, layer, oldCell, aboveOldCell, leftOfOldCell, offsetCell;
         
         this.grid = new Array(this.width * this.height * this.layers);
-        
-        if(Boolean(startIndex)) {
-            if(isRowIndex) {
-                startY = startIndex;
-            } else {
-                startX = startIndex;
-            }
-        }
 
         for(let index = 0; index < this.grid.length; index++) {
             coords = this.convertToCoordinates(index);
@@ -2567,19 +2559,17 @@ class LayeredGrid {
             // Offsets the start point depending on whether this is an insertion or deletion.
             else if(this.coordsAreInBounds(x - xOffset - startX, 0) && !isRowIndex ||
                     this.coordsAreInBounds(0, y - yOffset - startY) && isRowIndex) {
-              // Out of bounds.
-              if(!this.coordsAreInBounds(x - xOffset, y - yOffset)) {
-                continue;
-              }
-              // Shifted cells.
-              if(offsetCell) {
+              // Shifted cells (in-bounds only).
+              if(this.coordsAreInBounds(x - xOffset, y - yOffset) && offsetCell) {
                 this.set(x, y, layer);
               }
             }
             // In the case of an insertion, a blank row or column is inserted at the start index.
             // We want to auto-extend lines that originally passed through.
-            else if(oldCell && (isRowIndex && aboveOldCell || !isRowIndex && leftOfOldCell)) {
-                this.set(x, y, layer);
+            else if(oldCell) {
+                if(isRowIndex && aboveOldCell || !isRowIndex && leftOfOldCell) {
+                    this.set(x, y, layer);
+                }
             }
         }
 
