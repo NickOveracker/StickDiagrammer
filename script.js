@@ -2531,12 +2531,17 @@ class LayeredGrid {
     // Shift the grid by a given offset
     shift(xOffset, yOffset, startIndex, isRowIndex) {
         'use strict';
+
+        // Cannot be reasonably reduced further than this; make an exception.
+        /* jshint maxcomplexity: 11 */ 
         let oldGrid = this.grid;
         let startX = 0;
         let startY = 0;
-        let coords, x, y, layer, oldCell, isInShiftRange, extendCell, offsetCell, shiftCoord;
+        let index, coords, x, y, layer, oldCell, isInShiftRange, extendCell, offsetCell, shiftCoord;
         
         this.grid = new Array(this.width * this.height * this.layers);
+
+        index = 0;
 
         for(let index = 0; index < this.grid.length; index++) {
             coords = this.convertToCoordinates(index);
