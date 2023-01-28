@@ -2534,7 +2534,7 @@ class LayeredGrid {
         let oldGrid = this.grid;
         let startX = 0;
         let startY = 0;
-        let coords, x, y, layer, oldCell, extendCell, offsetCell;
+        let coords, x, y, layer, oldCell, isInShiftRange, extendCell, offsetCell;
         
         this.grid = new Array(this.width * this.height * this.layers);
         
@@ -2555,9 +2555,13 @@ class LayeredGrid {
             oldCell       = oldGrid[x           +  (y            * this.width) + (layer * this.width * this.height)];
             offsetCell    = oldGrid[x - xOffset + ((y - yOffset) * this.width) + (layer * this.width * this.height)];
             if(isRowIndex) {
+                // Are we below the shift start row?
+                isInShiftRange = Boolean(this.coordsAreInBounds(0, y - yOffset - startY));
                 // Cell above the current cell (extend down)
                 extendCell = oldGrid[x + ((y - 1) * this.width) + (layer * this.width * this.height)];
             } else {
+                // Are we to the right of the shift start column?
+                isInShiftRange = Boolean(this.coordsAreInBounds(x - xOffset - startX, 0));
                 // Cell to the left of the current cell (extend right)
                 extendCell = oldGrid[x - 1 +  (y * this.width) + (layer * this.width * this.height)];
             }
@@ -2570,12 +2574,8 @@ class LayeredGrid {
             }
             // On or after the start row or column: Shift
             // Offsets the start point depending on whether this is an insertion or deletion.
-            else if(this.coordsAreInBounds(x - xOffset - startX, 0) && !isRowIndex ||
-                    this.coordsAreInBounds(0, y - yOffset - startY) && isRowIndex) {
-              // Shifted cells.
-              if(offsetCell && this.coordsAreInBounds(x - xOffset, y - yOffset)) {
+            else if(isInShiftRange && offsetCell && this.coordsAreInBounds(x - xOffset, y - yOffset)) {
                 this.set(x, y, layer);
-              }
             }
             // In the case of an insertion, a blank row or column is inserted at the start index.
             // We want to auto-extend lines that originally passed through.
