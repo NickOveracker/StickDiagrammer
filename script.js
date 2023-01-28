@@ -2583,8 +2583,10 @@ class LayeredGrid {
             }
             // On or after the start row or column: Shift
             // Offsets the start point depending on whether this is an insertion or deletion.
-            else if(isInShiftRange && offsetCell && this.coordsAreInBounds(x - xOffset, y - yOffset)) {
-                this.set(x, y, layer);
+            else if(isInShiftRange) {
+                if(offsetCell && this.coordsAreInBounds(x - xOffset, y - yOffset)) {
+                    this.set(x, y, layer);
+                }
             }
             // In the case of an insertion, a blank row or column is inserted at the start index.
             // We want to auto-extend lines that originally passed through.
