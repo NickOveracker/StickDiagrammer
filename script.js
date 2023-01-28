@@ -2603,7 +2603,7 @@ class LayeredGrid {
     shiftTerminals(xOffset, yOffset, startIndex, isRowIndex) {
         'use strict';
         let shiftTerminal = function(terminal) {
-            if(isRowIndex && terminal.y <= startIndex || !isRowIndex && terminal.x <= startIndex) {
+            if(isRowIndex && terminal.y <= startIndex && !isRowIndex && terminal.x <= startIndex) {
                 return;
             }
             if(this.coordsAreInBounds(terminal.x + xOffset, 0)) {
