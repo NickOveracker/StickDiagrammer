@@ -1383,25 +1383,25 @@ class DiagramController {
         // Set up shift commands
         this.shiftCommands[37] = ((e) => {
             if(e.type.includes('up')) {
-                this.diagram.layeredGrid.shift(-1,  0);
+                this.diagram.layeredGrid.shift(-1, 0, 0);
             }
         }).bind(this);
 
         this.shiftCommands[38] = ((e) => {
             if(e.type.includes('up')) {
-                this.diagram.layeredGrid.shift( 0, -1);
+                this.diagram.layeredGrid.shift(0, -1, 0);
             }
         }).bind(this);
 
         this.shiftCommands[39] = ((e) => {
             if(e.type.includes('up')) {
-                this.diagram.layeredGrid.shift( 1,  0);
+                this.diagram.layeredGrid.shift(1, 0, 0);
             }
         }).bind(this);
 
         this.shiftCommands[40] = ((e) => {
             if(e.type.includes('up')) {
-                this.diagram.layeredGrid.shift( 0,  1);
+                this.diagram.layeredGrid.shift(0, 1, 0);
             }
         }).bind(this);
 
@@ -2537,14 +2537,6 @@ class LayeredGrid {
         let coords, x, y, layer, oldCell, isInShiftRange, extendCell, offsetCell, shiftCoord;
         
         this.grid = new Array(this.width * this.height * this.layers);
-        
-        if(Boolean(startIndex)) {
-            if(isRowIndex) {
-                startY = startIndex;
-            } else {
-                startX = startIndex;
-            }
-        }
 
         for(let index = 0; index < this.grid.length; index++) {
             coords = this.convertToCoordinates(index);
@@ -2552,12 +2544,13 @@ class LayeredGrid {
             y = coords.y;
             layer = coords.layer;
 
-            oldCell       = oldGrid[x           +  (y            * this.width) + (layer * this.width * this.height)];
-            offsetCell    = oldGrid[x - xOffset + ((y - yOffset) * this.width) + (layer * this.width * this.height)];
+            oldCell     = oldGrid[x           +  (y            * this.width) + (layer * this.width * this.height)];
+            offsetCell  = oldGrid[x - xOffset + ((y - yOffset) * this.width) + (layer * this.width * this.height)];
 
             if(isRowIndex) {
                 // Shifting in Y direction.
                 shiftCoord = y;
+                startY = startIndex;
 
                 // Are we below the shift start row?
                 isInShiftRange = Boolean(this.coordsAreInBounds(0, y - yOffset - startY));
@@ -2567,6 +2560,7 @@ class LayeredGrid {
             } else {
                 // Shifting in X dirction.
                 shiftCoord = x;
+                startX = startIndex;
 
                 // Are we to the right of the shift start column?
                 isInShiftRange = Boolean(this.coordsAreInBounds(x - xOffset - startX, 0));
@@ -3071,19 +3065,19 @@ function setUpControls() {
     }.bind(diagram);
 
     document.getElementById("shift-left").onclick = function() {
-        this.layeredGrid.shift(-1, 0);
+        this.layeredGrid.shift(-1, 0, 0);
     }.bind(diagram);
 
     document.getElementById("shift-right").onclick = function() {
-        this.layeredGrid.shift(1, 0);
+        this.layeredGrid.shift(1, 0, 0);
     }.bind(diagram);
 
     document.getElementById("shift-up").onclick = function() {
-        this.layeredGrid.shift(0, -1);
+        this.layeredGrid.shift(0, -1, 0);
     }.bind(diagram);
 
     document.getElementById("shift-down").onclick = function() {
-        this.layeredGrid.shift(0, 1);
+        this.layeredGrid.shift(0, 1, 0);
     }.bind(diagram);
 
     document.getElementById("paint-mode-btn").onclick = function() {
