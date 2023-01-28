@@ -2579,7 +2579,7 @@ class LayeredGrid {
             }
             // In the case of an insertion, a blank row or column is inserted at the start index.
             // We want to auto-extend lines that originally passed through.
-            else if(oldCell && extendCell) {
+            else if(oldCell && extendCell && layer !== this.diagram.CONTACT) {
                 this.set(x, y, layer);
             }
         }
