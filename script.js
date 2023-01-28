@@ -2534,7 +2534,7 @@ class LayeredGrid {
         let oldGrid = this.grid;
         let startX = 0;
         let startY = 0;
-        let coords, x, y, layer, oldCell, aboveOldCell, leftOfOldCell, offsetCell;
+        let coords, x, y, layer, oldCell, extendCell, offsetCell;
         
         this.grid = new Array(this.width * this.height * this.layers);
         
@@ -2553,9 +2553,14 @@ class LayeredGrid {
             layer = coords.layer;
 
             oldCell       = oldGrid[x           +  (y            * this.width) + (layer * this.width * this.height)];
-            aboveOldCell  = oldGrid[x           + ((y - 1)       * this.width) + (layer * this.width * this.height)];
-            leftOfOldCell = oldGrid[x - 1       +  (y            * this.width) + (layer * this.width * this.height)];
             offsetCell    = oldGrid[x - xOffset + ((y - yOffset) * this.width) + (layer * this.width * this.height)];
+            if(isRowIndex) {
+                // Cell above the current cell (extend down)
+                extendCell = oldGrid[x + ((y - 1) * this.width) + (layer * this.width * this.height)];
+            } else {
+                // Cell to the left of the current cell (extend right)
+                extendCell = oldGrid[x - 1 +  (y * this.width) + (layer * this.width * this.height)];
+            }
 
             // Before the start row or column: Don't shift (set same as original)
             if(x < startX || y < startY) {
@@ -2574,7 +2579,7 @@ class LayeredGrid {
             }
             // In the case of an insertion, a blank row or column is inserted at the start index.
             // We want to auto-extend lines that originally passed through.
-            else if(oldCell && (isRowIndex && aboveOldCell || !isRowIndex && leftOfOldCell)) {
+            else if(oldCell && extendCell) {
                 this.set(x, y, layer);
             }
         }
