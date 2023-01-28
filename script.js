@@ -2534,6 +2534,25 @@ class LayeredGrid {
 
         // Cannot be reasonably reduced further than this; make an exception.
         /* jshint maxcomplexity: 11 */ 
+
+        let isNonTerminalContact = function(x, y, layer) {
+            let terminals = [this.diagram.vddNode, this.diagram.gndNode,]
+                .concat(this.diagram.inputNodes)
+                .concat(this.diagram.outputNodes);
+
+            if(layer === Diagram.CONTACT) {
+                for(let ii = 0; ii < terminals.length; ii++) {
+                    if(terminals[ii].cell.x === x && terminals[ii].cell.y === y) {
+                        return false;
+                    }
+                }
+
+                return true;
+            } else {
+                return false;
+            }
+        }.bind(this);
+
         let oldGrid = this.grid;
         let startX = 0;
         let startY = 0;
@@ -2590,7 +2609,7 @@ class LayeredGrid {
             // In the case of an insertion, a blank row or column is inserted at the start index.
             // We want to auto-extend lines that originally passed through.
             // Don't extend CONTACT layer.
-            else if(oldCell && extendCell && layer !== Diagram.CONTACT) {
+            else if(oldCell && extendCell && !isNonTerminalContact(x, y, layer)) {
                 this.set(x, y, layer);
             }
         }
