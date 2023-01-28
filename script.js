@@ -2567,17 +2567,19 @@ class LayeredGrid {
             // Offsets the start point depending on whether this is an insertion or deletion.
             else if(this.coordsAreInBounds(x - xOffset - startX, 0) && !isRowIndex ||
                     this.coordsAreInBounds(0, y - yOffset - startY) && isRowIndex) {
-              // Shifted cells.
-              if(offsetCell && this.coordsAreInBounds(x - xOffset, y - yOffset)) {
+              // Out of bounds.
+              if(!this.coordsAreInBounds(x - xOffset, y - yOffset)) {
                 continue;
+              }
+              // Shifted cells.
+              if(offsetCell) {
+                this.set(x, y, layer);
               }
             }
             // In the case of an insertion, a blank row or column is inserted at the start index.
             // We want to auto-extend lines that originally passed through.
-            else if(oldCell) {
-                if(isRowIndex && aboveOldCell || !isRowIndex && leftOfOldCell) {
-                    this.set(x, y, layer);
-                }
+            else if(oldCell && (isRowIndex && aboveOldCell || !isRowIndex && leftOfOldCell)) {
+                this.set(x, y, layer);
             }
         }
 
