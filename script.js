@@ -2565,7 +2565,8 @@ class LayeredGrid {
             }
             // On or after the start row or column: Shift
             // Offsets the start point depending on whether this is an insertion or deletion.
-            else if(x >= (xOffset + startX) && !isRowIndex || y >= (yOffset + startY) && isRowIndex) {
+            else if(this.coordsAreInBounds(x - xOffset - startX, 0) && !isRowIndex ||
+                    this.coordsAreInBounds(0, y - yOffset - startY) && isRowIndex) {
               // Out of bounds.
               if(!this.coordsAreInBounds(x - xOffset, y - yOffset)) {
                 continue;
