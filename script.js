@@ -2534,7 +2534,7 @@ class LayeredGrid {
         let oldGrid = this.grid;
         let startX = 0;
         let startY = 0;
-        let coords, x, y, layer, oldCell, isInShiftRange, extendCell, offsetCell;
+        let coords, x, y, layer, oldCell, isInShiftRange, extendCell, offsetCell, shiftCoord;
         
         this.grid = new Array(this.width * this.height * this.layers);
         
@@ -2554,20 +2554,29 @@ class LayeredGrid {
 
             oldCell       = oldGrid[x           +  (y            * this.width) + (layer * this.width * this.height)];
             offsetCell    = oldGrid[x - xOffset + ((y - yOffset) * this.width) + (layer * this.width * this.height)];
+
             if(isRowIndex) {
+                // Shifting in Y direction.
+                shiftCoord = y;
+
                 // Are we below the shift start row?
                 isInShiftRange = Boolean(this.coordsAreInBounds(0, y - yOffset - startY));
+
                 // Cell above the current cell (extend down)
                 extendCell = oldGrid[x + ((y - 1) * this.width) + (layer * this.width * this.height)];
             } else {
+                // Shifting in X dirction.
+                shiftCoord = x;
+
                 // Are we to the right of the shift start column?
                 isInShiftRange = Boolean(this.coordsAreInBounds(x - xOffset - startX, 0));
+
                 // Cell to the left of the current cell (extend right)
                 extendCell = oldGrid[x - 1 +  (y * this.width) + (layer * this.width * this.height)];
             }
 
             // Before the start row or column: Don't shift (set same as original)
-            if(x < startX || y < startY) {
+            if(shiftCoord < startIndex) {
               if(oldCell) {
                 this.set(x, y, layer);
               }
