@@ -2278,8 +2278,8 @@ class DiagramView {
         this.drawBorder();
         this.drawLabels();
 
-        document.getElementById("num-rows").innerHTML = this.layeredGrid.height;
-        document.getElementById("num-cols").innerHTML = this.layeredGrid.width;
+        document.getElementById("num-rows").innerHTML = this.diagram.layeredGrid.height;
+        document.getElementById("num-cols").innerHTML = this.diagram.layeredGrid.width;
 
         window.requestAnimationFrame(this.refreshCanvas.bind(this));
     }
