@@ -2571,7 +2571,7 @@ class LayeredGrid {
                 // Shifting in X dirction.
                 shiftCoord = x;
                 startX = startIndex;
-                xOffset = Integer(sign) / Math.abs(Integer(sign));
+                xOffset = sign / Math.abs(sign);
                 yOffset = 0;
 
                 // Are we to the right of the shift start column?
