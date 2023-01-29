@@ -2562,7 +2562,8 @@ class LayeredGrid {
                 isInShiftRange = Boolean(this.coordsAreInBounds(0, y - yOffset - startY));
 
                 // Cell above the current cell (extend down)
-                extendCell = oldGrid[x + ((y - 1) * this.width) + (layer * this.width * this.height)];
+                // Excludes the last row
+                extendCell = oldGrid[x + ((y - 1) % this.height * this.width) + (layer * this.width * this.height)];
             } else {
                 // Shifting in X dirction.
                 shiftCoord = x;
@@ -2572,7 +2573,8 @@ class LayeredGrid {
                 isInShiftRange = Boolean(this.coordsAreInBounds(x - xOffset - startX, 0));
 
                 // Cell to the left of the current cell (extend right)
-                extendCell = oldGrid[x - 1 +  (y * this.width) + (layer * this.width * this.height)];
+                // Excludes the last column
+                extendCell = oldGrid[(x - 1) % this.width + (y * this.width) + (layer * this.width * this.height)];
             }
 
             // Before the start row or column: Don't shift (set same as original)
