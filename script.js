@@ -2536,73 +2536,67 @@ class LayeredGrid {
         // Cannot be reasonably reduced further than this; make an exception.
         /* jshint maxcomplexity: 12 */ 
 
-        let oldGrid, startX, startY, index, coords, x, y, layer, oldCell,
-            isInShiftRange, extendCell, cellExtendable, offsetCell, shiftCoord,
+        let oldGrid, startX, startY, coords, oldCell, isInShiftRange,
+            extendCell, cellExtendable, offsetCell, shiftCoord,
             xOffset, yOffset;
+
         oldGrid = this.grid;
-        startX = startY = 0;
+        startX = startY = xOffset = yOffset = 0;
         
         this.grid = new Array(this.width * this.height * this.layers);
 
-        index = 0;
-
         for(let index = 0; index < this.grid.length; index++) {
             coords = this.convertToCoordinates(index);
-            x = coords.x;
-            y = coords.y;
-            layer = coords.layer;
-            oldCell = oldGrid[x +  (y * this.width) + (layer * this.width * this.height)];
+            oldCell = oldGrid[coords.x +  (coords.y * this.width) + (coords.layer * this.width * this.height)];
 
             if(byRow) {
                 // Shifting in Y direction.
-                shiftCoord = y;
+                shiftCoord = coords.y;
                 startY = startIndex;
-                xOffset = 0;
                 yOffset = sign / Math.abs(sign);
 
                 // Are we below the shift start row?
-                isInShiftRange = Boolean(this.coordsAreInBounds(0, y - yOffset - startY));
+                isInShiftRange = Boolean(this.coordsAreInBounds(0, coords.y - yOffset - startY));
 
                 // Cell above the current cell (extend down)
                 // Excludes the last row
-                extendCell = oldGrid[x + ((y - 1) * this.width) + (layer * this.width * this.height)];
-                cellExtendable = y < this.height - 1;
+                extendCell = oldGrid[coords.x + ((coords.y - 1) * this.width) + (coords.layer * this.width * this.height)];
+                cellExtendable = coords.y < this.height - 1;
             } else {
                 // Shifting in X dirction.
-                shiftCoord = x;
+                shiftCoord = coords.x;
                 startX = startIndex;
                 xOffset = sign / Math.abs(sign);
-                yOffset = 0;
 
                 // Are we to the right of the shift start column?
-                isInShiftRange = Boolean(this.coordsAreInBounds(x - xOffset - startX, 0));
+                isInShiftRange = Boolean(this.coordsAreInBounds(coords.x - xOffset - startX, 0));
 
                 // Cell to the left of the current cell (extend right)
-                extendCell = oldGrid[x - 1 +  (y * this.width) + (layer * this.width * this.height)];
-                cellExtendable = x < this.width - 1;
+                extendCell = oldGrid[coords.x - 1 +  (coords.y * this.width) + (coords.layer * this.width * this.height)];
+                cellExtendable = coords.x < this.width - 1;
             }
 
             // The cell above or to the left of the current cell (depending on row/col mode)
-            offsetCell  = oldGrid[x - xOffset + ((y - yOffset) * this.width) + (layer * this.width * this.height)];
+            offsetCell  = oldGrid[coords.x - xOffset + ((coords.y - yOffset) * this.width) + (coords.layer * this.width * this.height)];
 
             // Before the start row or column: Don't shift (set same as original)
             if(shiftCoord < startIndex) {
               if(oldCell) {
-                this.set(x, y, layer);
+                this.set(coords.x, coords.y, coords.layer);
               }
             }
             // On or after the start row or column: Shift
             // Offsets the start point depending on whether this is an insertion or deletion.
             else if(isInShiftRange) {
-                if(offsetCell && this.coordsAreInBounds(x - xOffset, y - yOffset)) {
-                    this.set(x, y, layer);
+                if(offsetCell && this.coordsAreInBounds(coords.x - xOffset, coords.y - yOffset)) {
+                    this.set(coords.x, coords.y, coords.layer);
                 }
             }
             // In the case of an insertion, a blank row or column is inserted at the start index.
             // We want to auto-extend lines that originally passed through.
             // Don't extend CONTACT layer.
-            else if(oldCell && cellExtendable && extendCell && layer !== Diagram.CONTACT) {
-                this.set(x, y, layer);
+            else if(oldCell && cellExtendable && extendCell && coords.layer !== Diagram.CONTACT) {
+                this.set(coords.x, coords.y, coords.layer);
             }
         }
 
