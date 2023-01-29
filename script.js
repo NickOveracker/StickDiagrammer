@@ -200,7 +200,7 @@ class UserInterface {
                     toggleDarkMode();
                 }
             },
-        }
+        };
 
         // SHIFT + F
         this.transparencyCommand = {
