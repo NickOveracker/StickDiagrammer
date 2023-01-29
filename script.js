@@ -43,6 +43,96 @@
 let darkMode;
 let button;
 let diagram;
+let UI;
+
+class UserInterface {
+    constructor() {
+        'use strict';
+
+        this.shiftCommands      = [];
+        this.ctrlCommands       = [];
+        this.noModifierCommands = [];
+
+        this.initHistoryCommands();
+        this.initNavigationCommands();
+        this.initTerminalPlacementCommands();
+        this.initRowColCommands();
+        this.initCosmeticCommands();
+    }
+
+    initHistoryCommands() {
+        'use strict';
+
+        this.undoCommand = {
+        };
+        this.redoCommand = {
+        };
+    }
+
+    initNavigationCommands() {
+        'use strict';
+
+        this.exitMenuCommand = {
+        };
+        this.evaluateCommand = {
+        };
+    }
+
+    initTerminalPlacementCommands() {
+        'use strict';
+
+        this.placeVddCommand = {
+        };
+        this.placeGndCommand = {
+        };
+        this.placeIOCommand = {
+        };
+    }
+
+    initRowColCommands() {
+        'use strict';
+
+        this.shiftLeftCommand = {
+            keyCode: 37,
+        };
+        this.shiftUpCommand = {
+            keyCode: 38,
+        };
+        this.shiftRightCommand = {
+            keyCode: 39,
+        };
+        this.shiftDownCommand = {
+            keyCode: 40,
+        };
+        this.deleteColCommand = {
+            keyCode: 37,
+            shiftModifier: true,
+        };
+        this.deleteRowCommand = {
+            keyCode: 38,
+            shiftModifier: true,
+        };
+        this.insertColCommand = {
+            keyCode: 39,
+            shiftModifier: true,
+        };
+        this.insertRowCommand = {
+            keyCode: 40,
+            shiftModifier: true,
+        };
+    }
+
+    initCosmeticCommands() {
+        'use strict';
+
+        this.darkModeCommand = {
+        };
+        this.transparencyCommand = {
+        };
+        this.themeCommand = {
+        };
+   }
+}
 
 class Diagram {
     // Cycle through the following cursor colors by pressing space: Diagram.PDIFF, Diagram.NDIFF, Diagram.POLY, METAL1, Diagram.CONTACT
