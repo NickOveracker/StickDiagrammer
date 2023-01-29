@@ -1409,25 +1409,25 @@ class DiagramController {
         // Set up shift commands
         this.shiftCommands[37] = ((e) => {
             if(e.type.includes('up')) {
-                this.diagram.layeredGrid.shift(-1,  0);
+                this.diagram.layeredGrid.shift(0, false, -1);
             }
         }).bind(this);
 
         this.shiftCommands[38] = ((e) => {
             if(e.type.includes('up')) {
-                this.diagram.layeredGrid.shift( 0, -1);
+                this.diagram.layeredGrid.shift(0, true, -1);
             }
         }).bind(this);
 
         this.shiftCommands[39] = ((e) => {
             if(e.type.includes('up')) {
-                this.diagram.layeredGrid.shift( 1,  0);
+                this.diagram.layeredGrid.shift(0, false, 1);
             }
         }).bind(this);
 
         this.shiftCommands[40] = ((e) => {
             if(e.type.includes('up')) {
-                this.diagram.layeredGrid.shift( 0,  1);
+                this.diagram.layeredGrid.shift(0, true, 1);
             }
         }).bind(this);
 
@@ -1459,6 +1459,42 @@ class DiagramController {
         this.shiftCommands[86] = ((e) => {
             if(e.type.includes('down')) {
                 this.placeTerminal(e, this.diagram.vddCell);
+            }
+        }).bind(this);
+
+        this.shiftCommands[72] = ((e) => {
+            if(e.type.includes('down')) {
+                let coords = this.getCellAtCursor(this.currentX, this.currentY);
+                if(coords !== null) {
+                    this.diagram.layeredGrid.insertRemoveRowColAt(coords.x, true, false);
+                }
+            }
+        }).bind(this);
+
+        this.shiftCommands[74] = ((e) => {
+            if(e.type.includes('down')) {
+                let coords = this.getCellAtCursor(this.currentX, this.currentY);
+                if(coords !== null) {
+                    this.diagram.layeredGrid.insertRemoveRowColAt(coords.y, true, true);
+                }
+            }
+        }).bind(this);
+
+        this.shiftCommands[75] = ((e) => {
+            if(e.type.includes('down')) {
+                let coords = this.getCellAtCursor(this.currentX, this.currentY);
+                if(coords !== null) {
+                    this.diagram.layeredGrid.insertRemoveRowColAt(coords.y, false, true);
+                }
+            }
+        }).bind(this);
+
+        this.shiftCommands[76] = ((e) => {
+            if(e.type.includes('down')) {
+                let coords = this.getCellAtCursor(this.currentX, this.currentY);
+                if(coords !== null) {
+                    this.diagram.layeredGrid.insertRemoveRowColAt(coords.x, false, false);
+                }
             }
         }).bind(this);
     }
@@ -1600,7 +1636,7 @@ class DiagramController {
         }
     }
 
-    inBounds(screenX, screenY) {
+    pixelIsInBounds(screenX, screenY) {
         'use strict';
         let boundingBox = this.view.canvas.getBoundingClientRect();
         return screenX > boundingBox.left   + this.view.cellWidth &&
@@ -1612,7 +1648,7 @@ class DiagramController {
     getCellAtCursor(screenX, screenY) {
         'use strict';
         // Ignore if not inside the canvas
-        if (this.inBounds(screenX, screenY)) {
+        if (this.pixelIsInBounds(screenX, screenY)) {
 
             let x = Math.floor((screenX - this.view.canvas.getBoundingClientRect().left - this.view.cellWidth) / this.view.cellWidth);
             let y = Math.floor((screenY - this.view.canvas.getBoundingClientRect().top - this.view.cellHeight) / this.view.cellHeight);
@@ -1639,7 +1675,7 @@ class DiagramController {
         let anyLayerSet = false;
 
         // Ignore if not inside the canvas
-        if (this.inBounds(clientX, clientY)) {
+        if (this.pixelIsInBounds(clientX, clientY)) {
             let x = Math.floor((clientX - this.view.canvas.getBoundingClientRect().left - this.view.cellWidth) / this.view.cellWidth);
             let y = Math.floor((clientY - this.view.canvas.getBoundingClientRect().top - this.view.cellHeight) / this.view.cellHeight);
 
@@ -1733,14 +1769,14 @@ class DiagramController {
         'use strict';
         let coords = this.getCoordsFromEvent(event);
 
-        if(this.inBounds(coords.x, coords.y)) {
+        if(this.pixelIsInBounds(coords.x, coords.y)) {
             event.preventDefault();
         }
      
         if (this.isPrimaryInput(event) || event.button === 2) {
             if (this.dragging) {
                 this.endDrag(coords.x, coords.y, event);
-            } else if (this.inBounds(coords.x, coords.y)) {
+            } else if (this.pixelIsInBounds(coords.x, coords.y)) {
                 this.cellClickHandler(event);
             } else if(event.button === 2) {
                 this.changeLayer();
@@ -1825,7 +1861,7 @@ class DiagramController {
     endDrag(currentX, currentY, event) {
         'use strict';
         // If the mouse was released outside the canvas, undo and return.
-        if(!this.inBounds(currentX, currentY)) {
+        if(!this.pixelIsInBounds(currentX, currentY)) {
             this.undo();
             return;
         }
@@ -1861,7 +1897,7 @@ class DiagramController {
         'use strict';
         let coords = this.getCoordsFromEvent(event);
 
-        if(this.inBounds(coords.x, coords.y)) {
+        if(this.pixelIsInBounds(coords.x, coords.y)) {
             event.preventDefault();
         }
 
@@ -1877,7 +1913,7 @@ class DiagramController {
         // If the mouse is pressed and the mouse is between cells 1 and gridsize - 1,
         if (this.isPrimaryInput(event) || event.buttons === 2) {
             // Ignore if not inside the canvas
-            if (this.inBounds(coords.x, coords.y)) {
+            if (this.pixelIsInBounds(coords.x, coords.y)) {
                 this.drag(event);
             }
         }
@@ -1967,7 +2003,7 @@ class DiagramController {
 
         if (this.isPrimaryInput(event) || event.button === 2) {
             // Return if not between cells 1 and gridsize - 1
-            if (this.inBounds(coords.x, coords.y)) {
+            if (this.pixelIsInBounds(coords.x, coords.y)) {
                 event.preventDefault();
                 this.startX = Math.floor((coords.x - this.view.canvas.getBoundingClientRect().left - this.view.cellWidth) / this.view.cellWidth);
                 this.startY = Math.floor((coords.y - this.view.canvas.getBoundingClientRect().top - this.view.cellHeight) / this.view.cellHeight);
@@ -2274,6 +2310,10 @@ class DiagramView {
         // set the outer border of the canvas to the cursor color
         this.drawBorder();
         this.drawLabels();
+
+        document.getElementById("num-rows").innerHTML = this.diagram.layeredGrid.height;
+        document.getElementById("num-cols").innerHTML = this.diagram.layeredGrid.width;
+
         window.requestAnimationFrame(this.refreshCanvas.bind(this));
     }
 }
@@ -2492,50 +2532,137 @@ class LayeredGrid {
         this.moveWithinBounds(this.diagram.vddCell, newBounds);
         this.moveWithinBounds(this.diagram.gndCell, newBounds);
     }
+    
+    insertRemoveRowColAt(rowColIndex, isInsert, isRow) {
+        // Add or remove?
+        let addend    = isInsert ? 1 : -1;
+        
+        // Set the new width and height.
+        let newWidth  = isRow    ? this.width           : this.width + addend;
+        let newHeight = isRow    ? this.height + addend : this.height;
+        
+        // If it's an insert, add the row/column before shifting the existing contents.
+        if(isInsert) {
+            // Update grid size first so we have room to shift
+            this.resize(newWidth, newHeight);
+            // Shift right/down from the selected row/cell
+            this.shift(rowColIndex, isRow, 1);
+        }
+        else {
+            // Shift left/up into the selected row/cell
+            this.shift(rowColIndex, isRow, -1);
+            // Update the grid size last now that we have shifted the contents.
+            this.resize(newWidth, newHeight);
+        }
+    }
 
-    // Shift the grid by a given offset
-    shift(xOffset, yOffset) {
+    coordsAreInBounds(x, y) {
         'use strict';
-        let oldGrid = this.grid;
+        return x >= 0 && x < this.width && y >= 0 && y < this.height;
+    }
+
+    // Shift the grid
+    // Sign should be a positive or negative integer
+    shift(startIndex, byRow, sign) {
+        'use strict';
+
+        // Cannot be reasonably reduced further than this; make an exception.
+        /* jshint maxcomplexity: 12 */ 
+
+        let oldGrid, startX, startY, coords, oldCell, isInShiftRange,
+            extendCell, cellExtendable, offsetCell, shiftCoord,
+            xOffset, yOffset;
+
+        oldGrid = this.grid;
+        startX = startY = xOffset = yOffset = 0;
+        
         this.grid = new Array(this.width * this.height * this.layers);
 
-        for(let layer = 0; layer < this.layers; layer++) {
-            for(let y = 0; y < this.height; y++) {
-                for(let x = 0; x < this.width; x++) {
-                    if(x - xOffset < 0 || x - xOffset >= this.width || y - yOffset < 0 || y - yOffset >= this.height) {
-                        continue;
-                    }
-                    if(oldGrid[x - xOffset + ((y - yOffset) * this.width) + (layer * this.width * this.height)]) {
-                        this.set(x, y, layer);
-                    }
+        for(let index = 0; index < this.grid.length; index++) {
+            coords = this.convertToCoordinates(index);
+            oldCell = oldGrid[coords.x +  (coords.y * this.width) + (coords.layer * this.width * this.height)];
+
+            if(byRow) {
+                // Shifting in Y direction.
+                shiftCoord = coords.y;
+                startY = startIndex;
+                yOffset = sign / Math.abs(sign);
+
+                // Are we below the shift start row?
+                isInShiftRange = Boolean(this.coordsAreInBounds(0, coords.y - yOffset - startY));
+
+                // Cell above the current cell (extend down)
+                // Excludes the last row
+                extendCell = oldGrid[coords.x + ((coords.y - 1) * this.width) + (coords.layer * this.width * this.height)];
+                cellExtendable = coords.y < this.height - 1;
+            } else {
+                // Shifting in X dirction.
+                shiftCoord = coords.x;
+                startX = startIndex;
+                xOffset = sign / Math.abs(sign);
+
+                // Are we to the right of the shift start column?
+                isInShiftRange = Boolean(this.coordsAreInBounds(coords.x - xOffset - startX, 0));
+
+                // Cell to the left of the current cell (extend right)
+                extendCell = oldGrid[coords.x - 1 +  (coords.y * this.width) + (coords.layer * this.width * this.height)];
+                cellExtendable = coords.x < this.width - 1;
+            }
+
+            // The cell above or to the left of the current cell (depending on row/col mode)
+            offsetCell  = oldGrid[coords.x - xOffset + ((coords.y - yOffset) * this.width) + (coords.layer * this.width * this.height)];
+
+            // Before the start row or column: Don't shift (set same as original)
+            if(shiftCoord < startIndex) {
+              if(oldCell) {
+                this.set(coords.x, coords.y, coords.layer);
+              }
+            }
+            // On or after the start row or column: Shift
+            // Offsets the start point depending on whether this is an insertion or deletion.
+            else if(isInShiftRange) {
+                if(offsetCell && this.coordsAreInBounds(coords.x - xOffset, coords.y - yOffset)) {
+                    this.set(coords.x, coords.y, coords.layer);
                 }
+            }
+            // In the case of an insertion, a blank row or column is inserted at the start index.
+            // We want to auto-extend lines that originally passed through.
+            // Don't extend CONTACT layer.
+            else if(oldCell && cellExtendable && extendCell && coords.layer !== Diagram.CONTACT) {
+                this.set(coords.x, coords.y, coords.layer);
             }
         }
 
-        this.shiftTerminals(xOffset, yOffset);
+        this.shiftTerminals(xOffset, yOffset, startIndex);
     }
 
     // Shift the terminals by a given offset
-    shiftTerminals(xOffset, yOffset) {
+    shiftTerminals(xOffset, yOffset, startIndex) {
         'use strict';
         let shiftTerminal = function(terminal) {
-            if(terminal.x + xOffset >= 0 && terminal.x + xOffset < this.width) {
-                terminal.x += xOffset;
-            } else if(terminal.x + xOffset < 0) {
-                terminal.x = 0;
-            } else {
-                terminal.x = this.width - 1;
-            }
-            if(terminal.y + yOffset >= 0 && terminal.y + yOffset < this.height) {
-                terminal.y += yOffset;
-            } else if(terminal.y + yOffset < 0) {
-                terminal.y = 0;
-            } else {
-                terminal.y = this.height - 1;
+            // Starting from a column.
+            if(xOffset && terminal.x >= startIndex) {
+                if(this.coordsAreInBounds(terminal.x + xOffset, 0)) {
+                    terminal.x += xOffset;
+                } else if(terminal.x + xOffset < 0) {
+                    terminal.x = 0;
+                } else {
+                    terminal.x = this.width - 1;
+                }
             }
 
-            // Make sure there is still a Diagram.CONTACT at the new coordinates
-            // (may have shifted off the screen)
+            // Starting from a row, or default starting point
+            if(yOffset && terminal.y >= startIndex) {
+                if(this.coordsAreInBounds(0, terminal.y + yOffset)) {
+                    terminal.y += yOffset;
+                } else if(terminal.y + yOffset < 0) {
+                    terminal.y = 0;
+                } else {
+                    terminal.y = this.height - 1;
+                }
+            }
+
+            // Make sure there is still a CONTACT at the terminal.
             this.set(terminal.x, terminal.y, Diagram.CONTACT);
         }.bind(this);
 
@@ -2964,42 +3091,38 @@ function setUpControls() {
     'use strict';
     document.getElementById("remove-row").onclick = function() {
         this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height - 1);
-        document.getElementById("num-rows").innerHTML = this.layeredGrid.height;
         this.view.drawGrid();
     }.bind(diagram);
 
     document.getElementById("add-row").onclick = function() {
         this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height + 1);
-        document.getElementById("num-rows").innerHTML = this.layeredGrid.height;
         this.view.drawGrid();
     }.bind(diagram);
 
     document.getElementById("remove-column").onclick = function() {
         this.layeredGrid.resize(this.layeredGrid.width - 1, this.layeredGrid.height);
-        document.getElementById("num-cols").innerHTML = this.layeredGrid.width;
         this.view.drawGrid();
     }.bind(diagram);
 
     document.getElementById("add-column").onclick = function() {
         this.layeredGrid.resize(this.layeredGrid.width + 1, this.layeredGrid.height);
-        document.getElementById("num-cols").innerHTML = this.layeredGrid.width;
         this.view.drawGrid();
     }.bind(diagram);
 
     document.getElementById("shift-left").onclick = function() {
-        this.layeredGrid.shift(-1, 0);
+        this.layeredGrid.shift(0, false, -1);
     }.bind(diagram);
 
     document.getElementById("shift-right").onclick = function() {
-        this.layeredGrid.shift(1, 0);
+        this.layeredGrid.shift(0, false, 1);
     }.bind(diagram);
 
     document.getElementById("shift-up").onclick = function() {
-        this.layeredGrid.shift(0, -1);
+        this.layeredGrid.shift(0, true, -1);
     }.bind(diagram);
 
     document.getElementById("shift-down").onclick = function() {
-        this.layeredGrid.shift(0, 1);
+        this.layeredGrid.shift(0, true, 1);
     }.bind(diagram);
 
     document.getElementById("paint-mode-btn").onclick = function() {
@@ -3288,8 +3411,6 @@ window.onload = function () {
     diagram.layeredGrid.set(diagram.vddCell.x, diagram.vddCell.y, Diagram.CONTACT);
     diagram.layeredGrid.set(diagram.gndCell.x, diagram.gndCell.y, Diagram.CONTACT);
 
-    document.getElementById("num-rows").innerHTML = diagram.layeredGrid.height;
-    document.getElementById("num-cols").innerHTML = diagram.layeredGrid.width;
     setUpControls();
 
     populateTermSelect();
