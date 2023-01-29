@@ -54,23 +54,27 @@ class UserInterface {
         this.ctrlCommands       = [];
         this.noModifierCommands = [];
 
-        this.initHistoryCommands();
-        this.initNavigationCommands();
         this.initTerminalPlacementCommands();
-        this.initRowColCommands();
+        this.initNavigationCommands();
         this.initCosmeticCommands();
+        this.initHistoryCommands();
+        this.initRowColCommands();
     }
 
     initHistoryCommands() {
         'use strict';
 
         this.undoCommand = {
-            keyCode: null,
-            action:  null,
+            // CTRL-Z
+            keyCode:      90,
+            ctrlModifier: true,
+            action:       this.diagramController.undo,
         };
         this.redoCommand = {
-            keyCode: null,
-            action:  null,
+            // CTRL-Y
+            keyCode:      89,
+            ctrlModifier: true,
+            action:       this.diagramController.undo,
         };
     }
 
@@ -78,26 +82,42 @@ class UserInterface {
         'use strict';
 
         this.exitMenuCommand = {
+            // ESC
             keyCode: 27,
             action:  this.diagramController.closeTopMenu,
         };
         this.evaluateCommand = {
-            keyCode: null,
-            action:  null,
+            // ENTER
+            keyCode: 13,
+            action:  this.diagramController.refreshTruthTable,
         };
     }
 
     initTerminalPlacementCommands() {
         'use strict';
 
+        // SHIFT + V
         this.placeVddCommand = {
-            keyCode: null,
-            action:  null,
+            keyCode: 86,
+            shiftModifier: true,
+            action:  ((e) => {
+                if(e.type.includes('down')) {
+                    this.placeTerminal(e, this.diagram.vddCell);
+                }
+            }).bind(this.diagramController),
         };
+
+        // SHIFT + G
         this.placeGndCommand = {
-            keyCode: null,
-            action:  null,
+            keyCode: 71,
+            shiftModifier: true,
+            action:  ((e) => {
+                if(e.type.includes('down')) {
+                    this.placeTerminal(e, this.diagram.gndCell);
+                }
+            }).bind(this.diagramController),
         };
+
         this.placeIOCommand = {
             keyCode: null,
             action:  null,
@@ -107,22 +127,46 @@ class UserInterface {
     initRowColCommands() {
         'use strict';
 
+        // LEFT ARROW
         this.shiftLeftCommand = {
             keyCode: 37,
-            action:  null,
+            action:  ((e) => {
+                if(e.type.includes('up')) {
+                    this.diagram.layeredGrid.shift(-1, 0);
+                }
+            }).bind(this.diagramController),
         };
+
+        // UP ARROW
         this.shiftUpCommand = {
             keyCode: 38,
-            action:  null,
+            action:  ((e) => {
+                if(e.type.includes('up')) {
+                    this.diagram.layeredGrid.shift(0, -1);
+                }
+            }).bind(this.diagramController),
         };
+
+        // RIGHT ARROW
         this.shiftRightCommand = {
             keyCode: 39,
-            action:  null,
+            action:  ((e) => {
+                if(e.type.includes('up')) {
+                    this.diagram.layeredGrid.shift(1, 0);
+                }
+            }).bind(this.diagramController),
         };
+
+        // DOWN ARROW
         this.shiftDownCommand = {
             keyCode: 40,
-            action:  null,
+            action:  ((e) => {
+                if(e.type.includes('up')) {
+                    this.diagram.layeredGrid.shift(0, 1);
+                }
+            }).bind(this.diagramController),
         };
+
         this.deleteColCommand = {
             shiftModifier: true,
             keyCode:       37,
@@ -148,17 +192,35 @@ class UserInterface {
     initCosmeticCommands() {
         'use strict';
 
+        // SHIFT + D
         this.darkModeCommand = {
-            keyCode: null,
-            action:  null,
-        };
+            keyCode: 68,
+            action:  (e) => {
+                if(e.type.includes('up')) {
+                    toggleDarkMode();
+                }
+            },
+        }
+
+        // SHIFT + F
         this.transparencyCommand = {
-            keyCode: null,
-            action:  null,
+            keyCode: 70,
+            action:  ((e) => {
+                if(e.type.includes('up')) {
+                    this.view.useFlatColors = !this.view.useFlatColors;
+                }
+            }).bind(this.diagramController),
         };
+        
+        // SHIFT + T
         this.themeCommand = {
-            keyCode: null,
-            action:  null,
+            keyCode: 84,
+            action: ((e) => {
+                if(e.type.includes('up')) {
+                    this.view.theme = this.view.theme < DiagramView.themes.length - 1 ? this.view.theme + 1 : 0;
+                    setUpLayerSelector();
+                }
+            }).bind(this.diagramController),
         };
    }
 }
