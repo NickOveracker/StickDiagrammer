@@ -2513,11 +2513,11 @@ class LayeredGrid {
             // Update grid size first so we have room to shift
             this.resize(newWidth, newHeight);
             // Shift rigth/down from the selected row/cell
-            this.shift(isRow ? 0 : 1, isRow ? 1 : 0, rowColIndex, isRow);
+            this.shift(isRow ? 0 : 1, isRow ? 1 : 0, rowColIndex);
         }
         else {
             // Shift left/up into the selected row/cell
-            this.shift(isRow ? 0 : -1, isRow ? -1 : 0, rowColIndex, isRow);
+            this.shift(isRow ? 0 : -1, isRow ? -1 : 0, rowColIndex);
             // Update the grid size last now that we have shifted the contents.
             this.resize(newWidth, newHeight);
         }
@@ -2529,7 +2529,7 @@ class LayeredGrid {
     }
 
     // Shift the grid by a given offset
-    shift(xOffset, yOffset, startIndex, isRowIndex) {
+    shift(xOffset, yOffset, startIndex) {
         'use strict';
 
         // Cannot be reasonably reduced further than this; make an exception.
@@ -2553,7 +2553,7 @@ class LayeredGrid {
             oldCell     = oldGrid[x           +  (y            * this.width) + (layer * this.width * this.height)];
             offsetCell  = oldGrid[x - xOffset + ((y - yOffset) * this.width) + (layer * this.width * this.height)];
 
-            if(isRowIndex) {
+            if(yOffset) {
                 // Shifting in Y direction.
                 shiftCoord = y;
                 startY = startIndex;
@@ -2596,7 +2596,7 @@ class LayeredGrid {
             }
         }
 
-        this.shiftTerminals(xOffset, yOffset, startIndex, isRowIndex);
+        this.shiftTerminals(xOffset, yOffset, startIndex);
     }
 
     // Shift the terminals by a given offset
@@ -2604,7 +2604,7 @@ class LayeredGrid {
         'use strict';
         let shiftTerminal = function(terminal) {
             // Starting from a column.
-            if(!isRowIndex && terminal.x >= startIndex) {
+            if(xOffset && terminal.x >= startIndex) {
                 if(this.coordsAreInBounds(terminal.x + xOffset, 0)) {
                     terminal.x += xOffset;
                 } else if(terminal.x + xOffset < 0) {
@@ -2615,7 +2615,7 @@ class LayeredGrid {
             }
 
             // Starting from a row, or default starting point
-            if((isRowIndex || isRowIndex === undefined) && terminal.y >= startIndex) {
+            if(yOffset && terminal.y >= startIndex) {
                 if(this.coordsAreInBounds(0, terminal.y + yOffset)) {
                     terminal.y += yOffset;
                 } else if(terminal.y + yOffset < 0) {
