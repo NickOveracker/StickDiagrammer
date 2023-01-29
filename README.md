@@ -24,13 +24,13 @@
 * Allow custom command mappings.
 * Allow custom terminal labels.
 * Share small diagrams by URL arguments and QR codes.
-* Replace pullup/pulldown alert popups with less obtrusive warnings.
 * HDL generation.
 * Interactive tutorial.
 * Student/Teacher modes with generating/grading homework, practice problems, etc.
 * Draw CMOS circuit schematic corresponding to the painted topology.
 * Logical effort calculations (allow user to set constants)
 * Export netlist for use in electronics design software.
+* ~~Replace pullup/pulldown alert popups with less obtrusive warnings.~~ *Resolved 2023/1/29*
 * ~~Allow users to select where to insert rows and columns.~~ *Resolved 2023/1/29*
 * ~~Show which layers are set in highlighted cell.~~ *Resolved 2023/1/29*
 * ~~Show at least one path from rail voltage to output for each input.~~ *Resolved 2021/12/11*
