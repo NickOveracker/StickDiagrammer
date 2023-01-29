@@ -1383,25 +1383,25 @@ class DiagramController {
         // Set up shift commands
         this.shiftCommands[37] = ((e) => {
             if(e.type.includes('up')) {
-                this.diagram.layeredGrid.shift(-1, 0, 0);
+                this.diagram.layeredGrid.shift(0, false, -1);
             }
         }).bind(this);
 
         this.shiftCommands[38] = ((e) => {
             if(e.type.includes('up')) {
-                this.diagram.layeredGrid.shift(0, -1, 0);
+                this.diagram.layeredGrid.shift(0, true, -1);
             }
         }).bind(this);
 
         this.shiftCommands[39] = ((e) => {
             if(e.type.includes('up')) {
-                this.diagram.layeredGrid.shift(1, 0, 0);
+                this.diagram.layeredGrid.shift(0, false, 1);
             }
         }).bind(this);
 
         this.shiftCommands[40] = ((e) => {
             if(e.type.includes('up')) {
-                this.diagram.layeredGrid.shift(0, 1, 0);
+                this.diagram.layeredGrid.shift(0, true, 1);
             }
         }).bind(this);
 
@@ -2512,12 +2512,12 @@ class LayeredGrid {
         if(isInsert) {
             // Update grid size first so we have room to shift
             this.resize(newWidth, newHeight);
-            // Shift rigth/down from the selected row/cell
-            this.shift(isRow ? 0 : 1, isRow ? 1 : 0, rowColIndex);
+            // Shift right/down from the selected row/cell
+            this.shift(rowColIndex, isRow, 1);
         }
         else {
             // Shift left/up into the selected row/cell
-            this.shift(isRow ? 0 : -1, isRow ? -1 : 0, rowColIndex);
+            this.shift(rowColIndex, isRow, -1);
             // Update the grid size last now that we have shifted the contents.
             this.resize(newWidth, newHeight);
         }
@@ -2528,15 +2528,17 @@ class LayeredGrid {
         return x >= 0 && x < this.width && y >= 0 && y < this.height;
     }
 
-    // Shift the grid by a given offset
-    shift(xOffset, yOffset, startIndex) {
+    // Shift the grid
+    // Sign should be a positive or negative integer
+    shift(startIndex, byRow, sign) {
         'use strict';
 
         // Cannot be reasonably reduced further than this; make an exception.
         /* jshint maxcomplexity: 12 */ 
 
         let oldGrid, startX, startY, index, coords, x, y, layer, oldCell,
-            isInShiftRange, extendCell, cellExtendable, offsetCell, shiftCoord;
+            isInShiftRange, extendCell, cellExtendable, offsetCell, shiftCoord,
+            xOffset, yOffset;
         oldGrid = this.grid;
         startX = startY = 0;
         
@@ -2549,14 +2551,14 @@ class LayeredGrid {
             x = coords.x;
             y = coords.y;
             layer = coords.layer;
+            oldCell = oldGrid[x +  (y * this.width) + (layer * this.width * this.height)];
 
-            oldCell     = oldGrid[x           +  (y            * this.width) + (layer * this.width * this.height)];
-            offsetCell  = oldGrid[x - xOffset + ((y - yOffset) * this.width) + (layer * this.width * this.height)];
-
-            if(yOffset) {
+            if(byRow) {
                 // Shifting in Y direction.
                 shiftCoord = y;
                 startY = startIndex;
+                xOffset = 0;
+                yOffset = Integer(sign) / Math.abs(Integer(sign));
 
                 // Are we below the shift start row?
                 isInShiftRange = Boolean(this.coordsAreInBounds(0, y - yOffset - startY));
@@ -2569,6 +2571,8 @@ class LayeredGrid {
                 // Shifting in X dirction.
                 shiftCoord = x;
                 startX = startIndex;
+                xOffset = Integer(sign) / Math.abs(Integer(sign));
+                yOffset = 0;
 
                 // Are we to the right of the shift start column?
                 isInShiftRange = Boolean(this.coordsAreInBounds(x - xOffset - startX, 0));
@@ -2577,6 +2581,9 @@ class LayeredGrid {
                 extendCell = oldGrid[x - 1 +  (y * this.width) + (layer * this.width * this.height)];
                 cellExtendable = x < this.width - 1;
             }
+
+            // The cell above or to the left of the current cell (depending on row/col mode)
+            offsetCell  = oldGrid[x - xOffset + ((y - yOffset) * this.width) + (layer * this.width * this.height)];
 
             // Before the start row or column: Don't shift (set same as original)
             if(shiftCoord < startIndex) {
@@ -3076,19 +3083,19 @@ function setUpControls() {
     }.bind(diagram);
 
     document.getElementById("shift-left").onclick = function() {
-        this.layeredGrid.shift(-1, 0, 0);
+        this.layeredGrid.shift(0, false, -1);
     }.bind(diagram);
 
     document.getElementById("shift-right").onclick = function() {
-        this.layeredGrid.shift(1, 0, 0);
+        this.layeredGrid.shift(0, false, 1);
     }.bind(diagram);
 
     document.getElementById("shift-up").onclick = function() {
-        this.layeredGrid.shift(0, -1, 0);
+        this.layeredGrid.shift(0, true, -1);
     }.bind(diagram);
 
     document.getElementById("shift-down").onclick = function() {
-        this.layeredGrid.shift(0, 1, 0);
+        this.layeredGrid.shift(0, true, 1);
     }.bind(diagram);
 
     document.getElementById("paint-mode-btn").onclick = function() {
