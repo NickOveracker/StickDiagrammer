@@ -19,6 +19,8 @@
 * Software entropy must not increase.
 
 ## Feature Wishlist
+* Allow user to define custom color scheme.
+* Allow user to selectively hide layers (to verify connections).
 * Allow custom command mappings.
 * Allow custom terminal labels.
 * Share small diagrams by URL arguments and QR codes.
