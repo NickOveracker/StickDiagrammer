@@ -2533,12 +2533,12 @@ class LayeredGrid {
         'use strict';
 
         // Cannot be reasonably reduced further than this; make an exception.
-        /* jshint maxcomplexity: 11 */ 
+        /* jshint maxcomplexity: 12 */ 
 
-        let oldGrid = this.grid;
-        let startX = 0;
-        let startY = 0;
-        let index, coords, x, y, layer, oldCell, isInShiftRange, extendCell, offsetCell, shiftCoord;
+        let oldGrid, startX, startY, index, coords, x, y, layer, oldCell,
+            isInShiftRange, extendCell, cellExtendable, offsetCell, shiftCoord;
+        oldGrid = this.grid;
+        startX = startY = 0;
         
         this.grid = new Array(this.width * this.height * this.layers);
 
@@ -2563,7 +2563,8 @@ class LayeredGrid {
 
                 // Cell above the current cell (extend down)
                 // Excludes the last row
-                extendCell = oldGrid[x + ((y - 1) % this.height * this.width) + (layer * this.width * this.height)];
+                extendCell = oldGrid[x + ((y - 1) * this.width) + (layer * this.width * this.height)];
+                cellExtendable = y < this.height - 1;
             } else {
                 // Shifting in X dirction.
                 shiftCoord = x;
@@ -2573,8 +2574,8 @@ class LayeredGrid {
                 isInShiftRange = Boolean(this.coordsAreInBounds(x - xOffset - startX, 0));
 
                 // Cell to the left of the current cell (extend right)
-                // Excludes the last column
-                extendCell = oldGrid[(x - 1) % this.width + (y * this.width) + (layer * this.width * this.height)];
+                extendCell = oldGrid[x - 1 +  (y * this.width) + (layer * this.width * this.height)];
+                cellExtendable = x < this.width - 1;
             }
 
             // Before the start row or column: Don't shift (set same as original)
@@ -2593,7 +2594,7 @@ class LayeredGrid {
             // In the case of an insertion, a blank row or column is inserted at the start index.
             // We want to auto-extend lines that originally passed through.
             // Don't extend CONTACT layer.
-            else if(oldCell && extendCell && layer !== Diagram.CONTACT) {
+            else if(oldCell && cellExtendable && extendCell && layer !== Diagram.CONTACT) {
                 this.set(x, y, layer);
             }
         }
@@ -2602,7 +2603,7 @@ class LayeredGrid {
     }
 
     // Shift the terminals by a given offset
-    shiftTerminals(xOffset, yOffset, startIndex, isRowIndex) {
+    shiftTerminals(xOffset, yOffset, startIndex) {
         'use strict';
         let shiftTerminal = function(terminal) {
             // Starting from a column.
