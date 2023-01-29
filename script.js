@@ -46,9 +46,10 @@ let diagram;
 let UI;
 
 class UserInterface {
-    constructor() {
+    constructor(diagramController) {
         'use strict';
 
+        this.diagramController = diagramController;
         this.shiftCommands      = [];
         this.ctrlCommands       = [];
         this.noModifierCommands = [];
@@ -64,8 +65,12 @@ class UserInterface {
         'use strict';
 
         this.undoCommand = {
+            keyCode: null,
+            action:  null,
         };
         this.redoCommand = {
+            keyCode: null,
+            action:  null,
         };
     }
 
@@ -73,8 +78,12 @@ class UserInterface {
         'use strict';
 
         this.exitMenuCommand = {
+            keyCode: 27,
+            action:  this.diagramController.closeTopMenu,
         };
         this.evaluateCommand = {
+            keyCode: null,
+            action:  null,
         };
     }
 
@@ -82,10 +91,16 @@ class UserInterface {
         'use strict';
 
         this.placeVddCommand = {
+            keyCode: null,
+            action:  null,
         };
         this.placeGndCommand = {
+            keyCode: null,
+            action:  null,
         };
         this.placeIOCommand = {
+            keyCode: null,
+            action:  null,
         };
     }
 
@@ -94,31 +109,39 @@ class UserInterface {
 
         this.shiftLeftCommand = {
             keyCode: 37,
+            action:  null,
         };
         this.shiftUpCommand = {
             keyCode: 38,
+            action:  null,
         };
         this.shiftRightCommand = {
             keyCode: 39,
+            action:  null,
         };
         this.shiftDownCommand = {
             keyCode: 40,
+            action:  null,
         };
         this.deleteColCommand = {
-            keyCode: 37,
             shiftModifier: true,
+            keyCode:       37,
+            action:        null,
         };
         this.deleteRowCommand = {
-            keyCode: 38,
             shiftModifier: true,
+            keyCode:       38,
+            action:        null,
         };
         this.insertColCommand = {
-            keyCode: 39,
             shiftModifier: true,
+            keyCode:       39,
+            action:        null,
         };
         this.insertRowCommand = {
-            keyCode: 40,
             shiftModifier: true,
+            keyCode:       40,
+            action:        null,
         };
     }
 
@@ -126,10 +149,16 @@ class UserInterface {
         'use strict';
 
         this.darkModeCommand = {
+            keyCode: null,
+            action:  null,
         };
         this.transparencyCommand = {
+            keyCode: null,
+            action:  null,
         };
         this.themeCommand = {
+            keyCode: null,
+            action:  null,
         };
    }
 }
