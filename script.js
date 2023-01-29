@@ -2558,7 +2558,7 @@ class LayeredGrid {
                 shiftCoord = y;
                 startY = startIndex;
                 xOffset = 0;
-                yOffset = Integer(sign) / Math.abs(Integer(sign));
+                yOffset = sign / Math.abs(sign);
 
                 // Are we below the shift start row?
                 isInShiftRange = Boolean(this.coordsAreInBounds(0, y - yOffset - startY));
