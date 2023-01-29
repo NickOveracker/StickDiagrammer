@@ -50,6 +50,7 @@ class UserInterface {
         'use strict';
 
         this.diagramController = diagramController;
+        this.allCommands        = [];
         this.shiftCommands      = [];
         this.ctrlCommands       = [];
         this.noModifierCommands = [];
@@ -59,6 +60,18 @@ class UserInterface {
         this.initCosmeticCommands();
         this.initHistoryCommands();
         this.initRowColCommands();
+
+        this.allCommands.forEach((command) => {
+            if(command.ctrlModifier) {
+                this.ctrlCommands[command.keyCode] = command.action;
+            }
+            else if(command.shiftModifier) {
+                this.shiftCommands[command.keyCode] = command.action;
+            }
+            else {
+                this.noModifierCommands[command.keyCode] = command.action;
+            }
+        }).bind(this);
     }
 
     initHistoryCommands() {
@@ -76,6 +89,9 @@ class UserInterface {
             ctrlModifier: true,
             action:       this.diagramController.undo,
         };
+
+        this.allCommands.push(this.undoCommand);
+        this.allCommands.push(this.redoCommand);
     }
 
     initNavigationCommands() {
@@ -91,6 +107,9 @@ class UserInterface {
             keyCode: 13,
             action:  this.diagramController.refreshTruthTable,
         };
+
+        this.allCommands.push(this.exitMenuCommand);
+        this.allCommands.push(this.evaluateCommand);
     }
 
     initTerminalPlacementCommands() {
@@ -122,6 +141,9 @@ class UserInterface {
             keyCode: null,
             action:  null,
         };
+
+        this.allCommands.push(this.placeVddCommand);
+        this.allCommands.push(this.placeGndCommand);
     }
 
     initRowColCommands() {
@@ -187,6 +209,11 @@ class UserInterface {
             keyCode:       40,
             action:        null,
         };
+
+        this.allCommands.push(this.shiftLeftCommand);
+        this.allCommands.push(this.shiftUpCommand);
+        this.allCommands.push(this.shiftRightCommand);
+        this.allCommands.push(this.shiftDownCommand);
     }
 
     initCosmeticCommands() {
@@ -222,6 +249,10 @@ class UserInterface {
                 }
             }).bind(this.diagramController),
         };
+
+        this.allCommands.push(this.darkModeCommand);
+        this.allCommands.push(this.transparencyCommand);
+        this.allCommands.push(this.themeCommand);
    }
 }
 
