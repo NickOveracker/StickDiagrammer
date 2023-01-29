@@ -2857,7 +2857,7 @@ function refreshTruthTable(suppressSetNets) {
         });
     });
     
-    if (this.nmosPullup || this.pmosPulldown) {
+    if (diagram.nmosPullup || diagram.pmosPulldown) {
         document.getElementById("pullup-pulldown-warning").style.visibility = "visible";
     } else {
         document.getElementById("pullup-pulldown-warning").style.visibility = "hidden";
