@@ -1180,14 +1180,6 @@ class Diagram {
             }
             cell = gndNetIterator.next();
         }
-
-        // Alert the user with alert() if there are any pullups/pulldowns.
-        if (this.nmosPullup || this.pmosPulldown) {
-            alert("Warning:\n" +
-                  "N pull-up or P pull-down detected.\n" +
-                  "Simulation may be inaccurate."
-            );
-        }
     }
 
     linkIdenticalNets() {
@@ -2864,6 +2856,12 @@ function refreshTruthTable(suppressSetNets) {
             }
         });
     });
+    
+    if (this.nmosPullup || this.pmosPulldown) {
+        document.getElementById("pullup-pulldown-warning").style.visibility = "visible";
+    } else {
+        document.getElementById("pullup-pulldown-warning").style.visibility = "hidden";
+    }
 
     window.scrollTo({behavior: "smooth", top: Math.ceil(tableElement.getBoundingClientRect().top + window.scrollY), left: 0,});
 }
