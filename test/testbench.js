@@ -2585,7 +2585,7 @@ function runTestbench(runTo) {
                 cancelable: true,
                 ...events[ii][1]
             });
-            document.getElementById('canvas-container').dispatchEvent(evt);
+            document.getElementById('canvas-wrapper').dispatchEvent(evt);
         }
 
         if(assertNext) {
