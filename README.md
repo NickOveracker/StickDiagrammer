@@ -19,6 +19,7 @@
 * Software entropy must not increase.
 
 ## Feature Wishlist
+* Share small diagrams by URL arguments and QR codes.
 * Show which layers are set in highlighted cell.
 * Replace pullup/pulldown alert popups with less obtrusive warnings.
 * HDL generation.

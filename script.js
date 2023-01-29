@@ -77,7 +77,7 @@ class Diagram {
         this.DIRECT_PATH         = { indeterminate: false, hasPath: true,  direct: true,  label: "1", }; // Originally [true]
         this.VIRTUAL_PATH        = { indeterminate: true,  hasPath: true,  direct: false, label: "v", }; // Originally ["i"]
         this.VIRTUAL_PATH_ONLY   = { indeterminate: false, hasPath: true,  direct: false, label: "I", }; // Originally ["I"]
-        this.NO_PATH             = { indeterminate: false, hasPath: false,                label: "0", }; // Originally [false]
+        this.NO_PATH             = { indeterminate: false, hasPath: false, direct: true,  label: "0", }; // Originally [false]
         this.COMPUTING_PATH      = { indeterminate: true,                                 label: "?", }; // Originally [null]
         this.UNCHECKED           = { indeterminate: true,                                 label: "_", }; // Originally [undefined]
 
@@ -365,78 +365,103 @@ class Diagram {
             this.syncEdges(this.nodeNodeMap.length - ii - 1, node2, node1, setPath);
         }
     }
-
-    syncEdges(ii, node1, node2, setPath) {
+    
+    isRailNode(node) {
         'use strict';
+        return node === this.gndNode || node === this.vddNode;
+    }
 
-        // Get the existing mappings between the remapped nodes and node ii.
-        let node1Mapping = this.nodeNodeMap[ii][this.graph.getIndexByNode(node1)];
-        let node2Mapping = this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)];
-        let mapFromRail = node1 === this.gndNode || node1 === this.vddNode;
-
-        let remap = function(mapping) {
-            this.nodeNodeMap[ii][this.graph.getIndexByNode(node2)] = mapping;
-            this.nodeNodeMap[this.graph.getIndexByNode(node2)][ii] = mapping;
-        }.bind(this);
+    remap(mapNode1Index, mapNode2Index, mapping) {
+        'use strict';
+        this.nodeNodeMap[mapNode1Index][mapNode2Index] = mapping;
+        this.nodeNodeMap[mapNode2Index][mapNode1Index] = mapping;
+    }
+    
+    updateVirtualPath(compareNodeMapping, nodeToMap, remapNode, setPath) {
+        'use strict';
+        if(compareNodeMapping === this.DIRECT_PATH) {
+            if(setPath === this.DIRECT_PATH) {
+                this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.DIRECT_PATH);
+            }
+            else if(setPath === this.NO_PATH) {
+                this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.VIRTUAL_PATH_ONLY);
+            }
+            else if(setPath === this.VIRTUAL_PATH_ONLY) {
+                this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.VIRTUAL_PATH_ONLY);
+            }
+        }
+        else if(compareNodeMapping === this.NO_PATH && setPath === this.DIRECT_PATH) {
+            this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.VIRTUAL_PATH_ONLY);
+        }
+    }
+    
+    updateNoPath(compareNode, nodeToMap, remapNode, setPath) {
+        'use strict';
+        let compareNodeMapping = this.nodeNodeMap[nodeToMap][this.graph.getIndexByNode(compareNode)];
+        let mapFromRail = this.isRailNode(compareNode);
         
-        if(node1Mapping.hasPath === undefined || setPath.hasPath === undefined) {
+        if(!mapFromRail && setPath === this.DIRECT_PATH && compareNodeMapping.direct === false) {
+            this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.VIRTUAL_PATH_ONLY);
+        }
+    }
+    
+    updateUndefinedPath(compareNode, nodeToMap, remapNode, setPath) {
+        'use strict';
+        let compareNodeMapping = this.nodeNodeMap[nodeToMap][this.graph.getIndexByNode(compareNode)];
+        let mapFromRail = this.isRailNode(compareNode);
+        
+        if(setPath === this.DIRECT_PATH) {
+            if(compareNodeMapping.direct) {
+                this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), compareNodeMapping);
+            }
+            else if(compareNodeMapping.direct === false && !mapFromRail) {
+                this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), compareNodeMapping);
+            }
+        }
+        else if(compareNodeMapping === this.DIRECT_PATH) {
+            if(setPath === this.NO_PATH) {
+                this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.NO_PATH);
+            }
+            else if(setPath === this.VIRTUAL_PATH_ONLY) {
+                if(mapFromRail) {
+                    this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.NO_PATH);
+                }
+                else {
+                    this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.VIRTUAL_PATH_ONLY);
+                }
+            }
+            else if(!mapFromRail) {
+                this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.VIRTUAL_PATH);
+            }
+        }
+    }
+
+    syncEdges(nodeToMap, compareNode, remapNode, setPath) {
+        'use strict';
+        // Get the existing mappings between the remapped nodes and node ii.
+        let compareNodeMapping = this.nodeNodeMap[nodeToMap][this.graph.getIndexByNode(compareNode)];
+        let remapNodeMapping = this.nodeNodeMap[nodeToMap][this.graph.getIndexByNode(remapNode)];
+        
+        // Case 0: Insufficient information to remap nodes.
+        if(compareNodeMapping.hasPath === undefined || setPath.hasPath === undefined) {
             return;
         }
-
         // Case 1: Node2 already has a positive mapping to node ii.
         //         In this case, only override to turn it from VIRTUAL_PATH to VIRTUAL_PATH_ONLY or DIRECT_PATH.
-        if(node2Mapping === this.VIRTUAL_PATH) {
-            if(node1Mapping === this.DIRECT_PATH) {
-                if(setPath === this.DIRECT_PATH) {
-                    remap(this.DIRECT_PATH);
-                }
-                else if(setPath === this.NO_PATH) {
-                    remap(this.VIRTUAL_PATH_ONLY);
-                }
-                else if(setPath === this.VIRTUAL_PATH_ONLY) {
-                    remap(this.VIRTUAL_PATH_ONLY);
-                }
-            }
-            else if(node1Mapping === this.NO_PATH && setPath === this.DIRECT_PATH) {
-                remap(this.VIRTUAL_PATH_ONLY);
-            }
+        else if(remapNodeMapping === this.VIRTUAL_PATH) {
+            this.updateVirtualPath(compareNodeMapping, nodeToMap, remapNode, setPath);
         }
         // Case 2: Node2 has a NO_PATH mapping to node ii.
         //         In this case, allow it to change to VIRTUAL_PATH_ONLY.
         //         DO NOT do this to propagate virtual paths from VDD and GND.
-        if(node2Mapping === this.NO_PATH && !mapFromRail) {
-            if(setPath === this.DIRECT_PATH && node1Mapping.direct === false) {
-                remap(this.VIRTUAL_PATH_ONLY);
-            }
+        else if(remapNodeMapping === this.NO_PATH) {
+            this.updateNoPath(compareNode, nodeToMap, remapNode, setPath);
         }
         // Case 3: Node2 is UNCHECKED or COMPUTING_PATH.
         //         In this case, copy any of the other mappings from node 1.
         //         Exception: Do not copy virtual paths from VDD and GND.
-        if(node2Mapping.hasPath === undefined) {
-            if(setPath === this.DIRECT_PATH) {
-                if(node1Mapping === this.DIRECT_PATH || node1Mapping === this.NO_PATH) {
-                    remap(node1Mapping);
-                }
-                else if(node1Mapping.direct === false && !mapFromRail) {
-                    remap(node1Mapping);
-                }
-            }
-            else if(node1Mapping === this.DIRECT_PATH) {
-                if(setPath === this.NO_PATH) {
-                    remap(this.NO_PATH);
-                }
-                else if(setPath === this.VIRTUAL_PATH_ONLY) {
-                    if(mapFromRail) {
-                        remap(this.NO_PATH);
-                    }
-                    else {
-                        remap(this.VIRTUAL_PATH_ONLY);
-                    }
-                }
-                else if(!mapFromRail) {
-                    remap(this.VIRTUAL_PATH);
-                }
-            }
+        else if(remapNodeMapping.hasPath === undefined) {
+            this.updateUndefinedPath(compareNode, nodeToMap, remapNode, setPath);
         }
     }
 
@@ -1379,6 +1404,7 @@ class DiagramController {
         this.placeTermMode    = false;
         this.selectedTerminal = null;
         this.shiftCommands    = [];
+        this.currentCell      = null;
 
         // Set up shift commands
         this.shiftCommands[37] = ((e) => {
@@ -1613,10 +1639,10 @@ class DiagramController {
     pixelIsInBounds(screenX, screenY) {
         'use strict';
         let boundingBox = this.view.canvas.getBoundingClientRect();
-        return screenX > boundingBox.left &&
-               screenX < boundingBox.right &&
-               screenY > boundingBox.top &&
-               screenY < boundingBox.bottom;
+        return screenX > boundingBox.left   + this.view.cellWidth &&
+               screenX < boundingBox.right  - this.view.cellWidth &&
+               screenY > boundingBox.top    + this.view.cellHeight &&
+               screenY < boundingBox.bottom - this.view.cellHeight;
     }
 
     getCellAtCursor(screenX, screenY) {
@@ -1626,9 +1652,20 @@ class DiagramController {
 
             let x = Math.floor((screenX - this.view.canvas.getBoundingClientRect().left - this.view.cellWidth) / this.view.cellWidth);
             let y = Math.floor((screenY - this.view.canvas.getBoundingClientRect().top - this.view.cellHeight) / this.view.cellHeight);
-            return { x: x, y: y, };
+            this.currentCell = {
+                x: x,
+                y: y,
+                pdiff:   this.diagram.layeredGrid.get(x, y, Diagram.PDIFF).isSet,
+                ndiff:   this.diagram.layeredGrid.get(x, y, Diagram.NDIFF).isSet,
+                poly:    this.diagram.layeredGrid.get(x, y, Diagram.POLY).isSet,
+                metal1:  this.diagram.layeredGrid.get(x, y, Diagram.METAL1).isSet,
+                metal2:  this.diagram.layeredGrid.get(x, y, Diagram.METAL2).isSet,
+                contact: this.diagram.layeredGrid.get(x, y, Diagram.CONTACT).isSet,
+            };
+        } else {
+            this.currentCell = null;
         }
-        return null;
+        return this.currentCell;
     }
 
     clearIfPainted(clientX, clientY) {
@@ -1785,7 +1822,7 @@ class DiagramController {
         }.bind(this), true);
     }
 
-    drag(currentCell, event) {
+    drag(event) {
         'use strict';
         if (this.startX === -1) {
             return;
@@ -1793,7 +1830,7 @@ class DiagramController {
 
         if (!this.dragging) {
             // don't start dragging unless the mouse has moved outside the cell
-            if(currentCell.x === this.startX && currentCell.y === this.startY) {
+            if(this.currentCell.x === this.startX && this.currentCell.y === this.startY) {
                 return;
             }
             this.dragging = true;
@@ -1871,13 +1908,13 @@ class DiagramController {
         // Save the current X and Y coordinates.
         this.currentX = coords.x;
         this.currentY = coords.y;
-        let currentCell = this.getCellAtCursor(this.currentX, this.currentY);
+        this.getCellAtCursor(coords.x, coords.y);
 
         // If the mouse is pressed and the mouse is between cells 1 and gridsize - 1,
         if (this.isPrimaryInput(event) || event.buttons === 2) {
             // Ignore if not inside the canvas
             if (this.pixelIsInBounds(coords.x, coords.y)) {
-                this.drag(currentCell, event);
+                this.drag(event);
             }
         }
     }
@@ -2018,7 +2055,7 @@ class DiagramView {
         this.gridCanvas = gridCanvas;
         this.ctx = this.canvas.getContext("2d");
         this.gridCtx = this.gridCanvas.getContext('2d');
-        this.canvasWidth = Math.min(document.getElementById('canvas-container').clientWidth, document.getElementById('canvas-container').clientHeight);
+        this.canvasWidth = Math.min(document.getElementById('canvas-wrapper').clientWidth, document.getElementById('canvas-wrapper').clientHeight);
         this.canvasHeight = this.canvasWidth;
         this.cellWidth  = this.canvasWidth  / (this.diagram.layeredGrid.width  + 2);
         this.cellHeight = this.canvasHeight / (this.diagram.layeredGrid.height + 2);
@@ -2139,10 +2176,9 @@ class DiagramView {
             document.body.classList.remove('no-controls');
         }
 
-        let containerWidth = document.getElementById('canvas-container').clientWidth;
-        let containerHeight = document.getElementById('canvas-container').clientHeight;
+        let containerWidth = document.getElementById('canvas-wrapper').clientWidth;
+        let containerHeight = document.getElementById('canvas-wrapper').clientHeight;
         let containerSize = Math.min(containerWidth, containerHeight);
-        //let sizeChanged = this.canvasWidth !== containerSize || this.canvasHeight !== containerSize;
        
         this.canvas.width = containerSize;
         this.canvas.height = containerSize;
@@ -2152,9 +2188,6 @@ class DiagramView {
         this.canvasHeight = containerSize;
 
         this.drawGrid();
-        /*if(sizeChanged) {
-            this.drawGrid();
-        }*/
     }
 
     decorateContact(x, y) {
@@ -2197,7 +2230,7 @@ class DiagramView {
             this.ctx.fillRect((ii+1) * this.cellWidth, (jj+1) * this.cellHeight - 1, this.cellWidth + 1, this.cellHeight + 2);
         } else if(!this.diagram.controller.dragging && layer === Diagram.layers.length - 1) {
             // Draw a faint highlight on the cell at the cursor location.
-            currentCell = this.diagram.controller.getCellAtCursor(this.diagram.controller.currentX, this.diagram.controller.currentY);
+            currentCell = this.diagram.controller.currentCell;
             if(ii === currentCell.x && jj === currentCell.y) {
                 this.ctx.fillStyle = darkMode ? "rgba(255, 255, 255, 0.5)" : "rgba(0, 0, 0, 0.5)";
                 this.ctx.fillRect((ii+1) * this.cellWidth, (jj+1) * this.cellHeight - 1, this.cellWidth + 1, this.cellHeight + 2);
@@ -2251,7 +2284,7 @@ class DiagramView {
         this.resizeCanvas();
 
         let currentCell = this.diagram.controller.getCellAtCursor(this.diagram.controller.currentX, this.diagram.controller.currentY);
-
+        
         // Draw each layer in order.
         let bounds = {
             left: 0,

@@ -354,12 +354,12 @@ span.small
     display: none;
 }
 
-.no-controls .sample {
+.no-controls .canvas-group {
     width: 100%;
     margin-left: 0;
 }
 
-.no-controls .sample-content {
+.no-controls .canvas-wrapper {
     width: 100%;
     height: min(85vh,100vw);
     margin-left: auto;
@@ -672,14 +672,23 @@ body.light {
     }
 
     /*-------------Canvas---------------*/
-    .sample{
+    .canvas-group {
         margin-top: 15vh;
         margin-left: 15vh;
     }
 
-    .sample-content{
+    .canvas-wrapper {
         width: min(80vh, 80vw);
         height: min(80vh, 80vw);
+    }
+
+    .active-layers {
+        width: 11vh;
+        height: 20vh;
+        margin-left: -13vh;
+        margin-top: 30vh;
+        background-color: red;
+        position: absolute;
     }
     /*-------------Canvas-END---------------*/
 
@@ -825,13 +834,13 @@ body.light {
         flex-direction: column;
     }
 
-    .sample{
+    .canvas-group {
         width: 100%;
         margin-left: 0;
         margin-right: 0;
     }
 
-    .sample-content{
+    .canvas-wrapper{
         width:100%;
         height: min(62vh, 100vw);
         margin-left: 0;
