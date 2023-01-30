@@ -372,6 +372,213 @@ class UserInterface {
         this.allCommands.push(this.transparencyCommand);
         this.allCommands.push(this.themeCommand);
    }
+
+    cellClickHandler(event) {
+        'use strict';
+
+        if(this.diagramController.startX === -1) {
+            return;
+        }
+
+        let coords = this.diagramController.getCoordsFromEvent(event);
+
+        if(this.diagramController.placeTermMode) {
+            this.diagramController.clearPlaceTerminalMode();
+            this.diagramController.placeTerminal(event, this.diagramController.selectedTerminal);
+        } else if (!this.diagramController.isEraseEvent(event)) {
+            // Just fill in or delete the cell at the start coordinates.
+            // If there is no cell at the start coordinates, change the cursor color.
+            if (!this.diagramController.diagram.layeredGrid.get(this.diagramController.startX, this.diagramController.startY, this.diagramController.cursorIndex).isSet) {
+                this.diagramController.saveCurrentState();
+                this.diagramController.diagram.layeredGrid.set(this.diagramController.startX, this.diagramController.startY, this.diagramController.cursorIndex);
+            }
+        } else {
+            // If in the canvas and over a colored cell, erase it.
+            // Otherwise, change the layer.
+            if (!(this.diagramController.clearIfPainted(coords.x, coords.y) || this.diagramController.eraseMode)) {
+                this.diagramController.changeLayer();
+            }
+        }
+    }
+
+    // Note the grid coordinates when the left or right mouse button is released.
+    // If the left (or primary) button, use the start and end coordinates to make either a horizontal or vertical line.
+    // If the right (or secondary) button, use the same coordinates to delete a line of cells.
+    mouseupHandler(event) {
+        'use strict';
+        let coords = this.diagramController.getCoordsFromEvent(event);
+
+        if(this.diagramController.pixelIsInBounds(coords.x, coords.y)) {
+            event.preventDefault();
+        }
+     
+        if (this.diagramController.isPrimaryInput(event) || event.button === 2) {
+            if (this.diagramController.dragging) {
+                this.endDrag(coords.x, coords.y, event);
+            } else if (this.diagramController.pixelIsInBounds(coords.x, coords.y)) {
+                this.cellClickHandler(event);
+            } else if(event.button === 2) {
+                this.diagramController.changeLayer();
+            }
+        }
+
+        this.diagramController.dragging = false;
+
+        if(event.type.includes("touch")) {
+            this.diagramController.currentX = this.diagramController.currentY = -1;
+        }
+    }
+
+    dragPrimary(bounds) {
+        'use strict';
+        // If the mouse moved more horizontally than vertically,
+        // draw a horizontal line.
+        if (bounds.right - bounds.left > bounds.bottom - bounds.top) {
+            bounds.lowLayer = bounds.highLayer = this.diagramController.cursorIndex;
+            bounds.bottom = bounds.top = this.diagramController.startY;
+            this.diagramController.diagram.layeredGrid.map(bounds, function (x, y, layer) {
+                this.diagram.layeredGrid.set(x, y, layer);
+            }.bind(this.diagramController), true);
+        }
+        // If the mouse moved more vertically than horizontally,
+        // draw a vertical line.
+        else {
+            bounds.lowLayer = bounds.highLayer = this.diagramController.cursorIndex;
+            bounds.right = bounds.left = this.diagramController.startX;
+            this.diagramController.diagram.layeredGrid.map(bounds, function (x, y, layer) {
+                this.diagram.layeredGrid.set(x, y, layer);
+            }.bind(this.diagramController), true);
+        }
+    }
+
+    dragSecondary(bounds) {
+        'use strict';
+        // Secondary mouse button (i.e. right click)
+        // Highlight a rectangle of squares for deletion.
+        bounds.lowLayer = bounds.highLayer = Diagram.DELETE;
+        this.diagramController.diagram.layeredGrid.map(bounds, function (x, y, layer) {
+            this.diagram.layeredGrid.set(x, y, layer);
+        }.bind(this.diagramController), true);
+    }
+
+    drag(event) {
+        'use strict';
+        if (this.diagramController.startX === -1) {
+            return;
+        }
+
+        if (!this.diagramController.dragging) {
+            // don't start dragging unless the mouse has moved outside the cell
+            if(this.diagramController.currentCell.x === this.diagramController.startX && this.diagramController.currentCell.y === this.diagramController.startY) {
+                return;
+            }
+            this.diagramController.dragging = true;
+            this.diagramController.saveCurrentState();
+        } else {
+            // Continuously refresh to update the preview line.
+            this.diagramController.undo();
+            this.diagramController.saveCurrentState();
+        }
+
+        let endX = Math.floor((this.diagramController.currentX - this.diagramController.view.canvas.getBoundingClientRect().left - this.diagramController.view.cellWidth) / this.diagramController.view.cellWidth);
+        let endY = Math.floor((this.diagramController.currentY - this.diagramController.view.canvas.getBoundingClientRect().top - this.diagramController.view.cellHeight) / this.diagramController.view.cellHeight);
+
+        let bounds = {
+            left: Math.min(this.diagramController.startX, endX),
+            right: Math.max(this.diagramController.startX, endX),
+            top: Math.min(this.diagramController.startY, endY),
+            bottom: Math.max(this.diagramController.startY, endY),
+        };
+
+        if (!this.diagramController.isEraseEvent(event)) {
+            this.dragPrimary(bounds);
+        } else {
+            this.dragSecondary(bounds);
+        }
+    }
+
+    endDrag(currentX, currentY, event) {
+        'use strict';
+        // If the mouse was released outside the canvas, undo and return.
+        if(!this.diagramController.pixelIsInBounds(currentX, currentY)) {
+            this.diagramController.undo();
+            return;
+        }
+
+        let endX = Math.floor((currentX - this.diagramController.view.canvas.getBoundingClientRect().left - this.diagramController.view.cellWidth) / this.diagramController.view.cellWidth);
+        let endY = Math.floor((currentY - this.diagramController.view.canvas.getBoundingClientRect().top - this.diagramController.view.cellHeight) / this.diagramController.view.cellHeight);
+        let bounds = {
+            left: Math.min(this.diagramController.startX, endX),
+            right: Math.max(this.diagramController.startX, endX),
+            top: Math.min(this.diagramController.startY, endY),
+            bottom: Math.max(this.diagramController.startY, endY),
+            lowLayer: 0,
+            highLayer: Diagram.layers.length - 1,
+            endX: endX,
+            endY: endY,
+        };
+
+        // For primary (i.e. left) mouse button:
+        // If the mouse moved more horizontally than vertically, draw a horizontal line.
+        if (!this.diagramController.isEraseEvent(event)) {
+            this.diagramController.draw(bounds);
+        } else {
+            // For secondary (i.e. right) mouse button:
+            // Delete a rectangle of squares
+            this.diagramController.diagram.layeredGrid.map(bounds, function (x, y, layer) {
+                this.diagram.layeredGrid.clear(x, y, layer);
+            }.bind(this.diagramController));
+        }
+    }
+
+    // Show a preview line when the user is dragging the mouse.
+    mousemoveHandler(event) {
+        'use strict';
+        let coords = this.diagramController.getCoordsFromEvent(event);
+
+        if(this.diagramController.pixelIsInBounds(coords.x, coords.y)) {
+            event.preventDefault();
+        }
+
+        if(event.type.includes("mouse")) {
+            this.diagramController.view.trailCursor = true;
+        }
+
+        // Save the current X and Y coordinates.
+        this.diagramController.currentX = coords.x;
+        this.diagramController.currentY = coords.y;
+        this.diagramController.getCellAtCursor(coords.x, coords.y);
+
+        // If the mouse is pressed and the mouse is between cells 1 and gridsize - 1,
+        if (this.diagramController.isPrimaryInput(event) || event.buttons === 2) {
+            // Ignore if not inside the canvas
+            if (this.diagramController.pixelIsInBounds(coords.x, coords.y)) {
+                this.drag(event);
+            }
+        }
+    }
+
+    // Note the grid coordinates when the left mouse button is pressed.
+    // Store the coordinates in startX and startY.
+    mousedownHandler(event) {
+        'use strict';
+        let coords = this.diagramController.getCoordsFromEvent(event);
+
+        this.diagramController.currentX = coords.x;
+        this.diagramController.currentY = coords.y;
+
+        if (this.diagramController.isPrimaryInput(event) || event.button === 2) {
+            // Return if not between cells 1 and gridsize - 1
+            if (this.diagramController.pixelIsInBounds(coords.x, coords.y)) {
+                event.preventDefault();
+                this.diagramController.startX = Math.floor((coords.x - this.diagramController.view.canvas.getBoundingClientRect().left - this.diagramController.view.cellWidth) / this.diagramController.view.cellWidth);
+                this.diagramController.startY = Math.floor((coords.y - this.diagramController.view.canvas.getBoundingClientRect().top - this.diagramController.view.cellHeight) / this.diagramController.view.cellHeight);
+            } else {
+                this.diagramController.startX = -1;
+                this.diagramController.startY = -1;
+            }
+        }
+    }
 }
 
 class Diagram {
@@ -3573,37 +3780,37 @@ window.onload = function () {
         if(document.getElementById("main-menu").classList.contains("closed")) {
             this.mouseupHandler(e);
         }
-    }.bind(diagram.controller));
+    }.bind(UI));
 
     window.addEventListener("mouseup", function(e) {
         if(document.getElementById("main-menu").classList.contains("closed")) {
             this.mouseupHandler(e);
         }
-    }.bind(diagram.controller));
+    }.bind(UI));
 
     window.addEventListener("touchstart", function(e) {
         if(document.getElementById("main-menu").classList.contains("closed")) {
             this.mousedownHandler(e);
         }
-    }.bind(diagram.controller));
+    }.bind(UI));
 
     window.addEventListener("mousedown", function(e) {
         if(document.getElementById("main-menu").classList.contains("closed")) {
             this.mousedownHandler(e);
         }
-    }.bind(diagram.controller));
+    }.bind(UI));
 
     window.addEventListener("touchmove", function(e) {
         if(document.getElementById("main-menu").classList.contains("closed")) {
             this.mousemoveHandler(e);
         }
-    }.bind(diagram.controller));
+    }.bind(UI));
 
     window.addEventListener("mousemove", function(e) {
         if(document.getElementById("main-menu").classList.contains("closed")) {
             this.mousemoveHandler(e);
         }
-    }.bind(diagram.controller));
+    }.bind(UI));
 
     window.addEventListener("keydown", function(e) {
 		this.keydownHandler(e);
