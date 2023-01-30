@@ -126,13 +126,13 @@ class UserInterface {
             // CTRL-Z
             ctrlModifier: true,
             keyCode:      90,
-            action:       this.diagramController.undo,
+            action:       this.diagramController.undo.bind(this.diagramController),
         };
         this.redoCommand = {
             // CTRL-Y
             ctrlModifier: true,
             keyCode:      89,
-            action:       this.diagramController.undo,
+            action:       this.diagramController.undo.bind(this.diagramController),
         };
 
         this.allCommands.push(this.undoCommand);
@@ -145,12 +145,12 @@ class UserInterface {
         this.exitMenuCommand = {
             // ESC
             keyCode: 27,
-            action:  this.diagramController.closeTopMenu,
+            action:  closeTopMenu,
         };
         this.evaluateCommand = {
             // ENTER
             keyCode: 13,
-            action:  this.diagramController.refreshTruthTable,
+            action:  refreshTruthTable,
         };
 
         this.allCommands.push(this.exitMenuCommand);
