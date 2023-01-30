@@ -1716,100 +1716,7 @@ class DiagramController {
         this.eraseMode        = false;
         this.placeTermMode    = false;
         this.selectedTerminal = null;
-        this.shiftCommands    = [];
         this.currentCell      = null;
-
-        // Set up shift commands
-        this.shiftCommands[37] = ((e) => {
-            if(e.type.includes('up')) {
-                this.diagram.layeredGrid.shift(0, false, -1);
-            }
-        }).bind(this);
-
-        this.shiftCommands[38] = ((e) => {
-            if(e.type.includes('up')) {
-                this.diagram.layeredGrid.shift(0, true, -1);
-            }
-        }).bind(this);
-
-        this.shiftCommands[39] = ((e) => {
-            if(e.type.includes('up')) {
-                this.diagram.layeredGrid.shift(0, false, 1);
-            }
-        }).bind(this);
-
-        this.shiftCommands[40] = ((e) => {
-            if(e.type.includes('up')) {
-                this.diagram.layeredGrid.shift(0, true, 1);
-            }
-        }).bind(this);
-
-        this.shiftCommands[84] = ((e) => {
-            if(e.type.includes('up')) {
-                this.view.theme = this.view.theme < DiagramView.themes.length - 1 ? this.view.theme + 1 : 0;
-                setUpLayerSelector();
-            }
-        }).bind(this);
-
-        this.shiftCommands[68] = (e) => {
-            if(e.type.includes('up')) {
-                toggleDarkMode();
-            }
-        };
-
-        this.shiftCommands[70] = ((e) => {
-            if(e.type.includes('up')) {
-                this.view.useFlatColors = !this.view.useFlatColors;
-            }
-        }).bind(this);
-
-        this.shiftCommands[71] = ((e) => {
-            if(e.type.includes('down')) {
-                this.placeTerminal(e, this.diagram.gndCell);
-            }
-        }).bind(this);
-
-        this.shiftCommands[86] = ((e) => {
-            if(e.type.includes('down')) {
-                this.placeTerminal(e, this.diagram.vddCell);
-            }
-        }).bind(this);
-
-        this.shiftCommands[72] = ((e) => {
-            if(e.type.includes('down')) {
-                let coords = this.getCellAtCursor(this.currentX, this.currentY);
-                if(coords !== {}) {
-                    this.diagram.layeredGrid.insertRemoveRowColAt(coords.x, true, false);
-                }
-            }
-        }).bind(this);
-
-        this.shiftCommands[74] = ((e) => {
-            if(e.type.includes('down')) {
-                let coords = this.getCellAtCursor(this.currentX, this.currentY);
-                if(coords !== {}) {
-                    this.diagram.layeredGrid.insertRemoveRowColAt(coords.y, true, true);
-                }
-            }
-        }).bind(this);
-
-        this.shiftCommands[75] = ((e) => {
-            if(e.type.includes('down')) {
-                let coords = this.getCellAtCursor(this.currentX, this.currentY);
-                if(coords !== {}) {
-                    this.diagram.layeredGrid.insertRemoveRowColAt(coords.y, false, true);
-                }
-            }
-        }).bind(this);
-
-        this.shiftCommands[76] = ((e) => {
-            if(e.type.includes('down')) {
-                let coords = this.getCellAtCursor(this.currentX, this.currentY);
-                if(coords !== {}) {
-                    this.diagram.layeredGrid.insertRemoveRowColAt(coords.x, false, false);
-                }
-            }
-        }).bind(this);
     }
 
     removeTerminal(isOutput) {
@@ -2277,34 +2184,6 @@ class DiagramController {
         }
     }
 
-    ctrlCommandHandler(event) {
-        'use strict';
-        if (event.keyCode === 90) {
-            // z
-            this.undo();
-        } else if (event.keyCode === 89) {
-            // y
-            this.redo();
-        }
-    }
-
-    keydownHandler(event) {
-        'use strict';
-        if(!document.getElementById("main-menu").classList.contains("closed")) {
-            return;
-        }
-        let isInput  = (keyCode) => { return (keyCode >= 65) && (keyCode < 65 + this.diagram.inputs.length );    }; // Y, X, W, ...
-        let isOutput = (keyCode) => { return (keyCode <= 89) && (keyCode > 89 - this.diagram.outputs.length);    }; // A, B, C, ...
-        // GND and VDD are handled in shiftCommandHandler.
-
-        if (event.shiftKey && this.shiftCommands[event.keyCode]) { this.shiftCommands[event.keyCode](event); }
-        else if (event.ctrlKey)           { this.ctrlCommandHandler(event); }
-        else if (isInput(event.keyCode))  { this.placeTerminal(event, this.diagram.inputs[event.keyCode - 65]); }
-        else if (isOutput(event.keyCode)) {
-            this.placeTerminal(event, this.diagram.outputs[this.diagram.outputs.length - 90 + event.keyCode]);
-        }
-    }
-
     // Note the grid coordinates when the left mouse button is pressed.
     // Store the coordinates in startX and startY.
     mousedownHandler(event) {
@@ -2324,28 +2203,6 @@ class DiagramController {
                 this.startX = -1;
                 this.startY = -1;
             }
-        }
-    }
-
-    // Only change dark/light mode on keyup to avoid seizure-inducing flashes from holding down space.
-    keyupHandler(event) {
-        'use strict';
-        if(document.getElementById("main-menu").classList.contains("closed")) {
-            // Only do the following if shift is pressed.
-            if (event.shiftKey && this.shiftCommands[event.keyCode]) {
-                // Run the registered shift command.
-                this.shiftCommands[event.keyCode](event);
-            }
-
-            // Update the truth table by pressing enter.
-            if (event.keyCode === 13) {
-                refreshTruthTable();
-            }
-        }
-
-        // Close the top window by pressing escape.
-        if (event.keyCode === 27) {
-            closeTopMenu();
         }
     }
 }
