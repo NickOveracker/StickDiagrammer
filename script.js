@@ -213,7 +213,7 @@ class UserInterface {
             keyCode: 37,
             action:  function(e) {
                 if(e.type.includes('up')) {
-                    this.diagram.layeredGrid.shift(-1, 0);
+                    this.diagram.layeredGrid.shift(0, false, -1);
                 }
             }.bind(this.diagramController),
         };
@@ -224,7 +224,7 @@ class UserInterface {
             keyCode: 38,
             action:  function(e) {
                 if(e.type.includes('up')) {
-                    this.diagram.layeredGrid.shift(0, -1);
+                    this.diagram.layeredGrid.shift(0, true, -1);
                 }
             }.bind(this.diagramController),
         };
@@ -235,7 +235,7 @@ class UserInterface {
             keyCode: 39,
             action:  function(e) {
                 if(e.type.includes('up')) {
-                    this.diagram.layeredGrid.shift(1, 0);
+                    this.diagram.layeredGrid.shift(0, false, 1);
                 }
             }.bind(this.diagramController),
         };
@@ -246,7 +246,7 @@ class UserInterface {
             keyCode: 40,
             action:  function(e) {
                 if(e.type.includes('up')) {
-                    this.diagram.layeredGrid.shift(0, 1);
+                    this.diagram.layeredGrid.shift(0, true, 1);
                 }
             }.bind(this.diagramController),
         };
