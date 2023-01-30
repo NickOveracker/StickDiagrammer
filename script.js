@@ -3050,9 +3050,9 @@ function refreshTruthTable(suppressSetNets) {
     });
     
     if (diagram.nmosPullup || diagram.pmosPulldown) {
-        document.getElementById("pullup-pulldown-warning").style.visibility = "visible";
-    } else {
-        document.getElementById("pullup-pulldown-warning").style.visibility = "hidden";
+        document.getElementById("pullup-pulldown-warning").classList.add("active");
+    } else if(document.getElementById("pullup-pulldown-warning").classList.contains("active")) {
+        document.getElementById("pullup-pulldown-warning").classList.remove("active");
     }
 
     window.scrollTo({behavior: "smooth", top: Math.ceil(tableElement.getBoundingClientRect().top + window.scrollY), left: 0,});
