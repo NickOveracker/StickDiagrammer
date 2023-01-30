@@ -115,7 +115,7 @@ class UserInterface {
         }
 		
         if (!event.shiftKey && !event.ctrlKey && this.noModifierCommands[event.keyCode]) {
-			this.noModifierommands[event.keyCode](event);
+			this.noModifierCommands[event.keyCode](event);
 		}
     }
 
