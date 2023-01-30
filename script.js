@@ -80,13 +80,13 @@ class UserInterface {
             return;
         }
 		
-        let isInput  = (keyCode) => {
+        let isInput  = ((keyCode) => {
 			return (keyCode >= 65) && (keyCode < 65 + this.diagram.inputs.length );
-		}.bind(this.diagramController);
+		}).bind(this.diagramController);
 		
-        let isOutput = (keyCode) => {
+        let isOutput = ((keyCode) => {
 			return (keyCode <= 89) && (keyCode > 89 - this.diagram.outputs.length);
-		}.bind(this.diagramController);
+		}).bind(this.diagramController);
         // GND and VDD are handled in shiftCommandHandler.
 
         if (event.shiftKey && this.shiftCommands[event.keyCode]) {
