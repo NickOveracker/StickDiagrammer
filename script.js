@@ -61,7 +61,7 @@ class UserInterface {
         this.initHistoryCommands();
         this.initRowColCommands();
 
-        this.allCommands.forEach(((command) => {
+        this.allCommands.forEach(function(command) {
             if(command.ctrlModifier) {
                 this.ctrlCommands[command.keyCode] = command.action;
             }
@@ -71,7 +71,7 @@ class UserInterface {
             else {
                 this.noModifierCommands[command.keyCode] = command.action;
             }
-        }).bind(this));
+        }.bind(this));
     }
 	
     keydownHandler(event) {
@@ -80,13 +80,13 @@ class UserInterface {
             return;
         }
 		
-        let isInput  = ((keyCode) => {
+        let isInput  = function(keyCode) {
 			return (keyCode >= 65) && (keyCode < 65 + this.diagram.inputs.length );
-		}).bind(this.diagramController);
+		}.bind(this.diagramController);
 		
-        let isOutput = ((keyCode) => {
+        let isOutput = function(keyCode) {
 			return (keyCode <= 89) && (keyCode > 89 - this.diagram.outputs.length);
-		}).bind(this.diagramController);
+		}.bind(this.diagramController);
         // GND and VDD are handled in shiftCommandHandler.
 
         if (event.shiftKey && this.shiftCommands[event.keyCode]) {
@@ -124,14 +124,14 @@ class UserInterface {
 
         this.undoCommand = {
             // CTRL-Z
-            keyCode:      90,
             ctrlModifier: true,
+            keyCode:      90,
             action:       this.diagramController.undo,
         };
         this.redoCommand = {
             // CTRL-Y
-            keyCode:      89,
             ctrlModifier: true,
+            keyCode:      89,
             action:       this.diagramController.undo,
         };
 
@@ -162,24 +162,24 @@ class UserInterface {
 
         // SHIFT + V
         this.placeVddCommand = {
-            keyCode: 86,
             shiftModifier: true,
-            action:  ((e) => {
+            keyCode:       86,
+            action:        function(e) {
                 if(e.type.includes('down')) {
                     this.placeTerminal(e, this.diagram.vddCell);
                 }
-            }).bind(this.diagramController),
+            }.bind(this.diagramController),
         };
 
         // SHIFT + G
         this.placeGndCommand = {
-            keyCode: 71,
             shiftModifier: true,
-            action:  ((e) => {
+            keyCode:       71,
+            action:        function(e) {
                 if(e.type.includes('down')) {
                     this.placeTerminal(e, this.diagram.gndCell);
                 }
-            }).bind(this.diagramController),
+            }.bind(this.diagramController),
         };
 
         this.placeIOCommand = {
@@ -197,97 +197,97 @@ class UserInterface {
         // LEFT ARROW
         this.shiftLeftCommand = {
             keyCode: 37,
-            action:  ((e) => {
+            action:  function(e) {
                 if(e.type.includes('up')) {
                     this.diagram.layeredGrid.shift(-1, 0);
                 }
-            }).bind(this.diagramController),
+            }.bind(this.diagramController),
         };
 
         // UP ARROW
         this.shiftUpCommand = {
             keyCode: 38,
-            action:  ((e) => {
+            action:  function(e) {
                 if(e.type.includes('up')) {
                     this.diagram.layeredGrid.shift(0, -1);
                 }
-            }).bind(this.diagramController),
+            }.bind(this.diagramController),
         };
 
         // RIGHT ARROW
         this.shiftRightCommand = {
             keyCode: 39,
-            action:  ((e) => {
+            action:  function(e) {
                 if(e.type.includes('up')) {
                     this.diagram.layeredGrid.shift(1, 0);
                 }
-            }).bind(this.diagramController),
+            }.bind(this.diagramController),
         };
 
         // DOWN ARROW
         this.shiftDownCommand = {
             keyCode: 40,
-            action:  ((e) => {
+            action:  function(e) {
                 if(e.type.includes('up')) {
                     this.diagram.layeredGrid.shift(0, 1);
                 }
-            }).bind(this.diagramController),
+            }.bind(this.diagramController),
         };
 
         // SHIFT + LEFT ARROW
         this.deleteColCommand = {
             shiftModifier: true,
             keyCode:       37,
-            action:        ((e) => {
+            action:        function(e) {
 				if(e.type.includes('down')) {
 					let coords = this.getCellAtCursor(this.currentX, this.currentY);
 					if(coords !== {}) {
 						this.diagram.layeredGrid.insertRemoveRowColAt(coords.x, false, false);
 					}
 				}
-			}).bind(this.diagramController),
+			}.bind(this.diagramController),
         };
 		
 		// SHIFT + UP ARROW
         this.deleteRowCommand = {
             shiftModifier: true,
             keyCode:       38,
-            action:        ((e) => {
+            action:        function(e) {
 				if(e.type.includes('down')) {
 					let coords = this.getCellAtCursor(this.currentX, this.currentY);
 					if(coords !== {}) {
 						this.diagram.layeredGrid.insertRemoveRowColAt(coords.y, false, true);
 					}
 				}
-			}).bind(this.diagramController),
+			}.bind(this.diagramController),
         };
 		
 		// SHIFT + RIGHT ARROW
         this.insertColCommand = {
             shiftModifier: true,
             keyCode:       39,
-            action:        ((e) => {
+            action:        function(e) {
 				if(e.type.includes('down')) {
 					let coords = this.getCellAtCursor(this.currentX, this.currentY);
 					if(coords !== {}) {
 						this.diagram.layeredGrid.insertRemoveRowColAt(coords.x, true, false);
 					}
 				}
-			}).bind(this.diagramController),
+			}.bind(this.diagramController),
         };
 		
 		// SHIFT + DOWN ARROW
         this.insertRowCommand = {
             shiftModifier: true,
             keyCode:       40,
-            action:        ((e) => {
+            action:        function(e) {
 				if(e.type.includes('down')) {
 					let coords = this.getCellAtCursor(this.currentX, this.currentY);
 					if(coords !== {}) {
 						this.diagram.layeredGrid.insertRemoveRowColAt(coords.y, true, true);
 					}
 				}
-			}).bind(this.diagramController),
+			}.bind(this.diagramController),
         };
 
         this.allCommands.push(this.shiftLeftCommand);
@@ -307,7 +307,7 @@ class UserInterface {
         // SHIFT + D
         this.darkModeCommand = {
             keyCode: 68,
-            action:  (e) => {
+            action:  function(e) {
                 if(e.type.includes('up')) {
                     toggleDarkMode();
                 }
@@ -317,22 +317,22 @@ class UserInterface {
         // SHIFT + F
         this.transparencyCommand = {
             keyCode: 70,
-            action:  ((e) => {
+            action:  function(e) {
                 if(e.type.includes('up')) {
                     this.view.useFlatColors = !this.view.useFlatColors;
                 }
-            }).bind(this.diagramController),
+            }.bind(this.diagramController),
         };
         
         // SHIFT + T
         this.themeCommand = {
             keyCode: 84,
-            action: ((e) => {
+            action:  function(e) {
                 if(e.type.includes('up')) {
                     this.view.theme = this.view.theme < DiagramView.themes.length - 1 ? this.view.theme + 1 : 0;
                     setUpLayerSelector();
                 }
-            }).bind(this.diagramController),
+            }.bind(this.diagramController),
         };
 
         this.allCommands.push(this.darkModeCommand);
