@@ -99,7 +99,7 @@ class UserInterface {
 			this.placeTerminal(event, this.diagram.inputs[event.keyCode - 65]);
 		}
         else if (isOutput(event.keyCode)) {
-            this.diagramController.placeTerminal(event, this.diagram.outputs[this.diagram.outputs.length - 90 + event.keyCode]);
+            this.diagramController.placeTerminal(event, this.diagramController.diagram.outputs[this.diagramController.diagram.outputs.length - 90 + event.keyCode]);
         }
     }
 	
