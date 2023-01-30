@@ -266,7 +266,7 @@ class UserInterface {
 					if(Object.hasOwn(coords, "x")) {
 						this.diagram.layeredGrid.insertRemoveRowColAt(coords.x, false, false);
 					} else {
-                        this.layeredGrid.resize(this.layeredGrid.width - 1, this.layeredGrid.height);
+                        this.diagram.layeredGrid.resize(this.diagram.layeredGrid.width - 1, this.diagram.layeredGrid.height);
                     }
 				}
 			}.bind(this.diagramController),
@@ -282,7 +282,7 @@ class UserInterface {
 					if(Object.hasOwn(coords, "y")) {
 						this.diagram.layeredGrid.insertRemoveRowColAt(coords.y, false, true);
 					} else {
-                        this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height - 1);
+                        this.diagram.layeredGrid.resize(this.diagram.layeredGrid.width, this.diagram.layeredGrid.height - 1);
                     }
 				}
 			}.bind(this.diagramController),
@@ -298,7 +298,7 @@ class UserInterface {
 					if(Object.hasOwn(coords, "x")) {
 						this.diagram.layeredGrid.insertRemoveRowColAt(coords.x, true, false);
 					} else {
-                        this.layeredGrid.resize(this.layeredGrid.width + 1, this.layeredGrid.height);
+                        this.diagram.layeredGrid.resize(this.diagram.layeredGrid.width + 1, this.diagram.layeredGrid.height);
                     }
 				}
 			}.bind(this.diagramController),
@@ -314,7 +314,7 @@ class UserInterface {
 					if(Object.hasOwn(coords, "y")) {
 						this.diagram.layeredGrid.insertRemoveRowColAt(coords.y, true, true);
 					} else {
-                        this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height + 1);
+                        this.diagram.layeredGrid.resize(this.diagram.layeredGrid.width, this.diagram.layeredGrid.height + 1);
                     }
 				}
 			}.bind(this.diagramController),
