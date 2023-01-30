@@ -3643,8 +3643,6 @@ window.onload = function () {
     diagram.layeredGrid.set(diagram.vddCell.x, diagram.vddCell.y, Diagram.CONTACT);
     diagram.layeredGrid.set(diagram.gndCell.x, diagram.gndCell.y, Diagram.CONTACT);
 
-    setUpControls();
-
     populateTermSelect();
     diagram.view.refreshCanvas();
     // 60 fps
