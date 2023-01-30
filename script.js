@@ -72,6 +72,8 @@ class UserInterface {
                 this.noModifierCommands[command.keyCode] = command.action;
             }
         }.bind(this));
+
+        this.addListeners();
     }
 	
     keydownHandler(event) {
@@ -578,6 +580,68 @@ class UserInterface {
                 this.diagramController.startY = -1;
             }
         }
+    }
+
+    addListeners() {
+        // Some of these pertain the the canvas, but we don't know whether
+        // it will be selected.
+        
+        window.addEventListener("touchend", function(e) {
+            if(document.getElementById("main-menu").classList.contains("closed")) {
+                this.mouseupHandler(e);
+            }
+        }.bind(this));
+
+        window.addEventListener("mouseup", function(e) {
+            if(document.getElementById("main-menu").classList.contains("closed")) {
+                this.mouseupHandler(e);
+            }
+        }.bind(this));
+
+        window.addEventListener("touchstart", function(e) {
+            if(document.getElementById("main-menu").classList.contains("closed")) {
+                this.mousedownHandler(e);
+            }
+        }.bind(this));
+
+        window.addEventListener("mousedown", function(e) {
+            if(document.getElementById("main-menu").classList.contains("closed")) {
+                this.mousedownHandler(e);
+            }
+        }.bind(this));
+
+        window.addEventListener("touchmove", function(e) {
+            if(document.getElementById("main-menu").classList.contains("closed")) {
+                this.mousemoveHandler(e);
+            }
+        }.bind(this));
+
+        window.addEventListener("mousemove", function(e) {
+            if(document.getElementById("main-menu").classList.contains("closed")) {
+                this.mousemoveHandler(e);
+            }
+        }.bind(this));
+
+        window.addEventListener("keydown", function(e) {
+            this.keydownHandler(e);
+        }.bind(this));
+        
+        window.addEventListener("keyup", function(e) {
+            this.keyupHandler(e);
+        }.bind(this));
+        
+        window.addEventListener("contextmenu", function(e) {
+            if (e.button === 2) {
+                // Don't show a context menu.
+                e.preventDefault();
+            }
+        });
+
+        // Set up the evaluate button.
+        button = document.getElementById("evaluate-btn");
+        button.onclick = function () {
+            refreshTruthTable();
+        };
     }
 }
 
@@ -3565,66 +3629,6 @@ window.onload = function () {
 	
 	// Set up the UI object.
 	UI = new UserInterface(diagram.controller);
-
-    // Some of these pertain the the canvas, but we don't know whether
-    // it will be selected.
-    
-    window.addEventListener("touchend", function(e) {
-        if(document.getElementById("main-menu").classList.contains("closed")) {
-            this.mouseupHandler(e);
-        }
-    }.bind(UI));
-
-    window.addEventListener("mouseup", function(e) {
-        if(document.getElementById("main-menu").classList.contains("closed")) {
-            this.mouseupHandler(e);
-        }
-    }.bind(UI));
-
-    window.addEventListener("touchstart", function(e) {
-        if(document.getElementById("main-menu").classList.contains("closed")) {
-            this.mousedownHandler(e);
-        }
-    }.bind(UI));
-
-    window.addEventListener("mousedown", function(e) {
-        if(document.getElementById("main-menu").classList.contains("closed")) {
-            this.mousedownHandler(e);
-        }
-    }.bind(UI));
-
-    window.addEventListener("touchmove", function(e) {
-        if(document.getElementById("main-menu").classList.contains("closed")) {
-            this.mousemoveHandler(e);
-        }
-    }.bind(UI));
-
-    window.addEventListener("mousemove", function(e) {
-        if(document.getElementById("main-menu").classList.contains("closed")) {
-            this.mousemoveHandler(e);
-        }
-    }.bind(UI));
-
-    window.addEventListener("keydown", function(e) {
-		this.keydownHandler(e);
-	}.bind(UI));
-	
-    window.addEventListener("keyup", function(e) {
-		this.keyupHandler(e);
-	}.bind(UI));
-	
-    window.addEventListener("contextmenu", function(e) {
-        if (e.button === 2) {
-            // Don't show a context menu.
-            e.preventDefault();
-        }
-    });
-
-    // Set up the evaluate button.
-    button = document.getElementById("evaluate-btn");
-    button.onclick = function () {
-        refreshTruthTable();
-    };
 
     // Set Diagram.CONTACT at the coordinates of each input and output.
     diagram.inputs.forEach(function(input) {
