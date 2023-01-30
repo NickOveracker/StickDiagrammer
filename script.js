@@ -262,9 +262,12 @@ class UserInterface {
             action:       function(e) {
 				if(e.type.includes('down')) {
 					let coords = this.getCellAtCursor(this.currentX, this.currentY);
-					if(coords !== {}) {
+                    coords = Object.hasOwn(coords, "x") ? coords : {x: this.diagram.layeredGrid.width, };
+					if(Object.hasOwn(coords, "x")) {
 						this.diagram.layeredGrid.insertRemoveRowColAt(coords.x, false, false);
-					}
+					} else {
+                        this.layeredGrid.resize(this.layeredGrid.width - 1, this.layeredGrid.height);
+                    }
 				}
 			}.bind(this.diagramController),
         };
@@ -276,9 +279,11 @@ class UserInterface {
             action:        function(e) {
 				if(e.type.includes('down')) {
 					let coords = this.getCellAtCursor(this.currentX, this.currentY);
-					if(coords !== {}) {
+					if(Object.hasOwn(coords, "y")) {
 						this.diagram.layeredGrid.insertRemoveRowColAt(coords.y, false, true);
-					}
+					} else {
+                        this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height - 1);
+                    }
 				}
 			}.bind(this.diagramController),
         };
@@ -290,9 +295,11 @@ class UserInterface {
             action:       function(e) {
 				if(e.type.includes('down')) {
 					let coords = this.getCellAtCursor(this.currentX, this.currentY);
-					if(coords !== {}) {
+					if(Object.hasOwn(coords, "x")) {
 						this.diagram.layeredGrid.insertRemoveRowColAt(coords.x, true, false);
-					}
+					} else {
+                        this.layeredGrid.resize(this.layeredGrid.width + 1, this.layeredGrid.height);
+                    }
 				}
 			}.bind(this.diagramController),
         };
@@ -304,9 +311,11 @@ class UserInterface {
             action:       function(e) {
 				if(e.type.includes('down')) {
 					let coords = this.getCellAtCursor(this.currentX, this.currentY);
-					if(coords !== {}) {
+					if(Object.hasOwn(coords, "y")) {
 						this.diagram.layeredGrid.insertRemoveRowColAt(coords.y, true, true);
-					}
+					} else {
+                        this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height + 1);
+                    }
 				}
 			}.bind(this.diagramController),
         };
@@ -2688,7 +2697,8 @@ class LayeredGrid {
     // Change the height of the grid
     resize(width, height) {
         'use strict';
-        if(width < 0 || height < 0) {
+
+        if(width <= 0 || height <= 0) {
             return;
         }
 
