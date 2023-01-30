@@ -74,6 +74,7 @@ class UserInterface {
         }.bind(this));
 
         this.addListeners();
+        this.setUpControls();
     }
 
     keydownHandler(event) {
@@ -642,6 +643,163 @@ class UserInterface {
         button.onclick = function () {
             refreshTruthTable();
         };
+    }
+
+    setUpControls() {
+        'use strict';
+        document.getElementById("remove-row").onclick = function() {
+            this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height - 1);
+            this.view.drawGrid();
+        }.bind(this.diagramController.diagram);
+
+        document.getElementById("add-row").onclick = function() {
+            this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height + 1);
+            this.view.drawGrid();
+        }.bind(this.diagramController.diagram);
+
+        document.getElementById("remove-column").onclick = function() {
+            this.layeredGrid.resize(this.layeredGrid.width - 1, this.layeredGrid.height);
+            this.view.drawGrid();
+        }.bind(this.diagramController.diagram);
+
+        document.getElementById("add-column").onclick = function() {
+            this.layeredGrid.resize(this.layeredGrid.width + 1, this.layeredGrid.height);
+            this.view.drawGrid();
+        }.bind(this.diagramController.diagram);
+
+        document.getElementById("shift-left").onclick = function() {
+            this.layeredGrid.shift(0, false, -1);
+        }.bind(this.diagramController.diagram);
+
+        document.getElementById("shift-right").onclick = function() {
+            this.layeredGrid.shift(0, false, 1);
+        }.bind(this.diagramController.diagram);
+
+        document.getElementById("shift-up").onclick = function() {
+            this.layeredGrid.shift(0, true, -1);
+        }.bind(this.diagramController.diagram);
+
+        document.getElementById("shift-down").onclick = function() {
+            this.layeredGrid.shift(0, true, 1);
+        }.bind(this.diagramController.diagram);
+
+        document.getElementById("paint-mode-btn").onclick = function() {
+            // No argument -> Toggle
+            this.controller.setEraseMode();
+
+            // Set the icon.
+            let paintModeButton = document.getElementById("paint-mode-btn");
+
+            if (this.controller.eraseMode) {
+                paintModeButton.classList.remove('fa-paint-brush');
+                paintModeButton.classList.add('fa-eraser');
+            } else {
+                paintModeButton.classList.remove('fa-eraser');
+                paintModeButton.classList.add('fa-paint-brush');
+            }
+        }.bind(this.diagramController.diagram);
+
+        document.getElementById("dark-mode-btn").onclick = function() {
+            toggleDarkMode();
+        };
+
+        document.getElementById("undo-btn").onclick = function() {
+            this.controller.undo();
+        }.bind(this.diagramController.diagram);
+
+        document.getElementById("redo-btn").onclick = function() {
+            this.controller.redo();
+        }.bind(this.diagramController.diagram);
+
+        document.getElementById("term-menu-btn").onclick = function() {
+            let termMenu = document.getElementById("terminal-menu");
+            if(termMenu.classList.contains("closed")) {
+                termMenu.classList.remove("closed");
+            }
+        };
+
+        document.getElementById("main-menu-btn").onclick = function() {
+            let mainMenu = document.getElementById("main-menu");
+            if(mainMenu.classList.contains("closed")) {
+                mainMenu.classList.remove("closed");
+                document.getElementById("main-container").style.display = "none";
+            }
+        };
+
+        document.getElementById("open-instructions-btn").onclick = function() {
+            let instructions = document.getElementById("instructions");
+            if(instructions.classList.contains("closed")) {
+                instructions.classList.remove("closed");
+            }
+        };
+
+        document.getElementById("open-about-page-btn").onclick = function() {
+            let instructions = document.getElementById("about-page");
+            if(instructions.classList.contains("closed")) {
+                instructions.classList.remove("closed");
+            }
+        };
+
+        document.getElementById("open-options-btn").onclick = function() {
+            let instructions = document.getElementById("options-menu");
+            if(instructions.classList.contains("closed")) {
+                instructions.classList.remove("closed");
+            }
+        };
+
+        document.getElementById("close-term-menu-btn").onclick    = closeTermMenu;
+        document.getElementById("close-main-menu-btn").onclick    = closeMainMenu;
+        document.getElementById("close-instructions-btn").onclick = closeInstructions;
+        document.getElementById("close-about-page-btn").onclick   = closeAboutPage;
+        document.getElementById("close-options-btn").onclick      = closeOptionsMenu;
+
+        document.getElementById("place-term-btn").onclick = function() {
+            let placeTermButton = document.getElementById("place-term-btn");
+            let term = document.querySelector('input[name="termselect"]:checked');
+
+            if(placeTermButton.classList.contains("active")) {
+                this.clearPlaceTerminalMode();
+                return;
+            }
+
+            if(term === null) {
+                return;
+            }
+
+            term = parseInt(term.value);
+            this.setPlaceTerminalMode(term);
+            placeTermButton.classList.add("active");
+
+        }.bind(this.diagramController);
+
+        document.getElementById('add-input-btn').onclick = function() {
+            this.addTerminal(false);
+        }.bind(this.diagramController);
+
+        document.getElementById('remove-input-btn').onclick = function() {
+            this.removeTerminal(false);
+        }.bind(this.diagramController);
+
+        document.getElementById('add-output-btn').onclick = function() {
+            this.addTerminal(true);
+        }.bind(this.diagramController);
+
+        document.getElementById('remove-output-btn').onclick = function() {
+            this.removeTerminal(true);
+        }.bind(this.diagramController);
+
+        document.getElementById('select-palette-btn').onclick = function() {
+            this.theme = this.theme < DiagramView.themes.length - 1 ? this.theme + 1 : 0;
+            document.getElementById('palette-setting').innerHTML = DiagramView.themes[this.theme];
+            setUpLayerSelector();
+        }.bind(this.diagramController.diagram.view);
+
+        document.getElementById('toggle-transparency-btn').onclick = function() {
+            this.useFlatColors = !this.useFlatColors;
+            document.getElementById('transparency-setting').innerHTML = this.useFlatColors ? "OFF" : "ON";
+        }.bind(this.diagramController.diagram.view);
+
+        setUpLayerSelector();
     }
 }
 
@@ -3367,163 +3525,6 @@ function setUpLayerSelector() {
         // Color with flat color (rgb, not rgba).
         element.style.color = diagram.view.getColor(index);
     }.bind(diagram));
-}
-
-function setUpControls() {
-    'use strict';
-    document.getElementById("remove-row").onclick = function() {
-        this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height - 1);
-        this.view.drawGrid();
-    }.bind(diagram);
-
-    document.getElementById("add-row").onclick = function() {
-        this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height + 1);
-        this.view.drawGrid();
-    }.bind(diagram);
-
-    document.getElementById("remove-column").onclick = function() {
-        this.layeredGrid.resize(this.layeredGrid.width - 1, this.layeredGrid.height);
-        this.view.drawGrid();
-    }.bind(diagram);
-
-    document.getElementById("add-column").onclick = function() {
-        this.layeredGrid.resize(this.layeredGrid.width + 1, this.layeredGrid.height);
-        this.view.drawGrid();
-    }.bind(diagram);
-
-    document.getElementById("shift-left").onclick = function() {
-        this.layeredGrid.shift(0, false, -1);
-    }.bind(diagram);
-
-    document.getElementById("shift-right").onclick = function() {
-        this.layeredGrid.shift(0, false, 1);
-    }.bind(diagram);
-
-    document.getElementById("shift-up").onclick = function() {
-        this.layeredGrid.shift(0, true, -1);
-    }.bind(diagram);
-
-    document.getElementById("shift-down").onclick = function() {
-        this.layeredGrid.shift(0, true, 1);
-    }.bind(diagram);
-
-    document.getElementById("paint-mode-btn").onclick = function() {
-        // No argument -> Toggle
-        this.controller.setEraseMode();
-
-        // Set the icon.
-        let paintModeButton = document.getElementById("paint-mode-btn");
-
-        if (this.controller.eraseMode) {
-            paintModeButton.classList.remove('fa-paint-brush');
-            paintModeButton.classList.add('fa-eraser');
-        } else {
-            paintModeButton.classList.remove('fa-eraser');
-            paintModeButton.classList.add('fa-paint-brush');
-        }
-    }.bind(diagram);
-
-    document.getElementById("dark-mode-btn").onclick = function() {
-        toggleDarkMode();
-    };
-
-    document.getElementById("undo-btn").onclick = function() {
-        this.controller.undo();
-    }.bind(diagram);
-
-    document.getElementById("redo-btn").onclick = function() {
-        this.controller.redo();
-    }.bind(diagram);
-
-    document.getElementById("term-menu-btn").onclick = function() {
-        let termMenu = document.getElementById("terminal-menu");
-        if(termMenu.classList.contains("closed")) {
-            termMenu.classList.remove("closed");
-        }
-    };
-
-    document.getElementById("main-menu-btn").onclick = function() {
-        let mainMenu = document.getElementById("main-menu");
-        if(mainMenu.classList.contains("closed")) {
-            mainMenu.classList.remove("closed");
-            document.getElementById("main-container").style.display = "none";
-        }
-    };
-
-    document.getElementById("open-instructions-btn").onclick = function() {
-        let instructions = document.getElementById("instructions");
-        if(instructions.classList.contains("closed")) {
-            instructions.classList.remove("closed");
-        }
-    };
-
-    document.getElementById("open-about-page-btn").onclick = function() {
-        let instructions = document.getElementById("about-page");
-        if(instructions.classList.contains("closed")) {
-            instructions.classList.remove("closed");
-        }
-    };
-
-    document.getElementById("open-options-btn").onclick = function() {
-        let instructions = document.getElementById("options-menu");
-        if(instructions.classList.contains("closed")) {
-            instructions.classList.remove("closed");
-        }
-    };
-
-    document.getElementById("close-term-menu-btn").onclick    = closeTermMenu;
-    document.getElementById("close-main-menu-btn").onclick    = closeMainMenu;
-    document.getElementById("close-instructions-btn").onclick = closeInstructions;
-    document.getElementById("close-about-page-btn").onclick   = closeAboutPage;
-    document.getElementById("close-options-btn").onclick      = closeOptionsMenu;
-
-    document.getElementById("place-term-btn").onclick = function() {
-        let placeTermButton = document.getElementById("place-term-btn");
-        let term = document.querySelector('input[name="termselect"]:checked');
-
-        if(placeTermButton.classList.contains("active")) {
-            this.clearPlaceTerminalMode();
-            return;
-        }
-
-        if(term === null) {
-            return;
-        }
-
-        term = parseInt(term.value);
-        this.setPlaceTerminalMode(term);
-        placeTermButton.classList.add("active");
-
-    }.bind(diagram.controller);
-
-    document.getElementById('add-input-btn').onclick = function() {
-        this.addTerminal(false);
-    }.bind(diagram.controller);
-
-    document.getElementById('remove-input-btn').onclick = function() {
-        this.removeTerminal(false);
-    }.bind(diagram.controller);
-
-    document.getElementById('add-output-btn').onclick = function() {
-        this.addTerminal(true);
-    }.bind(diagram.controller);
-
-    document.getElementById('remove-output-btn').onclick = function() {
-        this.removeTerminal(true);
-    }.bind(diagram.controller);
-
-    document.getElementById('select-palette-btn').onclick = function() {
-        this.theme = this.theme < DiagramView.themes.length - 1 ? this.theme + 1 : 0;
-        document.getElementById('palette-setting').innerHTML = DiagramView.themes[this.theme];
-        setUpLayerSelector();
-    }.bind(diagram.view);
-
-    document.getElementById('toggle-transparency-btn').onclick = function() {
-        this.useFlatColors = !this.useFlatColors;
-        document.getElementById('transparency-setting').innerHTML = this.useFlatColors ? "OFF" : "ON";
-    }.bind(diagram.view);
-
-    setUpLayerSelector();
 }
 
 function closeMainMenu() {
