@@ -158,12 +158,16 @@ class UserInterface {
         this.exitMenuCommand = {
             // ESC
             keyCode: 27,
-            action:  closeTopMenu,
+            action:  function() {
+				closeTopMenu();
+			},
         };
         this.evaluateCommand = {
             // ENTER
             keyCode: 13,
-            action:  refreshTruthTable,
+            action:  function() {
+				refreshTruthTable();
+			},
         };
 
         this.allCommands.push(this.exitMenuCommand);
