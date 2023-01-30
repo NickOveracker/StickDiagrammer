@@ -189,31 +189,71 @@ class UserInterface {
             }).bind(this.diagramController),
         };
 
+        // SHIFT + LEFT ARROW
         this.deleteColCommand = {
             shiftModifier: true,
             keyCode:       37,
-            action:        null,
+            action:        ((e) => {
+				if(e.type.includes('down')) {
+					let coords = this.getCellAtCursor(this.currentX, this.currentY);
+					if(coords !== {}) {
+						this.diagram.layeredGrid.insertRemoveRowColAt(coords.x, false, false);
+					}
+				}
+			}).bind(this.diagramController),
         };
+		
+		// SHIFT + UP ARROW
         this.deleteRowCommand = {
             shiftModifier: true,
             keyCode:       38,
-            action:        null,
+            action:        ((e) => {
+				if(e.type.includes('down')) {
+					let coords = this.getCellAtCursor(this.currentX, this.currentY);
+					if(coords !== {}) {
+						this.diagram.layeredGrid.insertRemoveRowColAt(coords.y, false, true);
+					}
+				}
+			}).bind(this.diagramController),
         };
+		
+		// SHIFT + RIGHT ARROW
         this.insertColCommand = {
             shiftModifier: true,
             keyCode:       39,
-            action:        null,
+            action:        ((e) => {
+				if(e.type.includes('down')) {
+					let coords = this.getCellAtCursor(this.currentX, this.currentY);
+					if(coords !== {}) {
+						this.diagram.layeredGrid.insertRemoveRowColAt(coords.x, true, false);
+					}
+				}
+			}).bind(this.diagramController),
         };
+		
+		// SHIFT + DOWN ARROW
         this.insertRowCommand = {
             shiftModifier: true,
             keyCode:       40,
-            action:        null,
+            action:        ((e) => {
+				if(e.type.includes('down')) {
+					let coords = this.getCellAtCursor(this.currentX, this.currentY);
+					if(coords !== {}) {
+						this.diagram.layeredGrid.insertRemoveRowColAt(coords.y, true, true);
+					}
+				}
+			}).bind(this.diagramController),
         };
 
         this.allCommands.push(this.shiftLeftCommand);
         this.allCommands.push(this.shiftUpCommand);
         this.allCommands.push(this.shiftRightCommand);
         this.allCommands.push(this.shiftDownCommand);
+		
+        this.allCommands.push(this.deleteColCommand);
+        this.allCommands.push(this.deleteRowCommand);
+        this.allCommands.push(this.insertColCommand);
+        this.allCommands.push(this.insertRowCommand);
     }
 
     initCosmeticCommands() {
