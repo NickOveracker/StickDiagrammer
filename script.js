@@ -61,7 +61,7 @@ class UserInterface {
         this.initHistoryCommands();
         this.initRowColCommands();
 
-        this.allCommands.forEach((command) => {
+        this.allCommands.forEach(((command) => {
             if(command.ctrlModifier) {
                 this.ctrlCommands[command.keyCode] = command.action;
             }
@@ -71,7 +71,7 @@ class UserInterface {
             else {
                 this.noModifierCommands[command.keyCode] = command.action;
             }
-        }).bind(this);
+        }).bind(this));
     }
 	
     keydownHandler(event) {
