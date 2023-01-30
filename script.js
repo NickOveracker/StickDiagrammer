@@ -194,8 +194,9 @@ class UserInterface {
     initRowColCommands() {
         'use strict';
 
-        // LEFT ARROW
+        // SHIFT + LEFT ARROW
         this.shiftLeftCommand = {
+            shiftModifier: true,
             keyCode: 37,
             action:  function(e) {
                 if(e.type.includes('up')) {
@@ -204,8 +205,9 @@ class UserInterface {
             }.bind(this.diagramController),
         };
 
-        // UP ARROW
+        // SHIFT + UP ARROW
         this.shiftUpCommand = {
+            shiftModifier: true,
             keyCode: 38,
             action:  function(e) {
                 if(e.type.includes('up')) {
@@ -214,8 +216,9 @@ class UserInterface {
             }.bind(this.diagramController),
         };
 
-        // RIGHT ARROW
+        // SHIFT + RIGHT ARROW
         this.shiftRightCommand = {
+            shiftModifier: true,
             keyCode: 39,
             action:  function(e) {
                 if(e.type.includes('up')) {
@@ -224,8 +227,9 @@ class UserInterface {
             }.bind(this.diagramController),
         };
 
-        // DOWN ARROW
+        // SHIFT + DOWN ARROW
         this.shiftDownCommand = {
+            shiftModifier: true,
             keyCode: 40,
             action:  function(e) {
                 if(e.type.includes('up')) {
@@ -234,11 +238,11 @@ class UserInterface {
             }.bind(this.diagramController),
         };
 
-        // SHIFT + LEFT ARROW
+        // CTRL + LEFT ARROW
         this.deleteColCommand = {
-            shiftModifier: true,
-            keyCode:       37,
-            action:        function(e) {
+            ctrlModifier: true,
+            keyCode:      37,
+            action:       function(e) {
 				if(e.type.includes('down')) {
 					let coords = this.getCellAtCursor(this.currentX, this.currentY);
 					if(coords !== {}) {
@@ -248,9 +252,9 @@ class UserInterface {
 			}.bind(this.diagramController),
         };
 		
-		// SHIFT + UP ARROW
+		// CTRL + UP ARROW
         this.deleteRowCommand = {
-            shiftModifier: true,
+            ctrlModifier: true,
             keyCode:       38,
             action:        function(e) {
 				if(e.type.includes('down')) {
@@ -262,11 +266,11 @@ class UserInterface {
 			}.bind(this.diagramController),
         };
 		
-		// SHIFT + RIGHT ARROW
+		// CTRL + RIGHT ARROW
         this.insertColCommand = {
-            shiftModifier: true,
-            keyCode:       39,
-            action:        function(e) {
+            ctrlModifier: true,
+            keyCode:      39,
+            action:       function(e) {
 				if(e.type.includes('down')) {
 					let coords = this.getCellAtCursor(this.currentX, this.currentY);
 					if(coords !== {}) {
@@ -276,11 +280,11 @@ class UserInterface {
 			}.bind(this.diagramController),
         };
 		
-		// SHIFT + DOWN ARROW
+		// CTRL + DOWN ARROW
         this.insertRowCommand = {
-            shiftModifier: true,
-            keyCode:       40,
-            action:        function(e) {
+            ctrlModifier: true,
+            keyCode:      40,
+            action:       function(e) {
 				if(e.type.includes('down')) {
 					let coords = this.getCellAtCursor(this.currentX, this.currentY);
 					if(coords !== {}) {
