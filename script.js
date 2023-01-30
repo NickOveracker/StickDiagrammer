@@ -96,7 +96,7 @@ class UserInterface {
 			this.ctrlCommands[event.keyCode](event);
 		}
         else if (isInput(event.keyCode))  {
-			this.placeTerminal(event, this.diagramController.diagram.inputs[event.keyCode - 65]);
+			this.diagramController.placeTerminal(event, this.diagramController.diagram.inputs[event.keyCode - 65]);
 		}
         else if (isOutput(event.keyCode)) {
             this.diagramController.placeTerminal(event, this.diagramController.diagram.outputs[this.diagramController.diagram.outputs.length - 90 + event.keyCode]);
