@@ -132,7 +132,7 @@ class UserInterface {
             // CTRL-Y
             ctrlModifier: true,
             keyCode:      89,
-            action:       this.diagramController.undo.bind(this.diagramController),
+            action:       this.diagramController.redo.bind(this.diagramController),
         };
 
         this.allCommands.push(this.undoCommand);
