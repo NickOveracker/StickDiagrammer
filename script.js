@@ -162,7 +162,7 @@ class UserInterface {
             // ESC
             keyCode: 27,
             action:  function() {
-                closeTopMenu();
+                this.closeTopMenu();
             },
         };
         this.evaluateCommand = {
@@ -747,11 +747,11 @@ class UserInterface {
             }
         };
 
-        document.getElementById("close-term-menu-btn").onclick    = closeTermMenu;
-        document.getElementById("close-main-menu-btn").onclick    = closeMainMenu;
-        document.getElementById("close-instructions-btn").onclick = closeInstructions;
-        document.getElementById("close-about-page-btn").onclick   = closeAboutPage;
-        document.getElementById("close-options-btn").onclick      = closeOptionsMenu;
+        document.getElementById("close-term-menu-btn").onclick    = this.closeTermMenu;
+        document.getElementById("close-main-menu-btn").onclick    = this.closeMainMenu;
+        document.getElementById("close-instructions-btn").onclick = this.closeInstructions;
+        document.getElementById("close-about-page-btn").onclick   = this.closeAboutPage;
+        document.getElementById("close-options-btn").onclick      = this.closeOptionsMenu;
 
         document.getElementById("place-term-btn").onclick = function() {
             let placeTermButton = document.getElementById("place-term-btn");
@@ -800,6 +800,57 @@ class UserInterface {
         }.bind(this.diagramController.diagram.view);
 
         setUpLayerSelector();
+    }
+
+    closeMainMenu() {
+        'use strict';
+        let mainMenu = document.getElementById("main-menu");
+        if(!mainMenu.classList.contains("closed")) {
+            mainMenu.classList.add("closed");
+            document.getElementById("main-container").style.display = "block";
+            return true;
+        }
+    }
+
+    closeInstructions() {
+        'use strict';
+        let instructions = document.getElementById("instructions");
+        if(!instructions.classList.contains("closed")) {
+            instructions.classList.add("closed");
+            return true;
+        }
+    }
+
+    closeTermMenu() {
+        'use strict';
+        let termMenu = document.getElementById("terminal-menu");
+        if(!termMenu.classList.contains("closed")) {
+            termMenu.classList.add("closed");
+            return true;
+        }
+    }
+
+    closeAboutPage() {
+        'use strict';
+        let aboutPage = document.getElementById("about-page");
+        if(!aboutPage.classList.contains("closed")) {
+            aboutPage.classList.add("closed");
+            return true;
+        }
+    }
+
+    closeOptionsMenu() {
+        'use strict';
+        let optionsPage = document.getElementById("options-menu");
+        if(!optionsPage.classList.contains("closed")) {
+            optionsPage.classList.add("closed");
+            return true;
+        }
+    }
+
+    closeTopMenu() {
+        'use strict';
+        this.closeAboutPage() || this.closeOptionsMenu() || this.closeInstructions() || this.closeMainMenu() || this.closeTermMenu(); // jshint ignore:line
     }
 }
 
@@ -3527,56 +3578,6 @@ function setUpLayerSelector() {
     }.bind(diagram));
 }
 
-function closeMainMenu() {
-    'use strict';
-    let mainMenu = document.getElementById("main-menu");
-    if(!mainMenu.classList.contains("closed")) {
-        mainMenu.classList.add("closed");
-        document.getElementById("main-container").style.display = "block";
-        return true;
-    }
-}
-
-function closeInstructions() {
-    'use strict';
-    let instructions = document.getElementById("instructions");
-    if(!instructions.classList.contains("closed")) {
-        instructions.classList.add("closed");
-        return true;
-    }
-}
-
-function closeTermMenu() {
-    'use strict';
-    let termMenu = document.getElementById("terminal-menu");
-    if(!termMenu.classList.contains("closed")) {
-        termMenu.classList.add("closed");
-        return true;
-    }
-}
-
-function closeAboutPage() {
-    'use strict';
-    let aboutPage = document.getElementById("about-page");
-    if(!aboutPage.classList.contains("closed")) {
-        aboutPage.classList.add("closed");
-        return true;
-    }
-}
-
-function closeOptionsMenu() {
-    'use strict';
-    let optionsPage = document.getElementById("options-menu");
-    if(!optionsPage.classList.contains("closed")) {
-        optionsPage.classList.add("closed");
-        return true;
-    }
-}
-
-function closeTopMenu() {
-    'use strict';
-    closeAboutPage() || closeOptionsMenu() || closeInstructions() || closeMainMenu() || closeTermMenu(); // jshint ignore:line
-}
 
 function clearPlaceTerminalMode() {
     'use strict';
