@@ -75,36 +75,36 @@ class UserInterface {
 
         this.addListeners();
     }
-	
+
     keydownHandler(event) {
         'use strict';
         if(!document.getElementById("main-menu").classList.contains("closed")) {
             return;
         }
-		
+        
         let isInput  = function(keyCode) {
-			return (keyCode >= 65) && (keyCode < 65 + this.diagram.inputs.length );
-		}.bind(this.diagramController);
-		
+            return (keyCode >= 65) && (keyCode < 65 + this.diagram.inputs.length );
+        }.bind(this.diagramController);
+        
         let isOutput = function(keyCode) {
-			return (keyCode <= 89) && (keyCode > 89 - this.diagram.outputs.length);
-		}.bind(this.diagramController);
+            return (keyCode <= 89) && (keyCode > 89 - this.diagram.outputs.length);
+        }.bind(this.diagramController);
         // GND and VDD are handled in shiftCommandHandler.
 
         if (event.shiftKey && this.shiftCommands[event.keyCode]) {
-			this.shiftCommands[event.keyCode](event);
-		}
+            this.shiftCommands[event.keyCode](event);
+        }
         else if (event.ctrlKey && this.ctrlCommands[event.keyCode])           {
-			this.ctrlCommands[event.keyCode](event);
-		}
+            this.ctrlCommands[event.keyCode](event);
+        }
         else if (isInput(event.keyCode))  {
-			this.diagramController.placeTerminal(event, this.diagramController.diagram.inputs[event.keyCode - 65]);
-		}
+            this.diagramController.placeTerminal(event, this.diagramController.diagram.inputs[event.keyCode - 65]);
+        }
         else if (isOutput(event.keyCode)) {
             this.diagramController.placeTerminal(event, this.diagramController.diagram.outputs[this.diagramController.diagram.outputs.length - 90 + event.keyCode]);
         }
     }
-	
+
     // Only change dark/light mode on keyup to avoid seizure-inducing flashes from holding down space.
     keyupHandler(event) {
         'use strict';
@@ -120,10 +120,10 @@ class UserInterface {
                 this.shiftCommands[event.keyCode](event);
             }
         }
-		
+
         if (!event.shiftKey && !event.ctrlKey && this.noModifierCommands[event.keyCode]) {
-			this.noModifierCommands[event.keyCode](event);
-		}
+            this.noModifierCommands[event.keyCode](event);
+        }
     }
 
     initHistoryCommands() {
@@ -135,9 +135,9 @@ class UserInterface {
             keyCode:      90,
             action:       function(e) {
                 if(e.type.includes('down')) {
-					this.undo();
-				}
-			}.bind(this.diagramController),
+                    this.undo();
+                }
+            }.bind(this.diagramController),
         };
         this.redoCommand = {
             // CTRL-Y
@@ -145,9 +145,9 @@ class UserInterface {
             keyCode:      89,
             action:       function(e) {
                 if(e.type.includes('down')) {
-					this.redo();
-				}
-			}.bind(this.diagramController),
+                    this.redo();
+                }
+            }.bind(this.diagramController),
         };
 
         this.allCommands.push(this.undoCommand);
@@ -161,15 +161,15 @@ class UserInterface {
             // ESC
             keyCode: 27,
             action:  function() {
-				closeTopMenu();
-			},
+                closeTopMenu();
+            },
         };
         this.evaluateCommand = {
             // ENTER
             keyCode: 13,
             action:  function() {
-				refreshTruthTable();
-			},
+                refreshTruthTable();
+            },
         };
 
         this.allCommands.push(this.exitMenuCommand);
@@ -262,71 +262,71 @@ class UserInterface {
             ctrlModifier: true,
             keyCode:      37,
             action:       function(e) {
-				if(e.type.includes('down')) {
-					let coords = this.getCellAtCursor(this.currentX, this.currentY);
+                if(e.type.includes('down')) {
+                    let coords = this.getCellAtCursor(this.currentX, this.currentY);
                     coords = Object.hasOwn(coords, "x") ? coords : {x: this.diagram.layeredGrid.width, };
-					if(Object.hasOwn(coords, "x")) {
-						this.diagram.layeredGrid.insertRemoveRowColAt(coords.x, false, false);
-					} else {
+                    if(Object.hasOwn(coords, "x")) {
+                        this.diagram.layeredGrid.insertRemoveRowColAt(coords.x, false, false);
+                    } else {
                         this.diagram.layeredGrid.resize(this.diagram.layeredGrid.width - 1, this.diagram.layeredGrid.height);
                     }
-				}
-			}.bind(this.diagramController),
+                }
+            }.bind(this.diagramController),
         };
-		
-		// CTRL + UP ARROW
+
+        // CTRL + UP ARROW
         this.deleteRowCommand = {
             ctrlModifier: true,
             keyCode:       38,
             action:        function(e) {
-				if(e.type.includes('down')) {
-					let coords = this.getCellAtCursor(this.currentX, this.currentY);
-					if(Object.hasOwn(coords, "y")) {
-						this.diagram.layeredGrid.insertRemoveRowColAt(coords.y, false, true);
-					} else {
+                if(e.type.includes('down')) {
+                    let coords = this.getCellAtCursor(this.currentX, this.currentY);
+                    if(Object.hasOwn(coords, "y")) {
+                        this.diagram.layeredGrid.insertRemoveRowColAt(coords.y, false, true);
+                    } else {
                         this.diagram.layeredGrid.resize(this.diagram.layeredGrid.width, this.diagram.layeredGrid.height - 1);
                     }
-				}
-			}.bind(this.diagramController),
+                }
+            }.bind(this.diagramController),
         };
-		
-		// CTRL + RIGHT ARROW
+
+        // CTRL + RIGHT ARROW
         this.insertColCommand = {
             ctrlModifier: true,
             keyCode:      39,
             action:       function(e) {
-				if(e.type.includes('down')) {
-					let coords = this.getCellAtCursor(this.currentX, this.currentY);
-					if(Object.hasOwn(coords, "x")) {
-						this.diagram.layeredGrid.insertRemoveRowColAt(coords.x, true, false);
-					} else {
+                if(e.type.includes('down')) {
+                    let coords = this.getCellAtCursor(this.currentX, this.currentY);
+                    if(Object.hasOwn(coords, "x")) {
+                        this.diagram.layeredGrid.insertRemoveRowColAt(coords.x, true, false);
+                    } else {
                         this.diagram.layeredGrid.resize(this.diagram.layeredGrid.width + 1, this.diagram.layeredGrid.height);
                     }
-				}
-			}.bind(this.diagramController),
+                }
+            }.bind(this.diagramController),
         };
-		
-		// CTRL + DOWN ARROW
+
+        // CTRL + DOWN ARROW
         this.insertRowCommand = {
             ctrlModifier: true,
             keyCode:      40,
             action:       function(e) {
-				if(e.type.includes('down')) {
-					let coords = this.getCellAtCursor(this.currentX, this.currentY);
-					if(Object.hasOwn(coords, "y")) {
-						this.diagram.layeredGrid.insertRemoveRowColAt(coords.y, true, true);
-					} else {
+                if(e.type.includes('down')) {
+                    let coords = this.getCellAtCursor(this.currentX, this.currentY);
+                    if(Object.hasOwn(coords, "y")) {
+                        this.diagram.layeredGrid.insertRemoveRowColAt(coords.y, true, true);
+                    } else {
                         this.diagram.layeredGrid.resize(this.diagram.layeredGrid.width, this.diagram.layeredGrid.height + 1);
                     }
-				}
-			}.bind(this.diagramController),
+                }
+            }.bind(this.diagramController),
         };
 
         this.allCommands.push(this.shiftLeftCommand);
         this.allCommands.push(this.shiftUpCommand);
         this.allCommands.push(this.shiftRightCommand);
         this.allCommands.push(this.shiftDownCommand);
-		
+
         this.allCommands.push(this.deleteColCommand);
         this.allCommands.push(this.deleteRowCommand);
         this.allCommands.push(this.insertColCommand);
@@ -1455,8 +1455,8 @@ class Diagram {
 
         // Test each node for a path to outputNode
         let testPath = function(node) {
-          	if(this.overdrivenPath) {
-              return;
+            if(this.overdrivenPath) {
+                return;
             }
 
             // Recursive over every possible path from the test node to outputNode.
@@ -3626,9 +3626,9 @@ window.onload = function () {
 
     // Set to dark mode if it is night time
     setDarkMode(new Date().getHours() > 19 || new Date().getHours() < 7);
-	
-	// Set up the UI object.
-	UI = new UserInterface(diagram.controller);
+    
+    // Set up the UI object.
+    UI = new UserInterface(diagram.controller);
 
     // Set Diagram.CONTACT at the coordinates of each input and output.
     diagram.inputs.forEach(function(input) {
