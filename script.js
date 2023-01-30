@@ -107,8 +107,13 @@ class UserInterface {
     keyupHandler(event) {
         'use strict';
         if(document.getElementById("main-menu").classList.contains("closed")) {
+            // Only do the following if ctrl is pressed.
+            if (event.ctrlKey && this.ctrlCommands[event.keyCode]) {
+                // Run the registered shift command.
+                this.ctrlCommands[event.keyCode](event);
+            }
             // Only do the following if shift is pressed.
-            if (event.shiftKey && this.shiftCommands[event.keyCode]) {
+            else if (event.shiftKey && this.shiftCommands[event.keyCode]) {
                 // Run the registered shift command.
                 this.shiftCommands[event.keyCode](event);
             }
@@ -126,13 +131,21 @@ class UserInterface {
             // CTRL-Z
             ctrlModifier: true,
             keyCode:      90,
-            action:       this.diagramController.undo.bind(this.diagramController),
+            action:       function(e) {
+                if(e.type.includes('down')) {
+					this.undo();
+				}
+			}.bind(this.diagramController),
         };
         this.redoCommand = {
             // CTRL-Y
             ctrlModifier: true,
             keyCode:      89,
-            action:       this.diagramController.redo.bind(this.diagramController),
+            action:       function(e) {
+                if(e.type.includes('down')) {
+					this.redo();
+				}
+			}.bind(this.diagramController),
         };
 
         this.allCommands.push(this.undoCommand);
@@ -310,6 +323,7 @@ class UserInterface {
 
         // SHIFT + D
         this.darkModeCommand = {
+            shiftModifier: true,
             keyCode: 68,
             action:  function(e) {
                 if(e.type.includes('up')) {
@@ -320,6 +334,7 @@ class UserInterface {
 
         // SHIFT + F
         this.transparencyCommand = {
+            shiftModifier: true,
             keyCode: 70,
             action:  function(e) {
                 if(e.type.includes('up')) {
@@ -330,6 +345,7 @@ class UserInterface {
         
         // SHIFT + T
         this.themeCommand = {
+            shiftModifier: true,
             keyCode: 84,
             action:  function(e) {
                 if(e.type.includes('up')) {
