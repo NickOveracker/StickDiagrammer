@@ -40,6 +40,7 @@
 /* jshint varstmt: true */
 /* jshint browser: true */
 /* globals runTestbench: false */
+/* jshint latedef: false */ // change to true or nofunc later
 let darkMode;
 let button;
 let diagram;
@@ -48,6 +49,10 @@ let UI;
 class UserInterface {
     constructor(diagramController) {
         'use strict';
+
+        // Grid color
+        this.darkModeGridColor = '#cccccc';
+        this.lightModeGridColor = '#999999';
 
         this.diagramController = diagramController;
         this.allCommands        = [];
@@ -851,6 +856,227 @@ class UserInterface {
     closeTopMenu() {
         'use strict';
         this.closeAboutPage() || this.closeOptionsMenu() || this.closeInstructions() || this.closeMainMenu() || this.closeTermMenu(); // jshint ignore:line
+    }
+
+    // Generate an output table.
+    // Each row evaluates to 1, 0, Z, or X
+    // 1 is VDD, 0 is GND.
+    // Z is high impedance, X is error (VDD and GND contradiction.)
+    buildTruthTable() {
+        'use strict';
+        let terminals  = diagram.getTerminals().slice(2);
+        let table      = [];
+        let header     = [];
+        let inputVals  = [];
+        let outputVals = [];
+        diagram.clearAnalyses();
+
+        // Each loop iteration is a combination of input values.
+        // I.e., one row of the output table.
+        for (let ii = 0; ii < Math.pow(2, diagram.inputs.length); ii++) {
+            let tableInputRow = [];
+            let tableOutputRow = [];
+
+            // Compute each output.
+            for (let jj = 0; jj < diagram.outputs.length; jj++) {
+                tableOutputRow[jj] = diagram.computeOutput(ii, diagram.outputNodes[jj]);
+            }
+
+            outputVals[ii] = tableOutputRow;
+
+            for (let jj = 0; jj < diagram.inputs.length; jj++) {
+                /*jslint bitwise: true */
+                tableInputRow[jj] = (ii >> jj) & 1;
+                /*jslint bitwise: false */
+            }
+
+            inputVals[ii] = tableInputRow;
+        }
+
+        // Header
+        terminals.forEach(function(terminal, index) {
+            header[index] = diagram.getTerminalName(index + 2);
+        });
+
+        // Merge input and output into one table (input on the left, output on the right.)
+        table[0] = header;
+        for (let ii = 0; ii < inputVals.length; ii++) {
+            // Reverse the inputs so that A is on the left.
+            table[ii + 1] = inputVals[ii].reverse().concat(outputVals[ii]);
+        }
+
+        return table;
+    }
+
+    // Table is a 2D array of single character strings.
+    refreshTruthTable(suppressSetNets) {
+        'use strict';
+        let error = false;
+
+        // Update the diagram.netlist.
+        if(!suppressSetNets) {
+            diagram.setNets();
+        }
+
+        // Create a table with the correct number of rows and columns.
+        // The first row should be a header.
+        let table = buildTruthTable();
+        let tableElement = document.getElementById("truth-table");
+
+        tableElement.innerHTML = "";
+
+        if(error) {
+            return;
+        }
+
+        let header = tableElement.createTHead();
+        let headerRow = header.insertRow(0);
+        headerRow.className = "header";
+
+        table[0].forEach(function (element, index) {
+            let cell = headerRow.insertCell(index);
+            cell.innerHTML = element;
+            cell.className = index < diagram.inputs.length ? "input" : "output";
+        });
+
+        // Create the rest of the table.
+        table.forEach(function (row, rowIndex) {
+            if(rowIndex === 0) { return; }
+            let tRow = tableElement.insertRow(rowIndex);
+
+            row.forEach(function (cell, colIndex) {
+                let tCell = tRow.insertCell(colIndex);
+                tCell.innerHTML = cell;
+
+                // Set the cell class depending on whether this is
+                // an input or output cell.
+                if(colIndex < diagram.inputs.length) {
+                    tCell.className = "input";
+                } else {
+                    tCell.className = "output";
+                    tCell.onmouseover = ((rowIndex, colIndex) => {
+                        return (() => {
+                            let path, outputNum, outputNodeIndex;
+                            outputNum = colIndex - diagram.inputs.length;
+                            outputNodeIndex = diagram.graph.getIndexByNode(diagram.outputNodes[outputNum]);
+                            path = diagram.analyses[rowIndex - 1][outputNodeIndex];
+                            diagram.view.setHighlight(path);
+                        });
+                    })(rowIndex, colIndex);
+                    tCell.onmouseleave = function () {
+                        diagram.view.highlightNets = false;
+                    };
+                }
+            });
+        });
+        
+        if (diagram.nmosPullup || diagram.pmosPulldown) {
+            document.getElementById("pullup-pulldown-warning").classList.add("active");
+        } else if(document.getElementById("pullup-pulldown-warning").classList.contains("active")) {
+            document.getElementById("pullup-pulldown-warning").classList.remove("active");
+        }
+
+        window.scrollTo({behavior: "smooth", top: Math.ceil(tableElement.getBoundingClientRect().top + window.scrollY), left: 0,});
+    }
+
+    setDarkMode(setToDark) {
+        'use strict';
+
+        if (setToDark) {
+            // Set to false so that toggleDarkMode() will set to true.
+            darkMode = false;
+            toggleDarkMode();
+        } else {
+            // Set to true so that toggleDarkMode() will set to false.
+            darkMode = true;
+            toggleDarkMode();
+        }
+    }
+
+    toggleDarkMode() {
+        'use strict';
+        darkMode = !darkMode;
+
+        if (darkMode) {
+            document.body.classList.add('dark');
+            document.body.classList.remove('light');
+            document.getElementById('dark-mode-btn').classList.remove('fa-cloud-moon');
+            document.getElementById('dark-mode-btn').classList.add('fa-sun');
+        } else {
+            document.body.classList.add('light');
+            document.body.classList.remove('dark');
+            document.getElementById('dark-mode-btn').classList.remove('fa-sun');
+            document.getElementById('dark-mode-btn').classList.add('fa-cloud-moon');
+        }
+    }
+
+    setUpLayerSelector() {
+        'use strict'; 
+
+        // Loop through all layer select buttons.
+        Array.from(document.getElementById("colorChange").children).forEach(function(element, index) {
+
+            // Set up the onclick event if not already set.
+            if(!element.onclick) {
+                element.onclick = function() {
+                    let paintModeButton = document.getElementById("paint-mode-btn");
+
+                    this.controller.changeLayer(index);
+
+                    // Set the icon.
+                    if (this.controller.eraseMode) {
+                        paintModeButton.classList.remove('fa-eraser');
+                        paintModeButton.classList.add('fa-paint-brush');
+                    }
+
+                    diagram.controller.setEraseMode(false);
+                }.bind(this);
+            }
+
+            // Color with flat color (rgb, not rgba).
+            element.style.color = diagram.view.getColor(index);
+        }.bind(diagram));
+    }
+
+    clearPlaceTerminalMode() {
+        'use strict';
+        let placeTermButton = document.getElementById("place-term-btn");
+        placeTermButton.classList.remove("active");
+    }
+
+    // Fill in the termselect-list div with a radio button for each terminal.
+    populateTermSelect() {
+        'use strict';
+        let termSelectList = document.getElementById("termselect-list");
+        let terminals = diagram.getTerminals();
+
+        // First, clear the list.
+        termSelectList.innerHTML = "";
+
+        for(let ii = 0; ii < terminals.length; ii++) {
+            let termSelectItemLabel = document.createElement("label");
+            let termSelectItemInput = document.createElement("input");
+
+            // Set CSS style
+            if(ii === 0) {
+                termSelectItemLabel.classList.add("first");
+            }
+            if(ii === terminals.length - 1) {
+                termSelectItemLabel.classList.add("last");
+            }
+            termSelectItemLabel.classList.add("clickable");
+
+            termSelectItemInput.type = "radio";
+            termSelectItemInput.name = "termselect";
+            termSelectItemInput.value = ii;
+            termSelectItemInput.id = "termselect-" + ii;
+
+            termSelectItemLabel.innerHTML = diagram.getTerminalName(ii);
+            termSelectItemLabel.htmlFor = termSelectItemInput.id;
+
+            termSelectList.appendChild(termSelectItemInput);
+            termSelectList.appendChild(termSelectItemLabel);
+        }
     }
 }
 
@@ -3389,234 +3615,6 @@ class Net {
     size() {
         'use strict';
         return this.nodes.size;
-    }
-}
-
-// Grid color
-let darkModeGridColor = '#cccccc';
-let lightModeGridColor = '#999999';
-
-/* jshint latedef: nofunc */
-
-// Generate an output table.
-// Each row evaluates to 1, 0, Z, or X
-// 1 is VDD, 0 is GND.
-// Z is high impedance, X is error (VDD and GND contradiction.)
-function buildTruthTable() {
-    'use strict';
-    let terminals  = diagram.getTerminals().slice(2);
-    let table      = [];
-    let header     = [];
-    let inputVals  = [];
-    let outputVals = [];
-    diagram.clearAnalyses();
-
-    // Each loop iteration is a combination of input values.
-    // I.e., one row of the output table.
-    for (let ii = 0; ii < Math.pow(2, diagram.inputs.length); ii++) {
-        let tableInputRow = [];
-        let tableOutputRow = [];
-
-        // Compute each output.
-        for (let jj = 0; jj < diagram.outputs.length; jj++) {
-            tableOutputRow[jj] = diagram.computeOutput(ii, diagram.outputNodes[jj]);
-        }
-
-        outputVals[ii] = tableOutputRow;
-
-        for (let jj = 0; jj < diagram.inputs.length; jj++) {
-            /*jslint bitwise: true */
-            tableInputRow[jj] = (ii >> jj) & 1;
-            /*jslint bitwise: false */
-        }
-
-        inputVals[ii] = tableInputRow;
-    }
-
-    // Header
-    terminals.forEach(function(terminal, index) {
-        header[index] = diagram.getTerminalName(index + 2);
-    });
-
-    // Merge input and output into one table (input on the left, output on the right.)
-    table[0] = header;
-    for (let ii = 0; ii < inputVals.length; ii++) {
-        // Reverse the inputs so that A is on the left.
-        table[ii + 1] = inputVals[ii].reverse().concat(outputVals[ii]);
-    }
-
-    return table;
-}
-
-// Table is a 2D array of single character strings.
-function refreshTruthTable(suppressSetNets) {
-    'use strict';
-    let error = false;
-
-    // Update the diagram.netlist.
-    if(!suppressSetNets) {
-        diagram.setNets();
-    }
-
-    // Create a table with the correct number of rows and columns.
-    // The first row should be a header.
-    let table = buildTruthTable();
-    let tableElement = document.getElementById("truth-table");
-
-    tableElement.innerHTML = "";
-
-    if(error) {
-        return;
-    }
-
-    let header = tableElement.createTHead();
-    let headerRow = header.insertRow(0);
-    headerRow.className = "header";
-
-    table[0].forEach(function (element, index) {
-        let cell = headerRow.insertCell(index);
-        cell.innerHTML = element;
-        cell.className = index < diagram.inputs.length ? "input" : "output";
-    });
-
-    // Create the rest of the table.
-    table.forEach(function (row, rowIndex) {
-        if(rowIndex === 0) { return; }
-        let tRow = tableElement.insertRow(rowIndex);
-
-        row.forEach(function (cell, colIndex) {
-            let tCell = tRow.insertCell(colIndex);
-            tCell.innerHTML = cell;
-
-            // Set the cell class depending on whether this is
-            // an input or output cell.
-            if(colIndex < diagram.inputs.length) {
-                tCell.className = "input";
-            } else {
-                tCell.className = "output";
-                tCell.onmouseover = ((rowIndex, colIndex) => {
-                    return (() => {
-                        let path, outputNum, outputNodeIndex;
-                        outputNum = colIndex - diagram.inputs.length;
-                        outputNodeIndex = diagram.graph.getIndexByNode(diagram.outputNodes[outputNum]);
-                        path = diagram.analyses[rowIndex - 1][outputNodeIndex];
-                        diagram.view.setHighlight(path);
-                    });
-                })(rowIndex, colIndex);
-                tCell.onmouseleave = function () {
-                    diagram.view.highlightNets = false;
-                };
-            }
-        });
-    });
-    
-    if (diagram.nmosPullup || diagram.pmosPulldown) {
-        document.getElementById("pullup-pulldown-warning").classList.add("active");
-    } else if(document.getElementById("pullup-pulldown-warning").classList.contains("active")) {
-        document.getElementById("pullup-pulldown-warning").classList.remove("active");
-    }
-
-    window.scrollTo({behavior: "smooth", top: Math.ceil(tableElement.getBoundingClientRect().top + window.scrollY), left: 0,});
-}
-
-function setDarkMode(setToDark) {
-    'use strict';
-
-    if (setToDark) {
-        // Set to false so that toggleDarkMode() will set to true.
-        darkMode = false;
-        toggleDarkMode();
-    } else {
-        // Set to true so that toggleDarkMode() will set to false.
-        darkMode = true;
-        toggleDarkMode();
-    }
-}
-
-function toggleDarkMode() {
-    'use strict';
-    darkMode = !darkMode;
-
-    if (darkMode) {
-        document.body.classList.add('dark');
-        document.body.classList.remove('light');
-        document.getElementById('dark-mode-btn').classList.remove('fa-cloud-moon');
-        document.getElementById('dark-mode-btn').classList.add('fa-sun');
-    } else {
-        document.body.classList.add('light');
-        document.body.classList.remove('dark');
-        document.getElementById('dark-mode-btn').classList.remove('fa-sun');
-        document.getElementById('dark-mode-btn').classList.add('fa-cloud-moon');
-    }
-}
-
-function setUpLayerSelector() {
-    'use strict'; 
-
-    // Loop through all layer select buttons.
-    Array.from(document.getElementById("colorChange").children).forEach(function(element, index) {
-
-        // Set up the onclick event if not already set.
-        if(!element.onclick) {
-            element.onclick = function() {
-                let paintModeButton = document.getElementById("paint-mode-btn");
-
-                this.controller.changeLayer(index);
-
-                // Set the icon.
-                if (this.controller.eraseMode) {
-                    paintModeButton.classList.remove('fa-eraser');
-                    paintModeButton.classList.add('fa-paint-brush');
-                }
-
-                diagram.controller.setEraseMode(false);
-            }.bind(this);
-        }
-
-        // Color with flat color (rgb, not rgba).
-        element.style.color = diagram.view.getColor(index);
-    }.bind(diagram));
-}
-
-
-function clearPlaceTerminalMode() {
-    'use strict';
-    let placeTermButton = document.getElementById("place-term-btn");
-    placeTermButton.classList.remove("active");
-}
-
-// Fill in the termselect-list div with a radio button for each terminal.
-function populateTermSelect() {
-    'use strict';
-    let termSelectList = document.getElementById("termselect-list");
-    let terminals = diagram.getTerminals();
-
-    // First, clear the list.
-    termSelectList.innerHTML = "";
-
-    for(let ii = 0; ii < terminals.length; ii++) {
-        let termSelectItemLabel = document.createElement("label");
-        let termSelectItemInput = document.createElement("input");
-
-        // Set CSS style
-        if(ii === 0) {
-            termSelectItemLabel.classList.add("first");
-        }
-        if(ii === terminals.length - 1) {
-            termSelectItemLabel.classList.add("last");
-        }
-        termSelectItemLabel.classList.add("clickable");
-
-        termSelectItemInput.type = "radio";
-        termSelectItemInput.name = "termselect";
-        termSelectItemInput.value = ii;
-        termSelectItemInput.id = "termselect-" + ii;
-
-        termSelectItemLabel.innerHTML = diagram.getTerminalName(ii);
-        termSelectItemLabel.htmlFor = termSelectItemInput.id;
-
-        termSelectList.appendChild(termSelectItemInput);
-        termSelectList.appendChild(termSelectItemLabel);
     }
 }
 
