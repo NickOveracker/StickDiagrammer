@@ -73,6 +73,51 @@ class UserInterface {
             }
         }).bind(this);
     }
+	
+    keydownHandler(event) {
+        'use strict';
+        if(!document.getElementById("main-menu").classList.contains("closed")) {
+            return;
+        }
+		
+        let isInput  = (keyCode) => {
+			return (keyCode >= 65) && (keyCode < 65 + this.diagram.inputs.length );
+		}.bind(this.diagramController);
+		
+        let isOutput = (keyCode) => {
+			return (keyCode <= 89) && (keyCode > 89 - this.diagram.outputs.length);
+		}.bind(this.diagramController);
+        // GND and VDD are handled in shiftCommandHandler.
+
+        if (event.shiftKey && this.shiftCommands[event.keyCode]) {
+			this.shiftCommands[event.keyCode](event);
+		}
+        else if (event.ctrlKey && this.ctrlCommands[event.keyCode])           {
+			this.ctrlCommands[event.keyCode](event);
+		}
+        else if (isInput(event.keyCode))  {
+			this.placeTerminal(event, this.diagram.inputs[event.keyCode - 65]);
+		}
+        else if (isOutput(event.keyCode)) {
+            this.diagramController.placeTerminal(event, this.diagram.outputs[this.diagram.outputs.length - 90 + event.keyCode]);
+        }
+    }
+	
+    // Only change dark/light mode on keyup to avoid seizure-inducing flashes from holding down space.
+    keyupHandler(event) {
+        'use strict';
+        if(document.getElementById("main-menu").classList.contains("closed")) {
+            // Only do the following if shift is pressed.
+            if (event.shiftKey && this.shiftCommands[event.keyCode]) {
+                // Run the registered shift command.
+                this.shiftCommands[event.keyCode](event);
+            }
+        }
+		
+        if (!event.shiftKey && !event.ctrlKey && this.noModifierCommands[event.keyCode]) {
+			this.noModifierommands[event.keyCode](event);
+		}
+    }
 
     initHistoryCommands() {
         'use strict';
@@ -3626,6 +3671,9 @@ window.onload = function () {
 
     // Set to dark mode if it is night time
     setDarkMode(new Date().getHours() > 19 || new Date().getHours() < 7);
+	
+	// Set up the UI object.
+	UI = new UserInterface(diagram.controller);
 
     // Some of these pertain the the canvas, but we don't know whether
     // it will be selected.
@@ -3666,8 +3714,14 @@ window.onload = function () {
         }
     }.bind(diagram.controller));
 
-    window.addEventListener("keydown", function(e) { this.keydownHandler(e); }.bind(diagram.controller));
-    window.addEventListener("keyup", function(e) { this.keyupHandler(e); }.bind(diagram.controller));
+    window.addEventListener("keydown", function(e) {
+		this.keydownHandler(e);
+	}.bind(UI));
+	
+    window.addEventListener("keyup", function(e) {
+		this.keyupHandler(e);
+	}.bind(UI));
+	
     window.addEventListener("contextmenu", function(e) {
         if (e.button === 2) {
             // Don't show a context menu.
