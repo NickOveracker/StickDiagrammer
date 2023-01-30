@@ -41,6 +41,13 @@ html {
     text-align: center;
     background: red;
     visibility: hidden;
+    font-size: small;
+    height: 0;
+}
+
+.pullup-pulldown-warning.active {
+    visibility: visible;
+    height: auto;
 }
 
 .menu-long-text li::before {
@@ -89,7 +96,6 @@ html {
 
 }
 
-
 #palette-setting, #transparency-setting {
     background-color: black;
     padding-left: 10px;
@@ -98,8 +104,6 @@ html {
     padding-bottom: 5px;
     border-radius: 30px;
 }
-
-
 
 .column-flex {
     display: flex;
