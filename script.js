@@ -42,9 +42,9 @@
 /* globals runTestbench: false */
 /* jshint latedef: false */ // change to true or nofunc later
 (() => {
-	'use strict';
-	let UI;
-	
+    'use strict';
+    let UI;
+    
     class UserInterface {
         constructor(diagram) {
             this.darkMode          = null;
@@ -3508,6 +3508,8 @@
         if(window.runTestbench) {
             runTestbench();
             window.UI = UI;
+            window.Graph = Graph;
+            window.Diagram = Diagram;
         }
     };
 })();
