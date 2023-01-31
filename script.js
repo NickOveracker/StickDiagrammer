@@ -46,12 +46,12 @@ let UI;
 class UserInterface {
     constructor(diagram) {
         'use strict';
-		
-		this.darkMode          = null;
-		this.diagram           = diagram;
-		this.diagramController = diagram.controller;
-		this.diagramView       = diagram.view;
-		this.diagramGrid       = diagram.layeredGrid;
+        
+        this.darkMode          = null;
+        this.diagram           = diagram;
+        this.diagramController = diagram.controller;
+        this.diagramView       = diagram.view;
+        this.diagramGrid       = diagram.layeredGrid;
 
         // Grid color
         this.darkModeGridColor  = '#cccccc';
@@ -82,10 +82,10 @@ class UserInterface {
 
         this.addListeners();
         this.setUpControls();
-	
-		// Set to dark mode if it is night time
+    
+        // Set to dark mode if it is night time
         this.setDarkMode(new Date().getHours() > 19 || new Date().getHours() < 7);
-		
+        
         this.populateTermSelect();
         this.diagramView.refreshCanvas();
     }
@@ -2776,10 +2776,12 @@ class DiagramView {
 
         // Set stroke color depending on whether the dark mode is on or off.
         // Should be faintly visible in both modes.
-        if (Boolean(UI) && UI.darkMode) {
-            this.gridCtx.strokeStyle = UI.darkModeGridColor;
-        } else {
-            this.gridCtx.strokeStyle = UI.lightModeGridColor;
+        if (Boolean(UI)) {
+            if(UI.darkMode) {
+                this.gridCtx.strokeStyle = UI.darkModeGridColor;
+            } else {
+                this.gridCtx.strokeStyle = UI.lightModeGridColor;
+            }
         }
 
         for (let ii = 1; ii <= Math.max(this.diagram.layeredGrid.width, this.diagram.layeredGrid.height); ii++) {
@@ -3403,7 +3405,7 @@ class Graph {
     constructor(diagram) {
         'use strict';
         this.nodes = [];
-		this.diagram = diagram;
+        this.diagram = diagram;
     }
 
     // Clear the diagram.graph.
