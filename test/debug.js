@@ -35,7 +35,6 @@
            UI:                false,
            Diagram:           false,
            Graph:             false,
-           LayeredGrid:       false,
 */
 
 function debugDefinitions() {
@@ -73,7 +72,7 @@ function debugDefinitions() {
             for(let jj = 0; jj < this.layeredGrid.width; jj++) {
                 grid[ii][jj] = "_";
                 // If any of the layers are in netA, set the cell to "A".
-                for(let kk = 0; kk < LayeredGrid.layers.length; kk++) {
+                for(let kk = 0; kk < Diagram.layers.length; kk++) {
                     if(this.layeredGrid.get(ii, jj, kk).isSet && net.containsCell(this.layeredGrid.get(ii, jj, kk))) {
                         grid[ii][jj] = name;
                     }
