@@ -39,7 +39,8 @@
 /* jshint unused: true */
 /* jshint varstmt: true */
 /* jshint browser: true */
-/* globals runTestbench: false */
+/* globals runTestbench:     false,
+           debugDefinitions: false */
 /* jshint latedef: false */ // change to true or nofunc later
 (() => {
     'use strict';
@@ -3506,10 +3507,11 @@
         window.requestAnimationFrame(diagram.view.refreshCanvas.bind(diagram.view));
 
         if(window.runTestbench) {
-            runTestbench();
             window.UI = UI;
             window.Graph = Graph;
             window.Diagram = Diagram;
+            debugDefinitions();
+            runTestbench();
         }
     };
 })();
