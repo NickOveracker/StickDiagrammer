@@ -508,7 +508,7 @@
         endDrag(event) {
             let canvas = this.diagramView.canvas;
             let view   = this.diagramView;
-            let coords = this.diagramController.getCoordsFromEvent();
+            let coords = this.diagramController.getCoordsFromEvent(event);
 
             // If the mouse was released outside the canvas, undo and return.
             if(!this.diagramController.pixelIsInBounds()) {
