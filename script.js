@@ -938,12 +938,12 @@
                                 outputNum = colIndex - this.diagram.inputs.length;
                                 outputNodeIndex = this.diagram.graph.getIndexByNode(this.diagram.outputNodes[outputNum]);
                                 path = this.diagram.analyses[rowIndex - 1][outputNodeIndex];
-                                this.diagram.view.setHighlight(path);
-                            });
-                        })(rowIndex, colIndex);
+                                this.diagramView.setHighlight(path);
+                            }.bind(this));
+                        }.bind(this))(rowIndex, colIndex);
                         tCell.onmouseleave = function () {
-                            this.diagram.view.highlightNets = false;
-                        };
+                            this.diagramView.highlightNets = false;
+                        }.bind(this);
                     }
                 }.bind(this));
             }.bind(this));
