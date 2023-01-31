@@ -268,7 +268,7 @@
                 keyCode:      37,
                 action:       function(e) {
                     if(e.type.includes('down')) {
-                        let coords = this.diagramController.getCellAtCursor(this.diagramController.currentX, this.diagramController.currentY);
+                        let coords = this.diagramController.getCellAtCursor();
                         coords = Object.hasOwn(coords, "x") ? coords : {x: this.diagramGrid.width, };
                         if(Object.hasOwn(coords, "x")) {
                             this.diagramGrid.insertRemoveRowColAt(coords.x, false, false);
@@ -285,7 +285,7 @@
                 keyCode:       38,
                 action:        function(e) {
                     if(e.type.includes('down')) {
-                        let coords = this.diagramController.getCellAtCursor(this.diagramController.currentX, this.diagramController.currentY);
+                        let coords = this.diagramController.getCellAtCursor();
                         if(Object.hasOwn(coords, "y")) {
                             this.diagramGrid.insertRemoveRowColAt(coords.y, false, true);
                         } else {
@@ -301,7 +301,7 @@
                 keyCode:      39,
                 action:       function(e) {
                     if(e.type.includes('down')) {
-                        let coords = this.diagramController.getCellAtCursor(this.diagramController.currentX, this.diagramController.currentY);
+                        let coords = this.diagramController.getCellAtCursor();
                         if(Object.hasOwn(coords, "x")) {
                             this.diagramGrid.insertRemoveRowColAt(coords.x, true, false);
                         } else {
@@ -317,7 +317,7 @@
                 keyCode:      40,
                 action:       function(e) {
                     if(e.type.includes('down')) {
-                        let coords = this.diagramController.getCellAtCursor(this.diagramController.currentX, this.diagramController.currentY);
+                        let coords = this.diagramController.getCellAtCursor();
                         if(Object.hasOwn(coords, "y")) {
                             this.diagramGrid.insertRemoveRowColAt(coords.y, true, true);
                         } else {
@@ -544,7 +544,7 @@
             // Save the current X and Y coordinates.
             this.diagramController.currentX = coords.x;
             this.diagramController.currentY = coords.y;
-            this.diagramController.getCellAtCursor(coords.x, coords.y);
+            this.diagramController.getCellAtCursor();
 
             // If the mouse is pressed and the mouse is between cells 1 and gridsize - 1,
             if (this.diagramController.isPrimaryInput(event) || event.buttons === 2) {
@@ -2502,12 +2502,12 @@
                    screenY < boundingBox.bottom - this.view.cellHeight;
         }
 
-        getCellAtCursor(screenX, screenY) {
+        getCellAtCursor() {
             // Ignore if not inside the canvas
-            if (this.pixelIsInBounds(screenX, screenY)) {
+            if (this.pixelIsInBounds(this.currentX, this.currentY)) {
 
-                let x = Math.floor((screenX - this.view.canvas.getBoundingClientRect().left - this.view.cellWidth) / this.view.cellWidth);
-                let y = Math.floor((screenY - this.view.canvas.getBoundingClientRect().top - this.view.cellHeight) / this.view.cellHeight);
+                let x = Math.floor((this.currentX - this.view.canvas.getBoundingClientRect().left - this.view.cellWidth) / this.view.cellWidth);
+                let y = Math.floor((this.currentY - this.view.canvas.getBoundingClientRect().top - this.view.cellHeight) / this.view.cellHeight);
                 this.currentCell = {
                     x: x,
                     y: y,
@@ -2593,7 +2593,7 @@
             if(useGridCoords) {
                 cell = terminal;
             } else {
-                cell = this.getCellAtCursor(this.currentX, this.currentY);
+                cell = this.getCellAtCursor();
             }
 
             if (cell !== {} && !event.ctrlKey) {
@@ -2866,7 +2866,7 @@
         refreshCanvas() {
             this.resizeCanvas();
 
-            let currentCell = this.diagram.controller.getCellAtCursor(this.diagram.controller.currentX, this.diagram.controller.currentY);
+            let currentCell = this.diagram.controller.getCellAtCursor();
 
             if(currentCell.contact) {
                 document.getElementById("CONTACT").style.backgroundColor = this.getColor(Diagram.CONTACT, true);
