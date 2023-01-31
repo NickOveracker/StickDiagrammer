@@ -174,7 +174,7 @@ class UserInterface {
             // ENTER
             keyCode: 13,
             action:  function() {
-                refreshTruthTable();
+                this.refreshTruthTable();
             },
         };
 
@@ -348,7 +348,7 @@ class UserInterface {
             keyCode: 68,
             action:  function(e) {
                 if(e.type.includes('up')) {
-                    toggleDarkMode();
+                    this.toggleDarkMode();
                 }
             },
         };
@@ -371,7 +371,7 @@ class UserInterface {
             action:  function(e) {
                 if(e.type.includes('up')) {
                     this.view.theme = this.view.theme < DiagramView.themes.length - 1 ? this.view.theme + 1 : 0;
-                    setUpLayerSelector();
+                    this.setUpLayerSelector();
                 }
             }.bind(this.diagramController),
         };
@@ -646,7 +646,7 @@ class UserInterface {
         // Set up the evaluate button.
         button = document.getElementById("evaluate-btn");
         button.onclick = function () {
-            refreshTruthTable();
+            this.refreshTruthTable();
         };
     }
 
@@ -705,7 +705,7 @@ class UserInterface {
         }.bind(this.diagramController.diagram);
 
         document.getElementById("dark-mode-btn").onclick = function() {
-            toggleDarkMode();
+            this.toggleDarkMode();
         };
 
         document.getElementById("undo-btn").onclick = function() {
@@ -796,7 +796,7 @@ class UserInterface {
         document.getElementById('select-palette-btn').onclick = function() {
             this.theme = this.theme < DiagramView.themes.length - 1 ? this.theme + 1 : 0;
             document.getElementById('palette-setting').innerHTML = DiagramView.themes[this.theme];
-            setUpLayerSelector();
+            this.setUpLayerSelector();
         }.bind(this.diagramController.diagram.view);
 
         document.getElementById('toggle-transparency-btn').onclick = function() {
@@ -804,7 +804,7 @@ class UserInterface {
             document.getElementById('transparency-setting').innerHTML = this.useFlatColors ? "OFF" : "ON";
         }.bind(this.diagramController.diagram.view);
 
-        setUpLayerSelector();
+        this.setUpLayerSelector();
     }
 
     closeMainMenu() {
@@ -920,7 +920,7 @@ class UserInterface {
 
         // Create a table with the correct number of rows and columns.
         // The first row should be a header.
-        let table = buildTruthTable();
+        let table = this.buildTruthTable();
         let tableElement = document.getElementById("truth-table");
 
         tableElement.innerHTML = "";
@@ -985,11 +985,11 @@ class UserInterface {
         if (setToDark) {
             // Set to false so that toggleDarkMode() will set to true.
             darkMode = false;
-            toggleDarkMode();
+            this.toggleDarkMode();
         } else {
             // Set to true so that toggleDarkMode() will set to false.
             darkMode = true;
-            toggleDarkMode();
+            this.toggleDarkMode();
         }
     }
 
@@ -2454,7 +2454,7 @@ class DiagramController {
             this.diagram.layeredGrid.clear(removedTerm.x, removedTerm.y, Diagram.CONTACT);
         }
 
-        populateTermSelect();
+        UI.populateTermSelect();
     }
 
     addTerminal(isOutput) {
@@ -2489,7 +2489,7 @@ class DiagramController {
             netArr.push(new Net(name, true));
         }
 
-        populateTermSelect();
+        UI.populateTermSelect();
     }
 
     setPlaceTerminalMode(terminalNumber) {
@@ -2503,7 +2503,7 @@ class DiagramController {
     clearPlaceTerminalMode() {
         'use strict';
         this.placeTermMode = false;
-        clearPlaceTerminalMode();
+        UI.clearPlaceTerminalMode();
     }
 
     // Toggle if mode is not provided.
@@ -3623,12 +3623,12 @@ window.onload = function () {
     // Clear local storage
     localStorage.clear();
     diagram = new Diagram(document.getElementById("canvas"), document.getElementById("grid-canvas"));
-
-    // Set to dark mode if it is night time
-    setDarkMode(new Date().getHours() > 19 || new Date().getHours() < 7);
     
     // Set up the UI object.
     UI = new UserInterface(diagram.controller);
+	
+	// Set to dark mode if it is night time
+    UI.setDarkMode(new Date().getHours() > 19 || new Date().getHours() < 7);
 
     // Set Diagram.CONTACT at the coordinates of each input and output.
     diagram.inputs.forEach(function(input) {
@@ -3642,7 +3642,7 @@ window.onload = function () {
     diagram.layeredGrid.set(diagram.vddCell.x, diagram.vddCell.y, Diagram.CONTACT);
     diagram.layeredGrid.set(diagram.gndCell.x, diagram.gndCell.y, Diagram.CONTACT);
 
-    populateTermSelect();
+    UI.populateTermSelect();
     diagram.view.refreshCanvas();
     // 60 fps
     window.requestAnimationFrame(diagram.view.refreshCanvas.bind(diagram.view));
