@@ -945,7 +945,7 @@ class UserInterface {
             let cell = headerRow.insertCell(index);
             cell.innerHTML = element;
             cell.className = index < this.diagram.inputs.length ? "input" : "output";
-        });
+        }.bind(this));
 
         // Create the rest of the table.
         table.forEach(function (row, rowIndex) {
@@ -975,8 +975,8 @@ class UserInterface {
                         this.diagram.view.highlightNets = false;
                     };
                 }
-            });
-        });
+            }.bind(this));
+        }.bind(this));
         
         if (this.diagram.nmosPullup || this.diagram.pmosPulldown) {
             document.getElementById("pullup-pulldown-warning").classList.add("active");
