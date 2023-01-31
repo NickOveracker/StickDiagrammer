@@ -2897,7 +2897,7 @@ class DiagramView {
         'use strict';
         // Draw labels on the canvas above each input and output.
         this.ctx.font = "bold " + Math.floor(this.cellHeight) + "px Arial";
-        this.ctx.fillStyle = UI.darkMode ? "#ffffff" : "#000000";
+        this.ctx.fillStyle = Boolean(UI) && UI.darkMode ? "#ffffff" : "#000000";
 
         // Draw labels for all terminals.
         this.diagram.getTerminals().forEach(((terminal, index) => {
@@ -2920,7 +2920,7 @@ class DiagramView {
             // Draw a faint highlight on the cell at the cursor location.
             currentCell = this.diagram.controller.currentCell;
             if(ii === currentCell.x && jj === currentCell.y) {
-                this.ctx.fillStyle = UI.darkMode ? "rgba(255, 255, 255, 0.5)" : "rgba(0, 0, 0, 0.5)";
+                this.ctx.fillStyle = Boolean(UI) && UI.darkMode ? "rgba(255, 255, 255, 0.5)" : "rgba(0, 0, 0, 0.5)";
                 this.ctx.fillRect((ii+1) * this.cellWidth, (jj+1) * this.cellHeight - 1, this.cellWidth + 1, this.cellHeight + 2);
             }
         }
