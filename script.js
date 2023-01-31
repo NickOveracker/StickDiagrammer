@@ -2828,7 +2828,7 @@ class DiagramView {
 
         // Draw a thick border on the edge of the border drawn above.
         this.ctx.lineWidth = this.cellWidth / 4;
-        this.ctx.strokeStyle = UI.darkMode ? "#ffffff" : "#000000";
+        this.ctx.strokeStyle = Boolean(UI) && UI.darkMode ? "#ffffff" : "#000000";
         this.ctx.strokeRect(1 + this.cellWidth - this.ctx.lineWidth / 2,
             1 + this.cellHeight - this.ctx.lineWidth / 2,
             this.canvasWidth - 2 * this.cellWidth + this.ctx.lineWidth / 2,
