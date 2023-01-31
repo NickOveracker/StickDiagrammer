@@ -442,13 +442,9 @@
         }
 
         dragPrimary(bounds) {
-            // If this is CONTACT layer, then just move the contact around.
-            if(this.diagramController.cursorIndex === Diagram.CONTACT) {
-                this.diagramGrid.set(this.diagramController.currentX, this.diagramController.currentY, Diagram.CONTACT);
-            }
             // If the mouse moved more horizontally than vertically,
             // draw a horizontal line.
-            else if (bounds.right - bounds.left > bounds.bottom - bounds.top) {
+            if (bounds.right - bounds.left > bounds.bottom - bounds.top) {
                 bounds.lowLayer = bounds.highLayer = this.diagramController.cursorIndex;
                 bounds.bottom = bounds.top = this.diagramController.startY;
                 this.diagramGrid.map(bounds, function (x, y, layer) {
@@ -478,6 +474,7 @@
         drag(event) {
             let controller = this.diagramController;
             let view = this.diagramView;
+            let endX, endY, bounds;
 
             if (controller.startX === -1) {
                 return;
@@ -496,15 +493,25 @@
                 controller.saveCurrentState();
             }
 
-            let endX = Math.floor((controller.currentX - view.canvas.getBoundingClientRect().left - view.cellWidth)  / view.cellWidth);
-            let endY = Math.floor((controller.currentY - view.canvas.getBoundingClientRect().top  - view.cellHeight) / view.cellHeight);
+            endX = Math.floor((controller.currentX - view.canvas.getBoundingClientRect().left - view.cellWidth)  / view.cellWidth);
+            endY = Math.floor((controller.currentY - view.canvas.getBoundingClientRect().top  - view.cellHeight) / view.cellHeight);
 
-            let bounds = {
-                left:   Math.min(controller.startX, endX),
-                right:  Math.max(controller.startX, endX),
-                top:    Math.min(controller.startY, endY),
-                bottom: Math.max(controller.startY, endY),
-            };
+            // If this is CONTACT layer, then just move the contact around.
+            if(this.diagramController.cursorIndex === Diagram.CONTACT) {
+                bounds = {
+                    left:   Math.min(controller.startX, endX),
+                    right:  Math.max(controller.startX, endX),
+                    top:    Math.min(controller.startY, endY),
+                    bottom: Math.max(controller.startY, endY),
+                };
+            } else {
+                bounds = {
+                    left:   endX,
+                    right:  endX,
+                    top:    endY,
+                    bottom: endY,
+                };
+            }
 
             if (!controller.isEraseEvent(event)) {
                 this.dragPrimary(bounds);
