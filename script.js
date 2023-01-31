@@ -632,9 +632,9 @@
 
             // Set up the evaluate button.
             this.button = document.getElementById("evaluate-btn");
-            this.button.onclick = function () {
+            this.button.onclick = function() {
                 this.refreshTruthTable();
-            };
+            }.bind(this);
         }
 
         setUpControls() {
