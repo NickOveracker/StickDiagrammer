@@ -469,7 +469,7 @@
 
         drag(event) {
             let controller = this.diagramController;
-            let view = this.view;
+            let view = this.diagramView;
 
             if (controller.startX === -1) {
                 return;
