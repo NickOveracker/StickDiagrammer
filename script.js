@@ -233,7 +233,7 @@ class UserInterface {
             keyCode: 37,
             action:  function(e) {
                 if(e.type.includes('up')) {
-                    this.layeredGrid.shift(0, false, -1);
+                    this.diagramGrid.shift(0, false, -1);
                 }
             }.bind(this),
         };
@@ -244,7 +244,7 @@ class UserInterface {
             keyCode: 38,
             action:  function(e) {
                 if(e.type.includes('up')) {
-                    this.layeredGrid.shift(0, true, -1);
+                    this.diagramGrid.shift(0, true, -1);
                 }
             }.bind(this),
         };
@@ -255,7 +255,7 @@ class UserInterface {
             keyCode: 39,
             action:  function(e) {
                 if(e.type.includes('up')) {
-                    this.layeredGrid.shift(0, false, 1);
+                    this.diagramGrid.shift(0, false, 1);
                 }
             }.bind(this),
         };
@@ -266,7 +266,7 @@ class UserInterface {
             keyCode: 40,
             action:  function(e) {
                 if(e.type.includes('up')) {
-                    this.layeredGrid.shift(0, true, 1);
+                    this.diagramGrid.shift(0, true, 1);
                 }
             }.bind(this),
         };
@@ -278,11 +278,11 @@ class UserInterface {
             action:       function(e) {
                 if(e.type.includes('down')) {
                     let coords = this.diagramController.getCellAtCursor(this.diagramController.currentX, this.diagramController.currentY);
-                    coords = Object.hasOwn(coords, "x") ? coords : {x: this.layeredGrid.width, };
+                    coords = Object.hasOwn(coords, "x") ? coords : {x: this.diagramGrid.width, };
                     if(Object.hasOwn(coords, "x")) {
-                        this.layeredGrid.insertRemoveRowColAt(coords.x, false, false);
+                        this.diagramGrid.insertRemoveRowColAt(coords.x, false, false);
                     } else {
-                        this.layeredGrid.resize(this.layeredGrid.width - 1, this.layeredGrid.height);
+                        this.diagramGrid.resize(this.diagramGrid.width - 1, this.diagramGrid.height);
                     }
                 }
             }.bind(this),
@@ -296,9 +296,9 @@ class UserInterface {
                 if(e.type.includes('down')) {
                     let coords = this.diagramController.getCellAtCursor(this.diagramController.currentX, this.diagramController.currentY);
                     if(Object.hasOwn(coords, "y")) {
-                        this.layeredGrid.insertRemoveRowColAt(coords.y, false, true);
+                        this.diagramGrid.insertRemoveRowColAt(coords.y, false, true);
                     } else {
-                        this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height - 1);
+                        this.diagramGrid.resize(this.diagramGrid.width, this.diagramGrid.height - 1);
                     }
                 }
             }.bind(this),
@@ -312,9 +312,9 @@ class UserInterface {
                 if(e.type.includes('down')) {
                     let coords = this.diagramController.getCellAtCursor(this.diagramController.currentX, this.diagramController.currentY);
                     if(Object.hasOwn(coords, "x")) {
-                        this.layeredGrid.insertRemoveRowColAt(coords.x, true, false);
+                        this.diagramGrid.insertRemoveRowColAt(coords.x, true, false);
                     } else {
-                        this.layeredGrid.resize(this.layeredGrid.width + 1, this.layeredGrid.height);
+                        this.diagramGrid.resize(this.diagramGrid.width + 1, this.diagramGrid.height);
                     }
                 }
             }.bind(this),
@@ -328,9 +328,9 @@ class UserInterface {
                 if(e.type.includes('down')) {
                     let coords = this.diagramController.getCellAtCursor(this.diagramController.currentX, this.diagramController.currentY);
                     if(Object.hasOwn(coords, "y")) {
-                        this.layeredGrid.insertRemoveRowColAt(coords.y, true, true);
+                        this.diagramGrid.insertRemoveRowColAt(coords.y, true, true);
                     } else {
-                        this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height + 1);
+                        this.diagramGrid.resize(this.diagramGrid.width, this.diagramGrid.height + 1);
                     }
                 }
             }.bind(this),
@@ -404,9 +404,9 @@ class UserInterface {
         } else if (!this.diagramController.isEraseEvent(event)) {
             // Just fill in or delete the cell at the start coordinates.
             // If there is no cell at the start coordinates, change the cursor color.
-            if (!this.layeredGrid.get(this.diagramController.startX, this.diagramController.startY, this.diagramController.cursorIndex).isSet) {
+            if (!this.diagramGrid.get(this.diagramController.startX, this.diagramController.startY, this.diagramController.cursorIndex).isSet) {
                 this.diagramController.saveCurrentState();
-                this.layeredGrid.set(this.diagramController.startX, this.diagramController.startY, this.diagramController.cursorIndex);
+                this.diagramGrid.set(this.diagramController.startX, this.diagramController.startY, this.diagramController.cursorIndex);
             }
         } else {
             // If in the canvas and over a colored cell, erase it.
@@ -452,8 +452,8 @@ class UserInterface {
         if (bounds.right - bounds.left > bounds.bottom - bounds.top) {
             bounds.lowLayer = bounds.highLayer = this.diagramController.cursorIndex;
             bounds.bottom = bounds.top = this.diagramController.startY;
-            this.layeredGrid.map(bounds, function (x, y, layer) {
-                this.layeredGrid.set(x, y, layer);
+            this.diagramGrid.map(bounds, function (x, y, layer) {
+                this.diagramGrid.set(x, y, layer);
             }.bind(this), true);
         }
         // If the mouse moved more vertically than horizontally,
@@ -461,8 +461,8 @@ class UserInterface {
         else {
             bounds.lowLayer = bounds.highLayer = this.diagramController.cursorIndex;
             bounds.right = bounds.left = this.diagramController.startX;
-            this.layeredGrid.map(bounds, function (x, y, layer) {
-                this.layeredGrid.set(x, y, layer);
+            this.diagramGrid.map(bounds, function (x, y, layer) {
+                this.diagramGrid.set(x, y, layer);
             }.bind(this), true);
         }
     }
@@ -472,8 +472,8 @@ class UserInterface {
         // Secondary mouse button (i.e. right click)
         // Highlight a rectangle of squares for deletion.
         bounds.lowLayer = bounds.highLayer = Diagram.DELETE;
-        this.layeredGrid.map(bounds, function (x, y, layer) {
-            this.layeredGrid.set(x, y, layer);
+        this.diagramGrid.map(bounds, function (x, y, layer) {
+            this.diagramGrid.set(x, y, layer);
         }.bind(this), true);
     }
 
@@ -541,8 +541,8 @@ class UserInterface {
         } else {
             // For secondary (i.e. right) mouse button:
             // Delete a rectangle of squares
-            this.layeredGrid.map(bounds, function (x, y, layer) {
-                this.layeredGrid.clear(x, y, layer);
+            this.diagramGrid.map(bounds, function (x, y, layer) {
+                this.diagramGrid.clear(x, y, layer);
             }.bind(this));
         }
     }
@@ -661,39 +661,39 @@ class UserInterface {
     setUpControls() {
         'use strict';
         document.getElementById("remove-row").onclick = function() {
-            this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height - 1);
+            this.diagramGrid.resize(this.diagramGrid.width, this.diagramGrid.height - 1);
             this.diagramView.drawGrid();
         }.bind(this);
 
         document.getElementById("add-row").onclick = function() {
-            this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height + 1);
+            this.diagramGrid.resize(this.diagramGrid.width, this.diagramGrid.height + 1);
             this.diagramView.drawGrid();
         }.bind(this);
 
         document.getElementById("remove-column").onclick = function() {
-            this.layeredGrid.resize(this.layeredGrid.width - 1, this.layeredGrid.height);
+            this.diagramGrid.resize(this.diagramGrid.width - 1, this.diagramGrid.height);
             this.diagramView.drawGrid();
         }.bind(this);
 
         document.getElementById("add-column").onclick = function() {
-            this.layeredGrid.resize(this.layeredGrid.width + 1, this.layeredGrid.height);
+            this.diagramGrid.resize(this.diagramGrid.width + 1, this.diagramGrid.height);
             this.diagramView.drawGrid();
         }.bind(this);
 
         document.getElementById("shift-left").onclick = function() {
-            this.layeredGrid.shift(0, false, -1);
+            this.diagramGrid.shift(0, false, -1);
         }.bind(this);
 
         document.getElementById("shift-right").onclick = function() {
-            this.layeredGrid.shift(0, false, 1);
+            this.diagramGrid.shift(0, false, 1);
         }.bind(this);
 
         document.getElementById("shift-up").onclick = function() {
-            this.layeredGrid.shift(0, true, -1);
+            this.diagramGrid.shift(0, true, -1);
         }.bind(this);
 
         document.getElementById("shift-down").onclick = function() {
-            this.layeredGrid.shift(0, true, 1);
+            this.diagramGrid.shift(0, true, 1);
         }.bind(this);
 
         document.getElementById("paint-mode-btn").onclick = function() {
