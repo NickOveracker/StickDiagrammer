@@ -90,7 +90,7 @@ function runTestbench(runTo) {
     runTo = runTo || testCases.length;
 
     // Set up the testbench
-    while(layeredGrid.layers[UI.diagramController.cursorIndex].name !== "metal1") {
+    while(LayeredGrid.layers[UI.diagramController.cursorIndex].name !== "metal1") {
         UI.diagramController.changeLayer();
     }
 
