@@ -414,6 +414,8 @@
         // If the left (or primary) button, use the start and end coordinates to make either a horizontal or vertical line.
         // If the right (or secondary) button, use the same coordinates to delete a line of cells.
         mouseupHandler(event) {
+            this.diagramController.getCoordsFromEvent(event);
+
             if(this.diagramController.pixelIsInBounds()) {
                 event.preventDefault();
             }
@@ -542,6 +544,8 @@
 
         // Show a preview line when the user is dragging the mouse.
         mousemoveHandler(event) {
+            this.diagramController.getCoordsFromEvent(event);
+
             if(this.diagramController.pixelIsInBounds()) {
                 event.preventDefault();
             }
@@ -2580,6 +2584,9 @@
                 ret.x = event.clientX;
                 ret.y = event.clientY;
             }
+
+            this.currentX = ret.x;
+            this.currentY = ret.y;
 
             return ret;
         }
