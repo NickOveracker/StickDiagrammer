@@ -32,7 +32,7 @@
 /* jshint varstmt: true */
 /* jshint browser: true */
 /* globals DiagramController: false,
-           diagram:           false,
+           UI:                false,
            Diagram:           false,
            Graph:             false,
 */
@@ -117,7 +117,7 @@ Node.prototype.getName = function() {
         name += this.isPmos ? "+" : "";
         name += this.isNmos ? "-" : "";
     } else {
-        name = diagram.graph.getIndexByNode(this);
+        name = UI.diagram.graph.getIndexByNode(this);
         name += this.isPmos ? "+" : "";
         name += this.isNmos ? "-" : "";
     }
@@ -132,7 +132,7 @@ function recordEvent(event) {
     'use strict';
     if(window.recordMode) {
         if(event.type === "mousemove") {
-            if(!diagram.controller.dragging) {
+            if(!UI.diagramController.dragging) {
                 return;
             }
             else if(window.userInput[window.userInput.length - 1].type === event.type) {
@@ -149,8 +149,8 @@ function getRecording() {
     window.userInput.forEach(function(event) {
         outArr.push([
             event.type, {
-                clientX: Math.ceil((event.clientX - diagram.view.canvas.offsetLeft - diagram.view.cellWidth)  / diagram.view.cellWidth),
-                clientY: Math.ceil((event.clientY - diagram.view.canvas.offsetTop  - diagram.view.cellHeight) / diagram.view.cellHeight),
+                clientX: Math.ceil((event.clientX - UI.diagramView.canvas.offsetLeft - UI.diagramView.cellWidth)  / UI.diagramView.cellWidth),
+                clientY: Math.ceil((event.clientY - UI.diagramView.canvas.offsetTop  - UI.diagramView.cellHeight) / UI.diagramView.cellHeight),
             },
         ]);
         if(outArr[outArr.length - 1][0].includes("move")) {
@@ -162,7 +162,6 @@ function getRecording() {
     let str = JSON.stringify(outArr);
     console.log(str.replace(/^\[(\[.*\])\]$/u, "$1").replaceAll("}],", "}],\n") + ",");
 }
-
 
 let oldOnload = window.onload;
 window.onload = function() {
@@ -180,12 +179,12 @@ window.onload = function() {
 };
 
 Diagram.prototype.mapString = function(row) {
-  let str = "";
-  
-  for(let jj = 0; jj < this.nodeNodeMap[row].length; jj++) {
-    str += this.nodeNodeMap[row][jj].label;
-    str += " ";
-  }
-  
-  return str;
-}
+    'use strict';
+    let str = "";
+
+    for(let jj = 0; jj < this.nodeNodeMap[row].length; jj++) {
+        str += this.nodeNodeMap[row][jj].label;
+        str += " ";
+    }
+    return str;
+};
