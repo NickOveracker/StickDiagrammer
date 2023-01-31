@@ -30,9 +30,8 @@
 /* jshint unused: false */
 /* jshint varstmt: true */
 /* jshint browser: true */
-/* globals diagram: false,
+/* globals UI: false,
            Diagram: false,
-           refreshTruthTable: false,
 */
 
 function runTestbench(runTo) {
@@ -91,32 +90,32 @@ function runTestbench(runTo) {
     runTo = runTo || testCases.length;
 
     // Set up the testbench
-    while(Diagram.layers[diagram.controller.cursorIndex].name !== "metal1") {
-        diagram.controller.changeLayer();
+    while(Diagram.layers[UI.diagramController.cursorIndex].name !== "metal1") {
+        UI.diagramController.changeLayer();
     }
 
-    function mapX(x) {return Math.floor(x*diagram.view.cellWidth + diagram.view.canvas.getBoundingClientRect().left + diagram.view.cellWidth);}
-    function mapY(y) {return Math.floor(y*diagram.view.cellHeight + diagram.view.canvas.getBoundingClientRect().top + diagram.view.cellHeight);}
+    function mapX(x) {return Math.floor(x*UI.diagramView.cellWidth + UI.diagramView.canvas.getBoundingClientRect().left + UI.diagramView.cellWidth);}
+    function mapY(y) {return Math.floor(y*UI.diagramView.cellHeight + UI.diagramView.canvas.getBoundingClientRect().top + UI.diagramView.cellHeight);}
 
     let events = [
         1,
         // Place terminals
         function() {
-            diagram.inputs[0].x = 3;
-            diagram.inputs[0].y = 14;
+            UI.diagram.inputs[0].x = 3;
+            UI.diagram.inputs[0].y = 14;
 
-            diagram.outputs[0].x = 28;
-            diagram.outputs[0].y = 14;
+            UI.diagram.outputs[0].x = 28;
+            UI.diagram.outputs[0].y = 14;
 
-            for(let ii = 1; ii < diagram.inputs.length; ii++) {
-                diagram.inputs[ii].x = 0;
-                diagram.inputs[ii].y = 0;
+            for(let ii = 1; ii < UI.diagram.inputs.length; ii++) {
+                UI.diagram.inputs[ii].x = 0;
+                UI.diagram.inputs[ii].y = 0;
             }
 
-            diagram.vddCell.x    = 1;
-            diagram.vddCell.y    = 1;
-            diagram.gndCell.x    = 1;
-            diagram.gndCell.y    = 27;
+            UI.diagram.vddCell.x    = 1;
+            UI.diagram.vddCell.y    = 1;
+            UI.diagram.gndCell.x    = 1;
+            UI.diagram.gndCell.y    = 27;
         },
 
         // Clear the canvas
@@ -413,8 +412,8 @@ function runTestbench(runTo) {
 
         // Place terminals
         function() {
-            diagram.outputs[0].x = 23;
-            diagram.outputs[0].y = 14;
+            UI.diagram.outputs[0].x = 23;
+            UI.diagram.outputs[0].y = 14;
         },
 
         2,
@@ -527,15 +526,15 @@ function runTestbench(runTo) {
 
         // Place terminals
         function() {
-            diagram.inputs[1].x = 3;
-            diagram.inputs[1].y = 14;
+            UI.diagram.inputs[1].x = 3;
+            UI.diagram.inputs[1].y = 14;
 
-            diagram.outputs[0].x = 28;
-            diagram.outputs[0].y = 14;
+            UI.diagram.outputs[0].x = 28;
+            UI.diagram.outputs[0].y = 14;
 
-            for(let ii = 1; ii < diagram.inputs.length; ii++) {
-                diagram.inputs[ii].x = 3 + 6 * ii;
-                diagram.inputs[ii].y = 14;
+            for(let ii = 1; ii < UI.diagram.inputs.length; ii++) {
+                UI.diagram.inputs[ii].x = 3 + 6 * ii;
+                UI.diagram.inputs[ii].y = 14;
             }
         },
 
@@ -547,8 +546,8 @@ function runTestbench(runTo) {
 
         // Place terminals
         function() {
-            diagram.outputs[0].x = 26;
-            diagram.outputs[0].y = 14;
+            UI.diagram.outputs[0].x = 26;
+            UI.diagram.outputs[0].y = 14;
         },
 
         2,
@@ -653,8 +652,8 @@ function runTestbench(runTo) {
 
         // Place terminals
         function() {
-            diagram.outputs[0].x = 28;
-            diagram.outputs[0].y = 14;
+            UI.diagram.outputs[0].x = 28;
+            UI.diagram.outputs[0].y = 14;
         },
 
         2,
@@ -802,8 +801,8 @@ function runTestbench(runTo) {
 
         // Place terminal A
         function() {
-            diagram.inputs[0].x = 8;
-            diagram.inputs[0].y = 4;
+            UI.diagram.inputs[0].x = 8;
+            UI.diagram.inputs[0].y = 4;
         },
 
         2,
@@ -813,8 +812,8 @@ function runTestbench(runTo) {
 
         // Place terminal B
         function() {
-            diagram.inputs[1].x = 20;
-            diagram.inputs[1].y = 4;
+            UI.diagram.inputs[1].x = 20;
+            UI.diagram.inputs[1].y = 4;
         },
 
         2,
@@ -824,8 +823,8 @@ function runTestbench(runTo) {
 
         // Place terminal C
         function() {
-            diagram.inputs[2].x = 8;
-            diagram.inputs[2].y = 24;
+            UI.diagram.inputs[2].x = 8;
+            UI.diagram.inputs[2].y = 24;
         },
 
         2,
@@ -835,8 +834,8 @@ function runTestbench(runTo) {
 
         // Place terminal D
         function() {
-            diagram.inputs[3].x = 20;
-            diagram.inputs[3].y = 24;
+            UI.diagram.inputs[3].x = 20;
+            UI.diagram.inputs[3].y = 24;
         },
 
         2,
@@ -845,16 +844,16 @@ function runTestbench(runTo) {
         /** A & B & (C | D) **/
         1,
         function() {
-            diagram.inputs[0].x  = 2;
-            diagram.inputs[0].y  = 13;
-            diagram.inputs[1].x  = 6;
-            diagram.inputs[1].y  = 13;
-            diagram.inputs[2].x  = 16;
-            diagram.inputs[2].y  = 13;
-            diagram.inputs[3].x  = 20;
-            diagram.inputs[3].y  = 13;
-            diagram.outputs[0].x = 28;
-            diagram.outputs[0].y = 13;
+            UI.diagram.inputs[0].x  = 2;
+            UI.diagram.inputs[0].y  = 13;
+            UI.diagram.inputs[1].x  = 6;
+            UI.diagram.inputs[1].y  = 13;
+            UI.diagram.inputs[2].x  = 16;
+            UI.diagram.inputs[2].y  = 13;
+            UI.diagram.inputs[3].x  = 20;
+            UI.diagram.inputs[3].y  = 13;
+            UI.diagram.outputs[0].x = 28;
+            UI.diagram.outputs[0].y = 13;
         },
 
         ["mousedown", {button:  2, clientX: mapX(1),   clientY: mapY(1)}],
@@ -1158,16 +1157,16 @@ function runTestbench(runTo) {
         /** AOI4 **/
         1,
         function() {
-            diagram.inputs[0].x  = 5;
-            diagram.inputs[0].y  = 8;
-            diagram.inputs[1].x  = 9;
-            diagram.inputs[1].y  = 8;
-            diagram.inputs[2].x  = 15;
-            diagram.inputs[2].y  = 8;
-            diagram.inputs[3].x  = 19;
-            diagram.inputs[3].y  = 8;
-            diagram.outputs[0].x = 3;
-            diagram.outputs[0].y = 21;
+            UI.diagram.inputs[0].x  = 5;
+            UI.diagram.inputs[0].y  = 8;
+            UI.diagram.inputs[1].x  = 9;
+            UI.diagram.inputs[1].y  = 8;
+            UI.diagram.inputs[2].x  = 15;
+            UI.diagram.inputs[2].y  = 8;
+            UI.diagram.inputs[3].x  = 19;
+            UI.diagram.inputs[3].y  = 8;
+            UI.diagram.outputs[0].x = 3;
+            UI.diagram.outputs[0].y = 21;
         },
 
         ["mousedown", {button:  2, clientX: mapX(1),   clientY: mapY(1)}],
@@ -1479,8 +1478,8 @@ function runTestbench(runTo) {
         /** Between transistors **/
         1,
         function() {
-            diagram.outputs[0].x = 15;
-            diagram.outputs[0].y = 24;
+            UI.diagram.outputs[0].x = 15;
+            UI.diagram.outputs[0].y = 24;
         },
 
         2,
@@ -1489,14 +1488,14 @@ function runTestbench(runTo) {
         /** SR Latch **/
         1,
         function() {
-            diagram.inputs[1].x  = 19;
-            diagram.inputs[1].y  = 8;
-            diagram.inputs[2].x  = 25;
-            diagram.inputs[2].y  = 8;
-            diagram.inputs[3].x  = 25;
-            diagram.inputs[3].y  = 8;
-            diagram.outputs[0].x = 11;
-            diagram.outputs[0].y = 8;
+            UI.diagram.inputs[1].x  = 19;
+            UI.diagram.inputs[1].y  = 8;
+            UI.diagram.inputs[2].x  = 25;
+            UI.diagram.inputs[2].y  = 8;
+            UI.diagram.inputs[3].x  = 25;
+            UI.diagram.inputs[3].y  = 8;
+            UI.diagram.outputs[0].x = 11;
+            UI.diagram.outputs[0].y = 8;
         },
 
         ["mousedown", {button:  2, clientX: mapX(2),  clientY: mapY(15)}],
@@ -1533,8 +1532,8 @@ function runTestbench(runTo) {
         /** SR Latch Q' **/
         1,
         function() {
-            diagram.outputs[0].x = 13;
-            diagram.outputs[0].y = 7;
+            UI.diagram.outputs[0].x = 13;
+            UI.diagram.outputs[0].y = 7;
         },
 
         2,
@@ -1549,18 +1548,18 @@ function runTestbench(runTo) {
 
         1,
         function() {
-            diagram.inputs[0].x  = 26;
-            diagram.inputs[0].y  = 6;
-            diagram.inputs[1].x  = 7;
-            diagram.inputs[1].y  = 6;
-            diagram.inputs[2].x  = 28;
-            diagram.inputs[2].y  = 28;
-            diagram.inputs[3].x  = 28;
-            diagram.inputs[3].y  = 28;
-            diagram.outputs[0].x = 12;
-            diagram.outputs[0].y = 16;
-            diagram.gndCell.x    = 0;
-            diagram.gndCell.y    = 24;
+            UI.diagram.inputs[0].x  = 26;
+            UI.diagram.inputs[0].y  = 6;
+            UI.diagram.inputs[1].x  = 7;
+            UI.diagram.inputs[1].y  = 6;
+            UI.diagram.inputs[2].x  = 28;
+            UI.diagram.inputs[2].y  = 28;
+            UI.diagram.inputs[3].x  = 28;
+            UI.diagram.inputs[3].y  = 28;
+            UI.diagram.outputs[0].x = 12;
+            UI.diagram.outputs[0].y = 16;
+            UI.diagram.gndCell.x    = 0;
+            UI.diagram.gndCell.y    = 24;
         },
 
         ["mousedown",{"button":0,"clientX":mapX(2),"clientY":mapY(5)}],
@@ -1887,20 +1886,20 @@ function runTestbench(runTo) {
         /** GND and VDD on single PMOS gate **/
         1,
         function() {
-            diagram.inputs[0].x  = 7;
-            diagram.inputs[0].y  = 6;
-            diagram.inputs[1].x  = 28;
-            diagram.inputs[1].y  = 28;
-            diagram.inputs[2].x  = 28;
-            diagram.inputs[2].y  = 28;
-            diagram.inputs[3].x  = 28;
-            diagram.inputs[3].y  = 28;
-            diagram.outputs[0].x = 21;
-            diagram.outputs[0].y = 6;
-            diagram.vddCell.x    = 14;
-            diagram.vddCell.y    = 12;
-            diagram.gndCell.x    = 14;
-            diagram.gndCell.y    = 14;
+            UI.diagram.inputs[0].x  = 7;
+            UI.diagram.inputs[0].y  = 6;
+            UI.diagram.inputs[1].x  = 28;
+            UI.diagram.inputs[1].y  = 28;
+            UI.diagram.inputs[2].x  = 28;
+            UI.diagram.inputs[2].y  = 28;
+            UI.diagram.inputs[3].x  = 28;
+            UI.diagram.inputs[3].y  = 28;
+            UI.diagram.outputs[0].x = 21;
+            UI.diagram.outputs[0].y = 6;
+            UI.diagram.vddCell.x    = 14;
+            UI.diagram.vddCell.y    = 12;
+            UI.diagram.gndCell.x    = 14;
+            UI.diagram.gndCell.y    = 14;
         },
 
         // Clear the canvas
@@ -1931,20 +1930,20 @@ function runTestbench(runTo) {
         /* Two inputs driving single PMOS gate */
         1,
         function() {
-            diagram.inputs[0].x  = 14;
-            diagram.inputs[0].y  = 12;
-            diagram.inputs[1].x  = 14;
-            diagram.inputs[1].y  = 14;
-            diagram.inputs[2].x  = 28;
-            diagram.inputs[2].y  = 28;
-            diagram.inputs[3].x  = 28;
-            diagram.inputs[3].y  = 28;
-            diagram.outputs[0].x = 21;
-            diagram.outputs[0].y = 6;
-            diagram.vddCell.x    = 7;
-            diagram.vddCell.y    = 6;
-            diagram.gndCell.x    = 28;
-            diagram.gndCell.y    = 28;
+            UI.diagram.inputs[0].x  = 14;
+            UI.diagram.inputs[0].y  = 12;
+            UI.diagram.inputs[1].x  = 14;
+            UI.diagram.inputs[1].y  = 14;
+            UI.diagram.inputs[2].x  = 28;
+            UI.diagram.inputs[2].y  = 28;
+            UI.diagram.inputs[3].x  = 28;
+            UI.diagram.inputs[3].y  = 28;
+            UI.diagram.outputs[0].x = 21;
+            UI.diagram.outputs[0].y = 6;
+            UI.diagram.vddCell.x    = 7;
+            UI.diagram.vddCell.y    = 6;
+            UI.diagram.gndCell.x    = 28;
+            UI.diagram.gndCell.y    = 28;
         },
 
         2,
@@ -1953,20 +1952,20 @@ function runTestbench(runTo) {
         /** GND and VDD on single NMOS gate **/
         1,
         function() {
-            diagram.inputs[0].x  = 7;
-            diagram.inputs[0].y  = 6;
-            diagram.inputs[1].x  = 28;
-            diagram.inputs[1].y  = 28;
-            diagram.inputs[2].x  = 28;
-            diagram.inputs[2].y  = 28;
-            diagram.inputs[3].x  = 28;
-            diagram.inputs[3].y  = 28;
-            diagram.outputs[0].x = 21;
-            diagram.outputs[0].y = 6;
-            diagram.vddCell.x    = 14;
-            diagram.vddCell.y    = 12;
-            diagram.gndCell.x    = 14;
-            diagram.gndCell.y    = 14;
+            UI.diagram.inputs[0].x  = 7;
+            UI.diagram.inputs[0].y  = 6;
+            UI.diagram.inputs[1].x  = 28;
+            UI.diagram.inputs[1].y  = 28;
+            UI.diagram.inputs[2].x  = 28;
+            UI.diagram.inputs[2].y  = 28;
+            UI.diagram.inputs[3].x  = 28;
+            UI.diagram.inputs[3].y  = 28;
+            UI.diagram.outputs[0].x = 21;
+            UI.diagram.outputs[0].y = 6;
+            UI.diagram.vddCell.x    = 14;
+            UI.diagram.vddCell.y    = 12;
+            UI.diagram.gndCell.x    = 14;
+            UI.diagram.gndCell.y    = 14;
         },
 
         // Clear the canvas
@@ -1997,20 +1996,20 @@ function runTestbench(runTo) {
         /* Two inputs driving single NMOS gate */
         1,
         function() {
-            diagram.inputs[0].x  = 14;
-            diagram.inputs[0].y  = 12;
-            diagram.inputs[1].x  = 14;
-            diagram.inputs[1].y  = 14;
-            diagram.inputs[2].x  = 28;
-            diagram.inputs[2].y  = 28;
-            diagram.inputs[3].x  = 28;
-            diagram.inputs[3].y  = 28;
-            diagram.outputs[0].x = 21;
-            diagram.outputs[0].y = 6;
-            diagram.vddCell.x    = 28;
-            diagram.vddCell.y    = 28;
-            diagram.gndCell.x    = 7;
-            diagram.gndCell.y    = 6;
+            UI.diagram.inputs[0].x  = 14;
+            UI.diagram.inputs[0].y  = 12;
+            UI.diagram.inputs[1].x  = 14;
+            UI.diagram.inputs[1].y  = 14;
+            UI.diagram.inputs[2].x  = 28;
+            UI.diagram.inputs[2].y  = 28;
+            UI.diagram.inputs[3].x  = 28;
+            UI.diagram.inputs[3].y  = 28;
+            UI.diagram.outputs[0].x = 21;
+            UI.diagram.outputs[0].y = 6;
+            UI.diagram.vddCell.x    = 28;
+            UI.diagram.vddCell.y    = 28;
+            UI.diagram.gndCell.x    = 7;
+            UI.diagram.gndCell.y    = 6;
         },
 
         2,
@@ -2019,20 +2018,20 @@ function runTestbench(runTo) {
         /** Indirectly overdriven output via NMOS **/
         1,
         function() {
-            diagram.inputs[0].x  = 6;
-            diagram.inputs[0].y  = 14;
-            diagram.inputs[1].x  = 22;
-            diagram.inputs[1].y  = 14;
-            diagram.inputs[2].x  = 3;
-            diagram.inputs[2].y  = 6;
-            diagram.inputs[3].x  = 25;
-            diagram.inputs[3].y  = 6;
-            diagram.outputs[0].x = 14;
-            diagram.outputs[0].y = 6;
-            diagram.vddCell.x    = 0;
-            diagram.vddCell.y    = 0;
-            diagram.gndCell.x    = 0;
-            diagram.gndCell.y    = 28;
+            UI.diagram.inputs[0].x  = 6;
+            UI.diagram.inputs[0].y  = 14;
+            UI.diagram.inputs[1].x  = 22;
+            UI.diagram.inputs[1].y  = 14;
+            UI.diagram.inputs[2].x  = 3;
+            UI.diagram.inputs[2].y  = 6;
+            UI.diagram.inputs[3].x  = 25;
+            UI.diagram.inputs[3].y  = 6;
+            UI.diagram.outputs[0].x = 14;
+            UI.diagram.outputs[0].y = 6;
+            UI.diagram.vddCell.x    = 0;
+            UI.diagram.vddCell.y    = 0;
+            UI.diagram.gndCell.x    = 0;
+            UI.diagram.gndCell.y    = 28;
         },
 
         // Clear the canvas
@@ -2091,20 +2090,20 @@ function runTestbench(runTo) {
         /* Indirectly overdriven gates via PMOS */
         1,
         function() {
-            diagram.inputs[0].x  = 8;
-            diagram.inputs[0].y  = 14;
-            diagram.inputs[1].x  = 20;
-            diagram.inputs[1].y  = 14;
-            diagram.inputs[2].x  = 4;
-            diagram.inputs[2].y  = 1;
-            diagram.inputs[3].x  = 18;
-            diagram.inputs[3].y  = 1;
-            diagram.outputs[0].x = 26;
-            diagram.outputs[0].y = 14;
-            diagram.vddCell.x    = 12;
-            diagram.vddCell.y    = 1;
-            diagram.gndCell.x    = 12;
-            diagram.gndCell.y    = 27;
+            UI.diagram.inputs[0].x  = 8;
+            UI.diagram.inputs[0].y  = 14;
+            UI.diagram.inputs[1].x  = 20;
+            UI.diagram.inputs[1].y  = 14;
+            UI.diagram.inputs[2].x  = 4;
+            UI.diagram.inputs[2].y  = 1;
+            UI.diagram.inputs[3].x  = 18;
+            UI.diagram.inputs[3].y  = 1;
+            UI.diagram.outputs[0].x = 26;
+            UI.diagram.outputs[0].y = 14;
+            UI.diagram.vddCell.x    = 12;
+            UI.diagram.vddCell.y    = 1;
+            UI.diagram.gndCell.x    = 12;
+            UI.diagram.gndCell.y    = 27;
         },
 
         // Clear the canvas
@@ -2218,20 +2217,20 @@ function runTestbench(runTo) {
         /* Indirectly overdriven gates via NMOS */
         1,
         function() {
-            diagram.inputs[0].x  = 8;
-            diagram.inputs[0].y  = 14;
-            diagram.inputs[1].x  = 20;
-            diagram.inputs[1].y  = 14;
-            diagram.inputs[2].x  = 4;
-            diagram.inputs[2].y  = 1;
-            diagram.inputs[3].x  = 18;
-            diagram.inputs[3].y  = 1;
-            diagram.outputs[0].x = 26;
-            diagram.outputs[0].y = 14;
-            diagram.vddCell.x    = 12;
-            diagram.vddCell.y    = 27;
-            diagram.gndCell.x    = 12;
-            diagram.gndCell.y    = 1;
+            UI.diagram.inputs[0].x  = 8;
+            UI.diagram.inputs[0].y  = 14;
+            UI.diagram.inputs[1].x  = 20;
+            UI.diagram.inputs[1].y  = 14;
+            UI.diagram.inputs[2].x  = 4;
+            UI.diagram.inputs[2].y  = 1;
+            UI.diagram.inputs[3].x  = 18;
+            UI.diagram.inputs[3].y  = 1;
+            UI.diagram.outputs[0].x = 26;
+            UI.diagram.outputs[0].y = 14;
+            UI.diagram.vddCell.x    = 12;
+            UI.diagram.vddCell.y    = 27;
+            UI.diagram.gndCell.x    = 12;
+            UI.diagram.gndCell.y    = 1;
         },
 
         // Clear the canvas
@@ -2347,20 +2346,20 @@ function runTestbench(runTo) {
         /* Overdriven dead-end transistor */
          1,
         function() {
-            diagram.inputs[0].x  = 7;
-            diagram.inputs[0].y  = 5;
-            diagram.inputs[1].x  = 7;
-            diagram.inputs[1].y  = 11;
-            diagram.inputs[2].x  = 7;
-            diagram.inputs[2].y  = 17;
-            diagram.inputs[3].x  = 7;
-            diagram.inputs[3].y  = 23;
-            diagram.outputs[0].x = 19;
-            diagram.outputs[0].y = 13;
-            diagram.vddCell.x    = 0;
-            diagram.vddCell.y    = 0;
-            diagram.gndCell.x    = 0;
-            diagram.gndCell.y    = 0;
+            UI.diagram.inputs[0].x  = 7;
+            UI.diagram.inputs[0].y  = 5;
+            UI.diagram.inputs[1].x  = 7;
+            UI.diagram.inputs[1].y  = 11;
+            UI.diagram.inputs[2].x  = 7;
+            UI.diagram.inputs[2].y  = 17;
+            UI.diagram.inputs[3].x  = 7;
+            UI.diagram.inputs[3].y  = 23;
+            UI.diagram.outputs[0].x = 19;
+            UI.diagram.outputs[0].y = 13;
+            UI.diagram.vddCell.x    = 0;
+            UI.diagram.vddCell.y    = 0;
+            UI.diagram.gndCell.x    = 0;
+            UI.diagram.gndCell.y    = 0;
         },
 
         // Clear the canvas
@@ -2386,20 +2385,20 @@ function runTestbench(runTo) {
         /* One overdriven transistor in series with VDD w/ grounded gate */
          1,
         function() {
-            diagram.inputs[0].x  = 7;
-            diagram.inputs[0].y  = 5;
-            diagram.inputs[1].x  = 7;
-            diagram.inputs[1].y  = 11;
-            diagram.inputs[2].x  = 7;
-            diagram.inputs[2].y  = 17;
-            diagram.inputs[3].x  = 7;
-            diagram.inputs[3].y  = 23;
-            diagram.outputs[0].x = 19;
-            diagram.outputs[0].y = 13;
-            diagram.vddCell.x    = 1;
-            diagram.vddCell.y    = 13;
-            diagram.gndCell.x    = 7;
-            diagram.gndCell.y    = 20;
+            UI.diagram.inputs[0].x  = 7;
+            UI.diagram.inputs[0].y  = 5;
+            UI.diagram.inputs[1].x  = 7;
+            UI.diagram.inputs[1].y  = 11;
+            UI.diagram.inputs[2].x  = 7;
+            UI.diagram.inputs[2].y  = 17;
+            UI.diagram.inputs[3].x  = 7;
+            UI.diagram.inputs[3].y  = 23;
+            UI.diagram.outputs[0].x = 19;
+            UI.diagram.outputs[0].y = 13;
+            UI.diagram.vddCell.x    = 1;
+            UI.diagram.vddCell.y    = 13;
+            UI.diagram.gndCell.x    = 7;
+            UI.diagram.gndCell.y    = 20;
         },
 
         2,
@@ -2408,20 +2407,20 @@ function runTestbench(runTo) {
         /* Two overdriven dead-end transistors in series */
          1,
         function() {
-            diagram.inputs[0].x  = 7;
-            diagram.inputs[0].y  = 5;
-            diagram.inputs[1].x  = 7;
-            diagram.inputs[1].y  = 11;
-            diagram.inputs[2].x  = 5;
-            diagram.inputs[2].y  = 17;
-            diagram.inputs[3].x  = 5;
-            diagram.inputs[3].y  = 23;
-            diagram.outputs[0].x = 19;
-            diagram.outputs[0].y = 13;
-            diagram.vddCell.x    = 0;
-            diagram.vddCell.y    = 0;
-            diagram.gndCell.x    = 0;
-            diagram.gndCell.y    = 0;
+            UI.diagram.inputs[0].x  = 7;
+            UI.diagram.inputs[0].y  = 5;
+            UI.diagram.inputs[1].x  = 7;
+            UI.diagram.inputs[1].y  = 11;
+            UI.diagram.inputs[2].x  = 5;
+            UI.diagram.inputs[2].y  = 17;
+            UI.diagram.inputs[3].x  = 5;
+            UI.diagram.inputs[3].y  = 23;
+            UI.diagram.outputs[0].x = 19;
+            UI.diagram.outputs[0].y = 13;
+            UI.diagram.vddCell.x    = 0;
+            UI.diagram.vddCell.y    = 0;
+            UI.diagram.gndCell.x    = 0;
+            UI.diagram.gndCell.y    = 0;
         },
 
         // Clear some of the poly to remove old contacts
@@ -2444,20 +2443,20 @@ function runTestbench(runTo) {
         /* Two overdriven transistors in series with VDD */
          1,
         function() {
-            diagram.inputs[0].x  = 7;
-            diagram.inputs[0].y  = 5;
-            diagram.inputs[1].x  = 7;
-            diagram.inputs[1].y  = 11;
-            diagram.inputs[2].x  = 5;
-            diagram.inputs[2].y  = 17;
-            diagram.inputs[3].x  = 5;
-            diagram.inputs[3].y  = 23;
-            diagram.outputs[0].x = 19;
-            diagram.outputs[0].y = 13;
-            diagram.vddCell.x    = 1;
-            diagram.vddCell.y    = 13;
-            diagram.gndCell.x    = 0;
-            diagram.gndCell.y    = 0;
+            UI.diagram.inputs[0].x  = 7;
+            UI.diagram.inputs[0].y  = 5;
+            UI.diagram.inputs[1].x  = 7;
+            UI.diagram.inputs[1].y  = 11;
+            UI.diagram.inputs[2].x  = 5;
+            UI.diagram.inputs[2].y  = 17;
+            UI.diagram.inputs[3].x  = 5;
+            UI.diagram.inputs[3].y  = 23;
+            UI.diagram.outputs[0].x = 19;
+            UI.diagram.outputs[0].y = 13;
+            UI.diagram.vddCell.x    = 1;
+            UI.diagram.vddCell.y    = 13;
+            UI.diagram.gndCell.x    = 0;
+            UI.diagram.gndCell.y    = 0;
         },
 
         2,
@@ -2466,20 +2465,20 @@ function runTestbench(runTo) {
         /* Two overdriven transistors in series with VDD w/ grounded gate */
          1,
         function() {
-            diagram.inputs[0].x  = 7;
-            diagram.inputs[0].y  = 5;
-            diagram.inputs[1].x  = 7;
-            diagram.inputs[1].y  = 11;
-            diagram.inputs[2].x  = 5;
-            diagram.inputs[2].y  = 17;
-            diagram.inputs[3].x  = 5;
-            diagram.inputs[3].y  = 23;
-            diagram.outputs[0].x = 19;
-            diagram.outputs[0].y = 13;
-            diagram.vddCell.x    = 1;
-            diagram.vddCell.y    = 13;
-            diagram.gndCell.x    = 7;
-            diagram.gndCell.y    = 17;
+            UI.diagram.inputs[0].x  = 7;
+            UI.diagram.inputs[0].y  = 5;
+            UI.diagram.inputs[1].x  = 7;
+            UI.diagram.inputs[1].y  = 11;
+            UI.diagram.inputs[2].x  = 5;
+            UI.diagram.inputs[2].y  = 17;
+            UI.diagram.inputs[3].x  = 5;
+            UI.diagram.inputs[3].y  = 23;
+            UI.diagram.outputs[0].x = 19;
+            UI.diagram.outputs[0].y = 13;
+            UI.diagram.vddCell.x    = 1;
+            UI.diagram.vddCell.y    = 13;
+            UI.diagram.gndCell.x    = 7;
+            UI.diagram.gndCell.y    = 17;
         },
 
         2,
@@ -2488,20 +2487,20 @@ function runTestbench(runTo) {
         /* One transistor driven by VDD & GND in series w/ singly-driven gate & direct input */
         1,
         function() {
-            diagram.inputs[0].x  = 1;
-            diagram.inputs[0].y  = 13;
-            diagram.inputs[1].x  = 5;
-            diagram.inputs[1].y  = 5;
-            diagram.inputs[2].x  = 0;
-            diagram.inputs[2].y  = 0;
-            diagram.inputs[3].x  = 0;
-            diagram.inputs[3].y  = 0;
-            diagram.outputs[0].x = 19;
-            diagram.outputs[0].y = 13;
-            diagram.vddCell.x    = 7;
-            diagram.vddCell.y    = 5;
-            diagram.gndCell.x    = 7;
-            diagram.gndCell.y    = 23;
+            UI.diagram.inputs[0].x  = 1;
+            UI.diagram.inputs[0].y  = 13;
+            UI.diagram.inputs[1].x  = 5;
+            UI.diagram.inputs[1].y  = 5;
+            UI.diagram.inputs[2].x  = 0;
+            UI.diagram.inputs[2].y  = 0;
+            UI.diagram.inputs[3].x  = 0;
+            UI.diagram.inputs[3].y  = 0;
+            UI.diagram.outputs[0].x = 19;
+            UI.diagram.outputs[0].y = 13;
+            UI.diagram.vddCell.x    = 7;
+            UI.diagram.vddCell.y    = 5;
+            UI.diagram.gndCell.x    = 7;
+            UI.diagram.gndCell.y    = 23;
         },
 
         // Clear some of the poly to remove old contacts
@@ -2536,20 +2535,20 @@ function runTestbench(runTo) {
         /* One transistor driven by VDD & GND in series w/ overdriven gate & direct input */
         1,
         function() {
-            diagram.inputs[0].x  = 1;
-            diagram.inputs[0].y  = 13;
-            diagram.inputs[1].x  = 5;
-            diagram.inputs[1].y  = 5;
-            diagram.inputs[2].x  = 5;
-            diagram.inputs[2].y  = 23;
-            diagram.inputs[3].x  = 0;
-            diagram.inputs[3].y  = 0;
-            diagram.outputs[0].x = 19;
-            diagram.outputs[0].y = 13;
-            diagram.vddCell.x    = 7;
-            diagram.vddCell.y    = 5;
-            diagram.gndCell.x    = 7;
-            diagram.gndCell.y    = 23;
+            UI.diagram.inputs[0].x  = 1;
+            UI.diagram.inputs[0].y  = 13;
+            UI.diagram.inputs[1].x  = 5;
+            UI.diagram.inputs[1].y  = 5;
+            UI.diagram.inputs[2].x  = 5;
+            UI.diagram.inputs[2].y  = 23;
+            UI.diagram.inputs[3].x  = 0;
+            UI.diagram.inputs[3].y  = 0;
+            UI.diagram.outputs[0].x = 19;
+            UI.diagram.outputs[0].y = 13;
+            UI.diagram.vddCell.x    = 7;
+            UI.diagram.vddCell.y    = 5;
+            UI.diagram.gndCell.x    = 7;
+            UI.diagram.gndCell.y    = 23;
         },
 
         2,
@@ -2561,7 +2560,7 @@ function runTestbench(runTo) {
     startTime = Date.now();
     for(let ii = 0; ii < events.length && testVector < runTo; ii++) {
         if(events[ii] === 0) {
-            diagram.controller.changeLayer();
+            UI.diagramController.changeLayer();
             continue;
         }
 
@@ -2590,25 +2589,25 @@ function runTestbench(runTo) {
 
         if(assertNext) {
             // Set Diagram.CONTACT at the coordinates of each input and output.
-            diagram.inputs.forEach(function(input) {
-                diagram.layeredGrid.set(input.x, input.y, Diagram.CONTACT);
+            UI.diagram.inputs.forEach(function(input) {
+                UI.diagram.layeredGrid.set(input.x, input.y, Diagram.CONTACT);
             });
-            diagram.outputs.forEach(function(output) {
-                diagram.layeredGrid.set(output.x, output.y, Diagram.CONTACT);
+            UI.diagram.outputs.forEach(function(output) {
+                UI.diagram.layeredGrid.set(output.x, output.y, Diagram.CONTACT);
             });
 
             // Set the Diagram.CONTACT layer on the VDD and GND cells.
-            diagram.layeredGrid.set(diagram.vddCell.x, diagram.vddCell.y, Diagram.CONTACT);
-            diagram.layeredGrid.set(diagram.gndCell.x, diagram.gndCell.y, Diagram.CONTACT);
+            UI.diagram.layeredGrid.set(UI.diagram.vddCell.x, UI.diagram.vddCell.y, Diagram.CONTACT);
+            UI.diagram.layeredGrid.set(UI.diagram.gndCell.x, UI.diagram.gndCell.y, Diagram.CONTACT);
 
             // Do it.
-            diagram.setNets();
-            diagram.clearAnalyses();
+            UI.diagram.setNets();
+            UI.diagram.clearAnalyses();
             tv = "";
             
-            for(let ii = 0; ii < diagram.outputs.length; ii++) {
-                for(let jj = 0; jj < Math.pow(2, diagram.inputs.length); jj++) {
-                    tv += diagram.computeOutput(jj, diagram.outputNodes[ii]);
+            for(let ii = 0; ii < UI.diagram.outputs.length; ii++) {
+                for(let jj = 0; jj < Math.pow(2, UI.diagram.inputs.length); jj++) {
+                    tv += UI.diagram.computeOutput(jj, UI.diagram.outputNodes[ii]);
                 }
             }
         
@@ -2619,7 +2618,7 @@ function runTestbench(runTo) {
         }
     }
     endTime = Date.now();
-    refreshTruthTable(true);
+    UI.refreshTruthTable(true);
 
     // Only overwrite the results if all tests were run.
     if(runTo < testCases.length) {
