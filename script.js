@@ -2776,7 +2776,7 @@ class DiagramView {
 
         // Set stroke color depending on whether the dark mode is on or off.
         // Should be faintly visible in both modes.
-        if (UI.darkMode) {
+        if (Boolean(UI) && UI.darkMode) {
             this.gridCtx.strokeStyle = UI.darkModeGridColor;
         } else {
             this.gridCtx.strokeStyle = UI.lightModeGridColor;
