@@ -505,6 +505,8 @@
                     bottom: Math.max(controller.startY, endY),
                 };
             } else {
+                controller.startX = endX;
+                controller.startY = endY;
                 bounds = {
                     left:   endX,
                     right:  endX,
