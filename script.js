@@ -3510,6 +3510,7 @@
             window.UI = UI;
             window.Graph = Graph;
             window.Diagram = Diagram;
+            window.DiagramController = DiagramController;
             debugDefinitions();
             runTestbench();
         }
