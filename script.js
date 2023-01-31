@@ -398,7 +398,7 @@
             if(controller.placeTermMode) {
                 this.clearPlaceTerminalMode();
                 controller.placeTerminal(event, controller.selectedTerminal);
-            } else if (!controller.isEraseEvent(event)) {
+            } else if (!this.isEraseEvent(event)) {
                 // Just fill in or delete the cell at the start coordinates.
                 // If there is no cell at the start coordinates, change the cursor color.
                 if (!this.diagramGrid.get(controller.startX, controller.startY, controller.cursorIndex).isSet) {
@@ -497,7 +497,7 @@
             endY = Math.floor((controller.currentY - view.canvas.getBoundingClientRect().top  - view.cellHeight) / view.cellHeight);
 
             // If this is CONTACT layer, then just move the contact around.
-            if(controller.isEraseEvent(event) || controller.cursorIndex !== Diagram.CONTACT) {
+            if(this.isEraseEvent(event) || controller.cursorIndex !== Diagram.CONTACT) {
                 bounds = {
                     left:   Math.min(controller.startX, endX),
                     right:  Math.max(controller.startX, endX),
@@ -515,7 +515,7 @@
                 };
             }
 
-            if (!controller.isEraseEvent(event)) {
+            if (!this.isEraseEvent(event)) {
                 this.dragPrimary(bounds);
             } else {
                 this.dragSecondary(bounds);
@@ -542,7 +542,7 @@
 
             // For primary (i.e. left) mouse button:
             // If the mouse moved more horizontally than vertically, draw a horizontal line.
-            if (!this.diagramController.isEraseEvent(event)) {
+            if (!this.isEraseEvent(event)) {
                 this.diagramController.draw(bounds);
             } else {
                 // For secondary (i.e. right) mouse button:
@@ -696,7 +696,7 @@
 
             document.getElementById("paint-mode-btn").onclick = function() {
                 // No argument -> Toggle
-                this.diagramController.setEraseMode();
+                this.setEraseMode();
 
                 // Set the icon.
                 let paintModeButton = document.getElementById("paint-mode-btn");
@@ -778,7 +778,7 @@
                 }
 
                 term = parseInt(term.value);
-                this.diagramController.setPlaceTerminalMode(term);
+                this.setPlaceTerminalMode(term);
                 placeTermButton.classList.add("active");
             }.bind(this);
 
@@ -1022,7 +1022,7 @@
                             paintModeButton.classList.add('fa-paint-brush');
                         }
 
-                        this.diagramController.setEraseMode(false);
+                        this.setEraseMode(false);
                     }.bind(this);
                 }
 
@@ -1031,9 +1031,30 @@
             }.bind(this));
         }
 
+        setPlaceTerminalMode(terminalNumber) {
+            // Concatenate diagram.inputs, diagram.outputs, diagram.vddCell, and diagram.gndCell.
+            let terminals = this.diagram.getTerminals();
+            this.diagramController.placeTermMode = true;
+            this.diagramController.selectedTerminal = terminals[terminalNumber];
+        }
+
         clearPlaceTerminalMode() {
             document.getElementById("place-term-btn").classList.remove("active");
-            this.diagramController.clearPlaceTerminalMode();
+            this.diagramController.placeTermMode = false;
+        }
+
+        // Toggle if mode is not provided.
+        setEraseMode(mode) {
+            if(mode !== undefined) {
+                this.diagramController.eraseMode = mode;
+            }
+            else {
+                this.diagramController.eraseMode = !this.diagramController.eraseMode;
+            }
+        }
+
+        isEraseEvent(event) {
+            return this.diagramController.eraseMode || event.button === 2 || event.buttons === 2;
         }
 
         // Fill in the termselect-list div with a radio button for each terminal.
@@ -2437,31 +2458,6 @@
                 this.placeTerminal(newTerm, newTerm, true);
                 netArr.push(new Net(name, true));
             }
-        }
-
-        setPlaceTerminalMode(terminalNumber) {
-            // Concatenate diagram.inputs, diagram.outputs, diagram.vddCell, and diagram.gndCell.
-            let terminals = this.diagram.getTerminals();
-            this.placeTermMode = true;
-            this.selectedTerminal = terminals[terminalNumber];
-        }
-
-        clearPlaceTerminalMode() {
-            this.placeTermMode = false;
-        }
-
-        // Toggle if mode is not provided.
-        setEraseMode(mode) {
-            if(mode !== undefined) {
-                this.eraseMode = mode;
-            }
-            else {
-                this.eraseMode = !this.eraseMode;
-            }
-        }
-
-        isEraseEvent(event) {
-            return this.eraseMode || event.button === 2 || event.buttons === 2;
         }
 
         // Save function to save the current state of the grid and the canvas.
