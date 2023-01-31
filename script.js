@@ -692,7 +692,7 @@
 
             document.getElementById("dark-mode-btn").onclick = function() {
                 this.toggleDarkMode();
-            };
+            }.bind(this);
 
             document.getElementById("undo-btn").onclick = function() {
                 this.diagramController.undo();
