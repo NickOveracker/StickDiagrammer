@@ -1158,16 +1158,16 @@ class Diagram {
 
     initNets() {
         'use strict';
-        this.vddNet = new Net("VDD", true, this.layeredGrid);
-        this.gndNet = new Net("GND", true, this.layeredGrid);
+        this.vddNet = new Net("VDD", true);
+        this.gndNet = new Net("GND", true);
         this.inputNets = [];
         this.outputNets = [];
 
         for (let ii = 0; ii < this.inputs.length; ii++) {
-            this.inputNets.push(new Net(String.fromCharCode(65 + ii), true, this.layeredGrid));
+            this.inputNets.push(new Net(String.fromCharCode(65 + ii), true));
         }
         for (let ii = 0; ii < this.outputs.length; ii++) {
-            this.outputNets.push(new Net(String.fromCharCode(89 - ii), false, this.layeredGrid));
+            this.outputNets.push(new Net(String.fromCharCode(89 - ii), false));
         }
 
         this.netlist = [];
@@ -2122,7 +2122,7 @@ class Diagram {
             // Skip for the gate terminal.
             if (term === "gate") { return; }
 
-            let net = new Net("?", false, this.layeredGrid);
+            let net = new Net("?", false);
 
             // If the transistor's term1/term2 is not in any of the nets,
             // then create a new net and add term1/term2 to it.
@@ -2131,7 +2131,7 @@ class Diagram {
                     net.clear();
                     net = this.getNet(transistor[term]);
                 }
-                net.addCell(transistor[term]);
+                net.addCell(transistor[term], this.layeredGrid.get(transistor[term].x, transistor[term].y, Diagram.CONTACT).isSet);
             }
 
             // Add the net if it is not empty.
@@ -2148,7 +2148,7 @@ class Diagram {
             let net = this.getNet(transistor[term]);
 
             if (net === null) {
-                net = new Net("?", false, this.layeredGrid);
+                net = new Net("?", false);
                 this.setRecursively(transistor[term], net);
                 this.netlist.push(net);
             }
@@ -2389,7 +2389,7 @@ class Diagram {
                     return;
                 }
                 if (net.containsCell(this.layeredGrid.get(cell.x, cell.y, layer)) === false) {
-                    net.addCell(this.layeredGrid.get(cell.x, cell.y, layer));
+                    net.addCell(this.layeredGrid.get(cell.x, cell.y, layer), true);
                     this.setRecursively(this.layeredGrid.get(cell.x, cell.y, layer), net);
                 }
             }.bind(this));
@@ -2411,7 +2411,7 @@ class Diagram {
         if (this.checkIfTransistor(cell, Diagram.PDIFF, this.pmos)) { return; }
 
         // Add the cell to the net.
-        net.addCell(cell);
+        net.addCell(cell, this.layeredGrid.get(cell.x, cell.y, Diagram.CONTACT).isSet);
 
         // If Diagram.CONTACT is set, add add all layers to the net.
         this.handleContact(cell, net);
@@ -2488,7 +2488,7 @@ class DiagramController {
             });
             newTerm = termArr[0];
             this.placeTerminal(newTerm, newTerm, true);
-            netArr.unshift(new Net(name, false, this.layeredGrid));
+            netArr.unshift(new Net(name, false));
         } else {
             termArr = this.diagram.inputs;
             netArr  = this.diagram.inputNets;
@@ -2499,7 +2499,7 @@ class DiagramController {
             });
             newTerm = termArr[termArr.length - 1];
             this.placeTerminal(newTerm, newTerm, true);
-            netArr.push(new Net(name, true, this.layeredGrid));
+            netArr.push(new Net(name, true));
         }
 
         UI.populateTermSelect();
@@ -3561,7 +3561,7 @@ class Edge {
 
 // Set of cells that are electrically connected to one another.
 class Net {
-    constructor(name, isInput, grid) {
+    constructor(name, isInput) {
         'use strict';
         this.name = name;
         this.cells = new Set();
@@ -3569,7 +3569,6 @@ class Net {
         this.isInput = isInput;
         this.hasPoly = false;
         this.hasDiff = false;
-        this.grid = grid;
     }
 
     isIdentical(net) {
@@ -3613,11 +3612,11 @@ class Net {
         this.hasDiff = false;
     }
 
-    addCell(cell) {
+    addCell(cell, contactSet) {
         'use strict';
         this.cells.add(cell);
 
-        if(!this.grid.get(cell.x, cell.y, Diagram.CONTACT).isSet) {
+        if(!contactSet) {
             this.hasPoly = this.hasPoly || cell.layer === Diagram.POLY;
             this.hasDiff = this.hasDiff || cell.layer === Diagram.NDIFF || cell.layer === Diagram.PDIFF;
         }
