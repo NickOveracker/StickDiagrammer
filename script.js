@@ -932,8 +932,8 @@
                         tCell.className = "input";
                     } else {
                         tCell.className = "output";
-                        tCell.onmouseover = ((rowIndex, colIndex) => {
-                            return (() => {
+                        tCell.onmouseover = (function (rowIndex, colIndex) {
+                            return (function() {
                                 let path, outputNum, outputNodeIndex;
                                 outputNum = colIndex - this.diagram.inputs.length;
                                 outputNodeIndex = this.diagram.graph.getIndexByNode(this.diagram.outputNodes[outputNum]);
