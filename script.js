@@ -527,12 +527,6 @@
             let view   = this.diagramView;
             let coords = this.diagramController.getCoordsFromEvent(event);
 
-            // If the mouse was released outside the canvas, undo and return.
-            if(!this.diagramController.pixelIsInBounds()) {
-                this.diagramController.undo();
-                return;
-            }
-
             let endX = Math.floor((coords.x - canvas.getBoundingClientRect().left - view.cellWidth)  / view.cellWidth);
             let endY = Math.floor((coords.y - canvas.getBoundingClientRect().top  - view.cellHeight) / view.cellHeight);
             let bounds = {
