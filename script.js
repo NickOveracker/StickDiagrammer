@@ -544,6 +544,7 @@
 
         // Show a preview line when the user is dragging the mouse.
         mousemoveHandler(event) {
+            // Save the current X and Y coordinates.
             this.diagramController.getCoordsFromEvent(event);
 
             if(this.diagramController.pixelIsInBounds()) {
@@ -553,11 +554,6 @@
             if(event.type.includes("mouse")) {
                 this.diagramView.trailCursor = true;
             }
-
-            // Save the current X and Y coordinates.
-            this.diagramController.currentX = coords.x;
-            this.diagramController.currentY = coords.y;
-            this.diagramController.getCellAtCursor();
 
             // If the mouse is pressed and the mouse is between cells 1 and gridsize - 1,
             if (this.diagramController.isPrimaryInput(event) || event.buttons === 2) {
