@@ -362,7 +362,7 @@
                 action:  function(e) {
                     if(e.type.includes('up')) {
                         this.diagramView.theme = this.diagramView.theme < DiagramView.themes.length - 1 ? this.diagramView.theme + 1 : 0;
-                        this.diagramController.setUpLayerSelector();
+                        this.setUpLayerSelector();
                     }
                 }.bind(this),
             };
@@ -757,7 +757,6 @@
                 term = parseInt(term.value);
                 this.diagramController.setPlaceTerminalMode(term);
                 placeTermButton.classList.add("active");
-
             }.bind(this);
 
             document.getElementById('add-input-btn').onclick = function() {
@@ -783,7 +782,7 @@
             document.getElementById('select-palette-btn').onclick = function() {
                 this.diagramView.theme = this.diagramView.theme < DiagramView.themes.length - 1 ? this.diagramView.theme + 1 : 0;
                 document.getElementById('palette-setting').innerHTML = DiagramView.themes[this.diagramView.theme];
-                this.diagramView.setUpLayerSelector();
+                this.setUpLayerSelector();
             }.bind(this);
 
             document.getElementById('toggle-transparency-btn').onclick = function() {
