@@ -904,7 +904,7 @@ class UserInterface {
         // Header
         terminals.forEach(function(terminal, index) {
             header[index] = this.diagram.getTerminalName(index + 2);
-        });
+        }.bind(this));
 
         // Merge input and output into one table (input on the left, output on the right.)
         table[0] = header;
