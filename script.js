@@ -442,9 +442,13 @@
         }
 
         dragPrimary(bounds) {
+            // If this is CONTACT layer, then just move the contact around.
+            if(this.diagramController.cursorIndex === Diagram.CONTACT) {
+                this.diagramGrid.set(this.diagramController.currentX, this.diagramController.currentY, Diagram.CONTACT);
+            }
             // If the mouse moved more horizontally than vertically,
             // draw a horizontal line.
-            if (bounds.right - bounds.left > bounds.bottom - bounds.top) {
+            else if (bounds.right - bounds.left > bounds.bottom - bounds.top) {
                 bounds.lowLayer = bounds.highLayer = this.diagramController.cursorIndex;
                 bounds.bottom = bounds.top = this.diagramController.startY;
                 this.diagramGrid.map(bounds, function (x, y, layer) {
@@ -562,7 +566,7 @@
             // If the mouse is pressed and the mouse is between cells 1 and gridsize - 1,
             if (this.diagramController.isPrimaryInput(event) || event.buttons === 2) {
                 // Ignore if not inside the canvas
-                if (this.diagramController.pixelIsInBounds() && this.diagramController.cursorIndex !== Diagram.CONTACT) {
+                if (this.diagramController.pixelIsInBounds()) {
                     this.drag(event);
                 }
             }
