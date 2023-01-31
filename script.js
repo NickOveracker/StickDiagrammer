@@ -100,15 +100,19 @@
             // GND and VDD are handled in shiftCommandHandler.
 
             if (event.shiftKey && this.shiftCommands[event.keyCode]) {
+                event.preventDefault();
                 this.shiftCommands[event.keyCode](event);
             }
             else if (event.ctrlKey && this.ctrlCommands[event.keyCode])           {
+                event.preventDefault();
                 this.ctrlCommands[event.keyCode](event);
             }
             else if (isInput(event.keyCode))  {
+                event.preventDefault();
                 this.diagramController.placeTerminal(event, this.diagram.inputs[event.keyCode - 65]);
             }
             else if (isOutput(event.keyCode)) {
+                event.preventDefault();
                 this.diagramController.placeTerminal(event, this.diagram.outputs[this.diagram.outputs.length - 90 + event.keyCode]);
             }
         }
