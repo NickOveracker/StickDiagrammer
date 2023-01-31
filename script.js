@@ -350,7 +350,7 @@
                 keyCode: 70,
                 action:  function(e) {
                     if(e.type.includes('up')) {
-                        this.diagramView.useFlatColors = !this.diagramView.useFlatColors;
+                        this.toggleTransparency();
                     }
                 }.bind(this),
             };
@@ -361,8 +361,7 @@
                 keyCode: 84,
                 action:  function(e) {
                     if(e.type.includes('up')) {
-                        this.diagramView.theme = this.diagramView.theme < DiagramView.themes.length - 1 ? this.diagramView.theme + 1 : 0;
-                        this.setUpLayerSelector();
+                        this.changeTheme();
                     }
                 }.bind(this),
             };
@@ -370,7 +369,18 @@
             this.allCommands.push(this.darkModeCommand);
             this.allCommands.push(this.transparencyCommand);
             this.allCommands.push(this.themeCommand);
-       }
+        }
+
+        changeTheme() {
+            this.diagramView.theme = this.diagramView.theme < DiagramView.themes.length - 1 ? this.diagramView.theme + 1 : 0;
+            document.getElementById('palette-setting').innerHTML = DiagramView.themes[this.diagramView.theme];
+            this.setUpLayerSelector();
+        }
+
+        toggleTransparency() {
+            this.diagramView.useFlatColors = !this.diagramView.useFlatColors;
+            document.getElementById('transparency-setting').innerHTML = this.diagramView.useFlatColors ? "OFF" : "ON";
+        }
 
         cellClickHandler(event) {
             let controller = this.diagramController;
@@ -780,14 +790,11 @@
             }.bind(this);
 
             document.getElementById('select-palette-btn').onclick = function() {
-                this.diagramView.theme = this.diagramView.theme < DiagramView.themes.length - 1 ? this.diagramView.theme + 1 : 0;
-                document.getElementById('palette-setting').innerHTML = DiagramView.themes[this.diagramView.theme];
-                this.setUpLayerSelector();
+                this.changeTheme();
             }.bind(this);
 
             document.getElementById('toggle-transparency-btn').onclick = function() {
-                this.diagramView.useFlatColors = !this.diagramView.useFlatColors;
-                document.getElementById('transparency-setting').innerHTML = this.diagramView.useFlatColors ? "OFF" : "ON";
+                this.toggleTransparency();
             }.bind(this);
 
             this.setUpLayerSelector();
