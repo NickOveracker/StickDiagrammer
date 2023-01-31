@@ -1176,7 +1176,7 @@ class Diagram {
 
     initNodes() {
         'use strict';
-        this.graph = new Graph();
+        this.graph = new Graph(this);
         this.inputNodes  = [];
         this.outputNodes = [];
         this.nmos = new Set();
