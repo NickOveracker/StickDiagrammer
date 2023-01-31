@@ -44,19 +44,13 @@
 /* jshint latedef: false */ // change to true or nofunc later
 (() => {
     'use strict';
-    let UI;
-    
+
     class UserInterface {
         constructor(diagram) {
-            this.darkMode          = null;
             this.diagram           = diagram;
             this.diagramController = diagram.controller;
             this.diagramView       = diagram.view;
             this.diagramGrid       = diagram.layeredGrid;
-
-            // Grid color
-            this.darkModeGridColor  = '#cccccc';
-            this.lightModeGridColor = '#999999';
 
             this.allCommands        = [];
             this.shiftCommands      = [];
@@ -97,7 +91,7 @@
             }
             
             let isInput  = function(keyCode) {
-                return (keyCode >= 65) && (keyCode < 65 + this.diagram.inputs.length );
+                return (keyCode >= 65) && (keyCode < 65 + this.diagram.inputs.length);
             }.bind(this);
             
             let isOutput = function(keyCode) {
@@ -379,27 +373,29 @@
        }
 
         cellClickHandler(event) {
-            if(this.diagramController.startX === -1) {
+            let controller = this.diagramController;
+
+            if(controller.startX === -1) {
                 return;
             }
 
-            let coords = this.diagramController.getCoordsFromEvent(event);
+            let coords = controller.getCoordsFromEvent(event);
 
-            if(this.diagramController.placeTermMode) {
-                this.diagramController.clearPlaceTerminalMode();
-                this.diagramController.placeTerminal(event, this.diagramController.selectedTerminal);
-            } else if (!this.diagramController.isEraseEvent(event)) {
+            if(controller.placeTermMode) {
+                this.clearPlaceTerminalMode();
+                controller.placeTerminal(event, controller.selectedTerminal);
+            } else if (!controller.isEraseEvent(event)) {
                 // Just fill in or delete the cell at the start coordinates.
                 // If there is no cell at the start coordinates, change the cursor color.
-                if (!this.diagramGrid.get(this.diagramController.startX, this.diagramController.startY, this.diagramController.cursorIndex).isSet) {
-                    this.diagramController.saveCurrentState();
-                    this.diagramGrid.set(this.diagramController.startX, this.diagramController.startY, this.diagramController.cursorIndex);
+                if (!this.diagramGrid.get(controller.startX, controller.startY, controller.cursorIndex).isSet) {
+                    controller.saveCurrentState();
+                    this.diagramGrid.set(controller.startX, controller.startY, controller.cursorIndex);
                 }
             } else {
                 // If in the canvas and over a colored cell, erase it.
                 // Otherwise, change the layer.
-                if (!(this.diagramController.clearIfPainted(coords.x, coords.y) || this.diagramController.eraseMode)) {
-                    this.diagramController.changeLayer();
+                if (!(controller.clearIfPainted(coords.x, coords.y) || controller.eraseMode)) {
+                    controller.changeLayer();
                 }
             }
         }
@@ -408,16 +404,14 @@
         // If the left (or primary) button, use the start and end coordinates to make either a horizontal or vertical line.
         // If the right (or secondary) button, use the same coordinates to delete a line of cells.
         mouseupHandler(event) {
-            let coords = this.diagramController.getCoordsFromEvent(event);
-
-            if(this.diagramController.pixelIsInBounds(coords.x, coords.y)) {
+            if(this.diagramController.pixelIsInBounds()) {
                 event.preventDefault();
             }
          
             if (this.diagramController.isPrimaryInput(event) || event.button === 2) {
                 if (this.diagramController.dragging) {
-                    this.endDrag(coords.x, coords.y, event);
-                } else if (this.diagramController.pixelIsInBounds(coords.x, coords.y)) {
+                    this.endDrag(event);
+                } else if (this.diagramController.pixelIsInBounds()) {
                     this.cellClickHandler(event);
                 } else if(event.button === 2) {
                     this.diagramController.changeLayer();
@@ -462,53 +456,60 @@
         }
 
         drag(event) {
-            if (this.diagramController.startX === -1) {
+            let controller = this.diagramController;
+            let view = this.view;
+
+            if (controller.startX === -1) {
                 return;
             }
 
-            if (!this.diagramController.dragging) {
+            if (!controller.dragging) {
                 // don't start dragging unless the mouse has moved outside the cell
-                if(this.diagramController.currentCell.x === this.diagramController.startX && this.diagramController.currentCell.y === this.diagramController.startY) {
+                if(controller.currentCell.x === controller.startX && controller.currentCell.y === controller.startY) {
                     return;
                 }
-                this.diagramController.dragging = true;
-                this.diagramController.saveCurrentState();
+                controller.dragging = true;
+                controller.saveCurrentState();
             } else {
                 // Continuously refresh to update the preview line.
-                this.diagramController.undo();
-                this.diagramController.saveCurrentState();
+                controller.undo();
+                controller.saveCurrentState();
             }
 
-            let endX = Math.floor((this.diagramController.currentX - this.diagramController.view.canvas.getBoundingClientRect().left - this.diagramController.view.cellWidth) / this.diagramController.view.cellWidth);
-            let endY = Math.floor((this.diagramController.currentY - this.diagramController.view.canvas.getBoundingClientRect().top - this.diagramController.view.cellHeight) / this.diagramController.view.cellHeight);
+            let endX = Math.floor((controller.currentX - view.canvas.getBoundingClientRect().left - view.cellWidth)  / view.cellWidth);
+            let endY = Math.floor((controller.currentY - view.canvas.getBoundingClientRect().top  - view.cellHeight) / view.cellHeight);
 
             let bounds = {
-                left: Math.min(this.diagramController.startX, endX),
-                right: Math.max(this.diagramController.startX, endX),
-                top: Math.min(this.diagramController.startY, endY),
-                bottom: Math.max(this.diagramController.startY, endY),
+                left:   Math.min(controller.startX, endX),
+                right:  Math.max(controller.startX, endX),
+                top:    Math.min(controller.startY, endY),
+                bottom: Math.max(controller.startY, endY),
             };
 
-            if (!this.diagramController.isEraseEvent(event)) {
+            if (!controller.isEraseEvent(event)) {
                 this.dragPrimary(bounds);
             } else {
                 this.dragSecondary(bounds);
             }
         }
 
-        endDrag(currentX, currentY, event) {
+        endDrag(event) {
+            let canvas = this.diagramView.canvas;
+            let view   = this.diagramView;
+            let coords = this.controller.getCoordsFromEvent;
+
             // If the mouse was released outside the canvas, undo and return.
-            if(!this.diagramController.pixelIsInBounds(currentX, currentY)) {
+            if(!this.diagramController.pixelIsInBounds()) {
                 this.diagramController.undo();
                 return;
             }
 
-            let endX = Math.floor((currentX - this.diagramView.canvas.getBoundingClientRect().left - this.diagramController.view.cellWidth) / this.diagramController.view.cellWidth);
-            let endY = Math.floor((currentY - this.diagramView.canvas.getBoundingClientRect().top - this.diagramController.view.cellHeight) / this.diagramController.view.cellHeight);
+            let endX = Math.floor((coords.x - canvas.getBoundingClientRect().left - view.cellWidth)  / view.cellWidth);
+            let endY = Math.floor((coords.y - canvas.getBoundingClientRect().top  - view.cellHeight) / view.cellHeight);
             let bounds = {
-                left: Math.min(this.diagramController.startX, endX),
-                right: Math.max(this.diagramController.startX, endX),
-                top: Math.min(this.diagramController.startY, endY),
+                left:   Math.min(this.diagramController.startX, endX),
+                right:  Math.max(this.diagramController.startX, endX),
+                top:    Math.min(this.diagramController.startY, endY),
                 bottom: Math.max(this.diagramController.startY, endY),
                 lowLayer: 0,
                 highLayer: Diagram.layers.length - 1,
@@ -531,9 +532,7 @@
 
         // Show a preview line when the user is dragging the mouse.
         mousemoveHandler(event) {
-            let coords = this.diagramController.getCoordsFromEvent(event);
-
-            if(this.diagramController.pixelIsInBounds(coords.x, coords.y)) {
+            if(this.diagramController.pixelIsInBounds()) {
                 event.preventDefault();
             }
 
@@ -542,14 +541,12 @@
             }
 
             // Save the current X and Y coordinates.
-            this.diagramController.currentX = coords.x;
-            this.diagramController.currentY = coords.y;
             this.diagramController.getCellAtCursor();
 
             // If the mouse is pressed and the mouse is between cells 1 and gridsize - 1,
             if (this.diagramController.isPrimaryInput(event) || event.buttons === 2) {
                 // Ignore if not inside the canvas
-                if (this.diagramController.pixelIsInBounds(coords.x, coords.y)) {
+                if (this.diagramController.pixelIsInBounds()) {
                     this.drag(event);
                 }
             }
@@ -559,19 +556,19 @@
         // Store the coordinates in startX and startY.
         mousedownHandler(event) {
             let coords = this.diagramController.getCoordsFromEvent(event);
+            let controller = this.diagramController;
+            let canvas = this.diagramView.canvas;
+            let view   = this.diagramView;
 
-            this.diagramController.currentX = coords.x;
-            this.diagramController.currentY = coords.y;
-
-            if (this.diagramController.isPrimaryInput(event) || event.button === 2) {
+            if (controller.isPrimaryInput(event) || event.button === 2) {
                 // Return if not between cells 1 and gridsize - 1
-                if (this.diagramController.pixelIsInBounds(coords.x, coords.y)) {
+                if (controller.pixelIsInBounds()) {
                     event.preventDefault();
-                    this.diagramController.startX = Math.floor((coords.x - this.diagramController.view.canvas.getBoundingClientRect().left - this.diagramController.view.cellWidth) / this.diagramController.view.cellWidth);
-                    this.diagramController.startY = Math.floor((coords.y - this.diagramController.view.canvas.getBoundingClientRect().top - this.diagramController.view.cellHeight) / this.diagramController.view.cellHeight);
+                    controller.startX = Math.floor((coords.x - canvas.getBoundingClientRect().left - view.cellWidth)  / view.cellWidth);
+                    controller.startY = Math.floor((coords.y - canvas.getBoundingClientRect().top  - view.cellHeight) / view.cellHeight);
                 } else {
-                    this.diagramController.startX = -1;
-                    this.diagramController.startY = -1;
+                    controller.startX = -1;
+                    controller.startY = -1;
                 }
             }
         }
@@ -749,7 +746,7 @@
                 let term = document.querySelector('input[name="termselect"]:checked');
 
                 if(placeTermButton.classList.contains("active")) {
-                    this.diagramController.clearPlaceTerminalMode();
+                    this.clearPlaceTerminalMode();
                     return;
                 }
 
@@ -765,18 +762,22 @@
 
             document.getElementById('add-input-btn').onclick = function() {
                 this.diagramController.addTerminal(false);
+                this.populateTermSelect();
             }.bind(this);
 
             document.getElementById('remove-input-btn').onclick = function() {
                 this.diagramController.removeTerminal(false);
+                this.populateTermSelect();
             }.bind(this);
 
             document.getElementById('add-output-btn').onclick = function() {
                 this.diagramController.addTerminal(true);
+                this.populateTermSelect();
             }.bind(this);
 
             document.getElementById('remove-output-btn').onclick = function() {
                 this.diagramController.removeTerminal(true);
+                this.populateTermSelect();
             }.bind(this);
 
             document.getElementById('select-palette-btn').onclick = function() {
@@ -960,19 +961,19 @@
         setDarkMode(setToDark) {
             if (setToDark) {
                 // Set to false so that toggleDarkMode() will set to true.
-                this.darkMode = false;
+                this.diagramView.darkMode = false;
                 this.toggleDarkMode();
             } else {
                 // Set to true so that toggleDarkMode() will set to false.
-                this.darkMode = true;
+                this.diagramView.darkMode = true;
                 this.toggleDarkMode();
             }
         }
 
         toggleDarkMode() {
-            this.darkMode = !this.darkMode;
+            this.diagramView.darkMode = !this.diagramView.darkMode;
 
-            if (this.darkMode) {
+            if (this.diagramView.darkMode) {
                 document.body.classList.add('dark');
                 document.body.classList.remove('light');
                 document.getElementById('dark-mode-btn').classList.remove('fa-cloud-moon');
@@ -1012,8 +1013,8 @@
         }
 
         clearPlaceTerminalMode() {
-            let placeTermButton = document.getElementById("place-term-btn");
-            placeTermButton.classList.remove("active");
+            document.getElementById("place-term-btn").classList.remove("active");
+            this.diagramController.clearPlaceTerminalMode();
         }
 
         // Fill in the termselect-list div with a radio button for each terminal.
@@ -1131,7 +1132,7 @@
 
             this.netlist = [];
             this.analyses = [];
-       }
+        }
 
         initNodes() {
             this.graph = new Graph();
@@ -1140,8 +1141,9 @@
             this.nmos = new Set();
             this.pmos = new Set();
             this.nodeNodeMap = [];
-       }
+        }
 
+        /*
         // Compact the grid to send to the server.
         packGrid() {
             let cell;
@@ -1156,12 +1158,12 @@
                 // Get the cell and make room for the next bit.
                 cell = this.layeredGrid.grid[ii];
                 /*jslint bitwise: true */
-                packedArr[byteCodeIndex] <<= 1;
+        //        packedArr[byteCodeIndex] <<= 1;
                 /*jslint bitwise: false */
 
                 // If set, set the LSB.
                 // It's 0 by default.
-                if(!!cell && cell.isSet) {
+       /*         if(!!cell && cell.isSet) {
                     packedArr[byteCodeIndex]++;
                 }
 
@@ -1175,11 +1177,11 @@
 
             // Pad the last word with zeros to the right.
             /*jslint bitwise: true */
-            packedArr[packedArr.length - 1] <<= (32 - bitIndex);
+        //    packedArr[packedArr.length - 1] <<= (32 - bitIndex);
             /*jslint bitwise: false */
             
             // Add the X and Y coordinates of each terminal.
-            for(let ii = terminals.length - 1; ii >= 0; ii--) {
+        /*    for(let ii = terminals.length - 1; ii >= 0; ii--) {
                 packedArr.unshift(terminals[ii].y);
                 packedArr.unshift(terminals[ii].x);
             }
@@ -1235,9 +1237,9 @@
                         coords = this.layeredGrid.convertToCoordinates(ii);
                 
                 /*jslint bitwise: true */
-                if(!!((packedArr[offset + word] >> bit) & 1)) {
+        //        if(!!((packedArr[offset + word] >> bit) & 1)) {
                 /*jslint bitwise: false */
-                        this.layeredGrid.grid[ii] = {
+        /*                this.layeredGrid.grid[ii] = {
                             isSet: true,
                             x: coords.x,
                             y: coords.y,
@@ -1284,7 +1286,7 @@
                 this.unpackGrid(JSON.parse(xhr.responseText));
             };
             xhr.send();
-        }
+        }*/
 
         // Clear previous anaysis.
         clearAnalyses() {
@@ -2384,8 +2386,6 @@
             if(removedTerm !== undefined) {
                 this.diagram.layeredGrid.clear(removedTerm.x, removedTerm.y, Diagram.CONTACT);
             }
-
-            UI.populateTermSelect();
         }
 
         addTerminal(isOutput) {
@@ -2418,8 +2418,6 @@
                 this.placeTerminal(newTerm, newTerm, true);
                 netArr.push(new Net(name, true));
             }
-
-            UI.populateTermSelect();
         }
 
         setPlaceTerminalMode(terminalNumber) {
@@ -2431,7 +2429,6 @@
 
         clearPlaceTerminalMode() {
             this.placeTermMode = false;
-            UI.clearPlaceTerminalMode();
         }
 
         // Toggle if mode is not provided.
@@ -2494,12 +2491,12 @@
             }
         }
 
-        pixelIsInBounds(screenX, screenY) {
+        pixelIsInBounds() {
             let boundingBox = this.view.canvas.getBoundingClientRect();
-            return screenX > boundingBox.left   + this.view.cellWidth &&
-                   screenX < boundingBox.right  - this.view.cellWidth &&
-                   screenY > boundingBox.top    + this.view.cellHeight &&
-                   screenY < boundingBox.bottom - this.view.cellHeight;
+            return this.currentX > boundingBox.left   + this.view.cellWidth &&
+                   this.currentX < boundingBox.right  - this.view.cellWidth &&
+                   this.currentY > boundingBox.top    + this.view.cellHeight &&
+                   this.currentY < boundingBox.bottom - this.view.cellHeight;
         }
 
         getCellAtCursor() {
@@ -2654,6 +2651,9 @@
             this.highlightNets = false;
             this.netHighlightGrid = [];
             this.theme = 0;
+            this.darkMode = false;
+            this.darkModeGridColor  = '#cccccc';
+            this.lightModeGridColor = '#999999';
         }
         
         // Draw a faint grid on the canvas.
@@ -2679,12 +2679,10 @@
 
             // Set stroke color depending on whether the dark mode is on or off.
             // Should be faintly visible in both modes.
-            if (Boolean(UI)) {
-                if(UI.darkMode) {
-                    this.gridCtx.strokeStyle = UI.darkModeGridColor;
-                } else {
-                    this.gridCtx.strokeStyle = UI.lightModeGridColor;
-                }
+            if(this.darkMode) {
+                this.gridCtx.strokeStyle = this.darkModeGridColor;
+            } else {
+                this.gridCtx.strokeStyle = this.lightModeGridColor;
             }
 
             for (let ii = 1; ii <= Math.max(this.diagram.layeredGrid.width, this.diagram.layeredGrid.height); ii++) {
@@ -2729,7 +2727,7 @@
 
             // Draw a thick border on the edge of the border drawn above.
             this.ctx.lineWidth = this.cellWidth / 4;
-            this.ctx.strokeStyle = Boolean(UI) && UI.darkMode ? "#ffffff" : "#000000";
+            this.ctx.strokeStyle = this.darkMode ? "#ffffff" : "#000000";
             this.ctx.strokeRect(1 + this.cellWidth - this.ctx.lineWidth / 2,
                 1 + this.cellHeight - this.ctx.lineWidth / 2,
                 this.canvasWidth - 2 * this.cellWidth + this.ctx.lineWidth / 2,
@@ -2737,12 +2735,12 @@
             );
 
             // For the middle 11 cells of the upper border, fill with the grid color.
-            this.ctx.fillStyle = Boolean(UI) && UI.darkMode ? "#ffffff" : "#000000";
+            this.ctx.fillStyle = this.darkMode ? "#ffffff" : "#000000";
             let startCell = Math.floor(this.diagram.layeredGrid.width / 2) - 4;
             this.ctx.fillRect(startCell * this.cellWidth, 0, this.cellWidth * 11, this.cellHeight);
 
             // Write the cursor color name in the middle of the upper border of the canvas.
-            this.ctx.fillStyle = Boolean(UI) && UI.darkMode ? '#000000' : '#ffffff';
+            this.ctx.fillStyle = this.darkMode ? '#000000' : '#ffffff';
             this.ctx.font = Math.floor(this.cellHeight) + 'px Arial';
             this.ctx.textAlign = 'center';
 
@@ -2795,7 +2793,7 @@
         drawLabels() {
             // Draw labels on the canvas above each input and output.
             this.ctx.font = "bold " + Math.floor(this.cellHeight) + "px Arial";
-            this.ctx.fillStyle = Boolean(UI) && UI.darkMode ? "#ffffff" : "#000000";
+            this.ctx.fillStyle = this.darkMode ? "#ffffff" : "#000000";
 
             // Draw labels for all terminals.
             this.diagram.getTerminals().forEach(((terminal, index) => {
@@ -2817,7 +2815,7 @@
                 // Draw a faint highlight on the cell at the cursor location.
                 currentCell = this.diagram.controller.currentCell;
                 if(ii === currentCell.x && jj === currentCell.y) {
-                    this.ctx.fillStyle = Boolean(UI) && UI.darkMode ? "rgba(255, 255, 255, 0.5)" : "rgba(0, 0, 0, 0.5)";
+                    this.ctx.fillStyle = this.darkMode ? "rgba(255, 255, 255, 0.5)" : "rgba(0, 0, 0, 0.5)";
                     this.ctx.fillRect((ii+1) * this.cellWidth, (jj+1) * this.cellHeight - 1, this.cellWidth + 1, this.cellHeight + 2);
                 }
             }
@@ -3489,7 +3487,7 @@
         let diagram = new Diagram(document.getElementById("canvas"), document.getElementById("grid-canvas"));
         
         // Set up the UI object.
-        UI = new UserInterface(diagram);
+        let UI = new UserInterface(diagram);
 
         // Set Diagram.CONTACT at the coordinates of each input and output.
         diagram.inputs.forEach(function(input) {
