@@ -2836,12 +2836,12 @@ class DiagramView {
         );
 
         // For the middle 11 cells of the upper border, fill with the grid color.
-        this.ctx.fillStyle = UI.darkMode ? "#ffffff" : "#000000";
+        this.ctx.fillStyle = Boolean(UI) && UI.darkMode ? "#ffffff" : "#000000";
         let startCell = Math.floor(this.diagram.layeredGrid.width / 2) - 4;
         this.ctx.fillRect(startCell * this.cellWidth, 0, this.cellWidth * 11, this.cellHeight);
 
         // Write the cursor color name in the middle of the upper border of the canvas.
-        this.ctx.fillStyle = UI.darkMode ? '#000000' : '#ffffff';
+        this.ctx.fillStyle = Boolean(UI) && UI.darkMode ? '#000000' : '#ffffff';
         this.ctx.font = Math.floor(this.cellHeight) + 'px Arial';
         this.ctx.textAlign = 'center';
 
