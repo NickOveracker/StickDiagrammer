@@ -562,7 +562,7 @@
             // If the mouse is pressed and the mouse is between cells 1 and gridsize - 1,
             if (this.diagramController.isPrimaryInput(event) || event.buttons === 2) {
                 // Ignore if not inside the canvas
-                if (this.diagramController.pixelIsInBounds()) {
+                if (this.diagramController.pixelIsInBounds() && this.diagramController.cursorIndex !== Diagram.CONTACT) {
                     this.drag(event);
                 }
             }
