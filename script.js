@@ -497,7 +497,7 @@
             endY = Math.floor((controller.currentY - view.canvas.getBoundingClientRect().top  - view.cellHeight) / view.cellHeight);
 
             // If this is CONTACT layer, then just move the contact around.
-            if(this.diagramController.cursorIndex === Diagram.CONTACT) {
+            if(controller.isEraseEvent(event) || controller.cursorIndex !== Diagram.CONTACT) {
                 bounds = {
                     left:   Math.min(controller.startX, endX),
                     right:  Math.max(controller.startX, endX),
