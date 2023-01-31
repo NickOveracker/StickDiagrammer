@@ -1158,16 +1158,16 @@ class Diagram {
 
     initNets() {
         'use strict';
-        this.vddNet = new Net("VDD", true, this);
-        this.gndNet = new Net("GND", true, this);
+        this.vddNet = new Net("VDD", true, this.layeredGrid);
+        this.gndNet = new Net("GND", true, this.layeredGrid);
         this.inputNets = [];
         this.outputNets = [];
 
         for (let ii = 0; ii < this.inputs.length; ii++) {
-            this.inputNets.push(new Net(String.fromCharCode(65 + ii), true, this));
+            this.inputNets.push(new Net(String.fromCharCode(65 + ii), true, this.layeredGrid));
         }
         for (let ii = 0; ii < this.outputs.length; ii++) {
-            this.outputNets.push(new Net(String.fromCharCode(89 - ii), false, this));
+            this.outputNets.push(new Net(String.fromCharCode(89 - ii), false, this.layeredGrid));
         }
 
         this.netlist = [];
@@ -1176,7 +1176,7 @@ class Diagram {
 
     initNodes() {
         'use strict';
-        this.graph = new Graph(this);
+        this.graph = new Graph();
         this.inputNodes  = [];
         this.outputNodes = [];
         this.nmos = new Set();
@@ -2122,7 +2122,7 @@ class Diagram {
             // Skip for the gate terminal.
             if (term === "gate") { return; }
 
-            let net = new Net("?", false, this);
+            let net = new Net("?", false, this.layeredGrid);
 
             // If the transistor's term1/term2 is not in any of the nets,
             // then create a new net and add term1/term2 to it.
@@ -2148,7 +2148,7 @@ class Diagram {
             let net = this.getNet(transistor[term]);
 
             if (net === null) {
-                net = new Net("?", false, this);
+                net = new Net("?", false, this.layeredGrid);
                 this.setRecursively(transistor[term], net);
                 this.netlist.push(net);
             }
@@ -2353,7 +2353,12 @@ class Diagram {
                     cell.gate = undefined;
                 } else {
                     transistorArray.add(cell);
-                    this.graph.addNode(cell);
+                    this.graph.addNode(
+                        cell,
+                        false,
+                        this.layeredGrid.get(cell.x, cell.y, Diagram.PDIFF),
+                        this.layeredGrid.get(cell.x, cell.y, Diagram.NDIFF)
+                    );
                     return true;
                 }
             }
@@ -2483,7 +2488,7 @@ class DiagramController {
             });
             newTerm = termArr[0];
             this.placeTerminal(newTerm, newTerm, true);
-            netArr.unshift(new Net(name, false, this));
+            netArr.unshift(new Net(name, false, this.layeredGrid));
         } else {
             termArr = this.diagram.inputs;
             netArr  = this.diagram.inputNets;
@@ -2494,7 +2499,7 @@ class DiagramController {
             });
             newTerm = termArr[termArr.length - 1];
             this.placeTerminal(newTerm, newTerm, true);
-            netArr.push(new Net(name, true, this));
+            netArr.push(new Net(name, true, this.layeredGrid));
         }
 
         UI.populateTermSelect();
@@ -3402,10 +3407,9 @@ class LayeredGrid {
 
 // Graph class to represent CMOS circuitry.
 class Graph {
-    constructor(diagram) {
+    constructor() {
         'use strict';
         this.nodes = [];
-        this.diagram = diagram;
     }
 
     // Clear the diagram.graph.
@@ -3420,9 +3424,9 @@ class Graph {
     }
 
    // Add a node to the diagram.graph.
-    addNode(cell, suppressTransistor) {
+    addNode(cell, suppressTransistor, pdiffCell, ndiffCell) {
         'use strict';
-        let node = new Node(cell, suppressTransistor, this.diagram);
+        let node = new Node(cell, suppressTransistor, pdiffCell, ndiffCell);
         this.nodes.push(node);
         return node;
     }
@@ -3451,12 +3455,12 @@ class Graph {
 
 // Each diagram.graph node is a transistor, VDD, GND, or an output.
 class Node {
-    constructor(cell, suppressTransistor, diagram) {
+    constructor(cell, suppressTransistor, pdiffCell, ndiffCell) {
         'use strict';
         this.cell = cell;
         this.edges = [];
-        this.isPmos = !suppressTransistor && diagram.layeredGrid.get(cell.x, cell.y, Diagram.PDIFF).isSet;
-        this.isNmos = !suppressTransistor && diagram.layeredGrid.get(cell.x,cell.y, Diagram.NDIFF).isSet;
+        this.isPmos = !suppressTransistor && pdiffCell.isSet;
+        this.isNmos = !suppressTransistor && ndiffCell.isSet;
     }
 
     // Destructor
@@ -3557,7 +3561,7 @@ class Edge {
 
 // Set of cells that are electrically connected to one another.
 class Net {
-    constructor(name, isInput, diagram) {
+    constructor(name, isInput, grid) {
         'use strict';
         this.name = name;
         this.cells = new Set();
@@ -3565,7 +3569,7 @@ class Net {
         this.isInput = isInput;
         this.hasPoly = false;
         this.hasDiff = false;
-        this.diagram = diagram;
+        this.grid = grid;
     }
 
     isIdentical(net) {
@@ -3613,7 +3617,7 @@ class Net {
         'use strict';
         this.cells.add(cell);
 
-        if(!this.diagram.layeredGrid.get(cell.x, cell.y, Diagram.CONTACT).isSet) {
+        if(!this.grid.get(cell.x, cell.y, Diagram.CONTACT).isSet) {
             this.hasPoly = this.hasPoly || cell.layer === Diagram.POLY;
             this.hasDiff = this.hasDiff || cell.layer === Diagram.NDIFF || cell.layer === Diagram.PDIFF;
         }
