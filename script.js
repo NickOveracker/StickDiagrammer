@@ -41,20 +41,22 @@
 /* jshint browser: true */
 /* globals runTestbench: false */
 /* jshint latedef: false */ // change to true or nofunc later
-let darkMode;
-let button;
-let diagram;
 let UI;
 
 class UserInterface {
-    constructor(diagramController) {
+    constructor(diagram) {
         'use strict';
+		
+		this.darkMode          = null;
+		this.diagram           = diagram;
+		this.diagramController = diagram.controller;
+		this.diagramView       = diagram.view;
+		this.diagramGrid       = diagram.layeredGrid;
 
         // Grid color
-        this.darkModeGridColor = '#cccccc';
+        this.darkModeGridColor  = '#cccccc';
         this.lightModeGridColor = '#999999';
 
-        this.diagramController = diagramController;
         this.allCommands        = [];
         this.shiftCommands      = [];
         this.ctrlCommands       = [];
@@ -80,6 +82,12 @@ class UserInterface {
 
         this.addListeners();
         this.setUpControls();
+	
+		// Set to dark mode if it is night time
+        this.setDarkMode(new Date().getHours() > 19 || new Date().getHours() < 7);
+		
+        this.populateTermSelect();
+        this.view.refreshCanvas();
     }
 
     keydownHandler(event) {
@@ -90,11 +98,11 @@ class UserInterface {
         
         let isInput  = function(keyCode) {
             return (keyCode >= 65) && (keyCode < 65 + this.diagram.inputs.length );
-        }.bind(this.diagramController);
+        }.bind(this);
         
         let isOutput = function(keyCode) {
             return (keyCode <= 89) && (keyCode > 89 - this.diagram.outputs.length);
-        }.bind(this.diagramController);
+        }.bind(this);
         // GND and VDD are handled in shiftCommandHandler.
 
         if (event.shiftKey && this.shiftCommands[event.keyCode]) {
@@ -104,10 +112,10 @@ class UserInterface {
             this.ctrlCommands[event.keyCode](event);
         }
         else if (isInput(event.keyCode))  {
-            this.diagramController.placeTerminal(event, this.diagramController.diagram.inputs[event.keyCode - 65]);
+            this.diagramController.placeTerminal(event, this.diagram.inputs[event.keyCode - 65]);
         }
         else if (isOutput(event.keyCode)) {
-            this.diagramController.placeTerminal(event, this.diagramController.diagram.outputs[this.diagramController.diagram.outputs.length - 90 + event.keyCode]);
+            this.diagramController.placeTerminal(event, this.diagram.outputs[this.diagram.outputs.length - 90 + event.keyCode]);
         }
     }
 
@@ -141,9 +149,9 @@ class UserInterface {
             keyCode:      90,
             action:       function(e) {
                 if(e.type.includes('down')) {
-                    this.undo();
+                    this.diagramController.undo();
                 }
-            }.bind(this.diagramController),
+            }.bind(this),
         };
         this.redoCommand = {
             // CTRL-Y
@@ -151,9 +159,9 @@ class UserInterface {
             keyCode:      89,
             action:       function(e) {
                 if(e.type.includes('down')) {
-                    this.redo();
+                    this.diagramController.redo();
                 }
-            }.bind(this.diagramController),
+            }.bind(this),
         };
 
         this.allCommands.push(this.undoCommand);
@@ -168,14 +176,14 @@ class UserInterface {
             keyCode: 27,
             action:  function() {
                 this.closeTopMenu();
-            },
+            }.bind(this),
         };
         this.evaluateCommand = {
             // ENTER
             keyCode: 13,
             action:  function() {
                 this.refreshTruthTable();
-            },
+            }.bind(this),
         };
 
         this.allCommands.push(this.exitMenuCommand);
@@ -191,9 +199,9 @@ class UserInterface {
             keyCode:       86,
             action:        function(e) {
                 if(e.type.includes('down')) {
-                    this.placeTerminal(e, this.diagram.vddCell);
+                    this.diagramController.placeTerminal(e, this.diagram.vddCell);
                 }
-            }.bind(this.diagramController),
+            }.bind(this),
         };
 
         // SHIFT + G
@@ -202,9 +210,9 @@ class UserInterface {
             keyCode:       71,
             action:        function(e) {
                 if(e.type.includes('down')) {
-                    this.placeTerminal(e, this.diagram.gndCell);
+                    this.diagramController.placeTerminal(e, this.diagram.gndCell);
                 }
-            }.bind(this.diagramController),
+            }.bind(this),
         };
 
         this.placeIOCommand = {
@@ -225,9 +233,9 @@ class UserInterface {
             keyCode: 37,
             action:  function(e) {
                 if(e.type.includes('up')) {
-                    this.diagram.layeredGrid.shift(0, false, -1);
+                    this.layeredGrid.shift(0, false, -1);
                 }
-            }.bind(this.diagramController),
+            }.bind(this),
         };
 
         // SHIFT + UP ARROW
@@ -236,9 +244,9 @@ class UserInterface {
             keyCode: 38,
             action:  function(e) {
                 if(e.type.includes('up')) {
-                    this.diagram.layeredGrid.shift(0, true, -1);
+                    this.layeredGrid.shift(0, true, -1);
                 }
-            }.bind(this.diagramController),
+            }.bind(this),
         };
 
         // SHIFT + RIGHT ARROW
@@ -247,9 +255,9 @@ class UserInterface {
             keyCode: 39,
             action:  function(e) {
                 if(e.type.includes('up')) {
-                    this.diagram.layeredGrid.shift(0, false, 1);
+                    this.layeredGrid.shift(0, false, 1);
                 }
-            }.bind(this.diagramController),
+            }.bind(this),
         };
 
         // SHIFT + DOWN ARROW
@@ -258,9 +266,9 @@ class UserInterface {
             keyCode: 40,
             action:  function(e) {
                 if(e.type.includes('up')) {
-                    this.diagram.layeredGrid.shift(0, true, 1);
+                    this.layeredGrid.shift(0, true, 1);
                 }
-            }.bind(this.diagramController),
+            }.bind(this),
         };
 
         // CTRL + LEFT ARROW
@@ -269,15 +277,15 @@ class UserInterface {
             keyCode:      37,
             action:       function(e) {
                 if(e.type.includes('down')) {
-                    let coords = this.getCellAtCursor(this.currentX, this.currentY);
-                    coords = Object.hasOwn(coords, "x") ? coords : {x: this.diagram.layeredGrid.width, };
+                    let coords = this.diagramController.getCellAtCursor(this.diagramController.currentX, this.diagramController.currentY);
+                    coords = Object.hasOwn(coords, "x") ? coords : {x: this.layeredGrid.width, };
                     if(Object.hasOwn(coords, "x")) {
-                        this.diagram.layeredGrid.insertRemoveRowColAt(coords.x, false, false);
+                        this.layeredGrid.insertRemoveRowColAt(coords.x, false, false);
                     } else {
-                        this.diagram.layeredGrid.resize(this.diagram.layeredGrid.width - 1, this.diagram.layeredGrid.height);
+                        this.layeredGrid.resize(this.layeredGrid.width - 1, this.layeredGrid.height);
                     }
                 }
-            }.bind(this.diagramController),
+            }.bind(this),
         };
 
         // CTRL + UP ARROW
@@ -286,14 +294,14 @@ class UserInterface {
             keyCode:       38,
             action:        function(e) {
                 if(e.type.includes('down')) {
-                    let coords = this.getCellAtCursor(this.currentX, this.currentY);
+                    let coords = this.diagramController.getCellAtCursor(this.diagramController.currentX, this.diagramController.currentY);
                     if(Object.hasOwn(coords, "y")) {
-                        this.diagram.layeredGrid.insertRemoveRowColAt(coords.y, false, true);
+                        this.layeredGrid.insertRemoveRowColAt(coords.y, false, true);
                     } else {
-                        this.diagram.layeredGrid.resize(this.diagram.layeredGrid.width, this.diagram.layeredGrid.height - 1);
+                        this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height - 1);
                     }
                 }
-            }.bind(this.diagramController),
+            }.bind(this),
         };
 
         // CTRL + RIGHT ARROW
@@ -302,14 +310,14 @@ class UserInterface {
             keyCode:      39,
             action:       function(e) {
                 if(e.type.includes('down')) {
-                    let coords = this.getCellAtCursor(this.currentX, this.currentY);
+                    let coords = this.diagramController.getCellAtCursor(this.diagramController.currentX, this.diagramController.currentY);
                     if(Object.hasOwn(coords, "x")) {
-                        this.diagram.layeredGrid.insertRemoveRowColAt(coords.x, true, false);
+                        this.layeredGrid.insertRemoveRowColAt(coords.x, true, false);
                     } else {
-                        this.diagram.layeredGrid.resize(this.diagram.layeredGrid.width + 1, this.diagram.layeredGrid.height);
+                        this.layeredGrid.resize(this.layeredGrid.width + 1, this.layeredGrid.height);
                     }
                 }
-            }.bind(this.diagramController),
+            }.bind(this),
         };
 
         // CTRL + DOWN ARROW
@@ -318,14 +326,14 @@ class UserInterface {
             keyCode:      40,
             action:       function(e) {
                 if(e.type.includes('down')) {
-                    let coords = this.getCellAtCursor(this.currentX, this.currentY);
+                    let coords = this.diagramController.getCellAtCursor(this.diagramController.currentX, this.diagramController.currentY);
                     if(Object.hasOwn(coords, "y")) {
-                        this.diagram.layeredGrid.insertRemoveRowColAt(coords.y, true, true);
+                        this.layeredGrid.insertRemoveRowColAt(coords.y, true, true);
                     } else {
-                        this.diagram.layeredGrid.resize(this.diagram.layeredGrid.width, this.diagram.layeredGrid.height + 1);
+                        this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height + 1);
                     }
                 }
-            }.bind(this.diagramController),
+            }.bind(this),
         };
 
         this.allCommands.push(this.shiftLeftCommand);
@@ -350,7 +358,7 @@ class UserInterface {
                 if(e.type.includes('up')) {
                     this.toggleDarkMode();
                 }
-            },
+            }.bind(this),
         };
 
         // SHIFT + F
@@ -361,7 +369,7 @@ class UserInterface {
                 if(e.type.includes('up')) {
                     this.view.useFlatColors = !this.view.useFlatColors;
                 }
-            }.bind(this.diagramController),
+            }.bind(this),
         };
         
         // SHIFT + T
@@ -371,9 +379,9 @@ class UserInterface {
             action:  function(e) {
                 if(e.type.includes('up')) {
                     this.view.theme = this.view.theme < DiagramView.themes.length - 1 ? this.view.theme + 1 : 0;
-                    this.setUpLayerSelector();
+                    this.diagramController.setUpLayerSelector();
                 }
-            }.bind(this.diagramController),
+            }.bind(this),
         };
 
         this.allCommands.push(this.darkModeCommand);
@@ -396,9 +404,9 @@ class UserInterface {
         } else if (!this.diagramController.isEraseEvent(event)) {
             // Just fill in or delete the cell at the start coordinates.
             // If there is no cell at the start coordinates, change the cursor color.
-            if (!this.diagramController.diagram.layeredGrid.get(this.diagramController.startX, this.diagramController.startY, this.diagramController.cursorIndex).isSet) {
+            if (!this.layeredGrid.get(this.diagramController.startX, this.diagramController.startY, this.diagramController.cursorIndex).isSet) {
                 this.diagramController.saveCurrentState();
-                this.diagramController.diagram.layeredGrid.set(this.diagramController.startX, this.diagramController.startY, this.diagramController.cursorIndex);
+                this.layeredGrid.set(this.diagramController.startX, this.diagramController.startY, this.diagramController.cursorIndex);
             }
         } else {
             // If in the canvas and over a colored cell, erase it.
@@ -444,18 +452,18 @@ class UserInterface {
         if (bounds.right - bounds.left > bounds.bottom - bounds.top) {
             bounds.lowLayer = bounds.highLayer = this.diagramController.cursorIndex;
             bounds.bottom = bounds.top = this.diagramController.startY;
-            this.diagramController.diagram.layeredGrid.map(bounds, function (x, y, layer) {
-                this.diagram.layeredGrid.set(x, y, layer);
-            }.bind(this.diagramController), true);
+            this.layeredGrid.map(bounds, function (x, y, layer) {
+                this.layeredGrid.set(x, y, layer);
+            }.bind(this), true);
         }
         // If the mouse moved more vertically than horizontally,
         // draw a vertical line.
         else {
             bounds.lowLayer = bounds.highLayer = this.diagramController.cursorIndex;
             bounds.right = bounds.left = this.diagramController.startX;
-            this.diagramController.diagram.layeredGrid.map(bounds, function (x, y, layer) {
-                this.diagram.layeredGrid.set(x, y, layer);
-            }.bind(this.diagramController), true);
+            this.layeredGrid.map(bounds, function (x, y, layer) {
+                this.layeredGrid.set(x, y, layer);
+            }.bind(this), true);
         }
     }
 
@@ -464,9 +472,9 @@ class UserInterface {
         // Secondary mouse button (i.e. right click)
         // Highlight a rectangle of squares for deletion.
         bounds.lowLayer = bounds.highLayer = Diagram.DELETE;
-        this.diagramController.diagram.layeredGrid.map(bounds, function (x, y, layer) {
-            this.diagram.layeredGrid.set(x, y, layer);
-        }.bind(this.diagramController), true);
+        this.layeredGrid.map(bounds, function (x, y, layer) {
+            this.layeredGrid.set(x, y, layer);
+        }.bind(this), true);
     }
 
     drag(event) {
@@ -513,8 +521,8 @@ class UserInterface {
             return;
         }
 
-        let endX = Math.floor((currentX - this.diagramController.view.canvas.getBoundingClientRect().left - this.diagramController.view.cellWidth) / this.diagramController.view.cellWidth);
-        let endY = Math.floor((currentY - this.diagramController.view.canvas.getBoundingClientRect().top - this.diagramController.view.cellHeight) / this.diagramController.view.cellHeight);
+        let endX = Math.floor((currentX - this.view.canvas.getBoundingClientRect().left - this.diagramController.view.cellWidth) / this.diagramController.view.cellWidth);
+        let endY = Math.floor((currentY - this.view.canvas.getBoundingClientRect().top - this.diagramController.view.cellHeight) / this.diagramController.view.cellHeight);
         let bounds = {
             left: Math.min(this.diagramController.startX, endX),
             right: Math.max(this.diagramController.startX, endX),
@@ -533,9 +541,9 @@ class UserInterface {
         } else {
             // For secondary (i.e. right) mouse button:
             // Delete a rectangle of squares
-            this.diagramController.diagram.layeredGrid.map(bounds, function (x, y, layer) {
-                this.diagram.layeredGrid.clear(x, y, layer);
-            }.bind(this.diagramController));
+            this.layeredGrid.map(bounds, function (x, y, layer) {
+                this.layeredGrid.clear(x, y, layer);
+            }.bind(this));
         }
     }
 
@@ -549,7 +557,7 @@ class UserInterface {
         }
 
         if(event.type.includes("mouse")) {
-            this.diagramController.view.trailCursor = true;
+            this.view.trailCursor = true;
         }
 
         // Save the current X and Y coordinates.
@@ -644,8 +652,8 @@ class UserInterface {
         });
 
         // Set up the evaluate button.
-        button = document.getElementById("evaluate-btn");
-        button.onclick = function () {
+        this.button = document.getElementById("evaluate-btn");
+        this.button.onclick = function () {
             this.refreshTruthTable();
         };
     }
@@ -655,66 +663,66 @@ class UserInterface {
         document.getElementById("remove-row").onclick = function() {
             this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height - 1);
             this.view.drawGrid();
-        }.bind(this.diagramController.diagram);
+        }.bind(this);
 
         document.getElementById("add-row").onclick = function() {
             this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height + 1);
             this.view.drawGrid();
-        }.bind(this.diagramController.diagram);
+        }.bind(this);
 
         document.getElementById("remove-column").onclick = function() {
             this.layeredGrid.resize(this.layeredGrid.width - 1, this.layeredGrid.height);
             this.view.drawGrid();
-        }.bind(this.diagramController.diagram);
+        }.bind(this);
 
         document.getElementById("add-column").onclick = function() {
             this.layeredGrid.resize(this.layeredGrid.width + 1, this.layeredGrid.height);
             this.view.drawGrid();
-        }.bind(this.diagramController.diagram);
+        }.bind(this);
 
         document.getElementById("shift-left").onclick = function() {
             this.layeredGrid.shift(0, false, -1);
-        }.bind(this.diagramController.diagram);
+        }.bind(this);
 
         document.getElementById("shift-right").onclick = function() {
             this.layeredGrid.shift(0, false, 1);
-        }.bind(this.diagramController.diagram);
+        }.bind(this);
 
         document.getElementById("shift-up").onclick = function() {
             this.layeredGrid.shift(0, true, -1);
-        }.bind(this.diagramController.diagram);
+        }.bind(this);
 
         document.getElementById("shift-down").onclick = function() {
             this.layeredGrid.shift(0, true, 1);
-        }.bind(this.diagramController.diagram);
+        }.bind(this);
 
         document.getElementById("paint-mode-btn").onclick = function() {
             // No argument -> Toggle
-            this.controller.setEraseMode();
+            this.diagramController.setEraseMode();
 
             // Set the icon.
             let paintModeButton = document.getElementById("paint-mode-btn");
 
-            if (this.controller.eraseMode) {
+            if (this.diagramController.eraseMode) {
                 paintModeButton.classList.remove('fa-paint-brush');
                 paintModeButton.classList.add('fa-eraser');
             } else {
                 paintModeButton.classList.remove('fa-eraser');
                 paintModeButton.classList.add('fa-paint-brush');
             }
-        }.bind(this.diagramController.diagram);
+        }.bind(this);
 
         document.getElementById("dark-mode-btn").onclick = function() {
             this.toggleDarkMode();
         };
 
         document.getElementById("undo-btn").onclick = function() {
-            this.controller.undo();
-        }.bind(this.diagramController.diagram);
+            this.diagramController.undo();
+        }.bind(this);
 
         document.getElementById("redo-btn").onclick = function() {
-            this.controller.redo();
-        }.bind(this.diagramController.diagram);
+            this.diagramController.redo();
+        }.bind(this);
 
         document.getElementById("term-menu-btn").onclick = function() {
             let termMenu = document.getElementById("terminal-menu");
@@ -763,7 +771,7 @@ class UserInterface {
             let term = document.querySelector('input[name="termselect"]:checked');
 
             if(placeTermButton.classList.contains("active")) {
-                this.clearPlaceTerminalMode();
+                this.diagramController.clearPlaceTerminalMode();
                 return;
             }
 
@@ -772,37 +780,37 @@ class UserInterface {
             }
 
             term = parseInt(term.value);
-            this.setPlaceTerminalMode(term);
+            this.diagramController.setPlaceTerminalMode(term);
             placeTermButton.classList.add("active");
 
-        }.bind(this.diagramController);
+        }.bind(this);
 
         document.getElementById('add-input-btn').onclick = function() {
-            this.addTerminal(false);
-        }.bind(this.diagramController);
+            this.diagramController.addTerminal(false);
+        }.bind(this);
 
         document.getElementById('remove-input-btn').onclick = function() {
-            this.removeTerminal(false);
-        }.bind(this.diagramController);
+            this.diagramController.removeTerminal(false);
+        }.bind(this);
 
         document.getElementById('add-output-btn').onclick = function() {
-            this.addTerminal(true);
-        }.bind(this.diagramController);
+            this.diagramController.addTerminal(true);
+        }.bind(this);
 
         document.getElementById('remove-output-btn').onclick = function() {
-            this.removeTerminal(true);
-        }.bind(this.diagramController);
+            this.diagramController.removeTerminal(true);
+        }.bind(this);
 
         document.getElementById('select-palette-btn').onclick = function() {
-            this.theme = this.theme < DiagramView.themes.length - 1 ? this.theme + 1 : 0;
-            document.getElementById('palette-setting').innerHTML = DiagramView.themes[this.theme];
-            this.setUpLayerSelector();
-        }.bind(this.diagramController.diagram.view);
+            this.view.theme = this.view.theme < DiagramView.themes.length - 1 ? this.view.theme + 1 : 0;
+            document.getElementById('palette-setting').innerHTML = DiagramView.themes[this.view.theme];
+            this.view.setUpLayerSelector();
+        }.bind(this);
 
         document.getElementById('toggle-transparency-btn').onclick = function() {
-            this.useFlatColors = !this.useFlatColors;
-            document.getElementById('transparency-setting').innerHTML = this.useFlatColors ? "OFF" : "ON";
-        }.bind(this.diagramController.diagram.view);
+            this.view.useFlatColors = !this.view.useFlatColors;
+            document.getElementById('transparency-setting').innerHTML = this.view.useFlatColors ? "OFF" : "ON";
+        }.bind(this);
 
         this.setUpLayerSelector();
     }
@@ -864,27 +872,27 @@ class UserInterface {
     // Z is high impedance, X is error (VDD and GND contradiction.)
     buildTruthTable() {
         'use strict';
-        let terminals  = diagram.getTerminals().slice(2);
+        let terminals  = this.diagram.getTerminals().slice(2);
         let table      = [];
         let header     = [];
         let inputVals  = [];
         let outputVals = [];
-        diagram.clearAnalyses();
+        this.diagram.clearAnalyses();
 
         // Each loop iteration is a combination of input values.
         // I.e., one row of the output table.
-        for (let ii = 0; ii < Math.pow(2, diagram.inputs.length); ii++) {
+        for (let ii = 0; ii < Math.pow(2, this.diagram.inputs.length); ii++) {
             let tableInputRow = [];
             let tableOutputRow = [];
 
             // Compute each output.
-            for (let jj = 0; jj < diagram.outputs.length; jj++) {
-                tableOutputRow[jj] = diagram.computeOutput(ii, diagram.outputNodes[jj]);
+            for (let jj = 0; jj < this.diagram.outputs.length; jj++) {
+                tableOutputRow[jj] = this.diagram.computeOutput(ii, this.diagram.outputNodes[jj]);
             }
 
             outputVals[ii] = tableOutputRow;
 
-            for (let jj = 0; jj < diagram.inputs.length; jj++) {
+            for (let jj = 0; jj < this.diagram.inputs.length; jj++) {
                 /*jslint bitwise: true */
                 tableInputRow[jj] = (ii >> jj) & 1;
                 /*jslint bitwise: false */
@@ -895,7 +903,7 @@ class UserInterface {
 
         // Header
         terminals.forEach(function(terminal, index) {
-            header[index] = diagram.getTerminalName(index + 2);
+            header[index] = this.diagram.getTerminalName(index + 2);
         });
 
         // Merge input and output into one table (input on the left, output on the right.)
@@ -913,9 +921,9 @@ class UserInterface {
         'use strict';
         let error = false;
 
-        // Update the diagram.netlist.
+        // Update the netlist.
         if(!suppressSetNets) {
-            diagram.setNets();
+            this.diagram.setNets();
         }
 
         // Create a table with the correct number of rows and columns.
@@ -936,7 +944,7 @@ class UserInterface {
         table[0].forEach(function (element, index) {
             let cell = headerRow.insertCell(index);
             cell.innerHTML = element;
-            cell.className = index < diagram.inputs.length ? "input" : "output";
+            cell.className = index < this.diagram.inputs.length ? "input" : "output";
         });
 
         // Create the rest of the table.
@@ -950,27 +958,27 @@ class UserInterface {
 
                 // Set the cell class depending on whether this is
                 // an input or output cell.
-                if(colIndex < diagram.inputs.length) {
+                if(colIndex < this.diagram.inputs.length) {
                     tCell.className = "input";
                 } else {
                     tCell.className = "output";
                     tCell.onmouseover = ((rowIndex, colIndex) => {
                         return (() => {
                             let path, outputNum, outputNodeIndex;
-                            outputNum = colIndex - diagram.inputs.length;
-                            outputNodeIndex = diagram.graph.getIndexByNode(diagram.outputNodes[outputNum]);
-                            path = diagram.analyses[rowIndex - 1][outputNodeIndex];
-                            diagram.view.setHighlight(path);
+                            outputNum = colIndex - this.diagram.inputs.length;
+                            outputNodeIndex = this.diagram.graph.getIndexByNode(this.diagram.outputNodes[outputNum]);
+                            path = this.diagram.analyses[rowIndex - 1][outputNodeIndex];
+                            this.diagram.view.setHighlight(path);
                         });
                     })(rowIndex, colIndex);
                     tCell.onmouseleave = function () {
-                        diagram.view.highlightNets = false;
+                        this.diagram.view.highlightNets = false;
                     };
                 }
             });
         });
         
-        if (diagram.nmosPullup || diagram.pmosPulldown) {
+        if (this.diagram.nmosPullup || this.diagram.pmosPulldown) {
             document.getElementById("pullup-pulldown-warning").classList.add("active");
         } else if(document.getElementById("pullup-pulldown-warning").classList.contains("active")) {
             document.getElementById("pullup-pulldown-warning").classList.remove("active");
@@ -984,20 +992,20 @@ class UserInterface {
 
         if (setToDark) {
             // Set to false so that toggleDarkMode() will set to true.
-            darkMode = false;
+            this.darkMode = false;
             this.toggleDarkMode();
         } else {
             // Set to true so that toggleDarkMode() will set to false.
-            darkMode = true;
+            this.darkMode = true;
             this.toggleDarkMode();
         }
     }
 
     toggleDarkMode() {
         'use strict';
-        darkMode = !darkMode;
+        this.darkMode = !this.darkMode;
 
-        if (darkMode) {
+        if (this.darkMode) {
             document.body.classList.add('dark');
             document.body.classList.remove('light');
             document.getElementById('dark-mode-btn').classList.remove('fa-cloud-moon');
@@ -1021,21 +1029,21 @@ class UserInterface {
                 element.onclick = function() {
                     let paintModeButton = document.getElementById("paint-mode-btn");
 
-                    this.controller.changeLayer(index);
+                    this.diagramController.changeLayer(index);
 
                     // Set the icon.
-                    if (this.controller.eraseMode) {
+                    if (this.diagramController.eraseMode) {
                         paintModeButton.classList.remove('fa-eraser');
                         paintModeButton.classList.add('fa-paint-brush');
                     }
 
-                    diagram.controller.setEraseMode(false);
+                    this.diagramController.setEraseMode(false);
                 }.bind(this);
             }
 
             // Color with flat color (rgb, not rgba).
-            element.style.color = diagram.view.getColor(index);
-        }.bind(diagram));
+            element.style.color = this.view.getColor(index);
+        }.bind(this));
     }
 
     clearPlaceTerminalMode() {
@@ -1048,7 +1056,7 @@ class UserInterface {
     populateTermSelect() {
         'use strict';
         let termSelectList = document.getElementById("termselect-list");
-        let terminals = diagram.getTerminals();
+        let terminals = this.diagram.getTerminals();
 
         // First, clear the list.
         termSelectList.innerHTML = "";
@@ -1071,7 +1079,7 @@ class UserInterface {
             termSelectItemInput.value = ii;
             termSelectItemInput.id = "termselect-" + ii;
 
-            termSelectItemLabel.innerHTML = diagram.getTerminalName(ii);
+            termSelectItemLabel.innerHTML = this.diagram.getTerminalName(ii);
             termSelectItemLabel.htmlFor = termSelectItemInput.id;
 
             termSelectList.appendChild(termSelectItemInput);
@@ -1150,16 +1158,16 @@ class Diagram {
 
     initNets() {
         'use strict';
-        this.vddNet = new Net("VDD", true);
-        this.gndNet = new Net("GND", true);
+        this.vddNet = new Net("VDD", true, this);
+        this.gndNet = new Net("GND", true, this);
         this.inputNets = [];
         this.outputNets = [];
 
         for (let ii = 0; ii < this.inputs.length; ii++) {
-            this.inputNets.push(new Net(String.fromCharCode(65 + ii), true));
+            this.inputNets.push(new Net(String.fromCharCode(65 + ii), true, this));
         }
         for (let ii = 0; ii < this.outputs.length; ii++) {
-            this.outputNets.push(new Net(String.fromCharCode(89 - ii), false));
+            this.outputNets.push(new Net(String.fromCharCode(89 - ii), false, this));
         }
 
         this.netlist = [];
@@ -1319,7 +1327,7 @@ class Diagram {
             } else {
                 console.log("Error loading!");
             }
-            diagram.unpackGrid(JSON.parse(xhr.responseText));
+            this.unpackGrid(JSON.parse(xhr.responseText));
         };
         xhr.send();
     }
@@ -2114,7 +2122,7 @@ class Diagram {
             // Skip for the gate terminal.
             if (term === "gate") { return; }
 
-            let net = new Net("?", false);
+            let net = new Net("?", false, this);
 
             // If the transistor's term1/term2 is not in any of the nets,
             // then create a new net and add term1/term2 to it.
@@ -2140,7 +2148,7 @@ class Diagram {
             let net = this.getNet(transistor[term]);
 
             if (net === null) {
-                net = new Net("?", false);
+                net = new Net("?", false, this);
                 this.setRecursively(transistor[term], net);
                 this.netlist.push(net);
             }
@@ -2475,7 +2483,7 @@ class DiagramController {
             });
             newTerm = termArr[0];
             this.placeTerminal(newTerm, newTerm, true);
-            netArr.unshift(new Net(name, false));
+            netArr.unshift(new Net(name, false, this));
         } else {
             termArr = this.diagram.inputs;
             netArr  = this.diagram.inputNets;
@@ -2486,7 +2494,7 @@ class DiagramController {
             });
             newTerm = termArr[termArr.length - 1];
             this.placeTerminal(newTerm, newTerm, true);
-            netArr.push(new Net(name, true));
+            netArr.push(new Net(name, true, this));
         }
 
         UI.populateTermSelect();
@@ -2768,10 +2776,10 @@ class DiagramView {
 
         // Set stroke color depending on whether the dark mode is on or off.
         // Should be faintly visible in both modes.
-        if (darkMode) {
-            this.gridCtx.strokeStyle = darkModeGridColor;
+        if (UI.darkMode) {
+            this.gridCtx.strokeStyle = UI.darkModeGridColor;
         } else {
-            this.gridCtx.strokeStyle = lightModeGridColor;
+            this.gridCtx.strokeStyle = UI.lightModeGridColor;
         }
 
         for (let ii = 1; ii <= Math.max(this.diagram.layeredGrid.width, this.diagram.layeredGrid.height); ii++) {
@@ -2818,7 +2826,7 @@ class DiagramView {
 
         // Draw a thick border on the edge of the border drawn above.
         this.ctx.lineWidth = this.cellWidth / 4;
-        this.ctx.strokeStyle = darkMode ? "#ffffff" : "#000000";
+        this.ctx.strokeStyle = UI.darkMode ? "#ffffff" : "#000000";
         this.ctx.strokeRect(1 + this.cellWidth - this.ctx.lineWidth / 2,
             1 + this.cellHeight - this.ctx.lineWidth / 2,
             this.canvasWidth - 2 * this.cellWidth + this.ctx.lineWidth / 2,
@@ -2826,12 +2834,12 @@ class DiagramView {
         );
 
         // For the middle 11 cells of the upper border, fill with the grid color.
-        this.ctx.fillStyle = darkMode ? "#ffffff" : "#000000";
+        this.ctx.fillStyle = UI.darkMode ? "#ffffff" : "#000000";
         let startCell = Math.floor(this.diagram.layeredGrid.width / 2) - 4;
         this.ctx.fillRect(startCell * this.cellWidth, 0, this.cellWidth * 11, this.cellHeight);
 
         // Write the cursor color name in the middle of the upper border of the canvas.
-        this.ctx.fillStyle = darkMode ? '#000000' : '#ffffff';
+        this.ctx.fillStyle = UI.darkMode ? '#000000' : '#ffffff';
         this.ctx.font = Math.floor(this.cellHeight) + 'px Arial';
         this.ctx.textAlign = 'center';
 
@@ -2887,7 +2895,7 @@ class DiagramView {
         'use strict';
         // Draw labels on the canvas above each input and output.
         this.ctx.font = "bold " + Math.floor(this.cellHeight) + "px Arial";
-        this.ctx.fillStyle = darkMode ? "#ffffff" : "#000000";
+        this.ctx.fillStyle = UI.darkMode ? "#ffffff" : "#000000";
 
         // Draw labels for all terminals.
         this.diagram.getTerminals().forEach(((terminal, index) => {
@@ -2910,7 +2918,7 @@ class DiagramView {
             // Draw a faint highlight on the cell at the cursor location.
             currentCell = this.diagram.controller.currentCell;
             if(ii === currentCell.x && jj === currentCell.y) {
-                this.ctx.fillStyle = darkMode ? "rgba(255, 255, 255, 0.5)" : "rgba(0, 0, 0, 0.5)";
+                this.ctx.fillStyle = UI.darkMode ? "rgba(255, 255, 255, 0.5)" : "rgba(0, 0, 0, 0.5)";
                 this.ctx.fillRect((ii+1) * this.cellWidth, (jj+1) * this.cellHeight - 1, this.cellWidth + 1, this.cellHeight + 2);
             }
         }
@@ -2940,7 +2948,7 @@ class DiagramView {
 
         for(let ii = 0; ii < path.length; ii++) {
             // Only highlight nets directly connected to the output.
-            if(path[ii] !== diagram.DIRECT_PATH) {
+            if(path[ii] !== this.diagram.DIRECT_PATH) {
                 continue;
             }
             for(let jj = 0; jj < this.diagram.netlist.length; jj++) {
@@ -3392,9 +3400,10 @@ class LayeredGrid {
 
 // Graph class to represent CMOS circuitry.
 class Graph {
-    constructor() {
+    constructor(diagram) {
         'use strict';
         this.nodes = [];
+		this.diagram = diagram;
     }
 
     // Clear the diagram.graph.
@@ -3411,7 +3420,7 @@ class Graph {
    // Add a node to the diagram.graph.
     addNode(cell, suppressTransistor) {
         'use strict';
-        let node = new Node(cell, suppressTransistor);
+        let node = new Node(cell, suppressTransistor, this.diagram);
         this.nodes.push(node);
         return node;
     }
@@ -3440,7 +3449,7 @@ class Graph {
 
 // Each diagram.graph node is a transistor, VDD, GND, or an output.
 class Node {
-    constructor(cell, suppressTransistor) {
+    constructor(cell, suppressTransistor, diagram) {
         'use strict';
         this.cell = cell;
         this.edges = [];
@@ -3546,7 +3555,7 @@ class Edge {
 
 // Set of cells that are electrically connected to one another.
 class Net {
-    constructor(name, isInput) {
+    constructor(name, isInput, diagram) {
         'use strict';
         this.name = name;
         this.cells = new Set();
@@ -3554,6 +3563,7 @@ class Net {
         this.isInput = isInput;
         this.hasPoly = false;
         this.hasDiff = false;
+        this.diagram = diagram;
     }
 
     isIdentical(net) {
@@ -3601,7 +3611,7 @@ class Net {
         'use strict';
         this.cells.add(cell);
 
-        if(!diagram.layeredGrid.get(cell.x, cell.y, Diagram.CONTACT).isSet) {
+        if(!this.diagram.layeredGrid.get(cell.x, cell.y, Diagram.CONTACT).isSet) {
             this.hasPoly = this.hasPoly || cell.layer === Diagram.POLY;
             this.hasDiff = this.hasDiff || cell.layer === Diagram.NDIFF || cell.layer === Diagram.PDIFF;
         }
@@ -3622,13 +3632,10 @@ window.onload = function () {
     'use strict';
     // Clear local storage
     localStorage.clear();
-    diagram = new Diagram(document.getElementById("canvas"), document.getElementById("grid-canvas"));
+    let diagram = new Diagram(document.getElementById("canvas"), document.getElementById("grid-canvas"));
     
     // Set up the UI object.
-    UI = new UserInterface(diagram.controller);
-	
-	// Set to dark mode if it is night time
-    UI.setDarkMode(new Date().getHours() > 19 || new Date().getHours() < 7);
+    UI = new UserInterface(diagram);
 
     // Set Diagram.CONTACT at the coordinates of each input and output.
     diagram.inputs.forEach(function(input) {
@@ -3642,8 +3649,6 @@ window.onload = function () {
     diagram.layeredGrid.set(diagram.vddCell.x, diagram.vddCell.y, Diagram.CONTACT);
     diagram.layeredGrid.set(diagram.gndCell.x, diagram.gndCell.y, Diagram.CONTACT);
 
-    UI.populateTermSelect();
-    diagram.view.refreshCanvas();
     // 60 fps
     window.requestAnimationFrame(diagram.view.refreshCanvas.bind(diagram.view));
 
