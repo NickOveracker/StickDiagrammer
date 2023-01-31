@@ -3382,6 +3382,7 @@
             window.UI = UI;
             window.Graph = Graph;
             window.Diagram = Diagram;
+            window.LayeredGrid = LayeredGrid;
             window.DiagramController = DiagramController;
             debugDefinitions();
             runTestbench();
