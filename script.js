@@ -87,7 +87,7 @@ class UserInterface {
         this.setDarkMode(new Date().getHours() > 19 || new Date().getHours() < 7);
 		
         this.populateTermSelect();
-        this.view.refreshCanvas();
+        this.diagramView.refreshCanvas();
     }
 
     keydownHandler(event) {
@@ -367,7 +367,7 @@ class UserInterface {
             keyCode: 70,
             action:  function(e) {
                 if(e.type.includes('up')) {
-                    this.view.useFlatColors = !this.view.useFlatColors;
+                    this.diagramView.useFlatColors = !this.diagramView.useFlatColors;
                 }
             }.bind(this),
         };
@@ -378,7 +378,7 @@ class UserInterface {
             keyCode: 84,
             action:  function(e) {
                 if(e.type.includes('up')) {
-                    this.view.theme = this.view.theme < DiagramView.themes.length - 1 ? this.view.theme + 1 : 0;
+                    this.diagramView.theme = this.diagramView.theme < DiagramView.themes.length - 1 ? this.diagramView.theme + 1 : 0;
                     this.diagramController.setUpLayerSelector();
                 }
             }.bind(this),
@@ -521,8 +521,8 @@ class UserInterface {
             return;
         }
 
-        let endX = Math.floor((currentX - this.view.canvas.getBoundingClientRect().left - this.diagramController.view.cellWidth) / this.diagramController.view.cellWidth);
-        let endY = Math.floor((currentY - this.view.canvas.getBoundingClientRect().top - this.diagramController.view.cellHeight) / this.diagramController.view.cellHeight);
+        let endX = Math.floor((currentX - this.diagramView.canvas.getBoundingClientRect().left - this.diagramController.view.cellWidth) / this.diagramController.view.cellWidth);
+        let endY = Math.floor((currentY - this.diagramView.canvas.getBoundingClientRect().top - this.diagramController.view.cellHeight) / this.diagramController.view.cellHeight);
         let bounds = {
             left: Math.min(this.diagramController.startX, endX),
             right: Math.max(this.diagramController.startX, endX),
@@ -557,7 +557,7 @@ class UserInterface {
         }
 
         if(event.type.includes("mouse")) {
-            this.view.trailCursor = true;
+            this.diagramView.trailCursor = true;
         }
 
         // Save the current X and Y coordinates.
@@ -662,22 +662,22 @@ class UserInterface {
         'use strict';
         document.getElementById("remove-row").onclick = function() {
             this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height - 1);
-            this.view.drawGrid();
+            this.diagramView.drawGrid();
         }.bind(this);
 
         document.getElementById("add-row").onclick = function() {
             this.layeredGrid.resize(this.layeredGrid.width, this.layeredGrid.height + 1);
-            this.view.drawGrid();
+            this.diagramView.drawGrid();
         }.bind(this);
 
         document.getElementById("remove-column").onclick = function() {
             this.layeredGrid.resize(this.layeredGrid.width - 1, this.layeredGrid.height);
-            this.view.drawGrid();
+            this.diagramView.drawGrid();
         }.bind(this);
 
         document.getElementById("add-column").onclick = function() {
             this.layeredGrid.resize(this.layeredGrid.width + 1, this.layeredGrid.height);
-            this.view.drawGrid();
+            this.diagramView.drawGrid();
         }.bind(this);
 
         document.getElementById("shift-left").onclick = function() {
@@ -802,14 +802,14 @@ class UserInterface {
         }.bind(this);
 
         document.getElementById('select-palette-btn').onclick = function() {
-            this.view.theme = this.view.theme < DiagramView.themes.length - 1 ? this.view.theme + 1 : 0;
-            document.getElementById('palette-setting').innerHTML = DiagramView.themes[this.view.theme];
-            this.view.setUpLayerSelector();
+            this.diagramView.theme = this.diagramView.theme < DiagramView.themes.length - 1 ? this.diagramView.theme + 1 : 0;
+            document.getElementById('palette-setting').innerHTML = DiagramView.themes[this.diagramView.theme];
+            this.diagramView.setUpLayerSelector();
         }.bind(this);
 
         document.getElementById('toggle-transparency-btn').onclick = function() {
-            this.view.useFlatColors = !this.view.useFlatColors;
-            document.getElementById('transparency-setting').innerHTML = this.view.useFlatColors ? "OFF" : "ON";
+            this.diagramView.useFlatColors = !this.diagramView.useFlatColors;
+            document.getElementById('transparency-setting').innerHTML = this.diagramView.useFlatColors ? "OFF" : "ON";
         }.bind(this);
 
         this.setUpLayerSelector();
@@ -1042,7 +1042,7 @@ class UserInterface {
             }
 
             // Color with flat color (rgb, not rgba).
-            element.style.color = this.view.getColor(index);
+            element.style.color = this.diagramView.getColor(index);
         }.bind(this));
     }
 
