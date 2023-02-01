@@ -2320,28 +2320,20 @@
         }
     }
 
-/*    class TutorialStep {
+    class TutorialStep {
         constructor(UI) {
             this.UI = UI;
+            this.timer = Date.now();
             
             this.instructions = {
-                en_us: "Click the Dark Mode toggle button.",
-                ja_jp: "ダークモードのトグルボタンをクリックしましょう。",
+                en_us: "English instructions.",
+                ja_jp: "日本語の手順。",
             };
-            
-            this.completed = (function(darkModeSet) {
-                return function() {
-                    return this.UI.diagramView.darkMode !== darkModeSet;
-                }.bind(this);
-            }.bind(this))(this.UI.diagramView.darkMode);
-            
-            this.location = null;
-            
-            this.specialAction = function() {
-                return;
-            };
+            this.completed     = () => { return true; };
+            this.location      = () => { return {x: 0, y: 0,}; };
+            this.specialAction = () => { return; };
         }
-    }*/
+    }
 
     class Tutorial {
         constructor(UI) {
@@ -2353,40 +2345,58 @@
         }
 
         initTutorial() {
-            let tutStep = {
-                instructions: {
-                        en_us: "Click the Dark Mode toggle button.",
-                        ja_jp: "ダークモードのトグルボタンをクリックしましょう。",
-                    },
-                completed: (function(darkModeSet) {
-                        return function() {
-                            return this.UI.diagramView.darkMode !== darkModeSet;
-                        }.bind(this);
-                    }.bind(this))(this.UI.diagramView.darkMode),
-                location: null,
-                specialAction: function() {
-                        return;
-                    },
+            let tutStep = new TutorialStep(this.UI);
+
+            ////////////////////////// STEP 1 //////////////////////////
+            tutStep.instructions = {
+                en_us: "Click the Dark Mode toggle button.",
+                ja_jp: "ダークモードのトグルボタンをクリックしましょう。",
             };
+
+            tutStep.completed = (function(darkModeSet) {
+                return function() {
+                    let completed = this.UI.diagramView.darkMode !== darkModeSet;
+                    if(completed) {
+                        // Remove glow from dark mode button.
+                        let classList = document.getElementById("dark-mode-btn").classList;
+                        if(classList.contains("glow")) {
+                            classList.remove("glow");
+                        }
+                    }
+                    return completed;
+                }.bind(tutStep);
+            }.bind(tutStep))(this.UI.diagramView.darkMode);
+
+            tutStep.specialAction = function() {
+                if(this.timer > 1000) {
+                    let classList = document.getElementById("dark-mode-btn").classList;
+                    this.timer = Date.now();
+                    if(classList.contains("glow")) {
+                        classList.remove("glow");
+                    } else {
+                        classList.add("glow");
+                    }
+                }
+            }.bind(tutStep);
             
             this.steps.push(tutStep);
             
-            tutStep = {
-                instructions: {
-                        en_us: "Connect METAL1 to VDD.",
-                        ja_jp: "VDDに接続してください。",
-                    },
-                completed: function() {
-                        let cellSet = this.layeredGrid.get(this.vddCell.x, this.vddCell.y, LayeredGrid.METAL1).isSet;
-                        return cellSet && !this.controller.dragging;
-                    }.bind(this.UI.diagram),
-                location: null,
-                specialAction: function() {
-                        return;
-                    },
+            ////////////////////////// STEP 2 //////////////////////////
+            tutStep = new TutorialStep(this.UI);
+
+            tutStep.instructions = {
+                en_us: "Connect METAL1 to VDD.",
+                ja_jp: "VDDに接続してください。",
             };
+
+            tutStep.completed = function() {
+                let cellSet = this.layeredGrid.get(this.vddCell.x, this.vddCell.y, LayeredGrid.METAL1).isSet;
+                return cellSet && !this.controller.dragging;
+            }.bind(this.UI.diagram);
             
             this.steps.push(tutStep);
+            
+            ////////////////////////// START TUTORIAL //////////////////////////
             alert(this.steps[this.currentStep].instructions.en_us);
             this.active = true;
         }

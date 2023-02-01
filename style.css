@@ -627,7 +627,7 @@ body.light {
         transition: .5s;
     }
 
-    .clickable:hover {
+    .clickable:hover, .clickable.glow {
         color: #d4af37;
         transition: .5s;
     }
