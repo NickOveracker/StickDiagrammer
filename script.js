@@ -2337,6 +2337,9 @@
         }
 
         display() {
+            this.tutorialOverlay.classList.add("tutorial-overlay");
+            document.body.appendChild(this.tutorialOverlay);
+
             let targetRect = this.target.getBoundingClientRect();
             let overlayRect = this.tutorialOverlay.getBoundingClientRect();
             let x          = targetRect.left;
@@ -2356,8 +2359,6 @@
             // Position the overlay next to the target element
             this.tutorialOverlay.style.left = `${x}px`;
             this.tutorialOverlay.style.top = `${y}px`;
-            this.tutorialOverlay.classList.add("tutorial-overlay");
-            document.body.appendChild(this.tutorialOverlay);
         }
     }
 
