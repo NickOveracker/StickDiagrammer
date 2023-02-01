@@ -762,6 +762,7 @@
                     metal1:  this.diagram.layeredGrid.get(x, y, LayeredGrid.METAL1).isSet,
                     metal2:  this.diagram.layeredGrid.get(x, y, LayeredGrid.METAL2).isSet,
                     contact: this.diagram.layeredGrid.get(x, y, LayeredGrid.CONTACT).isSet,
+                    del:     this.diagram.layeredGrid.get(x, y, LayeredGrid.DELETE).isSet,
                 };
             } else {
                 this.currentCell = {};
@@ -1056,25 +1057,32 @@
 
         // Check the layers of the grid, and draw cells as needed.
         drawCell(ii, jj, layer) {
-            let currentCell, baseColor, hoverCell, isCurrentCell;
-			currentCell = this.diagram.controller.currentCell;
-			isCurrentCell = ii === currentCell.x && jj === currentCell.y;
-			
-            if(this.diagram.controller.dragging) {
-				hoverCell = isCurrentCell;
-			} else {
-                hoverCell = layer === LayeredGrid.layers.length - 1;
-			}
+            let currentCell, baseColor, hoverCell,
+                isCurrentRow, isCurrentCol, isCurrentCell;
+
+            currentCell   = this.diagram.controller.currentCell;
+            isCurrentCol  = ii === currentCell.x;
+            isCurrentRow  = jj === currentCell.y;
+            isCurrentCell = isCurrentCol && isCurrentRow;
+            
+            if(this.diagram.controller.dragging || this.diagram.controller.placeTermMode) {
+                hoverCell = (isCurrentRow || isCurrentCol);
+            } else {
+                hoverCell = isCurrentCell;
+            }
+            // Only hover on top layer.
+            hoverCell = hoverCell && layer === LayeredGrid.layers.length - 1;
+            // Do not hover when erasing.
+            hoverCell = hoverCell && !currentCell.del;
 
             if (this.diagram.layeredGrid.get(ii, jj, layer).isSet) {
                 this.ctx.fillStyle = this.getColor(layer);
                 this.ctx.fillRect((ii+1) * this.cellWidth, (jj+1) * this.cellHeight - 1, this.cellWidth + 1, this.cellHeight + 2);
             } else if(hoverCell) {
-                // Draw a faint highlight on the cell at the cursor location.
-                if(isCurrentCell) {
-                    this.ctx.fillStyle = this.darkMode ? "rgba(255, 255, 255, 0.5)" : "rgba(0, 0, 0, 0.5)";
-                    this.ctx.fillRect((ii+1) * this.cellWidth, (jj+1) * this.cellHeight - 1, this.cellWidth + 1, this.cellHeight + 2);
-                }
+                // Draw a faint highlight on the cell at the cursor location,
+                // or on the entire row and column when dragging.
+                this.ctx.fillStyle = this.darkMode ? "rgba(255, 255, 255, 0.5)" : "rgba(0, 0, 0, 0.5)";
+                this.ctx.fillRect((ii+1) * this.cellWidth, (jj+1) * this.cellHeight - 1, this.cellWidth + 1, this.cellHeight + 2);
             }
             if(this.highlightNets && this.netHighlightGrid[ii] && this.netHighlightGrid[ii][jj]) {
                 baseColor = this.getColor(LayeredGrid.DELETE, false).slice(0, -4);
@@ -1175,7 +1183,7 @@
                         this.decorateContact(x, y);
                     }
                 }
-            }.bind(this));
+            }.bind(this), this.diagram.controller.dragging || this.diagram.controller.placeTermMode);
 
             // set the outer border of the canvas to the cursor color
             this.drawBorder();
@@ -2665,8 +2673,9 @@
             let coords = controller.getCoordsFromEvent(event);
 
             if(controller.placeTermMode) {
+                // TODO: Refactor
+                // Actual placement done before calling in mouseupHandler
                 this.clearPlaceTerminalMode();
-                controller.placeTerminal(event, controller.selectedTerminal);
             } else if (!this.isEraseEvent(event)) {
                 // Just fill in or delete the cell at the start coordinates.
                 // If there is no cell at the start coordinates, change the cursor color.
@@ -2745,6 +2754,7 @@
             let view = this.diagramView;
             let endX, endY, bounds;
 
+            // TODO: Is this needed?
             if (controller.startX === -1) {
                 return;
             }
@@ -2836,10 +2846,18 @@
             }
 
             // If the mouse is pressed and the mouse is between cells 1 and gridsize - 1,
+            // TODO: Move isPrimaryInput to UI.
             if (this.diagramController.isPrimaryInput(event) || event.buttons === 2) {
                 // Ignore if not inside the canvas
+                // Do not enter drag event if in terminal placement mode.
+                // TODO: Allow manipulation outside the canvas
                 if (this.diagramController.pixelIsInBounds()) {
-                    this.drag(event);
+                    // TODO: Refactor
+                    if(this.diagramController.placeTermMode) {
+                        this.diagramController.placeTerminal(event, this.diagramController.selectedTerminal);
+                    } else {
+                        this.drag(event);
+                    }
                 }
             }
         }
