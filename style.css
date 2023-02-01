@@ -67,6 +67,7 @@ html {
 
 .tutorial-overlay {
     position: absolute;
+    color: black;
     background-color: white;
     padding: 10px;
     border-radius: 5px;
