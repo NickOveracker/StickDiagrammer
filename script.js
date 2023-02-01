@@ -1191,8 +1191,6 @@
 
             document.getElementById("num-rows").innerHTML = this.diagram.layeredGrid.height;
             document.getElementById("num-cols").innerHTML = this.diagram.layeredGrid.width;
-
-            window.requestAnimationFrame(this.refreshCanvas.bind(this));
         }
     }
 
@@ -2325,14 +2323,20 @@
     class TutorialStep {
         constructor(UI) {
             this.UI = UI;
+            
             this.instructions = {
-                en_us: "",
-                ja_jp: "",
+                en_us: "Click the Dark Mode toggle button.",
+                ja_jp: "ダークモードのトグルボタンをクリックしましょう。",
             };
-            this.completed = function() {
-                return true;
-            };
+            
+            this.completed = (function(darkModeSet) {
+                return function() {
+                    return this.UI.diagramView.darkMode !== darkModeSet;
+                }.bind(this);
+            }.bind(this))(this.diagramView.darkMode);
+            
             this.location = null;
+            
             this.specialAction = function() {
                 return;
             };
@@ -2345,10 +2349,25 @@
             this.steps = [];
             this.currentStep = 0;
             this.initTutorial();
+            this.active = true;
         }
 
         initTutorial() {
             this.steps.push(new TutorialStep(this.UI));
+            alert(this.steps[this.currentStep].en_us);
+        }
+        
+        step() {
+            if(this.active) {
+                if(this.steps[this.currentStep].completed()) {
+                    this.currentStep++;
+                    if(this.currentStep >= this.steps.length) {
+                        alert("Tutorial complete");
+                    }
+                } else {
+                    this.steps[this.currentStep].specialAction();
+                }
+            }
         }
     }
 
@@ -3409,6 +3428,16 @@
                 termSelectList.appendChild(termSelectItemLabel);
             }
         }
+        
+        refreshScreen() {
+            this.diagramView.refreshCanvas.bind(this.diagramView);
+
+            if(this.tutorial.active) {
+                this.tutorial.step();
+            }
+
+            window.requestAnimationFrame(this.refreshScreen.bind(this));
+        }
     }
 
     window.onload = function () {
@@ -3432,7 +3461,7 @@
         diagram.layeredGrid.set(diagram.gndCell.x, diagram.gndCell.y, LayeredGrid.CONTACT);
 
         // 60 fps
-        window.requestAnimationFrame(diagram.view.refreshCanvas.bind(diagram.view));
+        window.requestAnimationFrame(UI.refreshScreen.bind(UI));
 
         if(window.runTestbench) {
             window.UI = UI;
