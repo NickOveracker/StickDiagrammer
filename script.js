@@ -2349,8 +2349,8 @@
 
             ////////////////////////// STEP 1 //////////////////////////
             tutStep.instructions = {
-                en_us: "Click the Dark Mode toggle button.",
-                ja_jp: "ダークモードのトグルボタンをクリックしましょう。",
+                en_us: `Toggle dark mode by pressing the on-screen toggle button or by pressing ${this.UI.darkModeCommand.ctrlModifier ? "CTRL-" : this.UI.darkModeCommand.shiftModifier ? "SHIFT-" : ""}${String.fromCharCode(this.UI.darkModeCommand.keyCode)}.`,
+                ja_jp: `ダークモードのトグルボタンを押すか、${this.UI.darkModeCommand.ctrlModifier ? "CTRL-" : this.UI.darkModeCommand.shiftModifier ? "SHIFT-" : ""}${String.fromCharCode(this.UI.darkModeCommand.keyCode)}を押して下さい。`,
             };
 
             tutStep.completed = (function(darkModeSet) {
@@ -2361,6 +2361,10 @@
                         let classList = document.getElementById("dark-mode-btn").classList;
                         if(classList.contains("glowing")) {
                             classList.remove("glowing");
+                        }
+                        // Change layer if currently on METAL1 to prepare for next step.
+                        if(this.UI.diagramController.layerIndex === LayeredGrid.METAL1) {
+                            this.UI.diagramController.changeLayer();
                         }
                     }
                     return completed;
@@ -2380,17 +2384,51 @@
             tutStep = new TutorialStep(this.UI);
 
             tutStep.instructions = {
-                en_us: "Connect METAL1 to VDD.",
-                ja_jp: "VDDに接続してください。",
+                en_us: "Select the METAL1 layer by right clicking a few times, or by pressing the METAL1 layer select button.",
+                ja_jp: "右クリックを数回してMETAL1層に変えるか、METAL1層の選択ボタンを押して下さい。",
+            };
+
+            tutStep.completed = function() {
+                let completed = this.layerIndex === LayeredGrid.METAL1;
+                if(completed) {
+                    // Remove glow from metal1 swatch.
+                    let classList = document.getElementById("metal1-swatch").classList;
+                    if(classList.contains("glowing")) {
+                        classList.remove("glowing");
+                    }
+                }
+                return completed;
+           }.bind(this.UI.diagramController);
+
+            tutStep.specialAction = function() {
+                let classList = document.getElementById("metal1-swatch").classList;
+                if(!classList.contains("glowing")) {
+                    classList.add("glowing");
+                }
+            };
+           
+            this.steps.push(tutStep);
+
+            ////////////////////////// STEP 3 //////////////////////////
+            tutStep = new TutorialStep(this.UI);
+
+            tutStep.instructions = {
+                en_us: "Connect VDD to METAL1.",
+                ja_jp: "VDDをMETAL1層に接続して下さい。",
             };
 
             tutStep.completed = function() {
                 let cellSet = this.layeredGrid.get(this.vddCell.x, this.vddCell.y, LayeredGrid.METAL1).isSet;
-                return cellSet && !this.controller.dragging;
-            }.bind(this.UI.diagram);
-            
+                let completed = cellSet && !this.controller.dragging;
+                return completed;
+           }.bind(this.UI.diagram);
+
+            tutStep.specialAction = function() {
+                return;
+            };
+           
             this.steps.push(tutStep);
-            
+           
             ////////////////////////// START TUTORIAL //////////////////////////
             alert(this.steps[this.currentStep].instructions.en_us);
             this.active = true;
