@@ -2368,16 +2368,10 @@
             }.bind(tutStep))(this.UI.diagramView.darkMode);
 
             tutStep.specialAction = function() {
-                if(Date.now() - this.timer > 1000) {
-                    let classList = document.getElementById("dark-mode-btn").classList;
-                    this.timer = Date.now();
-                    if(classList.contains("glow")) {
-                        classList.remove("glow");
-                    } else {
-                        classList.add("glow");
-                    }
+                if(!classList.contains("glow")) {
+                    classList.add("glow");
                 }
-            }.bind(tutStep);
+            };
             
             this.steps.push(tutStep);
             
