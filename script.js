@@ -2368,6 +2368,7 @@
             }.bind(tutStep))(this.UI.diagramView.darkMode);
 
             tutStep.specialAction = function() {
+                let classList = document.getElementById("dark-mode-btn").classList;
                 if(!classList.contains("glow")) {
                     classList.add("glow");
                 }
