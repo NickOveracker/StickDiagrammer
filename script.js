@@ -2348,8 +2348,8 @@
             this.UI = UI;
             this.steps = [];
             this.currentStep = 0;
-            this.initTutorial();
             this.active = false;
+            this.initTutorial();
         }
 
         initTutorial() {
