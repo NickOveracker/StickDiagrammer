@@ -2389,7 +2389,7 @@
             };
 
             tutStep.completed = function() {
-                let completed = this.layerIndex === LayeredGrid.METAL1;
+                let completed = this.cursorIndex === LayeredGrid.METAL1;
                 if(completed) {
                     // Remove glow from metal1 swatch.
                     let classList = document.getElementById("metal1-swatch").classList;
