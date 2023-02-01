@@ -1072,7 +1072,7 @@
             // Only hover on top layer.
             hoverCell = hoverCell && layer === LayeredGrid.layers.length - 1;
             // Do not hover when erasing.
-            hoverCell = hoverCell && !currentCell.isSet;
+            hoverCell = hoverCell && !this.diagram.layeredGrid.get(ii, jj, LayeredGrid.DELETE).isSet;
 
             if (this.diagram.layeredGrid.get(ii, jj, layer).isSet) {
                 this.ctx.fillStyle = this.getColor(layer);
