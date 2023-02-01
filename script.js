@@ -1065,7 +1065,7 @@
             isCurrentRow  = jj === currentCell.y;
             isCurrentCell = isCurrentCol && isCurrentRow;
             
-            if(this.diagram.controller.dragging) {
+            if(this.diagram.controller.dragging || this.diagram.controller.placeTermMode) {
                 hoverCell = (isCurrentRow || isCurrentCol);
             } else {
                 hoverCell = isCurrentCell;
@@ -2673,8 +2673,9 @@
             let coords = controller.getCoordsFromEvent(event);
 
             if(controller.placeTermMode) {
-				// DO NOTHING
 				// TODO: Refactor
+				// Actual placement done before calling in mouseupHandler
+				this.clearPlaceTerminalMode();
             } else if (!this.isEraseEvent(event)) {
                 // Just fill in or delete the cell at the start coordinates.
                 // If there is no cell at the start coordinates, change the cursor color.
@@ -2703,7 +2704,6 @@
 			
 			// TODO: Refactor
 			if(this.diagramController.placeTermMode) {
-				this.clearPlaceTerminalMode();
                 this.diagramController.placeTerminal(event, this.diagramController.selectedTerminal);
 			}
          
