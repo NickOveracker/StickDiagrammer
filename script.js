@@ -2330,16 +2330,28 @@
                 ja_jp: "日本語の手順。",
             };
             this.completed     = () => { return true; };
-            this.location      = () => { return {x: 0, y: 0,}; };
+            this.position      = { centerHorizontal: false, centerVertical: false, x: 0, y: 0, flipLeft: false, flipUp: false };
             this.specialAction = () => { return; };
             this.target = document.body;
             this.tutorialOverlay = document.createElement("div");
         }
 
         display() {
-            let targetRect                 = this.target.getBoundingClientRect();
-            let x                          = targetRect.left + targetRect.width + 10;
-            let y                          = targetRect.top;
+            let targetRect = this.target.getBoundingClientRect();
+            let overlayRect = this.tutorialOverlay.getBoundingClientRect();
+            let location   = this.location();
+            let x          = targetRect.left;
+            let y          = targetRect.top;
+
+            x += flipLeft ? -overlayRect.width  - this.position.x : this.targetRect.width  + this.position.x;
+            y += flipUp   ? -overlayRect.height - this.position.y : this.targetRect.height + this.position.y;
+
+            if(location.centerHorizontal) {
+                x = x - this.targetRect.width/2 - this.overlayRect.width/2;
+            }
+            if(location.centerVertical) {
+                y = y - this.targetRect.height/2 - this.overlayRect.height/2;
+            }
             this.tutorialOverlay.innerHTML = this.instructions["en_us"];
 
             // Position the overlay next to the target element
@@ -2427,6 +2439,8 @@
             };
 
             tutStep.target = document.getElementById("metal1-swatch");
+            tutStep.position.centerHorizontal = true;
+            tutStep.position.flipUp = true;
            
             this.steps.push(tutStep);
 
@@ -2452,6 +2466,8 @@
             };
 
             tutStep.target = document.getElementById("canvas");
+            tutStep.position.centerHorizontal = true;
+            tutStep.position.centerVertical   = true;
            
             this.steps.push(tutStep);
            
