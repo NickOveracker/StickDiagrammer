@@ -2331,9 +2331,9 @@
             
             this.completed = (function(darkModeSet) {
                 return function() {
-                    return this.darkMode !== darkModeSet;
+                    return this.UI.diagramView.darkMode !== darkModeSet;
                 }.bind(this);
-            }.bind(this.UI.diagramView))(this.UI.diagramView.darkMode);
+            }.bind(this))(this.UI.diagramView.darkMode);
             
             this.location = null;
             
