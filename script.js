@@ -2339,7 +2339,6 @@
         display() {
             let targetRect = this.target.getBoundingClientRect();
             let overlayRect = this.tutorialOverlay.getBoundingClientRect();
-            let location   = this.location();
             let x          = targetRect.left;
             let y          = targetRect.top;
 
