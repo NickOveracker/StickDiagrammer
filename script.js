@@ -2354,7 +2354,7 @@
 
         initTutorial() {
             this.steps.push(new TutorialStep(this.UI));
-            alert(this.steps[this.currentStep].en_us);
+            alert(this.steps[this.currentStep].instructions.en_us);
             this.active = true;
         }
         
