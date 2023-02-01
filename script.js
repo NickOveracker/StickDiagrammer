@@ -1178,7 +1178,7 @@
                         this.decorateContact(x, y);
                     }
                 }
-            }.bind(this));
+            }.bind(this), this.diagram.controller.dragging);
 
             // set the outer border of the canvas to the cursor color
             this.drawBorder();
