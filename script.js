@@ -2322,6 +2322,36 @@
         }
     }
 
+    class TutorialStep {
+        constructor(UI) {
+            this.UI = UI;
+            this.instructions = {
+                en_us: "",
+                ja_jp: "",
+            };
+            this.completed = function() {
+                return true;
+            };
+            this.location = null;
+            this.specialAction = function() {
+                return;
+            };
+        }
+    }
+
+    class Tutorial {
+        constructor(UI) {
+            this.UI = UI;
+            this.steps = [];
+            this.currentStep = 0;
+            this.initTutorial();
+        }
+
+        initTutorial() {
+            this.steps.push(new TutorialStep(this.UI));
+        }
+    }
+
     class UserInterface {
         constructor(diagram) {
             this.diagram           = diagram;
@@ -2339,6 +2369,8 @@
             this.initCosmeticCommands();
             this.initHistoryCommands();
             this.initRowColCommands();
+
+            this.tutorial = new Tutorial();
 
             this.allCommands.forEach(function(command) {
                 if(command.ctrlModifier) {
