@@ -762,7 +762,7 @@
                     metal1:  this.diagram.layeredGrid.get(x, y, LayeredGrid.METAL1).isSet,
                     metal2:  this.diagram.layeredGrid.get(x, y, LayeredGrid.METAL2).isSet,
                     contact: this.diagram.layeredGrid.get(x, y, LayeredGrid.CONTACT).isSet,
-					del:     this.diagram.layeredGrid.get(x, y, LayeredGrid.DELETE).isSet,
+                    del:     this.diagram.layeredGrid.get(x, y, LayeredGrid.DELETE).isSet,
                 };
             } else {
                 this.currentCell = {};
@@ -1183,7 +1183,7 @@
                         this.decorateContact(x, y);
                     }
                 }
-            }.bind(this), this.diagram.controller.dragging);
+            }.bind(this), this.diagram.controller.dragging || this.diagram.controller.placeTermMode);
 
             // set the outer border of the canvas to the cursor color
             this.drawBorder();
@@ -2673,9 +2673,9 @@
             let coords = controller.getCoordsFromEvent(event);
 
             if(controller.placeTermMode) {
-				// TODO: Refactor
-				// Actual placement done before calling in mouseupHandler
-				this.clearPlaceTerminalMode();
+                // TODO: Refactor
+                // Actual placement done before calling in mouseupHandler
+                this.clearPlaceTerminalMode();
             } else if (!this.isEraseEvent(event)) {
                 // Just fill in or delete the cell at the start coordinates.
                 // If there is no cell at the start coordinates, change the cursor color.
@@ -2701,11 +2701,6 @@
             if(this.diagramController.pixelIsInBounds()) {
                 event.preventDefault();
             }
-			
-			// TODO: Refactor
-			if(this.diagramController.placeTermMode) {
-                this.diagramController.placeTerminal(event, this.diagramController.selectedTerminal);
-			}
          
             if (this.diagramController.isPrimaryInput(event) || event.button === 2) {
                 if (this.diagramController.dragging) {
@@ -2851,13 +2846,18 @@
             }
 
             // If the mouse is pressed and the mouse is between cells 1 and gridsize - 1,
-			// TODO: Move isPrimaryInput to UI.
+            // TODO: Move isPrimaryInput to UI.
             if (this.diagramController.isPrimaryInput(event) || event.buttons === 2) {
                 // Ignore if not inside the canvas
-				// Do not enter drag event if in terminal placement mode.
+                // Do not enter drag event if in terminal placement mode.
                 // TODO: Allow manipulation outside the canvas
                 if (this.diagramController.pixelIsInBounds() && !this.diagramController.placeTermMode) {
-                    this.drag(event);
+                    // TODO: Refactor
+                    if(this.diagramController.placeTermMode) {
+                        this.diagramController.placeTerminal(event, this.diagramController.selectedTerminal);
+                    } else {
+                        this.drag(event);
+                    }
                 }
             }
         }
