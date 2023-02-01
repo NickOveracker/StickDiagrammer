@@ -2368,7 +2368,7 @@
             }.bind(tutStep))(this.UI.diagramView.darkMode);
 
             tutStep.specialAction = function() {
-                if(this.timer > 1000) {
+                if(Date.now() - this.timer > 1000) {
                     let classList = document.getElementById("dark-mode-btn").classList;
                     this.timer = Date.now();
                     if(classList.contains("glow")) {
