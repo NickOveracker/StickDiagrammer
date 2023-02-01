@@ -2337,15 +2337,15 @@
         }
 
         display() {
-            let targetRect            = this.target.getBoundingClientRect();
-            let x                     = targetRect.left + targetRect.width + 10;
-            let y                     = targetRect.top;
-            tutorialOverlay.innerHTML = this.instructions["en_us"];
+            let targetRect                 = this.target.getBoundingClientRect();
+            let x                          = targetRect.left + targetRect.width + 10;
+            let y                          = targetRect.top;
+            this.tutorialOverlay.innerHTML = this.instructions["en_us"];
 
             // Position the overlay next to the target element
-            tutorialOverlay.style.left = `${x}px`;
-            tutorialOverlay.style.top = `${y}px`;
-            document.body.appendChild(tutorialOverlay);
+            this.tutorialOverlay.style.left = `${x}px`;
+            this.tutorialOverlay.style.top = `${y}px`;
+            document.body.appendChild(this.tutorialOverlay);
         }
     }
 
@@ -2406,7 +2406,7 @@
             };
 
             tutStep.completed = function() {
-                let completed = this.cursorIndex === LayeredGrid.METAL1;
+                let completed = this.UI.diagramController.cursorIndex === LayeredGrid.METAL1;
                 if(completed) {
                     // Remove glow from metal1 swatch.
                     let classList = document.getElementById("metal1-swatch").classList;
@@ -2416,7 +2416,7 @@
                     this.tutorialOverlay.remove();
                 }
                 return completed;
-           }.bind(this.UI.diagramController);
+           }.bind(tutStep);
 
             tutStep.specialAction = function() {
                 let classList = document.getElementById("metal1-swatch").classList;
@@ -2438,13 +2438,13 @@
             };
 
             tutStep.completed = function() {
-                let cellSet = this.layeredGrid.get(this.vddCell.x, this.vddCell.y, LayeredGrid.METAL1).isSet;
-                let completed = cellSet && !this.controller.dragging;
+                let cellSet = this.layeredGrid.get(this.UI.diagram.vddCell.x, this.UI.diagram.vddCell.y, LayeredGrid.METAL1).isSet;
+                let completed = cellSet && !this.UI.diagram.controller.dragging;
                 if(completed) {
                     this.tutorialOverlay.remove();
                 }
                 return completed;
-           }.bind(this.UI.diagram);
+           }.bind(tutStep);
 
             tutStep.specialAction = function() {
                 return;
