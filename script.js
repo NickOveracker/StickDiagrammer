@@ -2338,6 +2338,7 @@
 
         display() {
             this.tutorialOverlay.classList.add("tutorial-overlay");
+            this.tutorialOverlay.innerHTML = this.instructions["en_us"];
             document.body.appendChild(this.tutorialOverlay);
 
             let targetRect = this.target.getBoundingClientRect();
@@ -2354,7 +2355,6 @@
             if(this.position.centerVertical) {
                 y = y - targetRect.height/2 - overlayRect.height/2;
             }
-            this.tutorialOverlay.innerHTML = this.instructions["en_us"];
 
             // Position the overlay next to the target element
             this.tutorialOverlay.style.left = `${x}px`;
