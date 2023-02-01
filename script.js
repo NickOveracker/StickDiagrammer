@@ -2320,7 +2320,7 @@
         }
     }
 
-    class TutorialStep {
+/*    class TutorialStep {
         constructor(UI) {
             this.UI = UI;
             
@@ -2341,7 +2341,7 @@
                 return;
             };
         }
-    }
+    }*/
 
     class Tutorial {
         constructor(UI) {
@@ -2353,7 +2353,40 @@
         }
 
         initTutorial() {
-            this.steps.push(new TutorialStep(this.UI));
+            let tutStep = {
+                instructions: {
+                        en_us: "Click the Dark Mode toggle button.",
+                        ja_jp: "ダークモードのトグルボタンをクリックしましょう。",
+                    },
+                completed: (function(darkModeSet) {
+                        return function() {
+                            return this.UI.diagramView.darkMode !== darkModeSet;
+                        }.bind(this);
+                    }.bind(this))(this.UI.diagramView.darkMode),
+                location: null,
+                specialAction: function() {
+                        return;
+                    },
+            };
+            
+            tutStep = {
+                instructions: {
+                        en_us: "Connect METAL1 to VDD.",
+                        ja_jp: "VDDに接続してください。",
+                    },
+                completed: function() {
+                        let cellSet = this.layeredGrid.get(this.vddCell.x, this.vddCell.y, LayeredGrid.METAL1).isSet;
+                        return cellSet && !this.controller.dragging;
+                    }.bind(this.UI.diagram),
+                location: null,
+                specialAction: function() {
+                        return;
+                    },
+            };
+            
+            this.steps.push(tutStep);
+            
+            
             alert(this.steps[this.currentStep].instructions.en_us);
             this.active = true;
         }
