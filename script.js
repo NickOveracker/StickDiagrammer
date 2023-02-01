@@ -2387,8 +2387,6 @@
             };
             
             this.steps.push(tutStep);
-            
-            
             alert(this.steps[this.currentStep].instructions.en_us);
             this.active = true;
         }
@@ -2400,6 +2398,8 @@
                     if(this.currentStep >= this.steps.length) {
                         this.active = false;
                         alert("Tutorial complete");
+                    } else {
+                        alert(this.steps[this.currentStep].instructions.en_us);
                     }
                 } else {
                     this.steps[this.currentStep].specialAction();
