@@ -50,6 +50,21 @@ html {
     height: auto;
 }
 
+.glowing {
+    animation: glowing-animation 0.60s infinite alternate;
+    border-radius: 100%;
+}
+
+@keyframes glowing-animation {
+    from {
+        box-shadow: 0 0 10px -10px #d4af37;
+    }
+    to {
+        background-color: #d4af37;
+        box-shadow: 0 0 10px 10px #d4af37;
+    }
+}
+
 .menu-long-text li::before {
     position: relative;
     left: -10px;
@@ -630,21 +645,6 @@ body.light {
     .clickable:hover {
         color: #d4af37;
         transition: .5s;
-    }
-
-    .glowing {
-        animation: glowing-animation 0.60s infinite alternate;
-        border-radius: 100%;
-    }
-
-    @keyframes glowing-animation {
-        from {
-            box-shadow: 0 0 10px -10px #d4af37;
-        }
-        to {
-            background-color: #d4af37;
-            box-shadow: 0 0 10px 10px #d4af37;
-        }
     }
 
     .dark .icon-back:hover {
