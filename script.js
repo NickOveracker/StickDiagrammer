@@ -1065,10 +1065,14 @@
             isCurrentCell = isCurrentCol && isCurrentRow;
             
             if(this.diagram.controller.dragging) {
-                hoverCell = isCurrentRow || isCurrentCol;
+                hoverCell = (isCurrentRow || isCurrentCol);
             } else {
-                hoverCell = isCurrentCell && layer === LayeredGrid.layers.length - 1;
+                hoverCell = isCurrentCell;
             }
+            // Only hover on top layer.
+            hoverCell = hoverCell && layer === LayeredGrid.layers.length - 1;
+            // Do not hover when erasing.
+            hoverCell = hoverCell && !currentCell.isSet;
 
             if (this.diagram.layeredGrid.get(ii, jj, layer).isSet) {
                 this.ctx.fillStyle = this.getColor(layer);
