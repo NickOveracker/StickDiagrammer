@@ -1056,16 +1056,22 @@
 
         // Check the layers of the grid, and draw cells as needed.
         drawCell(ii, jj, layer) {
-            let currentCell;
-            let baseColor;
+            let currentCell, baseColor, hoverCell, isCurrentCell;
+			currentCell = this.diagram.controller.currentCell;
+			isCurrentCell = ii === currentCell.x && jj === currentCell.y;
+			
+            if(this.diagram.controller.dragging) {
+				hoverCell = isCurrentCell;
+			} else {
+                hoverCell = layer === LayeredGrid.layers.length - 1;
+			}
 
             if (this.diagram.layeredGrid.get(ii, jj, layer).isSet) {
                 this.ctx.fillStyle = this.getColor(layer);
                 this.ctx.fillRect((ii+1) * this.cellWidth, (jj+1) * this.cellHeight - 1, this.cellWidth + 1, this.cellHeight + 2);
-            } else if(!this.diagram.controller.dragging && layer === LayeredGrid.layers.length - 1) {
+            } else if(hoverCell) {
                 // Draw a faint highlight on the cell at the cursor location.
-                currentCell = this.diagram.controller.currentCell;
-                if(ii === currentCell.x && jj === currentCell.y) {
+                if(isCurrentCell) {
                     this.ctx.fillStyle = this.darkMode ? "rgba(255, 255, 255, 0.5)" : "rgba(0, 0, 0, 0.5)";
                     this.ctx.fillRect((ii+1) * this.cellWidth, (jj+1) * this.cellHeight - 1, this.cellWidth + 1, this.cellHeight + 2);
                 }
@@ -3363,7 +3369,7 @@
         // Set up the UI object.
         let UI = new UserInterface(diagram);
 
-        // Set LayeredGrid.CONTACT at the coordinates of each input and output.
+        // Set CONTACT at the coordinates of each input and output.
         diagram.inputs.forEach(function(input) {
             diagram.layeredGrid.set(input.x, input.y, LayeredGrid.CONTACT);
         });
@@ -3371,7 +3377,7 @@
             diagram.layeredGrid.set(output.x, output.y, LayeredGrid.CONTACT);
         });
 
-        // Set the LayeredGrid.CONTACT layer on the VDD and GND cells.
+        // Set the CONTACT layer on the VDD and GND cells.
         diagram.layeredGrid.set(diagram.vddCell.x, diagram.vddCell.y, LayeredGrid.CONTACT);
         diagram.layeredGrid.set(diagram.gndCell.x, diagram.gndCell.y, LayeredGrid.CONTACT);
 
