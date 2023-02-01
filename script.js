@@ -2331,9 +2331,9 @@
             
             this.completed = (function(darkModeSet) {
                 return function() {
-                    return this.UI.diagramView.darkMode !== darkModeSet;
-                }.bind(this);
-            }.bind(this))(this.diagramView.darkMode);
+                    return this.darkMode !== darkModeSet;
+                }.bind(this.UI.diagramView);
+            }.bind(this.UI.diagramView))(this.darkMode);
             
             this.location = null;
             
@@ -2349,12 +2349,13 @@
             this.steps = [];
             this.currentStep = 0;
             this.initTutorial();
-            this.active = true;
+            this.active = false;
         }
 
         initTutorial() {
             this.steps.push(new TutorialStep(this.UI));
             alert(this.steps[this.currentStep].en_us);
+            this.active = true;
         }
         
         step() {
