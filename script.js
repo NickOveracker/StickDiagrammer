@@ -2362,6 +2362,7 @@
                 if(this.steps[this.currentStep].completed()) {
                     this.currentStep++;
                     if(this.currentStep >= this.steps.length) {
+                        this.active = false;
                         alert("Tutorial complete");
                     }
                 } else {
