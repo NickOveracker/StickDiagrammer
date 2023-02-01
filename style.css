@@ -632,16 +632,18 @@ body.light {
         transition: .5s;
     }
 
-    .glow {
-        animation: glow-animation 0.5s infinite alternate;
+    .glowing {
+        animation: glowing-animation 0.60s infinite alternate;
+        border-radius: 100%;
     }
 
-    @keyframes glow {
+    @keyframes glowing-animation {
         from {
-            color: #d4af37;
+            box-shadow: 0 0 10px -10px #d4af37;
         }
         to {
-            color: inherit;
+            background-color: #d4af37;
+            box-shadow: 0 0 10px 10px #d4af37;
         }
     }
 

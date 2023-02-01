@@ -2359,8 +2359,8 @@
                     if(completed) {
                         // Remove glow from dark mode button.
                         let classList = document.getElementById("dark-mode-btn").classList;
-                        if(classList.contains("glow")) {
-                            classList.remove("glow");
+                        if(classList.contains("glowing")) {
+                            classList.remove("glowing");
                         }
                     }
                     return completed;
@@ -2369,8 +2369,8 @@
 
             tutStep.specialAction = function() {
                 let classList = document.getElementById("dark-mode-btn").classList;
-                if(!classList.contains("glow")) {
-                    classList.add("glow");
+                if(!classList.contains("glowing")) {
+                    classList.add("glowing");
                 }
             };
             
