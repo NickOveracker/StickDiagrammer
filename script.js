@@ -2332,6 +2332,20 @@
             this.completed     = () => { return true; };
             this.location      = () => { return {x: 0, y: 0,}; };
             this.specialAction = () => { return; };
+            this.target = document.body;
+            this.tutorialOverlay = document.createElement("div");
+        }
+
+        display() {
+            let targetRect            = this.target.getBoundingClientRect();
+            let x                     = targetRect.left + targetRect.width + 10;
+            let y                     = targetRect.top;
+            tutorialOverlay.innerHTML = this.instructions["en_us"];
+
+            // Position the overlay next to the target element
+            tutorialOverlay.style.left = `${x}px`;
+            tutorialOverlay.style.top = `${y}px`;
+            document.body.appendChild(tutorialOverlay);
         }
     }
 
@@ -2366,6 +2380,7 @@
                         if(this.UI.diagramController.cursorIndex === LayeredGrid.METAL1) {
                             this.UI.diagramController.changeLayer();
                         }
+                        this.tutorialOverlay.remove();
                     }
                     return completed;
                 }.bind(tutStep);
@@ -2377,6 +2392,8 @@
                     classList.add("glowing");
                 }
             };
+
+            tutStep.target = document.getElementById("dark-mode-btn");
             
             this.steps.push(tutStep);
             
@@ -2396,6 +2413,7 @@
                     if(classList.contains("glowing")) {
                         classList.remove("glowing");
                     }
+                    this.tutorialOverlay.remove();
                 }
                 return completed;
            }.bind(this.UI.diagramController);
@@ -2406,6 +2424,8 @@
                     classList.add("glowing");
                 }
             };
+
+            tutStep.target = document.getElementById("metal1-swatch");
            
             this.steps.push(tutStep);
 
@@ -2420,17 +2440,22 @@
             tutStep.completed = function() {
                 let cellSet = this.layeredGrid.get(this.vddCell.x, this.vddCell.y, LayeredGrid.METAL1).isSet;
                 let completed = cellSet && !this.controller.dragging;
+                if(completed) {
+                    this.tutorialOverlay.remove();
+                }
                 return completed;
            }.bind(this.UI.diagram);
 
             tutStep.specialAction = function() {
                 return;
             };
+
+            tutStep.target = document.getElementById("canvas");
            
             this.steps.push(tutStep);
            
             ////////////////////////// START TUTORIAL //////////////////////////
-            alert(this.steps[this.currentStep].instructions.en_us);
+            this.steps[this.currentStep].display();
             this.active = true;
         }
         
@@ -2442,7 +2467,7 @@
                         this.active = false;
                         alert("Tutorial complete");
                     } else {
-                        alert(this.steps[this.currentStep].instructions.en_us);
+                        this.steps[this.currentStep].display();
                     }
                 } else {
                     this.steps[this.currentStep].specialAction();
