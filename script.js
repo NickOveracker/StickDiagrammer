@@ -762,6 +762,7 @@
                     metal1:  this.diagram.layeredGrid.get(x, y, LayeredGrid.METAL1).isSet,
                     metal2:  this.diagram.layeredGrid.get(x, y, LayeredGrid.METAL2).isSet,
                     contact: this.diagram.layeredGrid.get(x, y, LayeredGrid.CONTACT).isSet,
+					del:     this.diagram.layeredGrid.get(x, y, LayeredGrid.DELETE).isSet,
                 };
             } else {
                 this.currentCell = {};
@@ -1072,7 +1073,7 @@
             // Only hover on top layer.
             hoverCell = hoverCell && layer === LayeredGrid.layers.length - 1;
             // Do not hover when erasing.
-            hoverCell = hoverCell && !this.diagram.layeredGrid.get(ii, jj, LayeredGrid.DELETE).isSet;
+            hoverCell = hoverCell && !currentCell.del;
 
             if (this.diagram.layeredGrid.get(ii, jj, layer).isSet) {
                 this.ctx.fillStyle = this.getColor(layer);
