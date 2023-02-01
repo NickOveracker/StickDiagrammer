@@ -2348,10 +2348,10 @@
             x += this.position.flipLeft ? -overlayRect.width  - this.position.x : targetRect.width  + this.position.x;
             y += this.position.flipUp   ? -overlayRect.height - this.position.y : targetRect.height + this.position.y;
 
-            if(location.centerHorizontal) {
+            if(this.position.centerHorizontal) {
                 x = x - targetRect.width/2 - overlayRect.width/2;
             }
-            if(location.centerVertical) {
+            if(this.position.centerVertical) {
                 y = y - targetRect.height/2 - overlayRect.height/2;
             }
             this.tutorialOverlay.innerHTML = this.instructions["en_us"];
