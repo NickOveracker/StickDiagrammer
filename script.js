@@ -2342,14 +2342,14 @@
             let x          = targetRect.left;
             let y          = targetRect.top;
 
-            x += this.position.flipLeft ? -overlayRect.width  - this.position.x : this.targetRect.width  + this.position.x;
+            x += this.position.flipLeft ? -overlayRect.width  - this.position.x : targetRect.width  + this.position.x;
             y += this.position.flipUp   ? -overlayRect.height - this.position.y : this.targetRect.height + this.position.y;
 
             if(location.centerHorizontal) {
-                x = x - this.targetRect.width/2 - this.overlayRect.width/2;
+                x = x - targetRect.width/2 - overlayRect.width/2;
             }
             if(location.centerVertical) {
-                y = y - this.targetRect.height/2 - this.overlayRect.height/2;
+                y = y - targetRect.height/2 - overlayRect.height/2;
             }
             this.tutorialOverlay.innerHTML = this.instructions["en_us"];
 
