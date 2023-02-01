@@ -2369,6 +2369,8 @@
                     },
             };
             
+            this.steps.push(tutStep);
+            
             tutStep = {
                 instructions: {
                         en_us: "Connect METAL1 to VDD.",
