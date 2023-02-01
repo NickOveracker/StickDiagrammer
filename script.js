@@ -2704,7 +2704,7 @@
 			// TODO: Refactor
 			if(this.diagramController.placeTermMode) {
 				this.clearPlaceTerminalMode();
-                controller.placeTerminal(event, controller.selectedTerminal);
+                this.diagramController.placeTerminal(event, controller.selectedTerminal);
 			}
          
             if (this.diagramController.isPrimaryInput(event) || event.button === 2) {
