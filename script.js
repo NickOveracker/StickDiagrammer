@@ -1056,14 +1056,18 @@
 
         // Check the layers of the grid, and draw cells as needed.
         drawCell(ii, jj, layer) {
-            let currentCell, baseColor, hoverCell, isCurrentCell;
-            currentCell = this.diagram.controller.currentCell;
-            isCurrentCell = ii === currentCell.x && jj === currentCell.y;
+            let currentCell, baseColor, hoverCell,
+                isCurrentRow, isCurrentCol, isCurrentCell;
+
+            currentCell   = this.diagram.controller.currentCell;
+            isCurrentCol  = ii === currentCell.x;
+            isCurrentRow  = jj === currentCell.y;
+            isCurrentCell = isCurrentCol && isCurrentRow;
             
             if(this.diagram.controller.dragging) {
-                hoverCell = isCurrentCell;
+                hoverCell = isCurrentRow || isCurrentCol;
             } else {
-                hoverCell = layer === LayeredGrid.layers.length - 1;
+                hoverCell = isCurrentCell && layer === LayeredGrid.layers.length - 1;
             }
 
             if (this.diagram.layeredGrid.get(ii, jj, layer).isSet) {
