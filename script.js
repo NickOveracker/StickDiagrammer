@@ -1057,24 +1057,23 @@
         // Check the layers of the grid, and draw cells as needed.
         drawCell(ii, jj, layer) {
             let currentCell, baseColor, hoverCell, isCurrentCell;
-			currentCell = this.diagram.controller.currentCell;
-			isCurrentCell = ii === currentCell.x && jj === currentCell.y;
-			
+            currentCell = this.diagram.controller.currentCell;
+            isCurrentCell = ii === currentCell.x && jj === currentCell.y;
+            
             if(this.diagram.controller.dragging) {
-				hoverCell = isCurrentCell;
-			} else {
+                hoverCell = isCurrentCell;
+            } else {
                 hoverCell = layer === LayeredGrid.layers.length - 1;
-			}
+            }
 
             if (this.diagram.layeredGrid.get(ii, jj, layer).isSet) {
                 this.ctx.fillStyle = this.getColor(layer);
                 this.ctx.fillRect((ii+1) * this.cellWidth, (jj+1) * this.cellHeight - 1, this.cellWidth + 1, this.cellHeight + 2);
             } else if(hoverCell) {
-                // Draw a faint highlight on the cell at the cursor location.
-                if(isCurrentCell) {
-                    this.ctx.fillStyle = this.darkMode ? "rgba(255, 255, 255, 0.5)" : "rgba(0, 0, 0, 0.5)";
-                    this.ctx.fillRect((ii+1) * this.cellWidth, (jj+1) * this.cellHeight - 1, this.cellWidth + 1, this.cellHeight + 2);
-                }
+                // Draw a faint highlight on the cell at the cursor location,
+                // or on the entire row and column when dragging.
+                this.ctx.fillStyle = this.darkMode ? "rgba(255, 255, 255, 0.5)" : "rgba(0, 0, 0, 0.5)";
+                this.ctx.fillRect((ii+1) * this.cellWidth, (jj+1) * this.cellHeight - 1, this.cellWidth + 1, this.cellHeight + 2);
             }
             if(this.highlightNets && this.netHighlightGrid[ii] && this.netHighlightGrid[ii][jj]) {
                 baseColor = this.getColor(LayeredGrid.DELETE, false).slice(0, -4);
