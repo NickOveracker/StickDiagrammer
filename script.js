@@ -2391,7 +2391,7 @@
             this.initHistoryCommands();
             this.initRowColCommands();
 
-            this.tutorial = new Tutorial();
+            this.tutorial = new Tutorial(this);
 
             this.allCommands.forEach(function(command) {
                 if(command.ctrlModifier) {
