@@ -2673,8 +2673,8 @@
             let coords = controller.getCoordsFromEvent(event);
 
             if(controller.placeTermMode) {
-                this.clearPlaceTerminalMode();
-                controller.placeTerminal(event, controller.selectedTerminal);
+				// DO NOTHING
+				// TODO: Refactor
             } else if (!this.isEraseEvent(event)) {
                 // Just fill in or delete the cell at the start coordinates.
                 // If there is no cell at the start coordinates, change the cursor color.
@@ -2700,6 +2700,12 @@
             if(this.diagramController.pixelIsInBounds()) {
                 event.preventDefault();
             }
+			
+			// TODO: Refactor
+			if(this.diagramController.placeTermMode) {
+				this.clearPlaceTerminalMode();
+                controller.placeTerminal(event, controller.selectedTerminal);
+			}
          
             if (this.diagramController.isPrimaryInput(event) || event.button === 2) {
                 if (this.diagramController.dragging) {
@@ -2753,6 +2759,7 @@
             let view = this.diagramView;
             let endX, endY, bounds;
 
+            // TODO: Is this needed?
             if (controller.startX === -1) {
                 return;
             }
@@ -2844,9 +2851,12 @@
             }
 
             // If the mouse is pressed and the mouse is between cells 1 and gridsize - 1,
+			// TODO: Move isPrimaryInput to UI.
             if (this.diagramController.isPrimaryInput(event) || event.buttons === 2) {
                 // Ignore if not inside the canvas
-                if (this.diagramController.pixelIsInBounds()) {
+				// Do not enter drag event if in terminal placement mode.
+                // TODO: Allow manipulation outside the canvas
+                if (this.diagramController.pixelIsInBounds() && !this.diagramController.placeTermMode) {
                     this.drag(event);
                 }
             }
