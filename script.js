@@ -1081,7 +1081,7 @@
             } else if(hoverCell) {
                 // Draw a faint highlight on the cell at the cursor location,
                 // or on the entire row and column when dragging.
-                this.ctx.fillStyle = this.darkMode ? "rgba(255, 255, 255, 0.5)" : "rgba(0, 0, 0, 0.5)";
+                this.ctx.fillStyle = this.darkMode ? "rgba(255, 255, 255, 0.3)" : "rgba(0, 0, 0, 0.3)";
                 this.ctx.fillRect((ii+1) * this.cellWidth, (jj+1) * this.cellHeight - 1, this.cellWidth + 1, this.cellHeight + 2);
             }
             if(this.highlightNets && this.netHighlightGrid[ii] && this.netHighlightGrid[ii][jj]) {
