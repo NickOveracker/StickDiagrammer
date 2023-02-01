@@ -2851,7 +2851,7 @@
                 // Ignore if not inside the canvas
                 // Do not enter drag event if in terminal placement mode.
                 // TODO: Allow manipulation outside the canvas
-                if (this.diagramController.pixelIsInBounds() && !this.diagramController.placeTermMode) {
+                if (this.diagramController.pixelIsInBounds()) {
                     // TODO: Refactor
                     if(this.diagramController.placeTermMode) {
                         this.diagramController.placeTerminal(event, this.diagramController.selectedTerminal);
