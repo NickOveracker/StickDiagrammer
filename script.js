@@ -2426,8 +2426,6 @@
             this.initHistoryCommands();
             this.initRowColCommands();
 
-            this.tutorial = new Tutorial(this);
-
             this.allCommands.forEach(function(command) {
                 if(command.ctrlModifier) {
                     this.ctrlCommands[command.keyCode] = command.action;
@@ -2445,9 +2443,9 @@
         
             // Set to dark mode if it is night time
             this.setDarkMode(new Date().getHours() > 19 || new Date().getHours() < 7);
-            
             this.populateTermSelect();
-            this.diagramView.refreshCanvas();
+
+            this.tutorial = new Tutorial(this);
         }
 
         keydownHandler(event) {
