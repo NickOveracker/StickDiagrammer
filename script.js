@@ -2345,6 +2345,7 @@
             // Position the overlay next to the target element
             this.tutorialOverlay.style.left = `${x}px`;
             this.tutorialOverlay.style.top = `${y}px`;
+            this.tutorialOverlay.classList.add("tutorial-overlay");
             document.body.appendChild(this.tutorialOverlay);
         }
     }
@@ -2438,7 +2439,7 @@
             };
 
             tutStep.completed = function() {
-                let cellSet = this.layeredGrid.get(this.UI.diagram.vddCell.x, this.UI.diagram.vddCell.y, LayeredGrid.METAL1).isSet;
+                let cellSet = this.UI.diagramGrid.get(this.UI.diagram.vddCell.x, this.UI.diagram.vddCell.y, LayeredGrid.METAL1).isSet;
                 let completed = cellSet && !this.UI.diagram.controller.dragging;
                 if(completed) {
                     this.tutorialOverlay.remove();
