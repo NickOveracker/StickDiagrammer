@@ -3432,7 +3432,7 @@
         }
         
         refreshScreen() {
-            this.diagramView.refreshCanvas.bind(this.diagramView);
+            this.diagramView.refreshCanvas();
 
             if(this.tutorial.active) {
                 this.tutorial.step();
