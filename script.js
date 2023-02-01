@@ -2343,7 +2343,7 @@
             let y          = targetRect.top;
 
             x += this.position.flipLeft ? -overlayRect.width  - this.position.x : targetRect.width  + this.position.x;
-            y += this.position.flipUp   ? -overlayRect.height - this.position.y : this.targetRect.height + this.position.y;
+            y += this.position.flipUp   ? -overlayRect.height - this.position.y : targetRect.height + this.position.y;
 
             if(location.centerHorizontal) {
                 x = x - targetRect.width/2 - overlayRect.width/2;
