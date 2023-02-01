@@ -2363,7 +2363,7 @@
                             classList.remove("glowing");
                         }
                         // Change layer if currently on METAL1 to prepare for next step.
-                        if(this.UI.diagramController.layerIndex === LayeredGrid.METAL1) {
+                        if(this.UI.diagramController.cursorIndex === LayeredGrid.METAL1) {
                             this.UI.diagramController.changeLayer();
                         }
                     }
