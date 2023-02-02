@@ -3132,7 +3132,7 @@
         // Show a preview line when the user is dragging the mouse.
         mousemoveHandler(event) {
             // Save the current X and Y coordinates.
-            this.diagramController.getCoordsFromEvent(event);
+            console.log(this.diagramController.getCoordsFromEvent(event));
 
             if(this.diagramController.pixelIsInBounds()) {
                 event.preventDefault();
