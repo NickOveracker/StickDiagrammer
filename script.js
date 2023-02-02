@@ -2348,10 +2348,10 @@
 
             let x               = targetRect.left;
             let y               = targetRect.top;
-            let totalExtraSpace = targetStyle.getPropertyValue("margin")  +
-                                  targetStyle.getPropertyValue("padding") +
-                                  overlayStyle.getPropertyValue("margin") +
-                                  targetStyle.getPropertyValue("padding");
+            let totalExtraSpace = parseFloat(targetStyle.getPropertyValue("margin"),   10)  +
+                                  parseFloat(targetStyle.getPropertyValue("padding"),  10) +
+                                  parseFloat(overlayStyle.getPropertyValue("margin"),  10) +
+                                  parseFloat(overlayStyle.getPropertyValue("padding"), 10);
 
             // Which side are we positioning relative to?
             x = this.position.flipLeft ? x - overlayRect.width  - this.position.x : x + targetRect.width  + this.position.x;
