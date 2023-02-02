@@ -2523,7 +2523,7 @@
                         }
                     }.bind(this), true);
                 }
-            }.bind(this.UI.layeredGrid);
+            }.bind(this.UI.diagramGrid);
 
             tutStep.target = document.getElementById("canvas");
             tutStep.position.flipLeft = true;
