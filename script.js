@@ -2701,6 +2701,7 @@
 
             tutStep.target = document.getElementById("evaluate-btn");
             tutStep.position.centerHorizontal = true;
+            tutStep.position.flipUp = true;
            
             this.steps.push(tutStep);
            
