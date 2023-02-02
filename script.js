@@ -2268,11 +2268,6 @@
         // For each layer of the cell in the net, recurse with all adjacent cells in the layer.
         // Generic function for the above code.
         setAdjacent(deltaX, deltaY, net, cell) {
-            // Don't recurse into adjacent cells for the contact layer.
-            if(cell.layer === LayeredGrid.CONTACT) {
-                return;
-            }
-
             if (net.containsCell(this.layeredGrid.get(cell.x, cell.y, cell.layer)) && this.layeredGrid.get(cell.x + deltaX, cell.y + deltaY, cell.layer).isSet) {
                 if (net.containsCell(this.layeredGrid.get(cell.x + deltaX, cell.y + deltaY, cell.layer)) === false) {
                     this.setRecursively(this.layeredGrid.get(cell.x + deltaX, cell.y + deltaY, cell.layer), net);
