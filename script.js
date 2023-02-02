@@ -2515,6 +2515,9 @@
                         paintCell = paintCell || y === this.diagram.gndCell.y && layer === LayeredGrid.METAL1;
                         paintCell = paintCell || y === this.diagram.vddCell.y + 2 && layer === LayeredGrid.PDIFF;
                         paintCell = paintCell || y === this.diagram.gndCell.y - 2 && layer === LayeredGrid.NDIFF;
+                        paintCell = paintCell || x === this.diagram.outputs[0].x && y >= this.diagram.vddCell.y + 2 && y <= this.diagram.gndCell.y - 2 && layer === LayeredGrid.METAL1;
+                        paintCell = paintCell || x === this.diagram.vddCell.x + 2 && y >= this.diagram.vddCell.y && y <= this.diagram.vddCell.y + 2 && layer === LayeredGrid.METAL1;
+                        paintCell = paintCell || x === this.diagram.gndCell.x + 2 && y <= this.diagram.gndCell.y && y >= this.diagram.gndCell.y - 2 && layer === LayeredGrid.METAL1;
                         
                         if(paintCell) {
                             this.set(x,y,layer);
@@ -2525,7 +2528,7 @@
                 }
             }.bind(this.UI.diagramGrid);
 
-            tutStep.target = document.getElementById("canvas");
+            tutStep.target = document.getElementById("contact-swatch");
             tutStep.position.flipLeft = true;
             tutStep.position.flipUp   = true;
            
