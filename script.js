@@ -2362,6 +2362,9 @@
             y = this.position.centerVertical   ? y - targetRect.height / 2 - overlayRect.height / 2 : this.position.flipUp   ? y - totalExtraSpace : y + totalExtraSpace;
 
             // Position the overlay next to the target element
+            x = Math.max(x, 0);
+            y = Math.max(y, 0);
+            x = Math.min(x, window.innerWidth - overlayRect.width);
             this.tutorialOverlay.style.left = `${x}px`;
             this.tutorialOverlay.style.top = `${y}px`;
         }
