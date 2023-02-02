@@ -2340,13 +2340,14 @@
             this.tutorialOverlay.classList.add("tutorial-overlay");
             this.tutorialOverlay.innerHTML = this.instructions["en_us"];
             document.body.appendChild(this.tutorialOverlay);
-
-            let x               = targetRect.left;
-            let y               = targetRect.top;
+                   
             let targetRect      = this.target.getBoundingClientRect();
             let overlayRect     = this.tutorialOverlay.getBoundingClientRect();
             let overlayStyle    = window.getComputedStyle(this.tutorialOverlay);
             let targetStyle     = window.getComputedStyle(this.target);
+
+            let x               = targetRect.left;
+            let y               = targetRect.top;
             let totalExtraSpace = targetStyle.getPropertyValue("margin")  +
                                   targetStyle.getPropertyValue("padding") +
                                   overlayStyle.getPropertyValue("margin") +
