@@ -2769,6 +2769,7 @@
             else {
                 this.tutorial = new Tutorial(this);
             }
+            this.diagramView.refreshCanvas();
         }
 
         keydownHandler(event) {
