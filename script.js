@@ -2396,6 +2396,7 @@
                         let classList = document.getElementById("dark-mode-btn").classList;
                         if(classList.contains("glowing")) {
                             classList.remove("glowing");
+                            classList.remove("rounded");
                         }
                         // Change layer if currently on METAL1 to prepare for next step.
                         if(this.UI.diagramController.cursorIndex === LayeredGrid.METAL1) {
@@ -2411,6 +2412,7 @@
                 let classList = document.getElementById("dark-mode-btn").classList;
                 if(!classList.contains("glowing")) {
                     classList.add("glowing");
+                    classList.add("rounded");
                 }
             };
 
@@ -2433,6 +2435,7 @@
                     let classList = document.getElementById("metal1-swatch").classList;
                     if(classList.contains("glowing")) {
                         classList.remove("glowing");
+                        classList.remove("rounded");
                     }
                     this.tutorialOverlay.remove();
                 }
@@ -2443,6 +2446,7 @@
                 let classList = document.getElementById("metal1-swatch").classList;
                 if(!classList.contains("glowing")) {
                     classList.add("glowing");
+                    classList.add("rounded");
                 }
             };
 
@@ -2494,6 +2498,7 @@
                     let classList = document.getElementById("contact-swatch").classList;
                     if(classList.contains("glowing")) {
                         classList.remove("glowing");
+                        classList.remove("rounded");
                     }
                     this.tutorialOverlay.remove();
                 }
@@ -2504,6 +2509,7 @@
                 let classList = document.getElementById("contact-swatch").classList;
                 if(!classList.contains("glowing")) {
                     classList.add("glowing");
+                    classList.add("rounded");
                     let bounds = {
                         left: 0,
                         right: this.width - 1,
@@ -2582,6 +2588,7 @@
                     let classList = document.getElementById("poly-swatch").classList;
                     if(classList.contains("glowing")) {
                         classList.remove("glowing");
+                        classList.remove("rounded");
                     }
                     this.tutorialOverlay.remove();
                 }
@@ -2592,6 +2599,7 @@
                 let classList = document.getElementById("poly-swatch").classList;
                 if(!classList.contains("glowing")) {
                     classList.add("glowing");
+                    classList.add("rounded");
                     let bounds = {
                         left: 0,
                         right: this.width - 1,
@@ -2646,6 +2654,7 @@
                 
                 if(done) {
                     this.tutorialOverlay.remove();
+                    window.scrollTo({behavior: "smooth", top: Math.ceil(document.getElementById("evaluate-btn").getBoundingClientRect().top + window.scrollY), left: 0,});
                 }
                 
                 return done;
@@ -2653,6 +2662,41 @@
 
             tutStep.specialAction = function() {
                 return;
+            };
+
+            tutStep.target = document.getElementById("canvas");
+            tutStep.position.centerHorizontal = true;
+            tutStep.position.centerVertical   = true;
+           
+            this.steps.push(tutStep);
+
+            ////////////////////////// STEP 8 //////////////////////////
+            tutStep = new TutorialStep(this.UI);
+
+            tutStep.instructions = {
+                en_us: "Press \"Evaluate\" to generate a truth table for the circuit.",
+                ja_jp: "「Evaluate」を押して回路の真理値表を作成精してください。",
+            };
+
+            tutStep.completed = function() {
+                let done = document.getElementById("truth-table").children.length > 0;
+                
+                if(done) {
+                    this.tutorialOverlay.remove();
+                    let classList = document.getElementById("evaluate-btn").classList;
+                    if(!classList.contains("glowing")) {
+                        classList.add("glowing");
+                    }
+                }
+                
+                return done;
+            }.bind(tutStep);
+
+            tutStep.specialAction = function() {
+                let classList = document.getElementById("evaluate-btn").classList;
+                if(!classList.contains("glowing")) {
+                    classList.add("glowing");
+                }
             };
 
             tutStep.target = document.getElementById("canvas");
