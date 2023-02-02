@@ -2230,7 +2230,7 @@
                     // Set the gate to the poly cell.
                     cell.gate = this.layeredGrid.get(cell.x, cell.y, LayeredGrid.POLY);
 
-                    // Check adjacent cells for LayeredGrid.NDIFF.
+                    // Check adjacent cells for NDIFF.
                     // Set term1 to the first one found.
                     // Set term2 to the second one found.
                     cell.term1 = undefined;
@@ -2268,11 +2268,6 @@
         // For each layer of the cell in the net, recurse with all adjacent cells in the layer.
         // Generic function for the above code.
         setAdjacent(deltaX, deltaY, net, cell) {
-            // Don't connect contacts to adjacent contacts.
-            if(cell.layer === LayeredGrid.CONTACT) {
-                return;
-            }
-
             if (net.containsCell(this.layeredGrid.get(cell.x, cell.y, cell.layer)) && this.layeredGrid.get(cell.x + deltaX, cell.y + deltaY, cell.layer).isSet) {
                 if (net.containsCell(this.layeredGrid.get(cell.x + deltaX, cell.y + deltaY, cell.layer)) === false) {
                     this.setRecursively(this.layeredGrid.get(cell.x + deltaX, cell.y + deltaY, cell.layer), net);
@@ -2316,12 +2311,12 @@
             this.handleContact(cell, net);
 
             // Check the cells above and below.
-            if (cell.y > 0) { this.setAdjacent(0, -1, net, cell); }
-            if (cell.y < this.layeredGrid.height - 1) { this.setAdjacent(0, 1, net, cell); }
+            if (cell.layer !== LayeredGrid.CONTACT && cell.y > 0) { this.setAdjacent(0, -1, net, cell); }
+            if (cell.layer !== LayeredGrid.CONTACT && cell.y < this.layeredGrid.height - 1) { this.setAdjacent(0, 1, net, cell); }
 
             // Check the cells to the left and right.
-            if (cell.x > 0) { this.setAdjacent(-1, 0, net, cell); }
-            if (cell.x < this.layeredGrid.width - 1) { this.setAdjacent(1, 0, net, cell); }
+            if (cell.layer !== LayeredGrid.CONTACT && cell.x > 0) { this.setAdjacent(-1, 0, net, cell); }
+            if (cell.layer !== LayeredGrid.CONTACT && cell.x < this.layeredGrid.width - 1) { this.setAdjacent(1, 0, net, cell); }
         }
     }
 
