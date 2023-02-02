@@ -2641,7 +2641,7 @@
                 this.UI.diagram.clearAnalyses();
                 
                 let done = this.UI.diagram.nmos.length === 1 && this.UI.diagram.pmos.length === 1;
-                done = done && this.UI.diagram.nmos[0].cell.gate.isIdentical(this.UI.diagram.pmos[0].cell.gate);
+                done = done && this.UI.diagram.nmos[0].gate.isIdentical(this.UI.diagram.pmos[0].gate);
                 done = done && !this.UI.diagram.vddNet.isIdentical(this.UI.diagram.gndNet);
                 
                 if(done) {
