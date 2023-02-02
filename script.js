@@ -2764,7 +2764,11 @@
             this.setDarkMode(new Date().getHours() > 19 || new Date().getHours() < 7);
             this.populateTermSelect();
 
-            this.tutorial = new Tutorial(this);
+            if(window.runTestbench) {
+                this.tutorial = {active: false,};
+            else {
+                this.tutorial = new Tutorial(this);
+            }
         }
 
         keydownHandler(event) {
