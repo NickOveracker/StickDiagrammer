@@ -3129,6 +3129,36 @@
             }
         }
 
+        // Show a preview line when the user is dragging the mouse.
+        mousemoveHandler(event) {
+            // Save the current X and Y coordinates.
+            this.diagramController.getCoordsFromEvent(event);
+
+            if(this.diagramController.pixelIsInBounds()) {
+                event.preventDefault();
+            }
+
+            if(event.type.includes("mouse")) {
+                this.diagramView.trailCursor = true;
+            }
+
+            // If the mouse is pressed and the mouse is between cells 1 and gridsize - 1,
+            // TODO: Move isPrimaryInput to UI.
+            if (this.diagramController.isPrimaryInput(event) || event.buttons === 2) {
+                // Ignore if not inside the canvas
+                // Do not enter drag event if in terminal placement mode.
+                // TODO: Allow manipulation outside the canvas
+                if (this.diagramController.pixelIsInBounds()) {
+                    // TODO: Refactor
+                    if(this.diagramController.placeTermMode) {
+                        this.diagramController.placeTerminal(event, this.diagramController.selectedTerminal);
+                    } else {
+                        this.drag(event);
+                    }
+                }
+            }
+        }
+
         dragPrimary(bounds) {
             // If the mouse moved more horizontally than vertically,
             // draw a horizontal line.
@@ -3160,6 +3190,12 @@
         }
 
         drag(event) {
+            if(window.runTestbench) {                
+                // Save the current X and Y coordinates.
+                // This is done by mouse events in normal use.
+                this.diagramController.getCoordsFromEvent(event);
+            }
+            
             let controller = this.diagramController;
             let view = this.diagramView;
             let endX, endY, bounds;
@@ -3239,36 +3275,6 @@
                 this.diagramGrid.map(bounds, function (x, y, layer) {
                     this.diagramGrid.clear(x, y, layer);
                 }.bind(this));
-            }
-        }
-
-        // Show a preview line when the user is dragging the mouse.
-        mousemoveHandler(event) {
-            // Save the current X and Y coordinates.
-            this.diagramController.getCoordsFromEvent(event);
-
-            if(this.diagramController.pixelIsInBounds()) {
-                event.preventDefault();
-            }
-
-            if(event.type.includes("mouse")) {
-                this.diagramView.trailCursor = true;
-            }
-
-            // If the mouse is pressed and the mouse is between cells 1 and gridsize - 1,
-            // TODO: Move isPrimaryInput to UI.
-            if (this.diagramController.isPrimaryInput(event) || event.buttons === 2) {
-                // Ignore if not inside the canvas
-                // Do not enter drag event if in terminal placement mode.
-                // TODO: Allow manipulation outside the canvas
-                if (this.diagramController.pixelIsInBounds()) {
-                    // TODO: Refactor
-                    if(this.diagramController.placeTermMode) {
-                        this.diagramController.placeTerminal(event, this.diagramController.selectedTerminal);
-                    } else {
-                        this.drag(event);
-                    }
-                }
             }
         }
 
