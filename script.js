@@ -2348,7 +2348,7 @@
 
             let x               = targetRect.left;
             let y               = targetRect.top;
-            let totalExtraSpace = parseFloat(targetStyle.getPropertyValue("margin"),   10)  +
+            let totalExtraSpace = parseFloat(targetStyle.getPropertyValue("margin"),   10) +
                                   parseFloat(targetStyle.getPropertyValue("padding"),  10) +
                                   parseFloat(overlayStyle.getPropertyValue("margin"),  10) +
                                   parseFloat(overlayStyle.getPropertyValue("padding"), 10);
@@ -2358,8 +2358,8 @@
             y = this.position.flipUp   ? y - overlayRect.height - this.position.y : y + targetRect.height + this.position.y;
             
             // Center? (Not compatible with flipping)
-            x = this.position.centerHorizontal ? x - targetRect.width  / 2 - overlayRect.width  / 2 : x + totalExtraSpace;
-            y = this.position.centerVertical   ? y - targetRect.height / 2 - overlayRect.height / 2 : y + totalExtraSpace;
+            x = this.position.centerHorizontal ? x - targetRect.width  / 2 - overlayRect.width  / 2 : this.position.flipLeft ? x - totalExtraSpace : x + totalExtraSpace;
+            y = this.position.centerVertical   ? y - targetRect.height / 2 - overlayRect.height / 2 : this.position.flipUp   ? y - totalExtraSpace : y + totalExtraSpace;
 
             // Position the overlay next to the target element
             this.tutorialOverlay.style.left = `${x}px`;
