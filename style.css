@@ -73,6 +73,7 @@ html {
     border-radius: 5px;
     box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
     width: auto;
+    max-width: 300px;
 }
 
 .menu-long-text li::before {
