@@ -1975,6 +1975,7 @@
         // Set the nets.
         setNets() {
             this.clearCircuit();
+            this.resetNetlist();
 
             this.inputNets.forEach(function (net) { net.clear(); });
             this.outputNets.forEach(function (net) { net.clear(); });
