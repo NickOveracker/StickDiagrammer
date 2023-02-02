@@ -3190,12 +3190,6 @@
         }
 
         drag(event) {
-            if(window.runTestbench) {                
-                // Save the current X and Y coordinates.
-                // This is done by mouse events in normal use.
-                this.diagramController.getCoordsFromEvent(event);
-            }
-            
             let controller = this.diagramController;
             let view = this.diagramView;
             let endX, endY, bounds;
@@ -3797,7 +3791,7 @@
         refreshScreen() {
             this.diagramView.refreshCanvas();
 
-            if(this.tutorial.active) {
+            if(!window.runTestbench && this.tutorial.active) {
                 this.tutorial.step();
             }
 
