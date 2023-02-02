@@ -2311,17 +2311,13 @@
             // Check the cell for a transistor.
             // If this is in a diffusion layer, do not propogate past a transistor.
             if (this.checkIfTransistor(cell, LayeredGrid.NDIFF, this.nmos)) {
-                if(this.getNet(this.layeredGrid.get(cell.x,cell.y,LayeredGrid.POLY)) === null) {
-                    let gateNet = new Net("gate", false);
-                    this.setRecursively(this.layeredGrid.get(cell.x, cell.y, LayeredGrid.POLY), gateNet);
-                }
+                let gateNet = this.getNet(this.layeredGrid.get(cell.x,cell.y,LayeredGrid.POLY));
+                this.setRecursively(this.layeredGrid.get(cell.x, cell.y, LayeredGrid.POLY), gateNet);
                 return;
             }
             if (this.checkIfTransistor(cell, LayeredGrid.PDIFF, this.pmos)) {
-                if(this.getNet(this.layeredGrid.get(cell.x,cell.y,LayeredGrid.POLY)) === null) {
-                    let gateNet = new Net("gate", false);
-                    this.setRecursively(this.layeredGrid.get(cell.x, cell.y, LayeredGrid.POLY), gateNet);
-                }
+                let gateNet = this.getNet(this.layeredGrid.get(cell.x,cell.y,LayeredGrid.POLY));
+                this.setRecursively(this.layeredGrid.get(cell.x, cell.y, LayeredGrid.POLY), gateNet);
                 return;
             }
             // If this is in the poly layer, we don't need to stop at a transistor.
