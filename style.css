@@ -52,6 +52,9 @@ html {
 
 .glowing {
     animation: glowing-animation 0.60s infinite alternate;
+}
+
+.rounded {
     border-radius: 100%;
 }
 
