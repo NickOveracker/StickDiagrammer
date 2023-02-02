@@ -2684,8 +2684,8 @@
                 if(done) {
                     this.tutorialOverlay.remove();
                     let classList = document.getElementById("evaluate-btn").classList;
-                    if(!classList.contains("glowing")) {
-                        classList.add("glowing");
+                    if(classList.contains("glowing")) {
+                        classList.remove("glowing");
                     }
                 }
                 
@@ -2699,9 +2699,8 @@
                 }
             };
 
-            tutStep.target = document.getElementById("canvas");
+            tutStep.target = document.getElementById("evaluate-btn");
             tutStep.position.centerHorizontal = true;
-            tutStep.position.centerVertical   = true;
            
             this.steps.push(tutStep);
            
