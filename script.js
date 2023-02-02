@@ -3132,7 +3132,7 @@
         // Show a preview line when the user is dragging the mouse.
         mousemoveHandler(event) {
             // Save the current X and Y coordinates.
-            console.log(this.diagramController.getCoordsFromEvent(event));
+            this.diagramController.getCoordsFromEvent(event);
 
             if(this.diagramController.pixelIsInBounds()) {
                 event.preventDefault();
@@ -3201,7 +3201,7 @@
 
             if (!controller.dragging) {
                 // don't start dragging unless the mouse has moved outside the cell
-                if(controller.currentCell.x === controller.startX && controller.currentCell.y === controller.startY) {
+                if(controller.currentX === controller.startX && controller.currentY === controller.startY) {
                     return;
                 }
                 controller.dragging = true;
