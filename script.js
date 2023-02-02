@@ -2526,8 +2526,8 @@
             }.bind(this.UI.layeredGrid);
 
             tutStep.target = document.getElementById("canvas");
-            tutStep.position.centerHorizontal = true;
-            tutStep.position.centerVertical   = true;
+            tutStep.position.flipLeft = true;
+            tutStep.position.flipUp   = true;
            
             this.steps.push(tutStep);
            
