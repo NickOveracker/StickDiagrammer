@@ -2538,8 +2538,8 @@
             tutStep = new TutorialStep(this.UI);
 
             tutStep.instructions = {
-                en_us: "Place CONTACTs where <span style="color:#88CCEE">METAL1</span> meets <span style="color:#332288">PDIFF</span> or <span style="color:#117733">NDIFF</span>.",
-                ja_jp: "<span style="color:#332288">PDIFF</span>か<span style="color:#117733">NDIFF層</span>の層上に<span style="color:#88CCEE">METAL1</span>層が引かれたところにCONTACTを置いてください。",
+                en_us: "Place CONTACTs where <span style='color:#88CCEE'>METAL1</span> meets <span style='color:#332288'>PDIFF</span> or <span style='color:#117733'>NDIFF</span>.",
+                ja_jp: "<span style='color:#332288'>PDIFF</span>か<span style='color:#117733'>NDIFF層</span>の層上に<span style='color:#88CCEE'>METAL1</span>層が引かれたところにCONTACTを置いてください。",
             };
 
             tutStep.completed = function() {
