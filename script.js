@@ -2533,6 +2533,37 @@
             tutStep.target = document.getElementById("contact-swatch");
             tutStep.position.flipLeft = true;
             tutStep.position.flipUp   = true;
+
+            ////////////////////////// STEP 5 //////////////////////////
+            tutStep = new TutorialStep(this.UI);
+
+            tutStep.instructions = {
+                en_us: "Place CONTACTs where <span style="color:#88CCEE">METAL1</span> meets <span style="color:#332288">PDIFF</span> or <span style="color:#117733">NDIFF</span>.",
+                ja_jp: "<span style="color:#332288">PDIFF</span>か<span style="color:#117733">NDIFF層</span>の層上に<span style="color:#88CCEE">METAL1</span>層が引かれたところにCONTACTを置いてください。",
+            };
+
+            tutStep.completed = function() {
+                let done = this.UI.diagramGrid.get(this.UI.diagram.vddCell.x+2, this.UI.diagram.vddCell.y+2, LayeredGrid.CONTACT).isSet;
+                done = done && this.UI.diagramGrid.get(this.UI.diagram.gndCell.x+2, this.UI.diagram.gndCell.y-2, LayeredGrid.CONTACT).isSet;
+                done = done && this.UI.diagramGrid.get(this.UI.diagram.outputs[0].x, this.UI.diagram.vddCell.y+2, LayeredGrid.CONTACT).isSet;
+                done = done && this.UI.diagramGrid.get(this.UI.diagram.outputs[0].x, this.UI.diagram.gndCell.y-2, LayeredGrid.CONTACT).isSet;
+                
+                done = done && !this.UI.diagram.controller.dragging;
+                if(done) {
+                    this.tutorialOverlay.remove();
+                }
+                return done;
+           }.bind(tutStep);
+
+            tutStep.specialAction = function() {
+                return;
+            };
+
+            tutStep.target = document.getElementById("canvas");
+            tutStep.position.centerHorizontal = true;
+            tutStep.position.centerVertical   = true;
+           
+            this.steps.push(tutStep);
            
             this.steps.push(tutStep);
            
