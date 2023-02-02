@@ -2412,6 +2412,7 @@
             };
 
             tutStep.target = document.getElementById("dark-mode-btn");
+            tutStep.position.centerVertical = true;
             
             this.steps.push(tutStep);
             
