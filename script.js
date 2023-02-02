@@ -2018,6 +2018,12 @@
                 this.outputNets[index].addNode(this.outputNodes[index]);
             }.bind(this));
 
+            this.processTransistors();
+            this.linkIdenticalNets();
+            this.checkPolarity();
+        } // end function setNets
+
+        processTransistors() {
             // Each nmos and pmos represents a relation between term1 and term2.
             // If term1 is not in any of the nets,
             // then create a new net and add term1 to it.
@@ -2116,10 +2122,7 @@
                     transistor.addEdge(node);
                 }
             }.bind(this));
-
-            this.linkIdenticalNets();
-            this.checkPolarity();
-        } // end function setNets
+        }
 
         // Add a node to a net that does not yet have any nodes.
         assignEmptyNode(net) {
@@ -2268,6 +2271,11 @@
         // For each layer of the cell in the net, recurse with all adjacent cells in the layer.
         // Generic function for the above code.
         setAdjacent(deltaX, deltaY, net, cell) {
+            // Don't connect contacts to adjacent contacts.
+            if(cell.layer === LayeredGrid.CONTACT) {
+                return;
+            }
+
             if (net.containsCell(this.layeredGrid.get(cell.x, cell.y, cell.layer)) && this.layeredGrid.get(cell.x + deltaX, cell.y + deltaY, cell.layer).isSet) {
                 if (net.containsCell(this.layeredGrid.get(cell.x + deltaX, cell.y + deltaY, cell.layer)) === false) {
                     this.setRecursively(this.layeredGrid.get(cell.x + deltaX, cell.y + deltaY, cell.layer), net);
@@ -2301,8 +2309,14 @@
             }
 
             // Check the cell for a transistor.
+            // If this is in a diffusion layer, do not propogate past a transistor.
             if (this.checkIfTransistor(cell, LayeredGrid.NDIFF, this.nmos)) { return; }
             if (this.checkIfTransistor(cell, LayeredGrid.PDIFF, this.pmos)) { return; }
+            // If this is in the poly layer, we don't need to stop at a transistor.
+            if(cell.layer === LayeredGrid.POLY) {
+                this.checkIfTransistor(this.layeredGrid.get(cell.x, cell.y, LayeredGrid.NDIFF), LayeredGrid.NDIFF, this.nmos);
+                this.checkIfTransistor(this.layeredGrid.get(cell.x, cell.y, LayeredGrid.PDIFF), LayeredGrid.PDIFF, this.pmos);
+            }
 
             // Add the cell to the net.
             net.addCell(cell, this.layeredGrid.get(cell.x, cell.y, LayeredGrid.CONTACT).isSet);
@@ -2311,12 +2325,12 @@
             this.handleContact(cell, net);
 
             // Check the cells above and below.
-            if (cell.layer !== LayeredGrid.CONTACT && cell.y > 0) { this.setAdjacent(0, -1, net, cell); }
-            if (cell.layer !== LayeredGrid.CONTACT && cell.y < this.layeredGrid.height - 1) { this.setAdjacent(0, 1, net, cell); }
+            if (cell.y > 0) { this.setAdjacent(0, -1, net, cell); }
+            if (cell.y < this.layeredGrid.height - 1) { this.setAdjacent(0, 1, net, cell); }
 
             // Check the cells to the left and right.
-            if (cell.layer !== LayeredGrid.CONTACT && cell.x > 0) { this.setAdjacent(-1, 0, net, cell); }
-            if (cell.layer !== LayeredGrid.CONTACT && cell.x < this.layeredGrid.width - 1) { this.setAdjacent(1, 0, net, cell); }
+            if (cell.x > 0) { this.setAdjacent(-1, 0, net, cell); }
+            if (cell.x < this.layeredGrid.width - 1) { this.setAdjacent(1, 0, net, cell); }
         }
     }
 
