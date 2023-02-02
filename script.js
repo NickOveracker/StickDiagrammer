@@ -2343,8 +2343,8 @@
                    
             let targetRect      = this.target.getBoundingClientRect();
             let overlayRect     = this.tutorialOverlay.getBoundingClientRect();
-            let overlayStyle    = window.getComputedStyle(this.tutorialOverlay);
             let targetStyle     = window.getComputedStyle(this.target);
+            let overlayStyle    = window.getComputedStyle(this.tutorialOverlay);
 
             let x               = targetRect.left;
             let y               = targetRect.top;
@@ -2355,7 +2355,7 @@
 
             // Which side are we positioning relative to?
             x = this.position.flipLeft ? x - overlayRect.width  - this.position.x : x + targetRect.width  + this.position.x;
-            y = this.position.flipUp   ? x - overlayRect.height - this.position.y : x + targetRect.height + this.position.y;
+            y = this.position.flipUp   ? y - overlayRect.height - this.position.y : y + targetRect.height + this.position.y;
             
             // Center? (Not compatible with flipping)
             x = this.position.centerHorizontal ? x - targetRect.width  / 2 - overlayRect.width  / 2 : x + totalExtraSpace;
