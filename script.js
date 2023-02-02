@@ -2566,6 +2566,100 @@
             tutStep.position.centerVertical   = true;
            
             this.steps.push(tutStep);
+
+            ////////////////////////// STEP 6 //////////////////////////
+            tutStep = new TutorialStep(this.UI);
+
+            tutStep.instructions = {
+                en_us: "Select the POLY layer by right clicking a few times, or by pressing the POLY layer select button.",
+                ja_jp: "右クリックを数回してPOLY層に変えるか、POLY層の選択ボタンを押して下さい。",
+            };
+
+            tutStep.completed = function() {
+                let completed = this.UI.diagramController.cursorIndex === LayeredGrid.POLY;
+                if(completed) {
+                    // Remove glow from poly swatch.
+                    let classList = document.getElementById("poly-swatch").classList;
+                    if(classList.contains("glowing")) {
+                        classList.remove("glowing");
+                    }
+                    this.tutorialOverlay.remove();
+                }
+                return completed;
+           }.bind(tutStep);
+
+            tutStep.specialAction = function() {
+                let classList = document.getElementById("poly-swatch").classList;
+                if(!classList.contains("glowing")) {
+                    classList.add("glowing");
+                    let bounds = {
+                        left: 0,
+                        right: this.width - 1,
+                        top: 0,
+                        bottom: this.height - 1,
+                        lowLayer: 0,
+                        highLayer: this.layers - 1,
+                    };
+                    this.map(bounds, function(x,y,layer) {
+                        let paintCell = y === this.diagram.vddCell.y && layer === LayeredGrid.METAL1;
+                        paintCell = paintCell || y === this.diagram.gndCell.y && layer === LayeredGrid.METAL1;
+                        paintCell = paintCell || y === this.diagram.vddCell.y + 2 && layer === LayeredGrid.PDIFF;
+                        paintCell = paintCell || y === this.diagram.gndCell.y - 2 && layer === LayeredGrid.NDIFF;
+                        paintCell = paintCell || x === this.diagram.outputs[0].x && y >= this.diagram.vddCell.y + 2 && y <= this.diagram.gndCell.y - 2 && layer === LayeredGrid.METAL1;
+                        paintCell = paintCell || x === this.diagram.vddCell.x + 2 && y >= this.diagram.vddCell.y && y <= this.diagram.vddCell.y + 2 && layer === LayeredGrid.METAL1;
+                        paintCell = paintCell || x === this.diagram.gndCell.x + 2 && y <= this.diagram.gndCell.y && y >= this.diagram.gndCell.y - 2 && layer === LayeredGrid.METAL1;
+                        paintCell = layer === LayeredGrid.CONTACT && this.get(x,y,LayeredGrid.METAL1).isSet && (this.get(x,y,LayeredGrid.PDIFF).isSet || this.get(x,y,LayeredGrid.NDIFF).isSet);
+                        
+                        if(paintCell) {
+                            this.set(x,y,layer);
+                        } else {
+                            this.clear(x,y,layer);
+                        }
+                    }.bind(this), true);
+                }
+            }.bind(this.UI.diagramGrid);
+
+            tutStep.target = document.getElementById("poly-swatch");
+            tutStep.position.flipUp   = true;
+           
+            this.steps.push(tutStep);
+
+            ////////////////////////// STEP 7 //////////////////////////
+            tutStep = new TutorialStep(this.UI);
+
+            tutStep.instructions = {
+                en_us: "Draw a line of POLY than spans across the <span style='color:#332288'>PDIFF</span> and <span style='color:#117733'>NDIFF</span> lines　between the left and right CONTACTs.",
+                ja_jp: "POLY層で<span style='color:#332288'>PDIFF</span>と<span style='color:#117733'>NDIFF層</span>を超える一本の線を左右のCONTACTの間に引いてください。",
+            };
+
+            tutStep.completed = function() {
+                if(this.UI.diagram.controller.dragging) {
+                    return false;
+                }
+                
+                this.UI.diagram.setNets();
+                this.UI.diagram.clearAnalyses();
+                
+                let done = this.UI.diagram.nmos.length === 1 && this.UI.diagram.pmos.length === 1;
+                done = done && this.UI.diagram.nmos[0].cell.gate.isIdentical(this.UI.diagram.pmos[0].cell.gate);
+                done = done && !this.UI.diagram.vddNet.isIdentical(this.UI.diagram.gndNet);
+                
+                if(done) {
+                    this.tutorialOverlay.remove();
+                }
+                
+                return done;
+           }.bind(tutStep);
+
+            tutStep.specialAction = function() {
+                return;
+            };
+
+            tutStep.target = document.getElementById("canvas");
+            tutStep.position.centerHorizontal = true;
+            tutStep.position.centerVertical   = true;
+           
+            this.steps.push(tutStep);
            
             ////////////////////////// START TUTORIAL //////////////////////////
             this.steps[this.currentStep].display();
