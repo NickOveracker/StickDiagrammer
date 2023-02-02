@@ -2268,6 +2268,11 @@
         // For each layer of the cell in the net, recurse with all adjacent cells in the layer.
         // Generic function for the above code.
         setAdjacent(deltaX, deltaY, net, cell) {
+            // Don't connect contacts to adjacent contacts.
+            if(cell.layer === LayeredGrid.CONTACT) {
+                return;
+            }
+
             if (net.containsCell(this.layeredGrid.get(cell.x, cell.y, cell.layer)) && this.layeredGrid.get(cell.x + deltaX, cell.y + deltaY, cell.layer).isSet) {
                 if (net.containsCell(this.layeredGrid.get(cell.x + deltaX, cell.y + deltaY, cell.layer)) === false) {
                     this.setRecursively(this.layeredGrid.get(cell.x + deltaX, cell.y + deltaY, cell.layer), net);
@@ -2766,11 +2771,12 @@
 
             if(window.runTestbench) {
                 this.tutorial = {active: false,};
+                // Must initialize the canvas before the testbench runs.
+                this.diagramView.refreshCanvas();
             }
             else {
                 this.tutorial = new Tutorial(this);
             }
-            this.diagramView.refreshCanvas();
         }
 
         keydownHandler(event) {
