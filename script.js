@@ -2301,6 +2301,7 @@
         }
 
         setRecursively(cell, net) {
+            let gateNet;
             net.addNode(this.graph.getNode(cell));
 
             // Return if this cell is in this.pmos or this.nmos already.
@@ -2311,12 +2312,18 @@
             // Check the cell for a transistor.
             // If this is in a diffusion layer, do not propogate past a transistor.
             if (this.checkIfTransistor(cell, LayeredGrid.NDIFF, this.nmos)) {
-                let gateNet = this.getNet(this.layeredGrid.get(cell.x,cell.y,LayeredGrid.POLY));
+                gateNet = this.getNet(this.layeredGrid.get(cell.x,cell.y,LayeredGrid.POLY)); 
+                if(gateNet === null) {
+                    gateNet = new Net("gate", false);
+                }
                 this.setRecursively(this.layeredGrid.get(cell.x, cell.y, LayeredGrid.POLY), gateNet);
                 return;
             }
             if (this.checkIfTransistor(cell, LayeredGrid.PDIFF, this.pmos)) {
-                let gateNet = this.getNet(this.layeredGrid.get(cell.x,cell.y,LayeredGrid.POLY));
+                gateNet = this.getNet(this.layeredGrid.get(cell.x,cell.y,LayeredGrid.POLY)); 
+                if(gateNet === null) {
+                    gateNet = new Net("gate", false);
+                }
                 this.setRecursively(this.layeredGrid.get(cell.x, cell.y, LayeredGrid.POLY), gateNet);
                 return;
             }
