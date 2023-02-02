@@ -2330,7 +2330,7 @@
                 ja_jp: "日本語の手順。",
             };
             this.completed     = () => { return true; };
-            this.position      = { centerHorizontal: false, centerVertical: false, x: 0, y: 0, flipLeft: false, flipUp: false };
+            this.position      = { centerHorizontal: false, centerVertical: false, x: 0, y: 0, flipLeft: false, flipUp: false, };
             this.specialAction = () => { return; };
             this.target = document.body;
             this.tutorialOverlay = document.createElement("div");
@@ -2470,6 +2470,60 @@
             tutStep.specialAction = function() {
                 return;
             };
+
+            tutStep.target = document.getElementById("canvas");
+            tutStep.position.centerHorizontal = true;
+            tutStep.position.centerVertical   = true;
+           
+            this.steps.push(tutStep);
+
+            ////////////////////////// STEP 4 //////////////////////////
+            tutStep = new TutorialStep(this.UI);
+
+            tutStep.instructions = {
+                en_us: "Select the CONTACT layer by right clicking a few times, or by pressing the METAL1 layer select button.",
+                ja_jp: "右クリックを数回してCONTACT層に変えるか、CONTACT層の選択ボタンを押して下さい。",
+            };
+
+            tutStep.completed = function() {
+                let completed = this.UI.diagramController.cursorIndex === LayeredGrid.CONTACT;
+                if(completed) {
+                    // Remove glow from contact swatch.
+                    let classList = document.getElementById("contact-swatch").classList;
+                    if(classList.contains("glowing")) {
+                        classList.remove("glowing");
+                    }
+                    this.tutorialOverlay.remove();
+                }
+                return completed;
+           }.bind(tutStep);
+
+            tutStep.specialAction = function() {
+                let classList = document.getElementById("contact-swatch").classList;
+                if(!classList.contains("glowing")) {
+                    classList.add("glowing");
+                    let bounds = {
+                        left: 0,
+                        right: this.width - 1,
+                        top: 0,
+                        bottom: this.height - 1,
+                        lowLayer: 0,
+                        highLayer: this.layers - 1,
+                    };
+                    this.map(bounds, function(x,y,layer) {
+                        let paintCell = y === this.diagram.vddCell.y && layer === LayeredGrid.METAL1;
+                        paintCell = paintCell || y === this.diagram.gndCell.y && layer === LayeredGrid.METAL1;
+                        paintCell = paintCell || y === this.diagram.vddCell.y + 2 && layer === LayeredGrid.PDIFF;
+                        paintCell = paintCell || y === this.diagram.gndCell.y - 2 && layer === LayeredGrid.NDIFF;
+                        
+                        if(paintCell) {
+                            this.set(x,y,layer);
+                        } else {
+                            this.clear(x,y,layer);
+                        }
+                    }.bind(this), true);
+                }
+            }.bind(this.UI.layeredGrid);
 
             tutStep.target = document.getElementById("canvas");
             tutStep.position.centerHorizontal = true;
