@@ -2533,6 +2533,8 @@
             tutStep.target = document.getElementById("contact-swatch");
             tutStep.position.flipLeft = true;
             tutStep.position.flipUp   = true;
+           
+            this.steps.push(tutStep);
 
             ////////////////////////// STEP 5 //////////////////////////
             tutStep = new TutorialStep(this.UI);
@@ -2562,8 +2564,6 @@
             tutStep.target = document.getElementById("canvas");
             tutStep.position.centerHorizontal = true;
             tutStep.position.centerVertical   = true;
-           
-            this.steps.push(tutStep);
            
             this.steps.push(tutStep);
            
