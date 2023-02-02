@@ -2640,8 +2640,8 @@
                 this.UI.diagram.setNets();
                 this.UI.diagram.clearAnalyses();
                 
-                let done = this.UI.diagram.nmos.length === 1 && this.UI.diagram.pmos.length === 1;
-                done = done && this.UI.diagram.nmos[0].gate.isIdentical(this.UI.diagram.pmos[0].gate);
+                let done = this.UI.diagram.nmos.size === 1 && this.UI.diagram.pmos.size === 1;
+                done = done && this.UI.diagram.nmos.values().next().value.gate.isIdentical(this.UI.diagram.pmos.values().next().value.gate);
                 done = done && !this.UI.diagram.vddNet.isIdentical(this.UI.diagram.gndNet);
                 
                 if(done) {
