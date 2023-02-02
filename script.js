@@ -2341,20 +2341,24 @@
             this.tutorialOverlay.innerHTML = this.instructions["en_us"];
             document.body.appendChild(this.tutorialOverlay);
 
-            let targetRect = this.target.getBoundingClientRect();
-            let overlayRect = this.tutorialOverlay.getBoundingClientRect();
-            let x          = targetRect.left;
-            let y          = targetRect.top;
+            let x               = targetRect.left;
+            let y               = targetRect.top;
+            let targetRect      = this.target.getBoundingClientRect();
+            let overlayRect     = this.tutorialOverlay.getBoundingClientRect();
+            let overlayStyle    = window.getComputedStyle(this.tutorialOverlay);
+            let targetStyle     = window.getComputedStyle(this.target);
+            let totalExtraSpace = targetStyle.getPropertyValue("margin")  +
+                                  targetStyle.getPropertyValue("padding") +
+                                  overlayStyle.getPropertyValue("margin") +
+                                  targetStyle.getPropertyValue("padding");
 
-            x += this.position.flipLeft ? -overlayRect.width  - this.position.x : targetRect.width  + this.position.x;
-            y += this.position.flipUp   ? -overlayRect.height - this.position.y : targetRect.height + this.position.y;
-
-            if(this.position.centerHorizontal) {
-                x = x - targetRect.width/2 - overlayRect.width/2;
-            }
-            if(this.position.centerVertical) {
-                y = y - targetRect.height/2 - overlayRect.height/2;
-            }
+            // Which side are we positioning relative to?
+            x = this.position.flipLeft ? x - overlayRect.width  - this.position.x : x + targetRect.width  + this.position.x;
+            y = this.position.flipUp   ? x - overlayRect.height - this.position.y : x + targetRect.height + this.position.y;
+            
+            // Center? (Not compatible with flipping)
+            x = this.position.centerHorizontal ? x - targetRect.width  / 2 - overlayRect.width  / 2 : x + totalExtraSpace;
+            y = this.position.centerVertical   ? y - targetRect.height / 2 - overlayRect.height / 2 : y + totalExtraSpace;
 
             // Position the overlay next to the target element
             this.tutorialOverlay.style.left = `${x}px`;
