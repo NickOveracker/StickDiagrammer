@@ -2608,7 +2608,7 @@
                         paintCell = paintCell || x === this.diagram.outputs[0].x && y >= this.diagram.vddCell.y + 2 && y <= this.diagram.gndCell.y - 2 && layer === LayeredGrid.METAL1;
                         paintCell = paintCell || x === this.diagram.vddCell.x + 2 && y >= this.diagram.vddCell.y && y <= this.diagram.vddCell.y + 2 && layer === LayeredGrid.METAL1;
                         paintCell = paintCell || x === this.diagram.gndCell.x + 2 && y <= this.diagram.gndCell.y && y >= this.diagram.gndCell.y - 2 && layer === LayeredGrid.METAL1;
-                        paintCell = layer === LayeredGrid.CONTACT && this.get(x,y,LayeredGrid.METAL1).isSet && (this.get(x,y,LayeredGrid.PDIFF).isSet || this.get(x,y,LayeredGrid.NDIFF).isSet);
+                        paintCell = paintCell || layer === LayeredGrid.CONTACT && this.get(x,y,LayeredGrid.METAL1).isSet && (this.get(x,y,LayeredGrid.PDIFF).isSet || this.get(x,y,LayeredGrid.NDIFF).isSet);
                         
                         if(paintCell) {
                             this.set(x,y,layer);
