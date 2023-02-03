@@ -2688,7 +2688,6 @@
                 
                 if(done) {
                     this.tutorialOverlay.remove();
-                    window.scrollTo({behavior: "smooth", top: Math.ceil(document.getElementById("evaluate-btn").getBoundingClientRect().top + window.scrollY), left: 0,});
                 }
                 
                 return done;
@@ -2897,6 +2896,7 @@
                     if(this.target.classList.contains("glowing")) {
                         this.target.classList.remove("glowing");
                     }
+                    window.scrollTo({behavior: "smooth", top: Math.ceil(document.getElementById("evaluate-btn").getBoundingClientRect().top + window.scrollY), left: 0,});
                 }
                 
                 return done;
@@ -2919,7 +2919,7 @@
 
             tutStep.instructions = {
                 en_us: "Press \"Evaluate\" to generate a truth table for the circuit.",
-                ja_jp: "「Evaluate」を押して回路の真理値表を作成精してください。",
+                ja_jp: "「Evaluate」を押して回路の真理値表を作成してください。",
             };
 
             tutStep.completed = function() {
@@ -2940,6 +2940,105 @@
                 // Sneakily remove a contact and don't allow it to be replaced.
                 this.UI.diagramGrid.clear(this.UI.diagram.vddCell.x, this.UI.diagram.vddCell.y, LayeredGrid.METAL1);
 
+                let classList = document.getElementById("evaluate-btn").classList;
+                if(!classList.contains("glowing")) {
+                    classList.add("glowing");
+                }
+            };
+
+            tutStep.target = document.getElementById("evaluate-btn");
+            tutStep.position.centerHorizontal = true;
+            tutStep.position.flipUp = true;
+           
+            this.steps.push(tutStep);
+
+            ////////////////////////// STEP 15 //////////////////////////
+            tutStep = new TutorialStep(this.UI);
+
+            tutStep.instructions = {
+                en_us: "The output isn't right! Click the \"Z\" output in the truth table to find out why it isn't \"1\".",
+                ja_jp: "出力がおかしい！「Z」の出力を押して、なぜ予想した「１」になっていないか検査しましょう。",
+            };
+
+            tutStep.completed = function() {
+                let done = this.UI.diagramView.netHighlightGrid[this.UI.diagram.vddCell.x + 1, this.UI.diagram.vddCell.y];
+                
+                if(done) {
+                    this.tutorialOverlay.remove();
+                    let classList = target.classList;
+                    if(classList.contains("glowing")) {
+                        classList.remove("glowing");
+                    }
+                }
+                
+                return done;
+            }.bind(tutStep);
+
+            tutStep.specialAction = function() {
+                let classList = target.classList;
+                if(!classList.contains("glowing")) {
+                    classList.add("glowing");
+                }
+            };
+
+            tutStep.target = document.getElementById("truth-table").children[0].children[1].children[1];
+            tutStep.position.centerHorizontal = true;
+            tutStep.position.flipUp = true;
+           
+            this.steps.push(tutStep);
+
+            ////////////////////////// STEP 16 //////////////////////////
+            tutStep = new TutorialStep(this.UI);
+
+            tutStep.instructions = {
+                en_us: "The output path isn't passing through VDD! <span style='color:#88CCEE'>METAL1</span> isn't passing through it.<br>Place <span style='color:#88CCEE'>METAL1</span> on VDD.",
+                ja_jp: "出力の同電路がVDDを通っていません！<span style='color:#88CCEE'>METAL1</span>層がVDDのセルにありません。<br><span style='color:#88CCEE'>METAL1</span>層をVDDに置いてください。",
+            };
+
+            tutStep.completed = function() {
+                let done = this.UI.diagramGrid.get(this.UI.diagram.vddCell.x, this.UI.diagram.vddCell.y, LayeredGrid.METAL1).isSet;
+                
+                if(done) {
+                    this.tutorialOverlay.remove();
+                    window.scrollTo({behavior: "smooth", top: Math.ceil(document.getElementById("evaluate-btn").getBoundingClientRect().top), left: 0,});
+                }
+                
+                return done;
+            }.bind(tutStep);
+
+            tutStep.specialAction = function() {
+                return;
+            };
+
+            tutStep.target = canvas;
+            tutStep.position.centerHorizontal = true;
+            tutStep.position.centerVertical = true;
+           
+            this.steps.push(tutStep);
+
+            ////////////////////////// STEP 17 //////////////////////////
+            tutStep = new TutorialStep(this.UI);
+
+            tutStep.instructions = {
+                en_us: "Press \"Evaluate\" to generate an updated truth table for the circuit.",
+                ja_jp: "「Evaluate」を押して回路の真理値表を再作成してください。",
+            };
+
+            tutStep.completed = function() {
+                let done = document.getElementById("truth-table").children.length > 0;
+                
+                if(done) {
+                    this.tutorialOverlay.remove();
+                    let classList = document.getElementById("evaluate-btn").classList;
+                    if(classList.contains("glowing")) {
+                        classList.remove("glowing");
+                    }
+                }
+                
+                return done;
+            }.bind(tutStep);
+
+            tutStep.specialAction = function() {
                 let classList = document.getElementById("evaluate-btn").classList;
                 if(!classList.contains("glowing")) {
                     classList.add("glowing");
