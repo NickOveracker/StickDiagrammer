@@ -2972,6 +2972,7 @@
                     if(classList.contains("glowing")) {
                         classList.remove("glowing");
                     }
+                    window.scrollTo({behavior: "smooth", top: Math.ceil(document.body.getBoundingClientRect().top), left: 0,});
                 }
                 
                 return done;
