@@ -3004,7 +3004,7 @@
             };
 
             tutStep.completed = function() {
-                let done = this.UI.diagramGrid.get(this.UI.diagram.vddCell.x, this.UI.diagram.vddCell.y, LayeredGrid.METAL1).isSet;
+                let done = !this.UI.diagramController.dragging && this.UI.diagramGrid.get(this.UI.diagram.vddCell.x, this.UI.diagram.vddCell.y, LayeredGrid.METAL1).isSet;
                 
                 if(done) {
                     this.tutorialOverlay.remove();
