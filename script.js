@@ -2972,6 +2972,11 @@
                 
                 if(done) {
                     let button = document.getElementById("remove-input-btn");
+
+                    // Don't let the user accidentally delete the A terminal.
+                    this.UI.diagramController.temp = this.UI.diagramController.removeTerminal;
+                    this.UI.diagramController.removeTerminal = () => { return; };
+
                     this.tutorialOverlay.remove();
                     if(button.classList.contains("glowing")) {
                         button.classList.remove("glowing");
@@ -3006,6 +3011,7 @@
                 let done = document.getElementById("terminal-menu").classList.contains("closed");
                 
                 if(done) {
+                    this.UI.diagramController.removeTerminal = this.UI.diagramController.temp;
                     this.tutorialOverlay.remove();
                     if(this.target.classList.contains("glowing")) {
                         this.target.classList.remove("glowing");
