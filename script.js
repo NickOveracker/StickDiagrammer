@@ -2748,12 +2748,13 @@
             };
 
             tutStep.completed = function() {
-                let done = this.target.isConnected && !document.getElementById("termselect-2").checked;
+                let label = document.getElementById("termselect-label-2");
+                let done = label && document.getElementById("termselect-2").checked;
                 
                 if(done) {
                     this.tutorialOverlay.remove();
-                    if(this.target.classList.contains("glowing")) {
-                        this.target.classList.remove("glowing");
+                    if(label.classList.contains("glowing")) {
+                        label.classList.remove("glowing");
                     }
                 }
                 
@@ -2762,18 +2763,20 @@
 
             tutStep.specialAction = function() {
                 // Don't let the user delete the A input.
-                if(!this.target.isConnected) {
+                let label = document.getElementById("termselect-label-2");
+                if(!label) {
                     this.UI.diagramController.addTerminal(false);
-                    this.target = document.getElementById("termselect-label-2");
+                    label = document.getElementById("termselect-label-2");
                 }
-                if(!this.target.classList.contains("glowing")) {
-                    this.target.classList.add("glowing");
+                // Make the label glow.
+                if(!label.classList.contains("glowing")) {
+                    label.classList.add("glowing");
                 }
             };
 
-            tutStep.target = document.getElementById("termselect-label-2");
+            tutStep.target = document.getElementById("canvas");
             tutStep.position.centerHorizontal = true;
-            tutStep.position.flipUp = true;
+            tutStep.position.centerVertical = true;
            
             this.steps.push(tutStep);
 
@@ -2786,12 +2789,13 @@
             };
 
             tutStep.completed = function() {
-                let done = this.target.classList.contains("active");
+                let button = document.getElementById("place-term-btn");
+                let done = button.classList.contains("active");
                 
                 if(done) {
                     this.tutorialOverlay.remove();
-                    if(this.target.classList.contains("glowing")) {
-                        this.target.classList.remove("glowing");
+                    if(button.classList.contains("glowing")) {
+                        button.classList.remove("glowing");
                     }
                 }
                 
@@ -2799,14 +2803,15 @@
             }.bind(tutStep);
 
             tutStep.specialAction = function() {
-                if(!this.target.classList.contains("glowing")) {
-                    this.target.classList.add("glowing");
+                let button = document.getElementById("place-term-btn");
+                if(!button.classList.contains("glowing")) {
+                    button.classList.add("glowing");
                 }
             };
 
-            tutStep.target = document.getElementById("place-term-btn");
+            tutStep.target = document.getElementById("canvas");
             tutStep.position.centerHorizontal = true;
-            tutStep.position.flipUp = true;
+            tutStep.position.centerVertical = true;
            
             this.steps.push(tutStep);
 
@@ -2826,21 +2831,16 @@
                 
                 if(done) {
                     this.tutorialOverlay.remove();
-                    if(this.target.classList.contains("glowing")) {
-                        this.target.classList.remove("glowing");
-                    }
                 }
                 
                 return done;
             }.bind(tutStep);
 
             tutStep.specialAction = function() {
-                if(!this.target.classList.contains("glowing")) {
-                    this.target.classList.add("glowing");
-                }
+                return;
             };
 
-            tutStep.target = document.getElementById("place-term-btn");
+            tutStep.target = document.getElementById("canvas");
             tutStep.position.centerHorizontal = true;
             tutStep.position.flipUp = true;
            
