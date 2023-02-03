@@ -2374,7 +2374,10 @@
             this.tutorialOverlay.classList.add("tutorial-overlay");
             this.tutorialOverlay.innerHTML = this.instructions["en_us"];
             document.body.appendChild(this.tutorialOverlay);
-                   
+            this.reposition();
+        }
+
+        reposition() {
             let targetRect      = this.target.getBoundingClientRect();
             let overlayRect     = this.tutorialOverlay.getBoundingClientRect();
             let targetStyle     = window.getComputedStyle(this.target);
@@ -2670,7 +2673,7 @@
             tutStep = new TutorialStep(this.UI);
 
             tutStep.instructions = {
-                en_us: "Draw a line of POLY than spans across the <span style='color:#332288'>PDIFF</span> and <span style='color:#117733'>NDIFF</span> lines　between the left and right CONTACTs.",
+                en_us: "Draw a line of POLY than spans across the <span style='color:#332288'>PDIFF</span> and <span style='color:#117733'>NDIFF</span> lines between the left and right CONTACTs.",
                 ja_jp: "POLY層で<span style='color:#332288'>PDIFF</span>と<span style='color:#117733'>NDIFF層</span>を超える一本の線を左右のCONTACTの間に引いてください。",
             };
 
@@ -2976,6 +2979,7 @@
 
             tutStep.specialAction = function() {
                 this.target = document.getElementById("truth-table").children[0].children[1].children[1];
+                this.reposition();
                 let classList = this.target.classList;
                 if(!classList.contains("glowing")) {
                     classList.add("glowing");
@@ -3423,6 +3427,7 @@
 
         cellClickHandler(event) {
             let controller = this.diagramController;
+            let changed = true;
 
             if(controller.startX === -1) {
                 return;
@@ -3451,7 +3456,12 @@
                 // Otherwise, change the layer.
                 if (!(controller.clearIfPainted(coords.x, coords.y) || controller.eraseMode)) {
                     controller.changeLayer();
+                    changed = false;
                 }
+            }
+
+            if(changed) {
+                document.getElementById("truth-table").innerHTML = "";
             }
         }
 
