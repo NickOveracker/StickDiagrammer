@@ -46,7 +46,7 @@
     'use strict';
 
     class LayeredGrid {
-        // Cycle through the following cursor colors by pressing space: LayeredGrid.PDIFF, LayeredGrid.NDIFF, LayeredGrid.POLY, METAL1, LayeredGrid.CONTACT
+        // Cycle through the following cursor colors by pressing space: PDIFF, NDIFF, POLY, METAL1, CONTACT
         // Additional colors: DELETE at index (numLayers + 0)
         // Colorblind-friendly template found on [David Nichols's](https://personal.sron.nl/~pault/) website.
         // Specifically, [Paul Tol's](https://personal.sron.nl/~pault/) template was used.
@@ -2708,6 +2708,214 @@
             tutStep = new TutorialStep(this.UI);
 
             tutStep.instructions = {
+                en_us: "Open the Terminals menu.",
+                ja_jp: "端子のメニューを開いて下さい。",
+            };
+
+            tutStep.completed = function() {
+                let done = !document.getElementById("terminal-menu").classList.contains("closed");
+                
+                if(done) {
+                    this.tutorialOverlay.remove();
+                    if(this.target.classList.contains("glowing")) {
+                        this.target.classList.remove("glowing");
+                        this.target.classList.remove("rounded");
+                    }
+                }
+                
+                return done;
+            }.bind(tutStep);
+
+            tutStep.specialAction = function() {
+                if(!this.target.classList.contains("glowing")) {
+                    this.target.classList.add("glowing");
+                    this.target.classList.add("rounded");
+                }
+            };
+
+            tutStep.target = document.getElementById("term-menu-btn");
+            tutStep.position.centerHorizontal = true;
+            tutStep.position.flipUp = true;
+           
+            this.steps.push(tutStep);
+
+            ////////////////////////// STEP 9 //////////////////////////
+            tutStep = new TutorialStep(this.UI);
+
+            tutStep.instructions = {
+                en_us: "Select Terminal A.",
+                ja_jp: "A端子を選択してください。",
+            };
+
+            tutStep.completed = function() {
+                let done = this.target.isConnected && !document.getElementById("termselect-2").checked;
+                
+                if(done) {
+                    this.tutorialOverlay.remove();
+                    if(this.target.classList.contains("glowing")) {
+                        this.target.classList.remove("glowing");
+                    }
+                }
+                
+                return done;
+            }.bind(tutStep);
+
+            tutStep.specialAction = function() {
+                // Don't let the user delete the A input.
+                if(!this.target.isConnected) {
+                    this.UI.diagramController.addTerminal(false);
+                    this.target = document.getElementById("termselect-label-2");
+                }
+                if(!this.target.classList.contains("glowing")) {
+                    this.target.classList.add("glowing");
+                }
+            };
+
+            tutStep.target = document.getElementById("termselect-label-2");
+            tutStep.position.centerHorizontal = true;
+            tutStep.position.flipUp = true;
+           
+            this.steps.push(tutStep);
+
+            ////////////////////////// STEP 10 //////////////////////////
+            tutStep = new TutorialStep(this.UI);
+
+            tutStep.instructions = {
+                en_us: "Press the Place Terminal button.",
+                ja_jp: "端子移動ボタンを押してください。",
+            };
+
+            tutStep.completed = function() {
+                let done = this.target.classList.contains("active");
+                
+                if(done) {
+                    this.tutorialOverlay.remove();
+                    if(this.target.classList.contains("glowing")) {
+                        this.target.classList.remove("glowing");
+                    }
+                }
+                
+                return done;
+            }.bind(tutStep);
+
+            tutStep.specialAction = function() {
+                if(!this.target.classList.contains("glowing")) {
+                    this.target.classList.add("glowing");
+                }
+            };
+
+            tutStep.target = document.getElementById("place-term-btn");
+            tutStep.position.centerHorizontal = true;
+            tutStep.position.flipUp = true;
+           
+            this.steps.push(tutStep);
+
+            ////////////////////////// STEP 11 //////////////////////////
+            tutStep = new TutorialStep(this.UI);
+
+            tutStep.instructions = {
+                en_us: "Place the A terminal on the <span='color:#882255'>POLY</span> between the <span style='color:#332288'>PDIFF</span> and <span style='color:#117733'>NDIFF</span> lines.",
+                ja_jp: "A端子移を<span style='color:#332288'>PDIFF</span>と<span style='color:#117733'>NDIFF層</span>の間の<span='color:#882255'>POLY</span>層上に置いてください。",
+            };
+
+            tutStep.completed = function() {
+                let done = this.UI.diagram.inputs.length > 0;
+                done = done && this.UI.diagramGrid.get(this.UI.diagram.inputs[0].x, this.UI.diagram.inputs[1], LayeredGrid.POLY).isSet;
+                done = done && !this.UI.diagramGrid.get(this.UI.diagram.inputs[0].x, this.UI.diagram.inputs[1], LayeredGrid.NDIFF).isSet;
+                done = done && !this.UI.diagramGrid.get(this.UI.diagram.inputs[0].x, this.UI.diagram.inputs[1], LayeredGrid.PDIFF).isSet;
+                
+                if(done) {
+                    this.tutorialOverlay.remove();
+                    if(this.target.classList.contains("glowing")) {
+                        this.target.classList.remove("glowing");
+                    }
+                }
+                
+                return done;
+            }.bind(tutStep);
+
+            tutStep.specialAction = function() {
+                if(!this.target.classList.contains("glowing")) {
+                    this.target.classList.add("glowing");
+                }
+            };
+
+            tutStep.target = document.getElementById("place-term-btn");
+            tutStep.position.centerHorizontal = true;
+            tutStep.position.flipUp = true;
+           
+            this.steps.push(tutStep);
+
+            ////////////////////////// STEP 12 //////////////////////////
+            tutStep = new TutorialStep(this.UI);
+
+            tutStep.instructions = {
+                en_us: "Good! If you are on PC, you can also place the A terminal by typing \"A\".<br><br>Now delete every terminal except for A.",
+                ja_jp: "完璧！パソコンを使用しているなら、A端子をAキーを打って早く置けます。<br><br>次、A端子以外の入力端子を削除しましょう。",
+            };
+
+            tutStep.completed = function() {
+                let done = this.UI.diagram.inputs.length === 1;
+                
+                if(done) {
+                    this.tutorialOverlay.remove();
+                    if(this.target.classList.contains("glowing")) {
+                        this.target.classList.remove("glowing");
+                    }
+                }
+                
+                return done;
+            }.bind(tutStep);
+
+            tutStep.specialAction = function() {
+                if(!this.target.classList.contains("glowing")) {
+                    this.target.classList.add("glowing");
+                }
+            };
+
+            tutStep.target = document.getElementById("remove-input-btn");
+            tutStep.position.centerHorizontal = true;
+            tutStep.position.flipUp = true;
+           
+            this.steps.push(tutStep);
+
+            ////////////////////////// STEP 13 //////////////////////////
+            tutStep = new TutorialStep(this.UI);
+
+            tutStep.instructions = {
+                en_us: "Now, close the Terminals menu by pressing the close button or by pressing ESC.",
+                ja_jp: "バツボタンまたはESCキーを押して端子メニューを閉じてください。",
+            };
+
+            tutStep.completed = function() {
+                let done = document.getElementById("terminal-menu").classList.contains("closed");
+                
+                if(done) {
+                    this.tutorialOverlay.remove();
+                    if(this.target.classList.contains("glowing")) {
+                        this.target.classList.remove("glowing");
+                    }
+                }
+                
+                return done;
+            }.bind(tutStep);
+
+            tutStep.specialAction = function() {
+                if(!this.target.classList.contains("glowing")) {
+                    this.target.classList.add("glowing");
+                }
+            };
+
+            tutStep.target = document.getElementById("close-term-menu-btn");
+            tutStep.position.centerHorizontal = true;
+            tutStep.position.flipUp = true;
+           
+            this.steps.push(tutStep);
+
+            ////////////////////////// STEP 14 //////////////////////////
+            tutStep = new TutorialStep(this.UI);
+
+            tutStep.instructions = {
                 en_us: "Press \"Evaluate\" to generate a truth table for the circuit.",
                 ja_jp: "「Evaluate」を押して回路の真理値表を作成精してください。",
             };
@@ -3810,6 +4018,7 @@
                     termSelectItemLabel.classList.add("last");
                 }
                 termSelectItemLabel.classList.add("clickable");
+                termSelectItemLabel.id = "termselect-label-" + ii;
 
                 termSelectItemInput.type = "radio";
                 termSelectItemInput.name = "termselect";
