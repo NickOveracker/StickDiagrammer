@@ -2912,7 +2912,7 @@
             };
 
             tutStep.target = document.getElementById("close-term-menu-btn");
-            tutStep.position.centerHorizontal = true;
+            tutStep.position.flipLeft = true;
             tutStep.position.flipUp = true;
            
             this.steps.push(tutStep);
