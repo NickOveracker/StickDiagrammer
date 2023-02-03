@@ -1496,6 +1496,8 @@ function runTestbench(runTo) {
             UI.diagram.inputs[3].y  = 8;
             UI.diagram.outputs[0].x = 11;
             UI.diagram.outputs[0].y = 8;
+            UI.diagram.gndCell.x    = 0;
+            UI.diagram.gndCell.y    = 27;
         },
 
         ["mousedown", {button:  2, clientX: mapX(2),  clientY: mapY(15)}],
@@ -1533,7 +1535,7 @@ function runTestbench(runTo) {
         1,
         function() {
             UI.diagram.outputs[0].x = 13;
-            UI.diagram.outputs[0].y = 7;
+            UI.diagram.outputs[0].y = 6;
         },
 
         2,
