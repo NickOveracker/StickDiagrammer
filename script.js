@@ -837,7 +837,7 @@
 
         placeTerminal(event, terminal, useGridCoords) {
             let cell;
-            let oldX, oldY;
+            let oldX, old;
 
             if(useGridCoords) {
                 cell = terminal;
@@ -3669,16 +3669,21 @@
                     return;
                 }
                 controller.dragging = true;
+
+                if(this.diagramController.placeTermMode) {
+                    this.diagramController.placeTerminal(event, this.diagramController.selectedTerminal);
+                    return;
+                }
+
                 controller.saveCurrentState();
             } else {
                 // Continuously refresh to update the preview line.
+                if(this.diagramController.placeTermMode) {
+                    this.diagramController.placeTerminal(event, this.diagramController.selectedTerminal);
+                    return;
+                }
                 controller.undo();
                 controller.saveCurrentState();
-            }
-
-            if(this.diagramController.placeTermMode) {
-                this.diagramController.placeTerminal(event, this.diagramController.selectedTerminal);
-                return;
             }
 
             endX = Math.floor((controller.currentX - view.canvas.getBoundingClientRect().left - view.cellWidth)  / view.cellWidth);
