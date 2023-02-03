@@ -3362,7 +3362,7 @@
             }
          
             if (this.diagramController.isPrimaryInput(event) || event.button === 2) {
-                if(this.diagramController.placeTermMode) {
+                if(this.diagramController.isPrimaryInput(event) && this.diagramController.placeTermMode) {
                     this.diagramController.placeTerminal(event, this.diagramController.selectedTerminal);
                 }
 
@@ -3373,6 +3373,8 @@
                 } else if(event.button === 2) {
                     this.diagramController.changeLayer();
                 }
+
+                this.diagramView.highlightNets = false;
             }
 
             this.diagramController.dragging = false;
@@ -3902,7 +3904,7 @@
                         tCell.className = "input";
                     } else {
                         tCell.className = "output";
-                        tCell.onmouseover = (function (rowIndex, colIndex) {
+                        tCell.onclick   = (function (rowIndex, colIndex) {
                             return (function() {
                                 let path, outputNum, outputNodeIndex;
                                 outputNum = colIndex - this.diagram.inputs.length;
@@ -3911,9 +3913,6 @@
                                 this.diagramView.setHighlight(path);
                             }.bind(this));
                         }.bind(this))(rowIndex, colIndex);
-                        tCell.onmouseleave = function () {
-                            this.diagramView.highlightNets = false;
-                        }.bind(this);
                     }
                 }.bind(this));
             }.bind(this));
