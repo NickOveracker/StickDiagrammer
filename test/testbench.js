@@ -1535,7 +1535,7 @@ function runTestbench(runTo) {
         1,
         function() {
             UI.diagram.outputs[0].x = 13;
-            UI.diagram.outputs[0].y = 7;
+            UI.diagram.outputs[0].y = 6;
         },
 
         2,
