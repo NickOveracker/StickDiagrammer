@@ -2826,15 +2826,15 @@
             };
 
             tutStep.completed = function() {
-                let done = this.UI.diagram.inputs.length > 0;
-                done = done && this.UI.diagramGrid.get(this.UI.diagram.inputs[0].x, this.UI.diagram.inputs[0].y, LayeredGrid.POLY).isSet;
+                let done = !this.UI.diagramController.dragging && this.UI.diagram.inputs.length > 0;
+                done = done &&  this.UI.diagramGrid.get(this.UI.diagram.inputs[0].x, this.UI.diagram.inputs[0].y, LayeredGrid.POLY).isSet;
                 done = done && !this.UI.diagramGrid.get(this.UI.diagram.inputs[0].x, this.UI.diagram.inputs[0].y, LayeredGrid.NDIFF).isSet;
                 done = done && !this.UI.diagramGrid.get(this.UI.diagram.inputs[0].x, this.UI.diagram.inputs[0].y, LayeredGrid.PDIFF).isSet;
-                
+
                 if(done) {
                     this.tutorialOverlay.remove();
                 }
-                
+
                 return done;
             }.bind(tutStep);
 
@@ -2844,7 +2844,7 @@
 
             tutStep.target = document.getElementById("canvas");
             tutStep.position.centerHorizontal = true;
-            tutStep.position.flipUp = true;
+            tutStep.position.centerVertical = true;
            
             this.steps.push(tutStep);
 
