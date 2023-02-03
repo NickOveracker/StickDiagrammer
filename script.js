@@ -2593,7 +2593,7 @@
                 done = done && this.UI.diagramGrid.get(this.UI.diagram.outputs[0].x, this.UI.diagram.vddCell.y+2, LayeredGrid.CONTACT).isSet;
                 done = done && this.UI.diagramGrid.get(this.UI.diagram.outputs[0].x, this.UI.diagram.gndCell.y-2, LayeredGrid.CONTACT).isSet;
                 
-                done = done && !this.UI.diagram.controller.dragging;
+                done = done && !this.UI.diagramController.dragging;
                 if(done) {
                     this.tutorialOverlay.remove();
                 }
@@ -2678,7 +2678,7 @@
             };
 
             tutStep.completed = function() {
-                if(this.UI.diagram.controller.dragging) {
+                if(this.UI.diagramController.dragging) {
                     return false;
                 }
                 
@@ -2967,8 +2967,9 @@
                 let done = this.UI.diagramView.netHighlightGrid[this.UI.diagram.vddCell.x + 1, this.UI.diagram.vddCell.y];
                 
                 if(done) {
+                    let outputCell = document.getElementById("truth-table").children[0].children[1].children[1];
                     this.tutorialOverlay.remove();
-                    let classList = this.target.classList;
+                    let classList = outputCell.classList;
                     if(classList.contains("glowing")) {
                         classList.remove("glowing");
                     }
@@ -2979,16 +2980,16 @@
             }.bind(tutStep);
 
             tutStep.specialAction = function() {
-                this.target = document.getElementById("truth-table").children[0].children[1].children[1];
-                this.reposition();
-                let classList = this.target.classList;
+                let outputCell = document.getElementById("truth-table").children[0].children[1].children[1];
+                let classList = outputCell.classList;
                 if(!classList.contains("glowing")) {
                     classList.add("glowing");
                 }
             };
 
+            tutStep.target = document.getElementById("evaluate-btn");
             tutStep.position.centerHorizontal = true;
-            tutStep.position.flipUp = true;
+            tutStep.position.centerVertical = true;
            
             this.steps.push(tutStep);
 
@@ -3518,11 +3519,7 @@
                 // TODO: Allow manipulation outside the canvas
                 if (this.diagramController.pixelIsInBounds()) {
                     // TODO: Refactor
-                    if(this.diagramController.placeTermMode) {
-                        this.diagramController.placeTerminal(event, this.diagramController.selectedTerminal);
-                    } else {
-                        this.drag(event);
-                    }
+                    this.drag(event);
                 }
             }
         }
@@ -3578,6 +3575,11 @@
                 // Continuously refresh to update the preview line.
                 controller.undo();
                 controller.saveCurrentState();
+            }
+
+            if(this.diagramController.placeTermMode) {
+                this.diagramController.placeTerminal(event, this.diagramController.selectedTerminal);
+                return;
             }
 
             endX = Math.floor((controller.currentX - view.canvas.getBoundingClientRect().left - view.cellWidth)  / view.cellWidth);
