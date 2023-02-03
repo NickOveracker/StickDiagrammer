@@ -2825,9 +2825,9 @@
 
             tutStep.completed = function() {
                 let done = this.UI.diagram.inputs.length > 0;
-                done = done && this.UI.diagramGrid.get(this.UI.diagram.inputs[0].x, this.UI.diagram.inputs[1], LayeredGrid.POLY).isSet;
-                done = done && !this.UI.diagramGrid.get(this.UI.diagram.inputs[0].x, this.UI.diagram.inputs[1], LayeredGrid.NDIFF).isSet;
-                done = done && !this.UI.diagramGrid.get(this.UI.diagram.inputs[0].x, this.UI.diagram.inputs[1], LayeredGrid.PDIFF).isSet;
+                done = done && this.UI.diagramGrid.get(this.UI.diagram.inputs[0].x, this.UI.diagram.inputs[0].y, LayeredGrid.POLY).isSet;
+                done = done && !this.UI.diagramGrid.get(this.UI.diagram.inputs[0].x, this.UI.diagram.inputs[0].y, LayeredGrid.NDIFF).isSet;
+                done = done && !this.UI.diagramGrid.get(this.UI.diagram.inputs[0].x, this.UI.diagram.inputs[0].y, LayeredGrid.PDIFF).isSet;
                 
                 if(done) {
                     this.tutorialOverlay.remove();
@@ -3357,6 +3357,10 @@
             }
          
             if (this.diagramController.isPrimaryInput(event) || event.button === 2) {
+                if(this.diagramController.placeTermMode) {
+                    this.diagramController.placeTerminal(event, this.diagramController.selectedTerminal);
+                }
+
                 if (this.diagramController.dragging) {
                     this.endDrag(event);
                 } else if (this.diagramController.pixelIsInBounds()) {
