@@ -2383,8 +2383,8 @@
             let targetStyle     = window.getComputedStyle(this.target);
             let overlayStyle    = window.getComputedStyle(this.tutorialOverlay);
 
-            let x               = targetRect.left + window.scrollX;
-            let y               = targetRect.top  + window.scrollY;
+            let x               = targetRect.left;
+            let y               = targetRect.top;
             let totalExtraSpace = parseFloat(targetStyle.getPropertyValue("margin"),   10) +
                                   parseFloat(targetStyle.getPropertyValue("padding"),  10) +
                                   parseFloat(overlayStyle.getPropertyValue("margin"),  10) +
