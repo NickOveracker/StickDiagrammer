@@ -2505,7 +2505,7 @@
 
                         // Disable further adjustment of the grid size for now
                         this.UI.diagramGrid.temp = this.layeredGrid.resize;
-                        this.diagramGrid.resize = () => { return; };
+                        this.UI.diagramGrid.resize = () => { return; };
 
                         this.tutorialOverlay.remove();
                         window.scrollTo({behavior: "smooth", top: Math.ceil(document.body.getBoundingClientRect().top), left: 0,});
