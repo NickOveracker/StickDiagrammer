@@ -2498,9 +2498,14 @@
                             this.diagramGrid.clear(oldX, oldY, LayeredGrid.CONTACT);
                         }.bind(this.UI);
 
+                        // Move the terminals to a better position
                         moveTerm(2,   2, this.UI.diagram.vddCell);
                         moveTerm(1,  18, this.UI.diagram.gndCell);
                         moveTerm(18, 10, this.UI.diagram.outputs[0]);
+
+                        // Disable further adjustment of the grid size for now
+                        this.UI.diagramGrid.temp = this.layeredGrid.resize;
+                        this.diagramGrid.resize = () => { return; };
 
                         this.tutorialOverlay.remove();
                         window.scrollTo({behavior: "smooth", top: Math.ceil(document.body.getBoundingClientRect().top), left: 0,});
@@ -3159,6 +3164,8 @@
                     if(classList.contains("glowing")) {
                         classList.remove("glowing");
                     }
+                    // Re-enable grid resizing.
+                    this.UI.diagramGrid.resize = this.UI.diagramGrid.temp;
                 }
                 
                 return done;
