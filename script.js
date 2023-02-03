@@ -2515,56 +2515,27 @@
             }.bind(tutStep))(this.UI.diagramView.darkMode);
 
             tutStep.specialAction = function() {
-                let remColClassList = document.getElementById("remove-column").classList;
-                let remRowClassList = document.getElementById("remove-row").classList;
-                let addColClassList = document.getElementById("add-column").classList;
-                let addRowClassList = document.getElementById("add-row").classList;
+                let limit = 20;
+                let setGlowing = function(element, compareVal, isAddButton) {
+                    if(isAddButton && compareVal < limit) {
+                        if(!element.classList.contains("glowing")) {
+                            element.classList.add("glowing");
+                        }
+                    } else if(!isAddButton && compareVal > limit) {
+                        if(!element.classList.contains("glowing")) {
+                            element.classList.add("glowing");
+                        }
+                    } else if(element.classList.contains("glowing")) {
+                        if(element.classList.contains("glowing")) {
+                            element.classList.remove("glowing");
+                        }
+                    }
+                }.bind(tutStep);
 
-                if(this.UI.diagramGrid.width > 20) {
-                    if(!remColClassList.contains("glowing")) {
-                        remColClassList.add("glowing");
-                    }
-                    if(addColClassList.contains("glowing")) {
-                        addColClassList.remove("glowing");
-                    }
-                } else if(this.UI.diagramGrid.width < 20) {
-                    if(!addColClassList.contains("glowing")) {
-                        addColClassList.add("glowing");
-                    }
-                    if(remColClassList.contains("glowing")) {
-                        remColClassList.remove("glowing");
-                    }
-                } else if(this.UI.diagramGrid.width === 20) {
-                    if(addColClassList.contains("glowing")) {
-                        addColClassList.remove("glowing");
-                    }
-                    if(remColClassList.contains("glowing")) {
-                        remColClassList.remove("glowing");
-                    }
-                }
-
-                if(this.UI.diagramGrid.height > 20) {
-                    if(!remRowClassList.contains("glowing")) {
-                        remRowClassList.add("glowing");
-                    }
-                    if(addRowClassList.contains("glowing")) {
-                        addRowClassList.remove("glowing");
-                    }
-                } else if(this.UI.diagramGrid.height < 20) {
-                    if(!addRowClassList.contains("glowing")) {
-                        addRowClassList.add("glowing");
-                    }
-                    if(remRowClassList.contains("glowing")) {
-                        remRowClassList.remove("glowing");
-                    }
-                } else if(this.UI.diagramGrid.height === 20) {
-                    if(addRowClassList.contains("glowing")) {
-                        addRowClassList.remove("glowing");
-                    }
-                    if(remRowClassList.contains("glowing")) {
-                        remRowClassList.remove("glowing");
-                    }
-                }
+                setGlowing(document.getElementById("remove-column"), this.diagramGrid.width, false);
+                setGlowing(document.getElementById("remove-row"), this.diagramGrid.height, false);
+                setGlowing(document.getElementById("add-column"), this.diagramGrid.width, true);
+                setGlowing(document.getElementById("add-row"), this.diagramGrid.height, true);
             };
 
             tutStep.target = document.getElementsByClassName("offscreen")[0];
@@ -2789,8 +2760,8 @@
             tutStep = new TutorialStep(this.UI);
 
             tutStep.instructions = {
-                en_us: "Draw a line of POLY than spans across the <span style='color:#332288'>PDIFF</span> and <span style='color:#117733'>NDIFF</span> lines between the left and right CONTACTs.",
-                ja_jp: "POLY層で<span style='color:#332288'>PDIFF</span>と<span style='color:#117733'>NDIFF層</span>を超える一本の線を左右のCONTACTの間に引いてください。",
+                en_us: "Draw a line of POLY that spans across the <span style='color:#332288'>PDIFF</span> and <span style='color:#117733'>NDIFF</span> lines between the left and right CONTACTs.",
+                ja_jp: "POLY層で<span style='color:#332288'>PDIFF</span>と<span style='color:#117733'>NDIFF層</span>を通る一本の線を左右のCONTACTの間に引いてください。",
             };
 
             tutStep.completed = function() {
