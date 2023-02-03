@@ -2489,12 +2489,6 @@
                             addRowClassList.remove("glowing");
                         }
 
-                        this.UI.diagram.vddCell.x = 2;
-                        this.UI.diagram.vddCell.y = 2;
-                        this.UI.diagram.gndCell.x = 2;
-                        this.UI.diagram.gndCell.y = 18;
-                        this.UI.diagram.outputs[0].x = 18;
-                        this.UI.diagram.outputs[0].y = 10;
                         this.UI.diagramController.placeTerminal({x:2,y:2,},   this.UI.diagram.vddCell,    true);
                         this.UI.diagramController.placeTerminal({x:2,y:18,},  this.UI.diagram.gndCell,    true);
                         this.UI.diagramController.placeTerminal({x:18,y:10,}, this.UI.diagram.outputs[0], true);
