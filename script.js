@@ -2489,9 +2489,18 @@
                             addRowClassList.remove("glowing");
                         }
 
-                        this.UI.diagramController.placeTerminal({x:2,y:2,},   this.UI.diagram.vddCell,    true);
-                        this.UI.diagramController.placeTerminal({x:2,y:18,},  this.UI.diagram.gndCell,    true);
-                        this.UI.diagramController.placeTerminal({x:18,y:10,}, this.UI.diagram.outputs[0], true);
+                        let moveTerm = function(x, y, terminal) {
+                            let oldX = terminal.x;
+                            let oldY = terminal.y;
+                            terminal.x = x;
+                            terminal.y = y;
+                            this.diagramController.placeTerminal(terminal, terminal, true);
+                            this.diagramGrid.clear(oldX, oldY, LayeredGrid.CONTACT);
+                        }.bind(this.UI);
+
+                        moveTerm(2,   2, this.UI.diagram.vddCell);
+                        moveTerm(1,  18, this.UI.diagram.gndCell);
+                        moveTerm(18, 10, this.UI.diagram.outputs[0]);
 
                         this.tutorialOverlay.remove();
                         window.scrollTo({behavior: "smooth", top: Math.ceil(document.body.getBoundingClientRect().top), left: 0,});
