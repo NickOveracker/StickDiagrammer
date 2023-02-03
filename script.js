@@ -3326,6 +3326,9 @@
             let controller = this.diagramController;
 
             if(controller.startX === -1) {
+                if(this.diagramView.highlightNets) {
+                    this.diagramView.highlightNets = false;
+                }
                 return;
             }
 
@@ -3373,8 +3376,6 @@
                 } else if(event.button === 2) {
                     this.diagramController.changeLayer();
                 }
-
-                this.diagramView.highlightNets = false;
             }
 
             this.diagramController.dragging = false;
