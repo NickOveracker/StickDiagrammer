@@ -845,7 +845,7 @@
                 cell = this.getCellAtCursor();
             }
 
-            if (cell !== {} && !event.ctrlKey) {
+            if (!Object.hasOwn(cell, "x") && !event.ctrlKey) {
                 // First, note the current coordinates.
                 oldX = terminal.x;
                 oldY = terminal.y;
