@@ -229,7 +229,7 @@
         // Change the height of the grid
         resize(width, height) {
 
-            if(width <= 0 || height <= 0) {
+            if(width <= 10 || height <= 10) {
                 return;
             }
 
@@ -2489,6 +2489,13 @@
                             addRowClassList.remove("glowing");
                         }
 
+                        this.UI.diagram.vddCell.x = 2;
+                        this.UI.diagram.vddCell.y = 2;
+                        this.UI.diagram.gndCell.x = 2;
+                        this.UI.diagram.gndCell.y = 18;
+                        this.UI.diagram.outputs[0].x = 18;
+                        this.UI.diagram.outputs[0].y = 10;
+
                         this.tutorialOverlay.remove();
                         window.scrollTo({behavior: "smooth", top: Math.ceil(document.body.getBoundingClientRect().top), left: 0,});
                     }
@@ -2614,7 +2621,7 @@
 
             tutStep.target = document.getElementById("canvas");
             tutStep.position.centerHorizontal = true;
-            tutStep.position.centerVertical   = true;
+            tutStep.position.flipUp = true;
            
             this.steps.push(tutStep);
 
@@ -2704,7 +2711,7 @@
 
             tutStep.target = document.getElementById("canvas");
             tutStep.position.centerHorizontal = true;
-            tutStep.position.centerVertical   = true;
+            tutStep.position.flipUp = true;
            
             this.steps.push(tutStep);
 
@@ -2800,7 +2807,7 @@
 
             tutStep.target = document.getElementById("canvas");
             tutStep.position.centerHorizontal = true;
-            tutStep.position.centerVertical   = true;
+            tutStep.position.flipUp = true;
            
             this.steps.push(tutStep);
 
@@ -2942,7 +2949,7 @@
 
             tutStep.target = document.getElementById("canvas");
             tutStep.position.centerHorizontal = true;
-            tutStep.position.centerVertical = true;
+            tutStep.position.flipUp = true;
            
             this.steps.push(tutStep);
 
@@ -3119,7 +3126,7 @@
 
             tutStep.target = document.getElementById("canvas");
             tutStep.position.centerHorizontal = true;
-            tutStep.position.centerVertical = true;
+            tutStep.position.flipUp = true;
            
             this.steps.push(tutStep);
 
