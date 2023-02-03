@@ -845,16 +845,16 @@
                 cell = this.getCellAtCursor();
             }
 
-            if (!Object.hasOwn(cell, "x") && !event.ctrlKey) {
+            if (Object.hasOwn(cell, "x") && !event.ctrlKey) {
                 // First, note the current coordinates.
                 oldX = terminal.x;
                 oldY = terminal.y;
                 // Then, set the new coordinates.
                 terminal.x = cell.x;
                 terminal.y = cell.y;
-                // Set the LayeredGrid.CONTACT layer at the new coordinates.
+                // Set the CONTACT layer at the new coordinates.
                 this.diagram.layeredGrid.set(cell.x, cell.y, LayeredGrid.CONTACT);
-                // Unset the LayeredGrid.CONTACT layer at the old coordinates.
+                // Unset the CONTACT layer at the old coordinates.
                 this.diagram.layeredGrid.clear(oldX, oldY, LayeredGrid.CONTACT);
             }
         }
