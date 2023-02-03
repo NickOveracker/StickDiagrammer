@@ -1955,7 +1955,7 @@
             }.bind(this));
         }
 
-        // Push all terminal nets to the this.netlist.
+        // Push all terminal nets to the netlist.
         resetNetlist() {
             // Clear the netlist.
             this.netlist.length = 0;
@@ -2002,8 +2002,6 @@
             this.outputs.forEach(function(output, index) {
                 this.setRecursively(this.layeredGrid.get(output.x, output.y, LayeredGrid.CONTACT), this.outputNets[index]);
             }.bind(this));
-
-            this.resetNetlist();
 
             // Add input nodes to the graph.
             this.inputNodes.length = 0;
@@ -2318,6 +2316,9 @@
                     gateNet = new Net("gate", false);
                 }
                 this.setRecursively(this.layeredGrid.get(cell.x, cell.y, LayeredGrid.POLY), gateNet);
+                if(this.getNet(this.layeredGrid.get(cell.x, cell.y, LayeredGrid.POLY))) {
+                    this.netlist.push(gateNet);
+                }
                 return;
             }
             if (this.checkIfTransistor(cell, LayeredGrid.PDIFF, this.pmos)) {
@@ -2326,6 +2327,9 @@
                     gateNet = new Net("gate", false);
                 }
                 this.setRecursively(this.layeredGrid.get(cell.x, cell.y, LayeredGrid.POLY), gateNet);
+                if(this.getNet(this.layeredGrid.get(cell.x, cell.y, LayeredGrid.POLY))) {
+                    this.netlist.push(gateNet);
+                }
                 return;
             }
             // If this is in the poly layer, we don't need to stop at a transistor.
