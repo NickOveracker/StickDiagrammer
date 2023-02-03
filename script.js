@@ -2858,9 +2858,10 @@
                 let done = this.UI.diagram.inputs.length === 1;
                 
                 if(done) {
+                    let button = document.getElementById("remove-input-btn");
                     this.tutorialOverlay.remove();
-                    if(this.target.classList.contains("glowing")) {
-                        this.target.classList.remove("glowing");
+                    if(button.classList.contains("glowing")) {
+                        button.classList.remove("glowing");
                     }
                 }
                 
@@ -2868,14 +2869,15 @@
             }.bind(tutStep);
 
             tutStep.specialAction = function() {
-                if(!this.target.classList.contains("glowing")) {
-                    this.target.classList.add("glowing");
+                let button = document.getElementById("remove-input-btn");
+                if(!button.classList.contains("glowing")) {
+                    button.classList.add("glowing");
                 }
             };
 
-            tutStep.target = document.getElementById("remove-input-btn");
+            tutStep.target = document.getElementById("canvas");
             tutStep.position.centerHorizontal = true;
-            tutStep.position.flipUp = true;
+            tutStep.position.centerVertical = true;
            
             this.steps.push(tutStep);
 
@@ -2935,6 +2937,9 @@
             }.bind(tutStep);
 
             tutStep.specialAction = function() {
+                // Sneakily remove a contact and don't allow it to be replaced.
+                this.UI.diagramGrid.clear(this.UI.diagram.vddCell.x, this.UI.diagram.vddCell.y, LayeredGrid.METAL1);
+
                 let classList = document.getElementById("evaluate-btn").classList;
                 if(!classList.contains("glowing")) {
                     classList.add("glowing");
