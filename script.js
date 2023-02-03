@@ -837,7 +837,7 @@
 
         placeTerminal(event, terminal, useGridCoords) {
             let cell;
-            let oldX, old;
+            let oldX, oldY;
 
             if(useGridCoords) {
                 cell = terminal;
