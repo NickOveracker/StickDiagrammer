@@ -3018,7 +3018,7 @@
                 return;
             };
 
-            tutStep.target = canvas;
+            tutStep.target = document.getElementById("canvas");
             tutStep.position.centerHorizontal = true;
             tutStep.position.centerVertical = true;
            
