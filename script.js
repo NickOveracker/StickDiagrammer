@@ -3005,10 +3005,10 @@
 
             tutStep.completed = function() {
                 let done = !this.UI.diagramController.dragging && this.UI.diagramGrid.get(this.UI.diagram.vddCell.x, this.UI.diagram.vddCell.y, LayeredGrid.METAL1).isSet;
-                document.getElementById("truth-table").innerHTML = "";
                 
                 if(done) {
                     this.tutorialOverlay.remove();
+                    document.getElementById("truth-table").innerHTML = "";
                     window.scrollTo({behavior: "smooth", top: Math.ceil(document.getElementById("evaluate-btn").getBoundingClientRect().top), left: 0,});
                 }
                 
