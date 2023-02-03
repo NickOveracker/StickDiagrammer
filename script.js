@@ -2495,6 +2495,9 @@
                         this.UI.diagram.gndCell.y = 18;
                         this.UI.diagram.outputs[0].x = 18;
                         this.UI.diagram.outputs[0].y = 10;
+                        this.UI.diagramController.placeTerminal(this.UI.diagram.vddCell, this.UI.diagram.vddCell, true);
+                        this.UI.diagramController.placeTerminal(this.UI.diagram.gndCell, this.UI.diagram.gndCell, true);
+                        this.UI.diagramController.placeTerminal(this.UI.diagram.outputs[0], this.UI.diagram.outputs[0], true);
 
                         this.tutorialOverlay.remove();
                         window.scrollTo({behavior: "smooth", top: Math.ceil(document.body.getBoundingClientRect().top), left: 0,});
