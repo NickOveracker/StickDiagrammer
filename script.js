@@ -3326,9 +3326,11 @@
             let controller = this.diagramController;
 
             if(controller.startX === -1) {
-                if(this.diagramView.highlightNets) {
-                    this.diagramView.highlightNets = false;
-                }
+                return;
+            }
+
+            if(this.diagramView.highlightNets) {
+                this.diagramView.highlightNets = false;
                 return;
             }
 
