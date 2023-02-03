@@ -2468,7 +2468,7 @@
 
             tutStep.completed = (function(darkModeSet) {
                 return function() {
-                    let completed = this.UI.diagramGrid.width === this.UI.diagramGrid.height === 20;
+                    let completed = this.UI.diagramGrid.width === 20 && this.UI.diagramGrid.height === 20;
                     if(completed) {
                         // Remove glow from dark mode button.
                         let remColClassList = document.getElementById("remove-column").classList;
@@ -2488,10 +2488,7 @@
                         if(addRowClassList.contains("glowing")) {
                             addRowClassList.remove("glowing");
                         }
-                        // Change layer if currently on METAL1 to prepare for next step.
-                        if(this.UI.diagramController.cursorIndex === LayeredGrid.METAL1) {
-                            this.UI.diagramController.changeLayer();
-                        }
+
                         this.tutorialOverlay.remove();
                         window.scrollTo({behavior: "smooth", top: Math.ceil(document.body.getBoundingClientRect().top), left: 0,});
                     }
@@ -2553,8 +2550,8 @@
             };
 
             tutStep.target = document.getElementsByClassName("offscreen")[0];
-            tutStep.flipUp = true;
-            tutStep.centerHorizontal = true;
+            tutStep.position.flipUp = true;
+            tutStep.position.centerHorizontal = true;
             
             this.steps.push(tutStep);
 
