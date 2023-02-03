@@ -2822,7 +2822,7 @@
 
             tutStep.instructions = {
                 en_us: "Place the A terminal on the <span='color:#882255'>POLY</span> between the <span style='color:#332288'>PDIFF</span> and <span style='color:#117733'>NDIFF</span> lines.",
-                ja_jp: "A端子移を<span style='color:#332288'>PDIFF</span>と<span style='color:#117733'>NDIFF層</span>の間の<span='color:#882255'>POLY</span>層上に置いてください。",
+                ja_jp: "A端子を<span style='color:#332288'>PDIFF</span>と<span style='color:#117733'>NDIFF層</span>の間の<span='color:#882255'>POLY</span>層上に置いてください。",
             };
 
             tutStep.completed = function() {
@@ -3005,6 +3005,7 @@
 
             tutStep.completed = function() {
                 let done = !this.UI.diagramController.dragging && this.UI.diagramGrid.get(this.UI.diagram.vddCell.x, this.UI.diagram.vddCell.y, LayeredGrid.METAL1).isSet;
+                document.getElementById("truth-table").innerHTML = "";
                 
                 if(done) {
                     this.tutorialOverlay.remove();
