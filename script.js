@@ -2316,7 +2316,7 @@
                     gateNet = new Net("gate", false);
                 }
                 this.setRecursively(this.layeredGrid.get(cell.x, cell.y, LayeredGrid.POLY), gateNet);
-                if(this.getNet(this.layeredGrid.get(cell.x, cell.y, LayeredGrid.POLY))) {
+                if(this.getNet(this.layeredGrid.get(cell.x, cell.y, LayeredGrid.POLY)) === null) {
                     this.netlist.push(gateNet);
                 }
                 return;
@@ -2327,7 +2327,7 @@
                     gateNet = new Net("gate", false);
                 }
                 this.setRecursively(this.layeredGrid.get(cell.x, cell.y, LayeredGrid.POLY), gateNet);
-                if(this.getNet(this.layeredGrid.get(cell.x, cell.y, LayeredGrid.POLY))) {
+                if(this.getNet(this.layeredGrid.get(cell.x, cell.y, LayeredGrid.POLY)) === null) {
                     this.netlist.push(gateNet);
                 }
                 return;
