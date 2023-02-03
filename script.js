@@ -2417,9 +2417,9 @@
         }
 
         initTutorial() {
+            ////////////////////////// STEP 1 //////////////////////////
             let tutStep = new TutorialStep(this.UI);
 
-            ////////////////////////// STEP 1 //////////////////////////
             tutStep.instructions = {
                 en_us: `Toggle dark mode by pressing the on-screen toggle button or by pressing ${this.UI.darkModeCommand.ctrlModifier ? "CTRL-" : this.UI.darkModeCommand.shiftModifier ? "SHIFT-" : ""}${String.fromCharCode(this.UI.darkModeCommand.keyCode)}.`,
                 ja_jp: `ダークモードのトグルボタンを押すか、${this.UI.darkModeCommand.ctrlModifier ? "CTRL-" : this.UI.darkModeCommand.shiftModifier ? "SHIFT-" : ""}${String.fromCharCode(this.UI.darkModeCommand.keyCode)}を押して下さい。`,
@@ -2459,6 +2459,8 @@
             this.steps.push(tutStep);
 
             ////////////////////////// STEP 2 //////////////////////////
+            tutStep = new TutorialStep(this.UI);
+
             tutStep.instructions = {
                 en_us: "Set the grid to 20 rows and 20 columns.",
                 ja_jp: "グリッドの行数と列数を両方２０に設定しましょう。",
@@ -2533,14 +2535,14 @@
                     if(addRowClassList.contains("glowing")) {
                         addRowClassList.remove("glowing");
                     }
-                } else if(this.UI.diagramGrid.width < 20) {
+                } else if(this.UI.diagramGrid.height < 20) {
                     if(!addRowClassList.contains("glowing")) {
                         addRowClassList.add("glowing");
                     }
                     if(remRowClassList.contains("glowing")) {
                         remRowClassList.remove("glowing");
                     }
-                } else if(this.UI.diagramGrid.width === 20) {
+                } else if(this.UI.diagramGrid.height === 20) {
                     if(addRowClassList.contains("glowing")) {
                         addRowClassList.remove("glowing");
                     }
