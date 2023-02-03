@@ -2429,6 +2429,7 @@
                 return function() {
                     let completed = this.UI.diagramView.darkMode !== darkModeSet;
                     if(completed) {
+                        window.scrollTo({behavior: "smooth", top: Math.ceil(document.getElementsByClassName("offscreen")[0].getBoundingClientRect().top + window.scrollY), left: 0,});
                         // Remove glow from dark mode button.
                         let classList = document.getElementById("dark-mode-btn").classList;
                         if(classList.contains("glowing")) {
@@ -2456,8 +2457,106 @@
             tutStep.target = document.getElementById("dark-mode-btn");
             
             this.steps.push(tutStep);
-            
+
             ////////////////////////// STEP 2 //////////////////////////
+            tutStep.instructions = {
+                en_us: "Set the grid to 20 rows and 20 columns.",
+                ja_jp: "グリッドの行数と列数を両方２０に設定しましょう。",
+            };
+
+            tutStep.completed = (function(darkModeSet) {
+                return function() {
+                    let completed = this.UI.diagramGrid.width === this.UI.diagramGrid.height === 20;
+                    if(completed) {
+                        // Remove glow from dark mode button.
+                        let remColClassList = document.getElementById("remove-column").classList;
+                        let remRowClassList = document.getElementById("remove-row").classList;
+                        let addColClassList = document.getElementById("add-column").classList;
+                        let addRowClassList = document.getElementById("add-row").classList;
+
+                        if(remColClassList.contains("glowing")) {
+                            remColClassList.remove("glowing");
+                        }
+                        if(remRowClassList.contains("glowing")) {
+                            remRowClassList.remove("glowing");
+                        }
+                        if(addColClassList.contains("glowing")) {
+                            addColClassList.remove("glowing");
+                        }
+                        if(addRowClassList.contains("glowing")) {
+                            addRowClassList.remove("glowing");
+                        }
+                        // Change layer if currently on METAL1 to prepare for next step.
+                        if(this.UI.diagramController.cursorIndex === LayeredGrid.METAL1) {
+                            this.UI.diagramController.changeLayer();
+                        }
+                        this.tutorialOverlay.remove();
+                        window.scrollTo({behavior: "smooth", top: Math.ceil(document.body.getBoundingClientRect().top), left: 0,});
+                    }
+                    return completed;
+                }.bind(tutStep);
+            }.bind(tutStep))(this.UI.diagramView.darkMode);
+
+            tutStep.specialAction = function() {
+                let remColClassList = document.getElementById("remove-column").classList;
+                let remRowClassList = document.getElementById("remove-row").classList;
+                let addColClassList = document.getElementById("add-column").classList;
+                let addRowClassList = document.getElementById("add-row").classList;
+
+                if(this.UI.diagramGrid.width > 20) {
+                    if(!remColClassList.contains("glowing")) {
+                        remColClassList.add("glowing");
+                    }
+                    if(addColClassList.contains("glowing")) {
+                        addColClassList.remove("glowing");
+                    }
+                } else if(this.UI.diagramGrid.width < 20) {
+                    if(!addColClassList.contains("glowing")) {
+                        addColClassList.add("glowing");
+                    }
+                    if(remColClassList.contains("glowing")) {
+                        remColClassList.remove("glowing");
+                    }
+                } else if(this.UI.diagramGrid.width === 20) {
+                    if(addColClassList.contains("glowing")) {
+                        addColClassList.remove("glowing");
+                    }
+                    if(remColClassList.contains("glowing")) {
+                        remColClassList.remove("glowing");
+                    }
+                }
+
+                if(this.UI.diagramGrid.height > 20) {
+                    if(!remRowClassList.contains("glowing")) {
+                        remRowClassList.add("glowing");
+                    }
+                    if(addRowClassList.contains("glowing")) {
+                        addRowClassList.remove("glowing");
+                    }
+                } else if(this.UI.diagramGrid.width < 20) {
+                    if(!addRowClassList.contains("glowing")) {
+                        addRowClassList.add("glowing");
+                    }
+                    if(remRowClassList.contains("glowing")) {
+                        remRowClassList.remove("glowing");
+                    }
+                } else if(this.UI.diagramGrid.width === 20) {
+                    if(addRowClassList.contains("glowing")) {
+                        addRowClassList.remove("glowing");
+                    }
+                    if(remRowClassList.contains("glowing")) {
+                        remRowClassList.remove("glowing");
+                    }
+                }
+            };
+
+            tutStep.target = document.getElementsByClassName("offscreen")[0];
+            tutStep.flipUp = true;
+            tutStep.centerHorizontal = true;
+            
+            this.steps.push(tutStep);
+
+            ////////////////////////// STEP 3 //////////////////////////
             tutStep = new TutorialStep(this.UI);
 
             tutStep.instructions = {
@@ -2493,7 +2592,7 @@
            
             this.steps.push(tutStep);
 
-            ////////////////////////// STEP 3 //////////////////////////
+            ////////////////////////// STEP 4 //////////////////////////
             tutStep = new TutorialStep(this.UI);
 
             tutStep.instructions = {
@@ -2520,7 +2619,7 @@
            
             this.steps.push(tutStep);
 
-            ////////////////////////// STEP 4 //////////////////////////
+            ////////////////////////// STEP 5 //////////////////////////
             tutStep = new TutorialStep(this.UI);
 
             tutStep.instructions = {
@@ -2579,7 +2678,7 @@
            
             this.steps.push(tutStep);
 
-            ////////////////////////// STEP 5 //////////////////////////
+            ////////////////////////// STEP 6 //////////////////////////
             tutStep = new TutorialStep(this.UI);
 
             tutStep.instructions = {
@@ -2610,7 +2709,7 @@
            
             this.steps.push(tutStep);
 
-            ////////////////////////// STEP 6 //////////////////////////
+            ////////////////////////// STEP 7 //////////////////////////
             tutStep = new TutorialStep(this.UI);
 
             tutStep.instructions = {
@@ -2669,7 +2768,7 @@
            
             this.steps.push(tutStep);
 
-            ////////////////////////// STEP 7 //////////////////////////
+            ////////////////////////// STEP 8 //////////////////////////
             tutStep = new TutorialStep(this.UI);
 
             tutStep.instructions = {
@@ -2706,7 +2805,7 @@
            
             this.steps.push(tutStep);
 
-            ////////////////////////// STEP 8 //////////////////////////
+            ////////////////////////// STEP 9 //////////////////////////
             tutStep = new TutorialStep(this.UI);
 
             tutStep.instructions = {
@@ -2741,7 +2840,7 @@
            
             this.steps.push(tutStep);
 
-            ////////////////////////// STEP 9 //////////////////////////
+            ////////////////////////// STEP 10 //////////////////////////
             tutStep = new TutorialStep(this.UI);
 
             tutStep.instructions = {
@@ -2782,7 +2881,7 @@
            
             this.steps.push(tutStep);
 
-            ////////////////////////// STEP 10 //////////////////////////
+            ////////////////////////// STEP 11 //////////////////////////
             tutStep = new TutorialStep(this.UI);
 
             tutStep.instructions = {
@@ -2817,7 +2916,7 @@
            
             this.steps.push(tutStep);
 
-            ////////////////////////// STEP 11 //////////////////////////
+            ////////////////////////// STEP 12 //////////////////////////
             tutStep = new TutorialStep(this.UI);
 
             tutStep.instructions = {
@@ -2848,7 +2947,7 @@
            
             this.steps.push(tutStep);
 
-            ////////////////////////// STEP 12 //////////////////////////
+            ////////////////////////// STEP 13 //////////////////////////
             tutStep = new TutorialStep(this.UI);
 
             tutStep.instructions = {
@@ -2883,7 +2982,7 @@
            
             this.steps.push(tutStep);
 
-            ////////////////////////// STEP 13 //////////////////////////
+            ////////////////////////// STEP 14 //////////////////////////
             tutStep = new TutorialStep(this.UI);
 
             tutStep.instructions = {
@@ -2917,7 +3016,7 @@
            
             this.steps.push(tutStep);
 
-            ////////////////////////// STEP 14 //////////////////////////
+            ////////////////////////// STEP 15 //////////////////////////
             tutStep = new TutorialStep(this.UI);
 
             tutStep.instructions = {
@@ -2956,7 +3055,7 @@
            
             this.steps.push(tutStep);
 
-            ////////////////////////// STEP 15 //////////////////////////
+            ////////////////////////// STEP 16 //////////////////////////
             tutStep = new TutorialStep(this.UI);
 
             tutStep.instructions = {
@@ -2995,7 +3094,7 @@
            
             this.steps.push(tutStep);
 
-            ////////////////////////// STEP 16 //////////////////////////
+            ////////////////////////// STEP 17 //////////////////////////
             tutStep = new TutorialStep(this.UI);
 
             tutStep.instructions = {
@@ -3025,7 +3124,7 @@
            
             this.steps.push(tutStep);
 
-            ////////////////////////// STEP 17 //////////////////////////
+            ////////////////////////// STEP 18 //////////////////////////
             tutStep = new TutorialStep(this.UI);
 
             tutStep.instructions = {
