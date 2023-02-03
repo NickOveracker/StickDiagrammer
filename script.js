@@ -2942,6 +2942,7 @@
             tutStep.specialAction = function() {
                 // Sneakily remove a contact and don't allow it to be replaced.
                 this.UI.diagramGrid.clear(this.UI.diagram.vddCell.x, this.UI.diagram.vddCell.y, LayeredGrid.METAL1);
+                this.reposition();
 
                 let classList = document.getElementById("evaluate-btn").classList;
                 if(!classList.contains("glowing")) {
@@ -2965,6 +2966,7 @@
 
             tutStep.completed = function() {
                 let done = this.UI.diagramView.netHighlightGrid[this.UI.diagram.vddCell.x + 1, this.UI.diagram.vddCell.y];
+                this.reposition();
                 
                 if(done) {
                     let outputCell = document.getElementById("truth-table").children[0].children[1].children[1];
@@ -3631,7 +3633,9 @@
 
             // For primary (i.e. left) mouse button:
             // If the mouse moved more horizontally than vertically, draw a horizontal line.
-            if (!this.isEraseEvent(event)) {
+            if(this.diagramController.placeTermMode) {
+                this.clearPlaceTerminalMode();
+            } else if (!this.isEraseEvent(event)) {
                 this.diagramController.draw(bounds);
             } else {
                 // For secondary (i.e. right) mouse button:
