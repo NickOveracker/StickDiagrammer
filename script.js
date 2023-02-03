@@ -2965,7 +2965,7 @@
                 
                 if(done) {
                     this.tutorialOverlay.remove();
-                    let classList = target.classList;
+                    let classList = this.target.classList;
                     if(classList.contains("glowing")) {
                         classList.remove("glowing");
                     }
@@ -2975,13 +2975,13 @@
             }.bind(tutStep);
 
             tutStep.specialAction = function() {
-                let classList = target.classList;
+                this.target = document.getElementById("truth-table").children[0].children[1].children[1];
+                let classList = this.target.classList;
                 if(!classList.contains("glowing")) {
                     classList.add("glowing");
                 }
             };
 
-            tutStep.target = document.getElementById("truth-table").children[0].children[1].children[1];
             tutStep.position.centerHorizontal = true;
             tutStep.position.flipUp = true;
            
