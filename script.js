@@ -3536,11 +3536,6 @@
                 return;
             }
 
-            if(this.diagramView.highlightNets) {
-                this.diagramView.highlightNets = false;
-                return;
-            }
-
             let coords = controller.getCoordsFromEvent(event);
 
             if(controller.placeTermMode) {
@@ -3585,8 +3580,10 @@
 
                 if (this.diagramController.dragging) {
                     this.endDrag(event);
+                    this.diagramView.highlightNets = false;
                 } else if (this.diagramController.pixelIsInBounds()) {
                     this.cellClickHandler(event);
+                    this.diagramView.highlightNets = false;
                 } else if(event.button === 2) {
                     this.diagramController.changeLayer();
                 }
@@ -3597,6 +3594,7 @@
             if(event.type.includes("touch")) {
                 this.diagramController.currentX = this.diagramController.currentY = -1;
             }
+
         }
 
         // Show a preview line when the user is dragging the mouse.
