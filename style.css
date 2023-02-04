@@ -266,7 +266,7 @@ li.clickable {
     margin: auto;
     position: relative;
     align-items: center;
-    width: 400px;
+    width: auto;
 }
 
 .menu-content li{
