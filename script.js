@@ -2402,7 +2402,7 @@
                 this.diagramView.refreshCanvas();
             }
             else if(window.tutorials) {
-                this.tutorial = window.tutorials[0].get();
+                this.tutorial = window.tutorials[0].get(this);
             }
         }
 
