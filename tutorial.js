@@ -120,6 +120,11 @@
                 }
             }
         }
+
+        start() {
+            this.active = true;
+            this.steps[this.currentStep].display(this.languageSetting);
+        }
     }
 
     function setUpInverterTutorial(UI, LayeredGrid) {
