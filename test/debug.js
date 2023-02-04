@@ -32,160 +32,149 @@
 /* jshint varstmt: true */
 /* jshint browser: true */
 /* globals DiagramController: false,
-           diagram:           false,
+           UI:                false,
            Diagram:           false,
            Graph:             false,
+           LayeredGrid:       false,
 */
 
-let PRINT_MOUSE_POS = false;
-
-// Represent the graph visually as a graph in the console.
-Graph.prototype.print = function() {
+function debugDefinitions() {
     'use strict';
-    let edgeSet = new Set();
-    console.log('graph G {');
-    for (let node of this.nodes) {
-        console.log(node.getName() + ';');
-        // Add all edges to the set.
-        for (let edge of node.edges) {
-            edgeSet.add(edge);
+    window.PRINT_MOUSE_POS = false;
+
+    // Represent the graph visually as a graph in the console.
+    Graph.prototype.print = function() {
+        let edgeSet = new Set();
+        console.log('graph G {');
+        for (let node of this.nodes) {
+            console.log(node.getName() + ';');
+            // Add all edges to the set.
+            for (let edge of node.edges) {
+                edgeSet.add(edge);
+            }
         }
-    }
-    // Loop through edgeSet and print each edge.
-    let edgeIterator = edgeSet.values();
-    let edge = edgeIterator.next();
-    while (!edge.done) {
-        console.log(edge.value.getNode1().getName() + ' <-> ' + edge.value.getNode2().getName() + ';');
-        edge = edgeIterator.next();
-    }
-    console.log('}');
-};
+        // Loop through edgeSet and print each edge.
+        let edgeIterator = edgeSet.values();
+        let edge = edgeIterator.next();
+        while (!edge.done) {
+            console.log(edge.value.getNode1().getName() + ' <-> ' + edge.value.getNode2().getName() + ';');
+            edge = edgeIterator.next();
+        }
+        console.log('}');
+    };
 
-// Print a grid with in all cells that are in a given net.
-Diagram.prototype.printGrid = function(netNum) {
-    'use strict';
-    let grid = [];
-    let net = this.netlist[netNum];
-    let name = "X";
-    for(let ii = 0; ii < this.layeredGrid.height; ii++) {
-        grid[ii] = [];
-        for(let jj = 0; jj < this.layeredGrid.width; jj++) {
-            grid[ii][jj] = "_";
-            // If any of the layers are in netA, set the cell to "A".
-            for(let kk = 0; kk < Diagram.layers.length; kk++) {
-                if(this.layeredGrid.get(ii, jj, kk).isSet && net.containsCell(this.layeredGrid.get(ii, jj, kk))) {
-                    grid[ii][jj] = name;
+    // Print a grid with in all cells that are in a given net.
+    Diagram.prototype.printGrid = function(netNum) {
+        let grid = [];
+        let net = this.netlist[netNum];
+        let name = "X";
+        for(let ii = 0; ii < this.layeredGrid.height; ii++) {
+            grid[ii] = [];
+            for(let jj = 0; jj < this.layeredGrid.width; jj++) {
+                grid[ii][jj] = "_";
+                // If any of the layers are in netA, set the cell to "A".
+                for(let kk = 0; kk < LayeredGrid.layers.length; kk++) {
+                    if(this.layeredGrid.get(ii, jj, kk).isSet && net.containsCell(this.layeredGrid.get(ii, jj, kk))) {
+                        grid[ii][jj] = name;
+                    }
+                    else if(this.pmos.has(this.layeredGrid.get(ii, jj, kk)) || this.nmos.has(this.layeredGrid.get(ii, jj, kk))) {
+                        grid[ii][jj] = "T";
+                    }
                 }
-                else if(this.pmos.has(this.layeredGrid.get(ii, jj, kk)) || this.nmos.has(this.layeredGrid.get(ii, jj, kk))) {
-                    grid[ii][jj] = "T";
-                }
             }
         }
-    }
 
-    // Print to the console, rotated 90 degrees.
-    let str = "";
-    for(let ii = 0; ii < grid.length; ii++) {
-        let row = "";
-        for(let jj = 0; jj < grid[ii].length; jj++) {
-            row += grid[jj][ii];
-        }
-        str += row + "\n";
-    }
-    console.log(str);
-};
-
-DiagramController.prototype.getCellAtCursor_old = DiagramController.prototype.getCellAtCursor;
-
-DiagramController.prototype.getCellAtCursor = function(screenX, screenY) {
-    'use strict';
-    let retVal = this.getCellAtCursor_old(screenX, screenY);
-
-    if(PRINT_MOUSE_POS && !!retVal) {
-        console.log(retVal.x, retVal.y);
-    }
-
-    return retVal;
-};
-
-Node.prototype.getName = function() {
-    'use strict';
-    let name = this.getName_old();
-
-    if(this.cell.gate && this.cell.gate.name !== "?") {
-        name = this.cell.gate.name;
-        name += this.isPmos ? "+" : "";
-        name += this.isNmos ? "-" : "";
-    } else {
-        name = diagram.graph.getIndexByNode(this);
-        name += this.isPmos ? "+" : "";
-        name += this.isNmos ? "-" : "";
-    }
-
-    return name;
-};
-
-window.userInput = [];
-window.recordMode = false;
-
-function recordEvent(event) {
-    'use strict';
-    if(window.recordMode) {
-        if(event.type === "mousemove") {
-            if(!diagram.controller.dragging) {
-                return;
+        // Print to the console, rotated 90 degrees.
+        let str = "";
+        for(let ii = 0; ii < grid.length; ii++) {
+            let row = "";
+            for(let jj = 0; jj < grid[ii].length; jj++) {
+                row += grid[jj][ii];
             }
-            else if(window.userInput[window.userInput.length - 1].type === event.type) {
-                window.userInput.pop();
-            }
+            str += row + "\n";
         }
-        window.userInput.push(event);
-    }
-}
+        console.log(str);
+    };
 
-function getRecording() {
-    'use strict';
-    let outArr = [];
-    window.userInput.forEach(function(event) {
-        outArr.push([
-            event.type, {
-                clientX: Math.ceil((event.clientX - diagram.view.canvas.offsetLeft - diagram.view.cellWidth)  / diagram.view.cellWidth),
-                clientY: Math.ceil((event.clientY - diagram.view.canvas.offsetTop  - diagram.view.cellHeight) / diagram.view.cellHeight),
-            },
-        ]);
-        if(outArr[outArr.length - 1][0].includes("move")) {
-            outArr[outArr.length - 1][1].buttons = event.buttons;
+    DiagramController.prototype.getCellAtCursor_old = DiagramController.prototype.getCellAtCursor;
+
+    DiagramController.prototype.getCellAtCursor = function(screenX, screenY) {
+        let retVal = this.getCellAtCursor_old(screenX, screenY);
+
+        if(window.PRINT_MOUSE_POS && !!retVal) {
+            console.log(retVal.x, retVal.y);
+        }
+
+        return retVal;
+    };
+
+    Node.prototype.getName = function() {
+        let name = this.getName_old();
+
+        if(this.cell.gate && this.cell.gate.name !== "?") {
+            name = this.cell.gate.name;
+            name += this.isPmos ? "+" : "";
+            name += this.isNmos ? "-" : "";
         } else {
-            outArr[outArr.length - 1][1].button = event.button;
+            name = UI.diagram.graph.getIndexByNode(this);
+            name += this.isPmos ? "+" : "";
+            name += this.isNmos ? "-" : "";
         }
-    });
-    let str = JSON.stringify(outArr);
-    console.log(str.replace(/^\[(\[.*\])\]$/u, "$1").replaceAll("}],", "}],\n") + ",");
-}
 
+        return name;
+    };
 
-let oldOnload = window.onload;
-window.onload = function() {
-    'use strict';
+    window.userInput = [];
+    window.recordMode = false;
 
-    oldOnload();
+    window.recordEvent = function(event) {
+        if(window.recordMode) {
+            if(event.type === "mousemove") {
+                if(!UI.diagramController.dragging) {
+                    return;
+                }
+                else if(window.userInput[window.userInput.length - 1].type === event.type) {
+                    window.userInput.pop();
+                }
+            }
+            window.userInput.push(event);
+        }
+    };
+
+    window.getRecording = function() {
+        let outArr = [];
+        window.userInput.forEach(function(event) {
+            outArr.push([
+                event.type, {
+                    clientX: Math.ceil((event.clientX - UI.diagramView.canvas.offsetLeft - UI.diagramView.cellWidth)  / UI.diagramView.cellWidth),
+                    clientY: Math.ceil((event.clientY - UI.diagramView.canvas.offsetTop  - UI.diagramView.cellHeight) / UI.diagramView.cellHeight),
+                },
+            ]);
+            if(outArr[outArr.length - 1][0].includes("move")) {
+                outArr[outArr.length - 1][1].buttons = event.buttons;
+            } else {
+                outArr[outArr.length - 1][1].button = event.button;
+            }
+        });
+        let str = JSON.stringify(outArr);
+        console.log(str.replace(/^\[(\[.*\])\]$/u, "$1").replaceAll("}],", "}],\n") + ",");
+    };
 
     // Record these events.
-    document.getElementById("canvas-container").addEventListener("mousedown", recordEvent);
-    document.getElementById("canvas-container").addEventListener("mouseup", recordEvent);
-    window.addEventListener("touchmove", recordEvent);
-    window.addEventListener("mousemove", recordEvent);
-    window.addEventListener("keydown", recordEvent);
-    window.addEventListener("keyup", recordEvent);
-};
+    document.getElementById("canvas-wrapper").addEventListener("mousedown", window.recordEvent);
+    document.getElementById("canvas-wrapper").addEventListener("mouseup", window.recordEvent);
+    window.addEventListener("touchmove", window.recordEvent);
+    window.addEventListener("mousemove", window.recordEvent);
+    window.addEventListener("keydown", window.recordEvent);
+    window.addEventListener("keyup", window.recordEvent);
 
-Diagram.prototype.mapString = function(row) {
-  let str = "";
-  
-  for(let jj = 0; jj < this.nodeNodeMap[row].length; jj++) {
-    str += this.nodeNodeMap[row][jj].label;
-    str += " ";
-  }
-  
-  return str;
+    Diagram.prototype.mapString = function(row) {
+        let str = "";
+
+        for(let jj = 0; jj < this.nodeNodeMap[row].length; jj++) {
+            str += this.nodeNodeMap[row][jj].label;
+            str += " ";
+        }
+        return str;
+    };
 }

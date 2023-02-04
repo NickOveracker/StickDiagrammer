@@ -37,6 +37,55 @@ html {
     -ms-user-select: none; /* Internet Explorer/Edge */
 }
 
+.pullup-pulldown-warning {
+    text-align: center;
+    background: red;
+    visibility: hidden;
+    font-size: small;
+    height: 0;
+}
+
+.pullup-pulldown-warning.active {
+    visibility: visible;
+    height: auto;
+}
+
+.glowing {
+    animation: glowing-animation 0.60s infinite alternate;
+}
+
+.rounded {
+    border-radius: 100%;
+}
+
+@keyframes glowing-animation {
+    from {
+        box-shadow: 0 0 10px -10px #d4af37;
+    }
+    to {
+        background-color: #d4af37;
+        box-shadow: 0 0 10px 10px #d4af37;
+    }
+}
+
+.tutorial-overlay {
+    position: absolute;
+    color: black;
+    background-color: white;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+    width: auto;
+    max-width: 300px;
+    animation: bouncy 0.8s infinite alternate;
+    animation-delay: 0.2s;
+}
+
+@keyframes bouncy {
+    from { transform: scale(1) }
+    to { transform: scale(0.9) }
+}
+
 .menu-long-text li::before {
     position: relative;
     left: -10px;
@@ -83,7 +132,6 @@ html {
 
 }
 
-
 #palette-setting, #transparency-setting {
     background-color: black;
     padding-left: 10px;
@@ -92,8 +140,6 @@ html {
     padding-bottom: 5px;
     border-radius: 30px;
 }
-
-
 
 .column-flex {
     display: flex;
@@ -220,7 +266,7 @@ li.clickable {
     margin: auto;
     position: relative;
     align-items: center;
-    width: 400px;
+    width: auto;
 }
 
 .menu-content li{
@@ -354,12 +400,12 @@ span.small
     display: none;
 }
 
-.no-controls .sample {
+.no-controls .canvas-group {
     width: 100%;
     margin-left: 0;
 }
 
-.no-controls .sample-content {
+.no-controls .canvas-wrapper {
     width: 100%;
     height: min(85vh,100vw);
     margin-left: auto;
@@ -672,15 +718,38 @@ body.light {
     }
 
     /*-------------Canvas---------------*/
-    .sample{
+    .canvas-group {
         margin-top: 15vh;
         margin-left: 15vh;
     }
 
-    .sample-content{
+    .canvas-wrapper {
         width: min(80vh, 80vw);
         height: min(80vh, 80vw);
     }
+
+    .active-layers {
+        width: 11vh;
+        height: 20vh;
+        margin-left: -13vh;
+        margin-top: 30vh;
+        position: absolute;
+    }
+
+    #CONTACT {
+        height: 20vh;
+        width: 5vh;
+        margin-left: 3vh;
+        position: absolute;
+    }
+
+    .cmos-layer {
+        height: 5vh;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
     /*-------------Canvas-END---------------*/
 
     .evaluate-btn{
@@ -825,13 +894,13 @@ body.light {
         flex-direction: column;
     }
 
-    .sample{
+    .canvas-group {
         width: 100%;
         margin-left: 0;
         margin-right: 0;
     }
 
-    .sample-content{
+    .canvas-wrapper{
         width:100%;
         height: min(62vh, 100vw);
         margin-left: 0;
