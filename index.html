@@ -7,6 +7,9 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Stixu Stick Diagrammer</title>
     <script src="https://kit.fontawesome.com/039fa42282.js" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="https://nturley.github.io/netlistsvg/elk.bundled.js"></script>
+    <script type="text/javascript" src="https://nturley.github.io/netlistsvg/built/netlistsvg.bundle.js"></script>
+    <script src="tutorial.js"></script>
     <script src="script.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -76,12 +79,12 @@
 
                 <!-- colorBtn -->
                 <div class="colorChange" id="colorChange">
-                    <i class="fas fa-circle clickable"></i>
-                    <i class="fas fa-circle clickable"></i>
-                    <i class="fas fa-circle clickable"></i>
-                    <i class="fas fa-circle clickable"></i>
-                    <i class="fas fa-circle clickable"></i>
-                    <i class="fas fa-circle clickable"></i>
+                    <i class="fas fa-circle clickable" id="pdiff-swatch"></i>
+                    <i class="fas fa-circle clickable" id="ndiff-swatch"></i>
+                    <i class="fas fa-circle clickable" id="poly-swatch"></i>
+                    <i class="fas fa-circle clickable" id="metal1-swatch"></i>
+                    <i class="fas fa-circle clickable" id="metal2-swatch"></i>
+                    <i class="fas fa-circle clickable" id="contact-swatch"></i>
                 </div>
                 <!-- colorBtn END -->
 
@@ -160,6 +163,7 @@
 
         <div class="menu-content">
             <ul>
+                <li class="clickable" id="open-tutorials-btn">Tutorials</li>
                 <li class="clickable" id="open-instructions-btn">Instructions</li>
                 <li class="clickable" id="open-about-page-btn">About</li>
                 <li class="clickable"><a href="mailto:nick.overacker@okstate.edu">Bug Report</a></li>
@@ -193,6 +197,15 @@
     </section>
     <!-- Main-menu-end -->
 
+    <section class="menu scrollable closed" id="tutorials">
+        <i class="fas fa-times clickable" id="close-tutorials-btn"></i>
+        <div class="menu-content">
+            <ul>
+                <li class="clickable" id="tutorial-btn-0">The Basics</li>
+            </ul>
+        </div>
+    </section>
+
     <section class="menu scrollable closed column-flex" id="instructions">
         <i class="fas fa-times clickable" id="close-instructions-btn"></i>
 
@@ -215,9 +228,9 @@
                 <li>Point at a cell and type SHIFT + G to move the GND contact to that cell.</li>
                 <li>Point at a cell and type the name of that terminal (A, B, C, ...) to move the chosen contact to that cell.</li>
                 <li>Press Enter or click "Evaluate" to generate a truth table for the painted diagram.
-                    <ul><li>Outputs are found with lazy evaluation, so not all paths are computed.</li></ul>
+                    <ul><li>Not all paths are evaluated for overdriven (simultaneously high and low) outputs.</li></ul>
                 </li>
-                <li>See additional keyboard shortcuts in the Options menu.</li>
+                <!--<li>See additional keyboard shortcuts in the Options menu.</li>-->
             </ul>
         </section>
 
@@ -252,7 +265,7 @@
                 </li>
                 <li>Scroll down and tap "Evaluate" to generate a truth table for the painted diagram.</li>
                 <li>Tap any output value in the truth table to highlight the evaluated path to the output.
-                    <ul><li>Outputs are found with lazy evaluation, so not all paths are computed.</li></ul>
+                    <ul><li>Not all paths are evaluated for overdriven (simultaneously high and low) outputs.</li></ul>
                 </li>
             </ul>
         </section>
