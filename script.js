@@ -2532,10 +2532,10 @@
                     }
                 }.bind(tutStep);
 
-                setGlowing(document.getElementById("remove-column"), this.diagramGrid.width, false);
-                setGlowing(document.getElementById("remove-row"), this.diagramGrid.height, false);
-                setGlowing(document.getElementById("add-column"), this.diagramGrid.width, true);
-                setGlowing(document.getElementById("add-row"), this.diagramGrid.height, true);
+                setGlowing(document.getElementById("remove-column"), this.UI.diagramGrid.width, false);
+                setGlowing(document.getElementById("remove-row"), this.UI.diagramGrid.height, false);
+                setGlowing(document.getElementById("add-column"), this.UI.diagramGrid.width, true);
+                setGlowing(document.getElementById("add-row"), this.UI.diagramGrid.height, true);
             };
 
             tutStep.target = document.getElementsByClassName("offscreen")[0];
