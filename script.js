@@ -11,6 +11,7 @@
  *      - This following tags may be disabled, but only on a line-by-line basis.
  *      - "jshint bitwise" (bitwise operators)
  *      - "jshint -W093" (returning and assigning in one step)
+ *      - "jshint complexity" (cyclomatic complexity, function-by-function basis)
  *    - All builds must pass testbench
  *      - The testbench may need to be modified for some breaking changes (e.g., new layers)
  * 
@@ -907,6 +908,10 @@
             this.darkModeGridColor  = '#cccccc';
             this.lightModeGridColor = '#999999';
         }
+
+        getCellHoverColor() {
+            return this.darkMode ? "rgba(255, 255, 255, 0.3)" : "rgba(0, 0, 0, 0.3)";
+        }
         
         // Draw a faint grid on the canvas.
         // Add an extra 2 units to the width and height for a border.
@@ -1057,7 +1062,7 @@
 
         // Check the layers of the grid, and draw cells as needed.
         drawCell(ii, jj, layer) {
-            let currentCell, baseColor, hoverCell,
+            let currentCell, hoverCell,
                 isCurrentRow, isCurrentCol, isCurrentCell;
 
             currentCell   = this.diagram.controller.currentCell;
@@ -1070,6 +1075,7 @@
             } else {
                 hoverCell = isCurrentCell;
             }
+
             // Only hover on top layer.
             hoverCell = hoverCell && layer === LayeredGrid.layers.length - 1;
             // Do not hover when erasing.
@@ -1081,18 +1087,23 @@
             } else if(hoverCell) {
                 // Draw a faint highlight on the cell at the cursor location,
                 // or on the entire row and column when dragging.
-                this.ctx.fillStyle = this.darkMode ? "rgba(255, 255, 255, 0.3)" : "rgba(0, 0, 0, 0.3)";
+                this.ctx.fillStyle = this.getCellHoverColor();
                 this.ctx.fillRect((ii+1) * this.cellWidth, (jj+1) * this.cellHeight - 1, this.cellWidth + 1, this.cellHeight + 2);
             }
-            if(this.highlightNets && this.netHighlightGrid[ii] && this.netHighlightGrid[ii][jj]) {
-                baseColor = this.getColor(LayeredGrid.DELETE, false).slice(0, -4);
-                this.ctx.fillStyle = baseColor + 
-                                     Math.round(
-                                        Math.sin(
-                                            (Math.floor(Date.now()/100) % 10) * Math.PI / 10
-                                        ) * 10
-                                     ) / 10 + ")";
-                this.ctx.fillRect((ii+1) * this.cellWidth, (jj+1) * this.cellHeight - 1, this.cellWidth + 1, this.cellHeight + 2);
+
+            this.setCellHighlight(this.ctx, ii, jj);
+        }
+            
+        setCellHighlight(ctx, x, y) {
+            if(this.highlightNets && this.netHighlightGrid[x] && this.netHighlightGrid[x][y]) {
+                let baseColor = this.getColor(LayeredGrid.DELETE, false).slice(0, -4);
+                ctx.fillStyle = baseColor + 
+                                Math.round(
+                                    Math.sin(
+                                        (Math.floor(Date.now()/100) % 10) * Math.PI / 10
+                                    ) * 10
+                                ) / 10 + ")";
+                ctx.fillRect((x+1) * this.cellWidth, (y+1) * this.cellHeight - 1, this.cellWidth + 1, this.cellHeight + 2);
             }
         }
 
@@ -1100,7 +1111,7 @@
         // so they can be highlighted in the canvas.
         //
         // path: The row of the relevant nodeNodeMap corresponding to the chosen output node.
-        setHighlight(path) {
+        setPathHighlight(path) {
             this.netHighlightGrid.length = 0;
 
             for(let ii = 0; ii < this.diagram.layeredGrid.width; ii++) {
@@ -2636,13 +2647,14 @@
                         highLayer: this.layers - 1,
                     };
                     this.map(bounds, function(x,y,layer) {
-                        let paintCell = y === this.diagram.vddCell.y && layer === LayeredGrid.METAL1;
-                        paintCell = paintCell || y === this.diagram.gndCell.y && layer === LayeredGrid.METAL1;
-                        paintCell = paintCell || y === this.diagram.vddCell.y + 2 && layer === LayeredGrid.PDIFF;
-                        paintCell = paintCell || y === this.diagram.gndCell.y - 2 && layer === LayeredGrid.NDIFF;
-                        paintCell = paintCell || x === this.diagram.outputs[0].x && y >= this.diagram.vddCell.y + 2 && y <= this.diagram.gndCell.y - 2 && layer === LayeredGrid.METAL1;
-                        paintCell = paintCell || x === this.diagram.vddCell.x + 2 && y >= this.diagram.vddCell.y && y <= this.diagram.vddCell.y + 2 && layer === LayeredGrid.METAL1;
-                        paintCell = paintCell || x === this.diagram.gndCell.x + 2 && y <= this.diagram.gndCell.y && y >= this.diagram.gndCell.y - 2 && layer === LayeredGrid.METAL1;
+                        /* jshint maxcomplexity: 21 */ 
+                        /** VDD rail  */ let paintCell = y === this.diagram.vddCell.y && layer === LayeredGrid.METAL1;
+                        /** GND rail  */ paintCell = paintCell || y === this.diagram.gndCell.y && layer === LayeredGrid.METAL1;
+                        /** PDIFF     */ paintCell = paintCell || y === this.diagram.vddCell.y + 2 && layer === LayeredGrid.PDIFF;
+                        /** NDIFF     */ paintCell = paintCell || y === this.diagram.gndCell.y - 2 && layer === LayeredGrid.NDIFF;
+                        /** Output    */ paintCell = paintCell || x === this.diagram.outputs[0].x && y >= this.diagram.vddCell.y + 2 && y <= this.diagram.gndCell.y - 2 && layer === LayeredGrid.METAL1;
+                        /** VDD-PDIFF */ paintCell = paintCell || x === this.diagram.vddCell.x + 2 && y >= this.diagram.vddCell.y && y <= this.diagram.vddCell.y + 2 && layer === LayeredGrid.METAL1;
+                        /** VDD-NDIFF */ paintCell = paintCell || x === this.diagram.gndCell.x + 2 && y <= this.diagram.gndCell.y && y >= this.diagram.gndCell.y - 2 && layer === LayeredGrid.METAL1;
                         
                         if(paintCell) {
                             this.set(x,y,layer);
@@ -2726,14 +2738,15 @@
                         highLayer: this.layers - 1,
                     };
                     this.map(bounds, function(x,y,layer) {
-                        let paintCell = y === this.diagram.vddCell.y && layer === LayeredGrid.METAL1;
-                        paintCell = paintCell || y === this.diagram.gndCell.y && layer === LayeredGrid.METAL1;
-                        paintCell = paintCell || y === this.diagram.vddCell.y + 2 && layer === LayeredGrid.PDIFF;
-                        paintCell = paintCell || y === this.diagram.gndCell.y - 2 && layer === LayeredGrid.NDIFF;
-                        paintCell = paintCell || x === this.diagram.outputs[0].x && y >= this.diagram.vddCell.y + 2 && y <= this.diagram.gndCell.y - 2 && layer === LayeredGrid.METAL1;
-                        paintCell = paintCell || x === this.diagram.vddCell.x + 2 && y >= this.diagram.vddCell.y && y <= this.diagram.vddCell.y + 2 && layer === LayeredGrid.METAL1;
-                        paintCell = paintCell || x === this.diagram.gndCell.x + 2 && y <= this.diagram.gndCell.y && y >= this.diagram.gndCell.y - 2 && layer === LayeredGrid.METAL1;
-                        paintCell = paintCell || layer === LayeredGrid.CONTACT && this.get(x,y,LayeredGrid.METAL1).isSet && (this.get(x,y,LayeredGrid.PDIFF).isSet || this.get(x,y,LayeredGrid.NDIFF).isSet);
+                        /* jshint maxcomplexity: 25 */ 
+                        /** VDD rail  */ let paintCell = y === this.diagram.vddCell.y && layer === LayeredGrid.METAL1;
+                        /** GND rail  */ paintCell = paintCell || y === this.diagram.gndCell.y && layer === LayeredGrid.METAL1;
+                        /** PDIFF     */ paintCell = paintCell || y === this.diagram.vddCell.y + 2 && layer === LayeredGrid.PDIFF;
+                        /** NDIFF     */ paintCell = paintCell || y === this.diagram.gndCell.y - 2 && layer === LayeredGrid.NDIFF;
+                        /** Output    */ paintCell = paintCell || x === this.diagram.outputs[0].x && y >= this.diagram.vddCell.y + 2 && y <= this.diagram.gndCell.y - 2 && layer === LayeredGrid.METAL1;
+                        /** VDD-PDIFF */ paintCell = paintCell || x === this.diagram.vddCell.x + 2 && y >= this.diagram.vddCell.y && y <= this.diagram.vddCell.y + 2 && layer === LayeredGrid.METAL1;
+                        /** VDD-NDIFF */ paintCell = paintCell || x === this.diagram.gndCell.x + 2 && y <= this.diagram.gndCell.y && y >= this.diagram.gndCell.y - 2 && layer === LayeredGrid.METAL1;
+                        /** Contacts  */ paintCell = paintCell || layer === LayeredGrid.CONTACT && this.get(x,y,LayeredGrid.METAL1).isSet && (this.get(x,y,LayeredGrid.PDIFF).isSet || this.get(x,y,LayeredGrid.NDIFF).isSet);
                         
                         if(paintCell) {
                             this.set(x,y,layer);
@@ -4121,7 +4134,7 @@
                                 outputNum = colIndex - this.diagram.inputs.length;
                                 outputNodeIndex = this.diagram.graph.getIndexByNode(this.diagram.outputNodes[outputNum]);
                                 path = this.diagram.analyses[rowIndex - 1][outputNodeIndex];
-                                this.diagramView.setHighlight(path);
+                                this.diagramView.setPathHighlight(path);
                                 window.scrollTo({behavior: "smooth", top: Math.ceil(document.body.getBoundingClientRect().top), left: 0,});
                             }.bind(this));
                         }.bind(this))(rowIndex, colIndex);
