@@ -2403,6 +2403,7 @@
             }
             else if(window.tutorials) {
                 this.tutorial = window.tutorials[0].get(this, LayeredGrid);
+                this.tutorial.active = true;
             }
         }
 
