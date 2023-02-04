@@ -2401,10 +2401,6 @@
                 // Must initialize the canvas before the testbench runs.
                 this.diagramView.refreshCanvas();
             }
-            else if(window.tutorials) {
-                this.tutorial = window.tutorials[0].get(this, LayeredGrid);
-                //this.tutorial.start();
-            }
         }
 
         keydownHandler(event) {
@@ -3082,11 +3078,19 @@
                 }
             };
 
+            // TODO: We can do better than this mess.
             document.getElementById("main-menu-btn").onclick = function() {
                 let mainMenu = document.getElementById("main-menu");
                 if(mainMenu.classList.contains("closed")) {
                     mainMenu.classList.remove("closed");
                     document.getElementById("main-container").style.display = "none";
+                }
+            };
+
+            document.getElementById("open-tutorials-btn").onclick = function() {
+                let tutorials = document.getElementById("tutorials");
+                if(tutorials.classList.contains("closed")) {
+                    tutorials.classList.remove("closed");
                 }
             };
 
@@ -3113,6 +3117,7 @@
 
             document.getElementById("close-term-menu-btn").onclick    = this.closeTermMenu;
             document.getElementById("close-main-menu-btn").onclick    = this.closeMainMenu;
+            document.getElementById("close-tutorials-btn").onclick    = this.closeTutorials;
             document.getElementById("close-instructions-btn").onclick = this.closeInstructions;
             document.getElementById("close-about-page-btn").onclick   = this.closeAboutPage;
             document.getElementById("close-options-btn").onclick      = this.closeOptionsMenu;
@@ -3163,14 +3168,32 @@
                 this.toggleTransparency();
             }.bind(this);
 
+            document.getElementById('tutorial-btn-0').onclick = function() {
+                if(window.tutorials) {
+                    this.closeTutorials();
+                    this.closeMainMenu();
+                    this.tutorial = window.tutorials[0].get(this, LayeredGrid);
+                    this.tutorial.start();
+                }
+            }.bind(this);
+
             this.setUpLayerSelector();
         }
 
+        // TODO: We can do better than this mess below.
         closeMainMenu() {
             let mainMenu = document.getElementById("main-menu");
             if(!mainMenu.classList.contains("closed")) {
                 mainMenu.classList.add("closed");
                 document.getElementById("main-container").style.display = "block";
+                return true;
+            }
+        }
+
+        closeTutorials() {
+            let tutorials = document.getElementById("tutorials");
+            if(!tutorials.classList.contains("closed")) {
+                tutorials.classList.add("closed");
                 return true;
             }
         }
@@ -3208,7 +3231,7 @@
         }
 
         closeTopMenu() {
-            this.closeAboutPage() || this.closeOptionsMenu() || this.closeInstructions() || this.closeMainMenu() || this.closeTermMenu(); // jshint ignore:line
+            this.closeTutorials() || this.closeAboutPage() || this.closeOptionsMenu() || this.closeInstructions() || this.closeMainMenu() || this.closeTermMenu(); // jshint ignore:line
         }
 
         // Generate an output table.
