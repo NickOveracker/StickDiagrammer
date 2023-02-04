@@ -4141,7 +4141,9 @@
                 document.getElementById("pullup-pulldown-warning").classList.remove("active");
             }
 
-            window.scrollTo({behavior: "smooth", top: Math.ceil(tableElement.getBoundingClientRect().top + window.scrollY), left: 0,});
+            if(!suppressSetNets) {
+                window.scrollTo({behavior: "smooth", top: Math.ceil(tableElement.getBoundingClientRect().top + window.scrollY), left: 0,});
+            }
         }
 
         setDarkMode(setToDark) {
