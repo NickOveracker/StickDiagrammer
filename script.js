@@ -2372,7 +2372,7 @@
 
         display() {
             this.tutorialOverlay.classList.add("tutorial-overlay");
-            this.tutorialOverlay.innerHTML = this.instructions["ja_jp"];
+            this.tutorialOverlay.innerHTML = this.instructions["en_us"];
             document.body.appendChild(this.tutorialOverlay);
             this.reposition();
         }
