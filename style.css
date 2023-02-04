@@ -50,6 +50,42 @@ html {
     height: auto;
 }
 
+.glowing {
+    animation: glowing-animation 0.60s infinite alternate;
+}
+
+.rounded {
+    border-radius: 100%;
+}
+
+@keyframes glowing-animation {
+    from {
+        box-shadow: 0 0 10px -10px #d4af37;
+    }
+    to {
+        background-color: #d4af37;
+        box-shadow: 0 0 10px 10px #d4af37;
+    }
+}
+
+.tutorial-overlay {
+    position: absolute;
+    color: black;
+    background-color: white;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+    width: auto;
+    max-width: 300px;
+    animation: bouncy 0.8s infinite alternate;
+    animation-delay: 0.2s;
+}
+
+@keyframes bouncy {
+    from { transform: scale(1) }
+    to { transform: scale(0.9) }
+}
+
 .menu-long-text li::before {
     position: relative;
     left: -10px;
