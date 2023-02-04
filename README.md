@@ -10,7 +10,7 @@
 * For uses not permitted under the license, please contact: [nick.overacker@okstate.edu](mailto:nick.overacker@okstate.edu)
 
 ## Dogma of Development
-* Everything we do will be excellent.
+* [Everything we do will be excellent.](https://www.researchgate.net/profile/Mark-Rockley-2)
 * Above all else, above the following points, code in main must work.
 * Javascript errors or warnings must not be tolerated on the live page.
 * All functions must be in strict mode.
