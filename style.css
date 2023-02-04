@@ -77,6 +77,13 @@ html {
     box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
     width: auto;
     max-width: 300px;
+    animation: bouncy 0.8s infinite alternate;
+    animation-delay: 0.2s;
+}
+
+@keyframes bouncy {
+    from { transform: scale(1) }
+    to { transform: scale(0.9) }
 }
 
 .menu-long-text li::before {
