@@ -4129,6 +4129,7 @@
                                 outputNodeIndex = this.diagram.graph.getIndexByNode(this.diagram.outputNodes[outputNum]);
                                 path = this.diagram.analyses[rowIndex - 1][outputNodeIndex];
                                 this.diagramView.setHighlight(path);
+                                window.scrollTo({behavior: "smooth", top: Math.ceil(document.body.getBoundingClientRect().top), left: 0,});
                             }.bind(this));
                         }.bind(this))(rowIndex, colIndex);
                     }
