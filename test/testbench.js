@@ -1496,6 +1496,8 @@ function runTestbench(runTo) {
             UI.diagram.inputs[3].y  = 8;
             UI.diagram.outputs[0].x = 11;
             UI.diagram.outputs[0].y = 8;
+            UI.diagram.gndCell.x    = 0;
+            UI.diagram.gndCell.y    = 27;
         },
 
         ["mousedown", {button:  2, clientX: mapX(2),  clientY: mapY(15)}],
@@ -1533,7 +1535,7 @@ function runTestbench(runTo) {
         1,
         function() {
             UI.diagram.outputs[0].x = 13;
-            UI.diagram.outputs[0].y = 7;
+            UI.diagram.outputs[0].y = 6;
         },
 
         2,
@@ -1878,8 +1880,8 @@ function runTestbench(runTo) {
         ["mouseup",{"button":2,"clientX":mapX(20),"clientY":mapY(9)}],
         ["mousedown",{"button":2,"clientX":mapX(26),"clientY":mapY(9)}],
         ["mouseup",{"button":2,"clientX":mapX(26),"clientY":mapY(9)}],
-        ["mousedown",{"button":2,"clientX":mapX(14),"clientY":mapY(8)}],
-        ["mouseup",{"button":2,"clientX":mapX(14),"clientY":mapY(8)}],
+        ["mousedown",{"button":2,"clientX":mapX(14),"clientY":mapY(7)}],
+        ["mouseup",{"button":2,"clientX":mapX(14),"clientY":mapY(7)}],
         ["mousedown",{"button":2,"clientX":mapX(6),"clientY":mapY(9)}],
         ["mouseup",{"button":2,"clientX":mapX(6),"clientY":mapY(9)}],
         ["mousedown",{"button":0,"clientX":mapX(6),"clientY":mapY(9)}],
@@ -2646,7 +2648,7 @@ function runTestbench(runTo) {
     // Label with their test case names.
     results.forEach(function(result, index) {
         p = document.createElement("p");
-        p.innerHTML = `<span style="cursor:pointer" onclick="runTestbench(${index + 1}); window.scrollTo({top: 0, left: 0, behavior: 'smooth'})"><b>Test ${index}:</b> ${testCases[index]}</span>`;
+        p.innerHTML = `<span style="cursor:pointer" onclick="window.scrollTo({top: 0, left: 0, behavior: 'auto'}); setTimeout(runTestbench, 10, ${index + 1});"><b>Test ${index}:</b> ${testCases[index]}</span>`;
         p.innerHTML += `<b style='float:right;color:${result ? "green'>PASS" : "red'>FAIL"}</b>`;
         resultsDiv.appendChild(p);
     });

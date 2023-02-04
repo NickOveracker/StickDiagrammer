@@ -11,6 +11,7 @@
  *      - This following tags may be disabled, but only on a line-by-line basis.
  *      - "jshint bitwise" (bitwise operators)
  *      - "jshint -W093" (returning and assigning in one step)
+ *      - "jshint complexity" (cyclomatic complexity, function-by-function basis)
  *    - All builds must pass testbench
  *      - The testbench may need to be modified for some breaking changes (e.g., new layers)
  * 
@@ -46,7 +47,7 @@
     'use strict';
 
     class LayeredGrid {
-        // Cycle through the following cursor colors by pressing space: LayeredGrid.PDIFF, LayeredGrid.NDIFF, LayeredGrid.POLY, METAL1, LayeredGrid.CONTACT
+        // Cycle through the following cursor colors by pressing space: PDIFF, NDIFF, POLY, METAL1, CONTACT
         // Additional colors: DELETE at index (numLayers + 0)
         // Colorblind-friendly template found on [David Nichols's](https://personal.sron.nl/~pault/) website.
         // Specifically, [Paul Tol's](https://personal.sron.nl/~pault/) template was used.
@@ -229,7 +230,7 @@
         // Change the height of the grid
         resize(width, height) {
 
-            if(width <= 0 || height <= 0) {
+            if(width <= 10 || height <= 10) {
                 return;
             }
 
@@ -845,16 +846,16 @@
                 cell = this.getCellAtCursor();
             }
 
-            if (cell !== {} && !event.ctrlKey) {
+            if (Object.hasOwn(cell, "x") && !event.ctrlKey) {
                 // First, note the current coordinates.
                 oldX = terminal.x;
                 oldY = terminal.y;
                 // Then, set the new coordinates.
                 terminal.x = cell.x;
                 terminal.y = cell.y;
-                // Set the LayeredGrid.CONTACT layer at the new coordinates.
+                // Set the CONTACT layer at the new coordinates.
                 this.diagram.layeredGrid.set(cell.x, cell.y, LayeredGrid.CONTACT);
-                // Unset the LayeredGrid.CONTACT layer at the old coordinates.
+                // Unset the CONTACT layer at the old coordinates.
                 this.diagram.layeredGrid.clear(oldX, oldY, LayeredGrid.CONTACT);
             }
         }
@@ -906,6 +907,10 @@
             this.darkMode = false;
             this.darkModeGridColor  = '#cccccc';
             this.lightModeGridColor = '#999999';
+        }
+
+        getCellHoverColor() {
+            return this.darkMode ? "rgba(255, 255, 255, 0.3)" : "rgba(0, 0, 0, 0.3)";
         }
         
         // Draw a faint grid on the canvas.
@@ -1057,7 +1062,7 @@
 
         // Check the layers of the grid, and draw cells as needed.
         drawCell(ii, jj, layer) {
-            let currentCell, baseColor, hoverCell,
+            let currentCell, hoverCell,
                 isCurrentRow, isCurrentCol, isCurrentCell;
 
             currentCell   = this.diagram.controller.currentCell;
@@ -1070,6 +1075,7 @@
             } else {
                 hoverCell = isCurrentCell;
             }
+
             // Only hover on top layer.
             hoverCell = hoverCell && layer === LayeredGrid.layers.length - 1;
             // Do not hover when erasing.
@@ -1081,18 +1087,23 @@
             } else if(hoverCell) {
                 // Draw a faint highlight on the cell at the cursor location,
                 // or on the entire row and column when dragging.
-                this.ctx.fillStyle = this.darkMode ? "rgba(255, 255, 255, 0.5)" : "rgba(0, 0, 0, 0.5)";
+                this.ctx.fillStyle = this.getCellHoverColor();
                 this.ctx.fillRect((ii+1) * this.cellWidth, (jj+1) * this.cellHeight - 1, this.cellWidth + 1, this.cellHeight + 2);
             }
-            if(this.highlightNets && this.netHighlightGrid[ii] && this.netHighlightGrid[ii][jj]) {
-                baseColor = this.getColor(LayeredGrid.DELETE, false).slice(0, -4);
-                this.ctx.fillStyle = baseColor + 
-                                     Math.round(
-                                        Math.sin(
-                                            (Math.floor(Date.now()/100) % 10) * Math.PI / 10
-                                        ) * 10
-                                     ) / 10 + ")";
-                this.ctx.fillRect((ii+1) * this.cellWidth, (jj+1) * this.cellHeight - 1, this.cellWidth + 1, this.cellHeight + 2);
+
+            this.setCellHighlight(this.ctx, ii, jj);
+        }
+            
+        setCellHighlight(ctx, x, y) {
+            if(this.highlightNets && this.netHighlightGrid[x] && this.netHighlightGrid[x][y]) {
+                let baseColor = this.getColor(LayeredGrid.DELETE, false).slice(0, -4);
+                ctx.fillStyle = baseColor + 
+                                Math.round(
+                                    Math.sin(
+                                        (Math.floor(Date.now()/100) % 10) * Math.PI / 10
+                                    ) * 10
+                                ) / 10 + ")";
+                ctx.fillRect((x+1) * this.cellWidth, (y+1) * this.cellHeight - 1, this.cellWidth + 1, this.cellHeight + 2);
             }
         }
 
@@ -1100,7 +1111,7 @@
         // so they can be highlighted in the canvas.
         //
         // path: The row of the relevant nodeNodeMap corresponding to the chosen output node.
-        setHighlight(path) {
+        setPathHighlight(path) {
             this.netHighlightGrid.length = 0;
 
             for(let ii = 0; ii < this.diagram.layeredGrid.width; ii++) {
@@ -1191,8 +1202,6 @@
 
             document.getElementById("num-rows").innerHTML = this.diagram.layeredGrid.height;
             document.getElementById("num-cols").innerHTML = this.diagram.layeredGrid.width;
-
-            window.requestAnimationFrame(this.refreshCanvas.bind(this));
         }
     }
 
@@ -1957,9 +1966,9 @@
             }.bind(this));
         }
 
-        // Push all terminal nets to the this.netlist.
+        // Push all terminal nets to the netlist.
         resetNetlist() {
-            // Clear the this.netlist.
+            // Clear the netlist.
             this.netlist.length = 0;
 
             // Add all terminal nets.
@@ -1977,6 +1986,7 @@
         // Set the nets.
         setNets() {
             this.clearCircuit();
+            this.resetNetlist();
 
             this.inputNets.forEach(function (net) { net.clear(); });
             this.outputNets.forEach(function (net) { net.clear(); });
@@ -2004,8 +2014,6 @@
                 this.setRecursively(this.layeredGrid.get(output.x, output.y, LayeredGrid.CONTACT), this.outputNets[index]);
             }.bind(this));
 
-            this.resetNetlist();
-
             // Add input nodes to the graph.
             this.inputNodes.length = 0;
             this.inputs.forEach(function(input, index) {
@@ -2020,6 +2028,12 @@
                 this.outputNets[index].addNode(this.outputNodes[index]);
             }.bind(this));
 
+            this.processTransistors();
+            this.linkIdenticalNets();
+            this.checkPolarity();
+        } // end function setNets
+
+        processTransistors() {
             // Each nmos and pmos represents a relation between term1 and term2.
             // If term1 is not in any of the nets,
             // then create a new net and add term1 to it.
@@ -2118,10 +2132,7 @@
                     transistor.addEdge(node);
                 }
             }.bind(this));
-
-            this.linkIdenticalNets();
-            this.checkPolarity();
-        } // end function setNets
+        }
 
         // Add a node to a net that does not yet have any nodes.
         assignEmptyNode(net) {
@@ -2219,57 +2230,66 @@
             }
         }
 
-        // If the cell is NDIFF or PDIFF intersected by LayeredGrid.POLY, create a transistor.
+        // If the cell is NDIFF or PDIFF intersected by POLY, create a transistor.
         // Exception for LayeredGrid.CONTACT.
         // Returns true if the cell is a transistor.
         // Side effect: Adds a transistor (if found) to this.nmos or this.pmos.
-        checkIfTransistor(cell, layer, transistorArray) {
-            // If the layer is LayeredGrid.NDIFF or PDIFF and there is also a LayeredGrid.POLY at the same location,
+        checkIfTransistor(cell) {
+            // If the layer is NDIFF or PDIFF and there is also a POLY at the same location,
             // add the cell to transistors.
             // (Except when there is also a contact)
-            if (cell.layer === layer && cell.isSet) {
-                if (this.layeredGrid.get(cell.x, cell.y, LayeredGrid.POLY).isSet && !this.layeredGrid.get(cell.x, cell.y, LayeredGrid.CONTACT).isSet) {
-                    // Set the gate to the poly cell.
-                    cell.gate = this.layeredGrid.get(cell.x, cell.y, LayeredGrid.POLY);
 
-                    // Check adjacent cells for LayeredGrid.NDIFF.
-                    // Set term1 to the first one found.
-                    // Set term2 to the second one found.
-                    cell.term1 = undefined;
-                    cell.term2 = undefined;
+            let handleCell = function(layer, transistorArray) {
+                if (cell.layer === layer && cell.isSet) {
+                    if (this.layeredGrid.get(cell.x, cell.y, LayeredGrid.POLY).isSet && !this.layeredGrid.get(cell.x, cell.y, LayeredGrid.CONTACT).isSet) {
+                        // Set the gate to the poly cell.
+                        cell.gate = this.layeredGrid.get(cell.x, cell.y, LayeredGrid.POLY);
 
-                    // Check the cells above and below.
-                    this.setTerminals(cell, cell.x, cell.y - 1, layer);
-                    this.setTerminals(cell, cell.x, cell.y + 1, layer);
-
-                    // Check the cells to the left and right.
-                    this.setTerminals(cell, cell.x - 1, cell.y, layer);
-                    this.setTerminals(cell, cell.x + 1, cell.y, layer);
-
-                    // If no term2 is set, then this is not a full transistor.
-                    // Undo.
-                    if(cell.term2 === undefined) {
+                        // Check adjacent cells for NDIFF.
+                        // Set term1 to the first one found.
+                        // Set term2 to the second one found.
                         cell.term1 = undefined;
-                        cell.gate = undefined;
-                    } else {
-                        transistorArray.add(cell);
-                        this.graph.addNode(
-                            cell,
-                            false,
-                            this.layeredGrid.get(cell.x, cell.y, LayeredGrid.PDIFF),
-                            this.layeredGrid.get(cell.x, cell.y, LayeredGrid.NDIFF)
-                        );
-                        return true;
+                        cell.term2 = undefined;
+
+                        // Check the cells above and below.
+                        this.setTerminals(cell, cell.x, cell.y - 1, layer);
+                        this.setTerminals(cell, cell.x, cell.y + 1, layer);
+
+                        // Check the cells to the left and right.
+                        this.setTerminals(cell, cell.x - 1, cell.y, layer);
+                        this.setTerminals(cell, cell.x + 1, cell.y, layer);
+
+                        // If no term2 is set, then this is not a full transistor.
+                        // Undo.
+                        if(cell.term2 === undefined) {
+                            cell.term1 = undefined;
+                            cell.gate = undefined;
+                        } else {
+                            transistorArray.add(cell);
+                            this.graph.addNode(
+                                cell,
+                                false,
+                                this.layeredGrid.get(cell.x, cell.y, LayeredGrid.PDIFF),
+                                this.layeredGrid.get(cell.x, cell.y, LayeredGrid.NDIFF)
+                            );
+                            return true;
+                        }
                     }
                 }
-            }
+                return false;
+            }.bind(this);
 
-            return false;
+            return handleCell(LayeredGrid.PDIFF, this.pmos) || handleCell(LayeredGrid.NDIFF, this.nmos);
         }
 
         // For each layer of the cell in the net, recurse with all adjacent cells in the layer.
         // Generic function for the above code.
         setAdjacent(deltaX, deltaY, net, cell) {
+            // Don't connect contacts to adjacent contacts.
+            if(cell.layer === LayeredGrid.CONTACT) {
+                return;
+            }
+
             if (net.containsCell(this.layeredGrid.get(cell.x, cell.y, cell.layer)) && this.layeredGrid.get(cell.x + deltaX, cell.y + deltaY, cell.layer).isSet) {
                 if (net.containsCell(this.layeredGrid.get(cell.x + deltaX, cell.y + deltaY, cell.layer)) === false) {
                     this.setRecursively(this.layeredGrid.get(cell.x + deltaX, cell.y + deltaY, cell.layer), net);
@@ -2295,6 +2315,7 @@
         }
 
         setRecursively(cell, net) {
+            let gateNet;
             net.addNode(this.graph.getNode(cell));
 
             // Return if this cell is in this.pmos or this.nmos already.
@@ -2303,8 +2324,25 @@
             }
 
             // Check the cell for a transistor.
-            if (this.checkIfTransistor(cell, LayeredGrid.NDIFF, this.nmos)) { return; }
-            if (this.checkIfTransistor(cell, LayeredGrid.PDIFF, this.pmos)) { return; }
+            // If this is in a diffusion layer, do not propogate past a transistor.
+            if (this.checkIfTransistor(cell)) {
+                gateNet = this.getNet(this.layeredGrid.get(cell.x,cell.y,LayeredGrid.POLY)); 
+
+                if(gateNet === null) {
+                    gateNet = new Net("gate", false);
+                }
+
+                this.setRecursively(this.layeredGrid.get(cell.x, cell.y, LayeredGrid.POLY), gateNet);
+                this.netlist.push(gateNet);
+
+                return;
+            }
+
+            // If this is in the poly layer, we don't need to stop at a transistor.
+            if (cell.layer === LayeredGrid.POLY) {
+                this.checkIfTransistor(this.layeredGrid.get(cell.x, cell.y, LayeredGrid.NDIFF));
+                this.checkIfTransistor(this.layeredGrid.get(cell.x, cell.y, LayeredGrid.PDIFF));
+            }
 
             // Add the cell to the net.
             net.addCell(cell, this.layeredGrid.get(cell.x, cell.y, LayeredGrid.CONTACT).isSet);
@@ -2357,9 +2395,16 @@
         
             // Set to dark mode if it is night time
             this.setDarkMode(new Date().getHours() > 19 || new Date().getHours() < 7);
-            
             this.populateTermSelect();
-            this.diagramView.refreshCanvas();
+
+            if(window.runTestbench) {
+                // Must initialize the canvas before the testbench runs.
+                this.diagramView.refreshCanvas();
+            }
+            else if(window.tutorials) {
+                this.tutorial = window.tutorials[0].get(this, LayeredGrid);
+                //this.tutorial.start();
+            }
         }
 
         keydownHandler(event) {
@@ -2665,6 +2710,7 @@
 
         cellClickHandler(event) {
             let controller = this.diagramController;
+            let changed = true;
 
             if(controller.startX === -1) {
                 return;
@@ -2688,7 +2734,12 @@
                 // Otherwise, change the layer.
                 if (!(controller.clearIfPainted(coords.x, coords.y) || controller.eraseMode)) {
                     controller.changeLayer();
+                    changed = false;
                 }
+            }
+
+            if(changed) {
+                document.getElementById("truth-table").innerHTML = "";
             }
         }
 
@@ -2703,10 +2754,16 @@
             }
          
             if (this.diagramController.isPrimaryInput(event) || event.button === 2) {
+                if(this.diagramController.isPrimaryInput(event) && this.diagramController.placeTermMode) {
+                    this.diagramController.placeTerminal(event, this.diagramController.selectedTerminal);
+                }
+
                 if (this.diagramController.dragging) {
                     this.endDrag(event);
+                    this.diagramView.highlightNets = false;
                 } else if (this.diagramController.pixelIsInBounds()) {
                     this.cellClickHandler(event);
+                    this.diagramView.highlightNets = false;
                 } else if(event.button === 2) {
                     this.diagramController.changeLayer();
                 }
@@ -2716,6 +2773,33 @@
 
             if(event.type.includes("touch")) {
                 this.diagramController.currentX = this.diagramController.currentY = -1;
+            }
+
+        }
+
+        // Show a preview line when the user is dragging the mouse.
+        mousemoveHandler(event) {
+            // Save the current X and Y coordinates.
+            this.diagramController.getCoordsFromEvent(event);
+
+            if(this.diagramController.pixelIsInBounds()) {
+                event.preventDefault();
+            }
+
+            if(event.type.includes("mouse")) {
+                this.diagramView.trailCursor = true;
+            }
+
+            // If the mouse is pressed and the mouse is between cells 1 and gridsize - 1,
+            // TODO: Move isPrimaryInput to UI.
+            if (this.diagramController.isPrimaryInput(event) || event.buttons === 2) {
+                // Ignore if not inside the canvas
+                // Do not enter drag event if in terminal placement mode.
+                // TODO: Allow manipulation outside the canvas
+                if (this.diagramController.pixelIsInBounds()) {
+                    // TODO: Refactor
+                    this.drag(event);
+                }
             }
         }
 
@@ -2761,13 +2845,23 @@
 
             if (!controller.dragging) {
                 // don't start dragging unless the mouse has moved outside the cell
-                if(controller.currentCell.x === controller.startX && controller.currentCell.y === controller.startY) {
+                if(controller.currentX === controller.startX && controller.currentY === controller.startY) {
                     return;
                 }
                 controller.dragging = true;
+
+                if(this.diagramController.placeTermMode) {
+                    this.diagramController.placeTerminal(event, this.diagramController.selectedTerminal);
+                    return;
+                }
+
                 controller.saveCurrentState();
             } else {
                 // Continuously refresh to update the preview line.
+                if(this.diagramController.placeTermMode) {
+                    this.diagramController.placeTerminal(event, this.diagramController.selectedTerminal);
+                    return;
+                }
                 controller.undo();
                 controller.saveCurrentState();
             }
@@ -2821,7 +2915,9 @@
 
             // For primary (i.e. left) mouse button:
             // If the mouse moved more horizontally than vertically, draw a horizontal line.
-            if (!this.isEraseEvent(event)) {
+            if(this.diagramController.placeTermMode) {
+                this.clearPlaceTerminalMode();
+            } else if (!this.isEraseEvent(event)) {
                 this.diagramController.draw(bounds);
             } else {
                 // For secondary (i.e. right) mouse button:
@@ -2829,36 +2925,6 @@
                 this.diagramGrid.map(bounds, function (x, y, layer) {
                     this.diagramGrid.clear(x, y, layer);
                 }.bind(this));
-            }
-        }
-
-        // Show a preview line when the user is dragging the mouse.
-        mousemoveHandler(event) {
-            // Save the current X and Y coordinates.
-            this.diagramController.getCoordsFromEvent(event);
-
-            if(this.diagramController.pixelIsInBounds()) {
-                event.preventDefault();
-            }
-
-            if(event.type.includes("mouse")) {
-                this.diagramView.trailCursor = true;
-            }
-
-            // If the mouse is pressed and the mouse is between cells 1 and gridsize - 1,
-            // TODO: Move isPrimaryInput to UI.
-            if (this.diagramController.isPrimaryInput(event) || event.buttons === 2) {
-                // Ignore if not inside the canvas
-                // Do not enter drag event if in terminal placement mode.
-                // TODO: Allow manipulation outside the canvas
-                if (this.diagramController.pixelIsInBounds()) {
-                    // TODO: Refactor
-                    if(this.diagramController.placeTermMode) {
-                        this.diagramController.placeTerminal(event, this.diagramController.selectedTerminal);
-                    } else {
-                        this.drag(event);
-                    }
-                }
             }
         }
 
@@ -3239,18 +3305,16 @@
                         tCell.className = "input";
                     } else {
                         tCell.className = "output";
-                        tCell.onmouseover = (function (rowIndex, colIndex) {
+                        tCell.onclick   = (function (rowIndex, colIndex) {
                             return (function() {
                                 let path, outputNum, outputNodeIndex;
                                 outputNum = colIndex - this.diagram.inputs.length;
                                 outputNodeIndex = this.diagram.graph.getIndexByNode(this.diagram.outputNodes[outputNum]);
                                 path = this.diagram.analyses[rowIndex - 1][outputNodeIndex];
-                                this.diagramView.setHighlight(path);
+                                this.diagramView.setPathHighlight(path);
+                                window.scrollTo({behavior: "smooth", top: Math.ceil(document.body.getBoundingClientRect().top), left: 0,});
                             }.bind(this));
                         }.bind(this))(rowIndex, colIndex);
-                        tCell.onmouseleave = function () {
-                            this.diagramView.highlightNets = false;
-                        }.bind(this);
                     }
                 }.bind(this));
             }.bind(this));
@@ -3261,7 +3325,9 @@
                 document.getElementById("pullup-pulldown-warning").classList.remove("active");
             }
 
-            window.scrollTo({behavior: "smooth", top: Math.ceil(tableElement.getBoundingClientRect().top + window.scrollY), left: 0,});
+            if(!suppressSetNets) {
+                window.scrollTo({behavior: "smooth", top: Math.ceil(tableElement.getBoundingClientRect().top + window.scrollY), left: 0,});
+            }
         }
 
         setDarkMode(setToDark) {
@@ -3364,6 +3430,7 @@
                     termSelectItemLabel.classList.add("last");
                 }
                 termSelectItemLabel.classList.add("clickable");
+                termSelectItemLabel.id = "termselect-label-" + ii;
 
                 termSelectItemInput.type = "radio";
                 termSelectItemInput.name = "termselect";
@@ -3376,6 +3443,16 @@
                 termSelectList.appendChild(termSelectItemInput);
                 termSelectList.appendChild(termSelectItemLabel);
             }
+        }
+        
+        refreshScreen() {
+            this.diagramView.refreshCanvas();
+
+            if(this.tutorial && this.tutorial.active) {
+                this.tutorial.step();
+            }
+
+            window.requestAnimationFrame(this.refreshScreen.bind(this));
         }
     }
 
@@ -3400,7 +3477,7 @@
         diagram.layeredGrid.set(diagram.gndCell.x, diagram.gndCell.y, LayeredGrid.CONTACT);
 
         // 60 fps
-        window.requestAnimationFrame(diagram.view.refreshCanvas.bind(diagram.view));
+        window.requestAnimationFrame(UI.refreshScreen.bind(UI));
 
         if(window.runTestbench) {
             window.UI = UI;
