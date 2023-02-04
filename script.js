@@ -2219,52 +2219,56 @@
             }
         }
 
-        // If the cell is NDIFF or PDIFF intersected by LayeredGrid.POLY, create a transistor.
+        // If the cell is NDIFF or PDIFF intersected by POLY, create a transistor.
         // Exception for LayeredGrid.CONTACT.
         // Returns true if the cell is a transistor.
         // Side effect: Adds a transistor (if found) to this.nmos or this.pmos.
-        checkIfTransistor(cell, layer, transistorArray) {
-            // If the layer is LayeredGrid.NDIFF or PDIFF and there is also a LayeredGrid.POLY at the same location,
+        checkIfTransistor(cell) {
+            // If the layer is NDIFF or PDIFF and there is also a POLY at the same location,
             // add the cell to transistors.
             // (Except when there is also a contact)
-            if (cell.layer === layer && cell.isSet) {
-                if (this.layeredGrid.get(cell.x, cell.y, LayeredGrid.POLY).isSet && !this.layeredGrid.get(cell.x, cell.y, LayeredGrid.CONTACT).isSet) {
-                    // Set the gate to the poly cell.
-                    cell.gate = this.layeredGrid.get(cell.x, cell.y, LayeredGrid.POLY);
 
-                    // Check adjacent cells for NDIFF.
-                    // Set term1 to the first one found.
-                    // Set term2 to the second one found.
-                    cell.term1 = undefined;
-                    cell.term2 = undefined;
+            let handleCell = function(layer, transistorArray) {
+                if (cell.layer === layer && cell.isSet) {
+                    if (this.layeredGrid.get(cell.x, cell.y, LayeredGrid.POLY).isSet && !this.layeredGrid.get(cell.x, cell.y, LayeredGrid.CONTACT).isSet) {
+                        // Set the gate to the poly cell.
+                        cell.gate = this.layeredGrid.get(cell.x, cell.y, LayeredGrid.POLY);
 
-                    // Check the cells above and below.
-                    this.setTerminals(cell, cell.x, cell.y - 1, layer);
-                    this.setTerminals(cell, cell.x, cell.y + 1, layer);
-
-                    // Check the cells to the left and right.
-                    this.setTerminals(cell, cell.x - 1, cell.y, layer);
-                    this.setTerminals(cell, cell.x + 1, cell.y, layer);
-
-                    // If no term2 is set, then this is not a full transistor.
-                    // Undo.
-                    if(cell.term2 === undefined) {
+                        // Check adjacent cells for NDIFF.
+                        // Set term1 to the first one found.
+                        // Set term2 to the second one found.
                         cell.term1 = undefined;
-                        cell.gate = undefined;
-                    } else {
-                        transistorArray.add(cell);
-                        this.graph.addNode(
-                            cell,
-                            false,
-                            this.layeredGrid.get(cell.x, cell.y, LayeredGrid.PDIFF),
-                            this.layeredGrid.get(cell.x, cell.y, LayeredGrid.NDIFF)
-                        );
-                        return true;
+                        cell.term2 = undefined;
+
+                        // Check the cells above and below.
+                        this.setTerminals(cell, cell.x, cell.y - 1, layer);
+                        this.setTerminals(cell, cell.x, cell.y + 1, layer);
+
+                        // Check the cells to the left and right.
+                        this.setTerminals(cell, cell.x - 1, cell.y, layer);
+                        this.setTerminals(cell, cell.x + 1, cell.y, layer);
+
+                        // If no term2 is set, then this is not a full transistor.
+                        // Undo.
+                        if(cell.term2 === undefined) {
+                            cell.term1 = undefined;
+                            cell.gate = undefined;
+                        } else {
+                            transistorArray.add(cell);
+                            this.graph.addNode(
+                                cell,
+                                false,
+                                this.layeredGrid.get(cell.x, cell.y, LayeredGrid.PDIFF),
+                                this.layeredGrid.get(cell.x, cell.y, LayeredGrid.NDIFF)
+                            );
+                            return true;
+                        }
                     }
                 }
-            }
+                return false;
+            }.bind(this);
 
-            return false;
+            return handleCell(LayeredGrid.PDIFF, this.pmos) || handleCell(LayeredGrid.NDIFF, this.nmos);
         }
 
         // For each layer of the cell in the net, recurse with all adjacent cells in the layer.
@@ -2310,32 +2314,23 @@
 
             // Check the cell for a transistor.
             // If this is in a diffusion layer, do not propogate past a transistor.
-            if (this.checkIfTransistor(cell, LayeredGrid.NDIFF, this.nmos)) {
+            if (this.checkIfTransistor(cell)) {
                 gateNet = this.getNet(this.layeredGrid.get(cell.x,cell.y,LayeredGrid.POLY)); 
+
                 if(gateNet === null) {
                     gateNet = new Net("gate", false);
                 }
+
                 this.setRecursively(this.layeredGrid.get(cell.x, cell.y, LayeredGrid.POLY), gateNet);
-                if(this.getNet(this.layeredGrid.get(cell.x, cell.y, LayeredGrid.POLY)) === null) {
-                    this.netlist.push(gateNet);
-                }
+                this.netlist.push(gateNet);
+
                 return;
             }
-            if (this.checkIfTransistor(cell, LayeredGrid.PDIFF, this.pmos)) {
-                gateNet = this.getNet(this.layeredGrid.get(cell.x,cell.y,LayeredGrid.POLY)); 
-                if(gateNet === null) {
-                    gateNet = new Net("gate", false);
-                }
-                this.setRecursively(this.layeredGrid.get(cell.x, cell.y, LayeredGrid.POLY), gateNet);
-                if(this.getNet(this.layeredGrid.get(cell.x, cell.y, LayeredGrid.POLY)) === null) {
-                    this.netlist.push(gateNet);
-                }
-                return;
-            }
+
             // If this is in the poly layer, we don't need to stop at a transistor.
             if (cell.layer === LayeredGrid.POLY) {
-                this.checkIfTransistor(this.layeredGrid.get(cell.x, cell.y, LayeredGrid.NDIFF), LayeredGrid.NDIFF, this.nmos);
-                this.checkIfTransistor(this.layeredGrid.get(cell.x, cell.y, LayeredGrid.PDIFF), LayeredGrid.PDIFF, this.pmos);
+                this.checkIfTransistor(this.layeredGrid.get(cell.x, cell.y, LayeredGrid.NDIFF));
+                this.checkIfTransistor(this.layeredGrid.get(cell.x, cell.y, LayeredGrid.PDIFF));
             }
 
             // Add the cell to the net.
@@ -2466,53 +2461,51 @@
                 ja_jp: "グリッドの行数と列数を両方２０に設定しましょう。",
             };
 
-            tutStep.completed = (function(darkModeSet) {
-                return function() {
-                    let completed = this.UI.diagramGrid.width === 20 && this.UI.diagramGrid.height === 20;
-                    if(completed) {
-                        // Remove glow from dark mode button.
-                        let remColClassList = document.getElementById("remove-column").classList;
-                        let remRowClassList = document.getElementById("remove-row").classList;
-                        let addColClassList = document.getElementById("add-column").classList;
-                        let addRowClassList = document.getElementById("add-row").classList;
+            tutStep.completed = function() {
+                let completed = this.UI.diagramGrid.width === 20 && this.UI.diagramGrid.height === 20;
+                if(completed) {
+                    // Remove glow from dark mode button.
+                    let remColClassList = document.getElementById("remove-column").classList;
+                    let remRowClassList = document.getElementById("remove-row").classList;
+                    let addColClassList = document.getElementById("add-column").classList;
+                    let addRowClassList = document.getElementById("add-row").classList;
 
-                        if(remColClassList.contains("glowing")) {
-                            remColClassList.remove("glowing");
-                        }
-                        if(remRowClassList.contains("glowing")) {
-                            remRowClassList.remove("glowing");
-                        }
-                        if(addColClassList.contains("glowing")) {
-                            addColClassList.remove("glowing");
-                        }
-                        if(addRowClassList.contains("glowing")) {
-                            addRowClassList.remove("glowing");
-                        }
-
-                        let moveTerm = function(x, y, terminal) {
-                            let oldX = terminal.x;
-                            let oldY = terminal.y;
-                            terminal.x = x;
-                            terminal.y = y;
-                            this.diagramController.placeTerminal(terminal, terminal, true);
-                            this.diagramGrid.clear(oldX, oldY, LayeredGrid.CONTACT);
-                        }.bind(this.UI);
-
-                        // Move the terminals to a better position
-                        moveTerm(2,   2, this.UI.diagram.vddCell);
-                        moveTerm(1,  18, this.UI.diagram.gndCell);
-                        moveTerm(18, 10, this.UI.diagram.outputs[0]);
-
-                        // Disable further adjustment of the grid size for now
-                        this.UI.diagramGrid.temp = this.UI.diagramGrid.resize;
-                        this.UI.diagramGrid.resize = () => { return; };
-
-                        this.tutorialOverlay.remove();
-                        window.scrollTo({behavior: "smooth", top: Math.ceil(document.body.getBoundingClientRect().top), left: 0,});
+                    if(remColClassList.contains("glowing")) {
+                        remColClassList.remove("glowing");
                     }
-                    return completed;
-                }.bind(tutStep);
-            }.bind(tutStep))(this.UI.diagramView.darkMode);
+                    if(remRowClassList.contains("glowing")) {
+                        remRowClassList.remove("glowing");
+                    }
+                    if(addColClassList.contains("glowing")) {
+                        addColClassList.remove("glowing");
+                    }
+                    if(addRowClassList.contains("glowing")) {
+                        addRowClassList.remove("glowing");
+                    }
+
+                    let moveTerm = function(x, y, terminal) {
+                        let oldX = terminal.x;
+                        let oldY = terminal.y;
+                        terminal.x = x;
+                        terminal.y = y;
+                        this.diagramController.placeTerminal(terminal, terminal, true);
+                        this.diagramGrid.clear(oldX, oldY, LayeredGrid.CONTACT);
+                    }.bind(this.UI);
+
+                    // Move the terminals to a better position
+                    moveTerm(2,   2, this.UI.diagram.vddCell);
+                    moveTerm(1,  18, this.UI.diagram.gndCell);
+                    moveTerm(18, 10, this.UI.diagram.outputs[0]);
+
+                    // Disable further adjustment of the grid size for now
+                    this.UI.diagramGrid.temp = this.UI.diagramGrid.resize;
+                    this.UI.diagramGrid.resize = () => { return; };
+
+                    this.tutorialOverlay.remove();
+                    window.scrollTo({behavior: "smooth", top: Math.ceil(document.body.getBoundingClientRect().top), left: 0,});
+                }
+                return completed;
+            }.bind(tutStep);
 
             tutStep.specialAction = function() {
                 let limit = 20;
