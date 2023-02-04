@@ -19,16 +19,20 @@
 * Software entropy must not increase.
 
 ## Feature Wishlist
+* Allow user to define custom color scheme.
+* Allow user to selectively hide layers (to verify connections).
+* Allow custom command mappings.
+* Allow custom terminal labels.
 * Share small diagrams by URL arguments and QR codes.
-* Show which layers are set in highlighted cell.
-* Replace pullup/pulldown alert popups with less obtrusive warnings.
 * HDL generation.
 * Interactive tutorial.
-* Allow users to select where to insert rows and columns.
 * Student/Teacher modes with generating/grading homework, practice problems, etc.
 * Draw CMOS circuit schematic corresponding to the painted topology.
 * Logical effort calculations (allow user to set constants)
 * Export netlist for use in electronics design software.
+* ~~Replace pullup/pulldown alert popups with less obtrusive warnings.~~ *Resolved 2023/1/29*
+* ~~Allow users to select where to insert rows and columns.~~ *Resolved 2023/1/29*
+* ~~Show which layers are set in highlighted cell.~~ *Resolved 2023/1/29*
 * ~~Show at least one path from rail voltage to output for each input.~~ *Resolved 2021/12/11*
 * ~~Warn user when pulling up with NMOS or pulling down with PMOS.~~ *Resolved 2021/12/10*
 * ~~Arbitrary number of I/O.~~ *Resolved 20201/12/10*
@@ -53,6 +57,7 @@
 * ~~Knowing that I spelled "accolades" correctly (I don't feel like Googling it)~~ *Resolved 2021/11/20*
 
 ## Known Bugs
+* ~~The pullup/pulldown alert div displaces the canvas by too much in some browsers, even when not visible.~~ *Resolved 2023/1/30*
 * ~~Highlighted nets are no longer comprehensive.~~ *Resolved 2023/1/22*
 * ~~Incorrect output for two input-overdriven transistors in series with a VDD+GND overdriven transistor in series with direct input.~~ *Resolved 2023/1/22*
 * ~~Incorrect output when GND and VDD are directly assigned to the same gate in series with overdriven transistor.~~ *Resolved 2023/1/17*
