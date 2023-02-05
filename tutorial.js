@@ -420,7 +420,7 @@
         tutStep = new TutorialStep(UI);
 
         tutStep.instructions = {
-            en_us: function() { return `Select the ${tut.getLayerSpan(UI.diagramGrid.constructor.POLY, UI)}layer by right clicking a few times, or by pressing the ${tut.getLayerSpan(UI.diagramGrid.constructor.POLY, UI)} layer select button.`; },
+            en_us: function() { return `Select the ${tut.getLayerSpan(UI.diagramGrid.constructor.POLY, UI)} layer by right clicking a few times, or by pressing the ${tut.getLayerSpan(UI.diagramGrid.constructor.POLY, UI)} layer select button.`; },
             ja_jp: function() { return `右クリックを数回して${tut.getLayerSpan(UI.diagramGrid.constructor.POLY, UI)}層に変えるか、${tut.getLayerSpan(UI.diagramGrid.constructor.POLY, UI)}層の選択ボタンを押して下さい。`; },
         };
 
