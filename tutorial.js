@@ -628,8 +628,8 @@
         tutStep = new TutorialStep(UI);
 
         tutStep.instructions = {
-            en_us: `Place the A terminal on the ${tut.getLayerSpan(UI.diagramGrid.prototype.POLY, UI)} between the ${tut.getLayerSpan(UI.diagramGrid.prototype.PDIFF, UI)} and ${tut.getLayerSpan(UI.diagramGrid.prototype.NDIFF, UI)} lines.`,
-            ja_jp: `A端子を${tut.getLayerSpan(UI.diagramGrid.prototype.PDIFF, UI)}と${tut.getLayerSpan(UI.diagramGrid.prototype.NDIFF, UI)}層の間の${tut.getLayerSpan(UI.diagramGrid.prototype.POLY, UI)}層上に置いてください。`,
+            en_us: `Place the A terminal on the ${tut.getLayerSpan(UI.diagramGrid.constructor.POLY, UI)} between the ${tut.getLayerSpan(UI.diagramGrid.constructor.PDIFF, UI)} and ${tut.getLayerSpan(UI.diagramGrid.constructor.NDIFF, UI)} lines.`,
+            ja_jp: `A端子を${tut.getLayerSpan(UI.diagramGrid.constructor.PDIFF, UI)}と${tut.getLayerSpan(UI.diagramGrid.constructor.NDIFF, UI)}層の間の${tut.getLayerSpan(UI.diagramGrid.constructor.POLY, UI)}層上に置いてください。`,
         };
 
         tutStep.completed = function() {
@@ -812,8 +812,8 @@
         tutStep = new TutorialStep(UI);
 
         tutStep.instructions = {
-            en_us: `The output path isn't passing through VDD! ${tut.getLayerSpan(UI.diagramGrid.prototype.METAL1, UI)} isn't passing through it.<br>Place ${tut.getLayerSpan(UI.diagramGrid.prototype.METAL1, UI)} on VDD.`,
-            ja_jp: `出力の同電路がVDDを通っていません！${tut.getLayerSpan(UI.diagramGrid.prototype.METAL1, UI)}層がVDDのセルにありません。<br>${tut.getLayerSpan(UI.diagramGrid.prototype.METAL1, UI)}層をVDDに置いてください。`,
+            en_us: `The output path isn't passing through VDD! ${tut.getLayerSpan(UI.diagramGrid.constructor.METAL1, UI)} isn't passing through it.<br>Place ${tut.getLayerSpan(UI.diagramGrid.constructor.METAL1, UI)} on VDD.`,
+            ja_jp: `出力の同電路がVDDを通っていません！${tut.getLayerSpan(UI.diagramGrid.constructor.METAL1, UI)}層がVDDのセルにありません。<br>${tut.getLayerSpan(UI.diagramGrid.constructor.METAL1, UI)}層をVDDに置いてください。`,
         };
 
         tutStep.completed = function() {
