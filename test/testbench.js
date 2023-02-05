@@ -2791,13 +2791,19 @@ function runTestbench(runTo) {
 
             UI.diagram.inputs[0].x  = 8;
             UI.diagram.inputs[0].y  = 13;
-            UI.diagram.outputs[0].x = 21;
+            UI.diagram.outputs[0].x = 25;
             UI.diagram.outputs[0].y = 13;
             UI.diagram.vddCell.x    = 9;
             UI.diagram.vddCell.y    = 5;
             UI.diagram.gndCell.x    = 9;
             UI.diagram.gndCell.y    = 23;
         },
+
+        // Clean up contacts
+        ["mousedown", {button:  2, clientX: mapX(29),  clientY: mapY(14)}],
+        ["mouseup",   {button:  2, clientX: mapX(29),  clientY: mapY(14)}],
+        ["mousedown", {button:  2, clientX: mapX(8),   clientY: mapY(24)}],
+        ["mouseup",   {button:  2, clientX: mapX(8),   clientY: mapY(24)}],
 
         2,
         "XXXX",
