@@ -2589,7 +2589,7 @@ function runTestbench(runTo) {
                 window, // view: should be window
                 false, // ctrlKey
                 false, // altKey
-                shift, // shiftKey
+                true, // shiftKey
                 false, // metaKey
                 68, // keyCode: unsigned long - the virtual key code, else 0
                 0, // charCode: unsigned long - the Unicode character associated with the depressed key, else 0
