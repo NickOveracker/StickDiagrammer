@@ -2542,7 +2542,7 @@
                 action:  function() {
                     this.diagramController.addTerminal(false);
                     this.populateTermSelect();
-                },
+                }.bind(this),
             }
 
             // O
@@ -2551,7 +2551,7 @@
                 action:  function() {
                     this.diagramController.addTerminal(true);
                     this.populateTermSelect();
-                },
+                }.bind(this),
             }
 
             // SHIFT+I
@@ -2560,7 +2560,7 @@
                 action:  function() {
                     this.diagramController.removeTerminal(false);
                     this.populateTermSelect();
-                },
+                }.bind(this),
             }
 
             // SHIFT+O
@@ -2569,7 +2569,7 @@
                 action:  function() {
                     this.diagramController.removeTerminal(true);
                     this.populateTermSelect();
-                },
+                }.bind(this),
             }
 
             this.placeIOCommand = {
