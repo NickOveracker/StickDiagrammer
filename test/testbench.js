@@ -2791,8 +2791,8 @@ function runTestbench(runTo) {
 
             UI.diagram.inputs[0].x  = 8;
             UI.diagram.inputs[0].y  = 13;
-            UI.diagram.outputs[1].x = 21;
-            UI.diagram.outputs[1].y = 13;
+            UI.diagram.outputs[0].x = 21;
+            UI.diagram.outputs[0].y = 13;
             UI.diagram.vddCell.x    = 9;
             UI.diagram.vddCell.y    = 5;
             UI.diagram.gndCell.x    = 9;
