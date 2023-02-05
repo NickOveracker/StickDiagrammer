@@ -1499,7 +1499,7 @@
                 console.log("Path 1: " + path1);
                 let path2 = this.getMapping(drainNode,  targetNode).hasPath;
                 console.log("Path 2: " + path2);
-                console.log("Active path exists: " + activePathExists;
+                console.log("Active path exists: " + activePathExists);
 
                 return path1 === path2 &&
                        path1 === activePathExists;
