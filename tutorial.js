@@ -107,7 +107,7 @@
 
         getLayerSpan(layer, UI) {
             let layerName, color;
-            layerName = UI.diagramGrid.constructor.layers[layer].toUpperCase();
+            layerName = UI.diagramGrid.constructor.layers[layer].name.toUpperCase();
             color = UI.diagramView.getColor(layer, true);
             return `<span style="color: ${color}; font-weight: bold;">${layerName}</span>`;
         }
