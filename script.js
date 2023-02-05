@@ -1475,6 +1475,7 @@
             let targetNodeReachable, nodeTerm1, nodeTerm2, od,
                 gndPathOk, vddPathOk, gndPathExistsActivated, vddPathExistsActivated;
 
+            console.log(`ATTEMPTING RESOLUTION: xistor (${node.x}, ${node.y}) to (${targetNode.x}, ${targetNode.y})`);
             // We will need to restore the old map after half of the
             // operation below, but there is no need to restore it at the
             // end. We will have determined that either there is a conflict
@@ -1495,7 +1496,10 @@
             // They're just named  that way here for readability
             let allPathsOk = function(sourceNode, drainNode, targetNode, activePathExists) {
                 let path1 = this.getMapping(sourceNode, targetNode).hasPath;
+                console.log("Path 1: " + path1);
                 let path2 = this.getMapping(drainNode,  targetNode).hasPath;
+                console.log("Path 2: " + path2);
+                console.log("Active path exists: " + activePathExists;
 
                 return path1 === path2 &&
                        path1 === activePathExists;
@@ -1515,18 +1519,24 @@
             this.mapNodes(node, nodeTerm2, this.DIRECT_PATH);
                           
             targetNodeReachable = this.recurseThroughEdges(node, targetNode, inputVals).hasPath;
+            console.log(`xistor (${node.x}, ${node.y}) can reach (${targetNode.x}, ${targetNode.y})`);
         
             od = this.overdrivenPath;
             this.overdrivenPath = false;
+            console.log(`od = ${od}`);
 
             // If it is reachable at all, compare the paths for inactive and active states.
             if(targetNodeReachable && Math.min(node.cell.term1.nodes.size, node.cell.term2.nodes.size) > 1) {
                 gndPathExistsActivated = this.recurseThroughEdges(nodeTerm1, this.gndNode, inputVals).hasPath;
                 vddPathExistsActivated = this.recurseThroughEdges(nodeTerm1, this.vddNode, inputVals).hasPath;
 
+                console.log(`xistor (${node.x}, ${node.y}) can still reach (${targetNode.x}, ${targetNode.y})`);
+                console.log(`Path to gnd activated: ${gndPathExistsActivated}    Path to vdd activated: ${vddPathExistsActivated}`);
+
                 mapCopy(backupNodeNodeMap, this.nodeNodeMap);
                 od = od || this.overdrivenPath;
                 this.overdrivenPath = false;
+                console.log(`od = ${od}`);
 
                 // If there is a conflict when activated, then the target node is definitely overdriven.
                 // As long as there is no conflict, proceed.
@@ -1536,11 +1546,14 @@
                     this.deactivateGate(node);
                     this.recurseThroughEdges(node, this.gndNode, inputVals);
                     this.recurseThroughEdges(node, this.vddNode, inputVals);
+                    console.log("Checking deactivated ground path...");
                     gndPathOk = allPathsOk(nodeTerm1, nodeTerm2, this.gndNode, gndPathExistsActivated);
+                    console.log("Checking deactivated vdd path...");
                     vddPathOk = allPathsOk(nodeTerm1, nodeTerm2, this.vddNode, vddPathExistsActivated);
                     
                     mapCopy(backupNodeNodeMap, this.nodeNodeMap);
                     od = od || this.overdrivenPath;
+                    console.log(`od = ${od}`);
                 }
 
                 od =  !(gndPathOk && vddPathOk) || od;
@@ -2241,7 +2254,7 @@
             // (Except when there is also a contact)
 
             let handleCell = function(layer, transistorArray) {
-                if (cell.layer === layer && cell.isSet) {
+                if (!transistorArray.has(cell) && cell.layer === layer && cell.isSet) {
                     if (this.layeredGrid.get(cell.x, cell.y, LayeredGrid.POLY).isSet && !this.layeredGrid.get(cell.x, cell.y, LayeredGrid.CONTACT).isSet) {
                         // Set the gate to the poly cell.
                         cell.gate = this.layeredGrid.get(cell.x, cell.y, LayeredGrid.POLY);
