@@ -47,6 +47,7 @@
     'use strict';
 
     class LayeredGrid {
+        // TODO: Consider moving to DiagramView if possible.
         // Cycle through the following cursor colors by pressing space: PDIFF, NDIFF, POLY, METAL1, CONTACT
         // Additional colors: DELETE at index (numLayers + 0)
         // Colorblind-friendly template found on [David Nichols's](https://personal.sron.nl/~pault/) website.
@@ -2367,6 +2368,17 @@
             this.diagramView       = diagram.view;
             this.diagramGrid       = diagram.layeredGrid;
 
+            // Order matters
+            // Lower-indexed menus are displayed at the same level as or over higher-indexed menus.
+            this.menus = [
+                "tutorials",
+                "instructions",
+                "about-page",
+                "options-menu",
+                "main-menu",
+                "terminal-menu",
+            ];
+
             this.allCommands        = [];
             this.shiftCommands      = [];
             this.ctrlCommands       = [];
@@ -2524,6 +2536,52 @@
                 }.bind(this),
             };
 
+            // I
+            this.addInputCommand = {
+                keyCode: 73,
+                action:  function(e) {
+                    if(e.type.includes('up')) {
+                        this.diagramController.addTerminal(false);
+                        this.populateTermSelect();
+                    }
+                }.bind(this),
+            };
+
+            // O
+            this.addOutputCommand = {
+                keyCode: 79,
+                action:  function(e) {
+                    if(e.type.includes('up')) {
+                        this.diagramController.addTerminal(true);
+                        this.populateTermSelect();
+                    }
+                }.bind(this),
+            };
+
+            // SHIFT+I
+            this.removeInputCommand = {
+                shiftModifier: true,
+                keyCode: 73,
+                action:  function(e) {
+                    if(e.type.includes('up')) {
+                        this.diagramController.removeTerminal(false);
+                        this.populateTermSelect();
+                    }
+                }.bind(this),
+            };
+
+            // SHIFT+O
+            this.removeOutputCommand = {
+                shiftModifier: true,
+                keyCode: 79,
+                action:  function(e) {
+                    if(e.type.includes('up')) {
+                        this.diagramController.removeTerminal(true);
+                        this.populateTermSelect();
+                    }
+                }.bind(this),
+            };
+
             this.placeIOCommand = {
                 keyCode: null,
                 action:  null,
@@ -2531,6 +2589,10 @@
 
             this.allCommands.push(this.placeVddCommand);
             this.allCommands.push(this.placeGndCommand);
+            this.allCommands.push(this.addInputCommand);
+            this.allCommands.push(this.addOutputCommand);
+            this.allCommands.push(this.removeInputCommand);
+            this.allCommands.push(this.removeOutputCommand);
         }
 
         initRowColCommands() {
@@ -2583,7 +2645,7 @@
                 ctrlModifier: true,
                 keyCode:      37,
                 action:       function(e) {
-                    if(e.type.includes('down')) {
+                    if(e.type.includes('up')) {
                         let coords = this.diagramController.getCellAtCursor();
                         coords = Object.hasOwn(coords, "x") ? coords : {x: this.diagramGrid.width, };
                         if(Object.hasOwn(coords, "x")) {
@@ -2600,7 +2662,7 @@
                 ctrlModifier: true,
                 keyCode:       38,
                 action:        function(e) {
-                    if(e.type.includes('down')) {
+                    if(e.type.includes('up')) {
                         let coords = this.diagramController.getCellAtCursor();
                         if(Object.hasOwn(coords, "y")) {
                             this.diagramGrid.insertRemoveRowColAt(coords.y, false, true);
@@ -2616,7 +2678,7 @@
                 ctrlModifier: true,
                 keyCode:      39,
                 action:       function(e) {
-                    if(e.type.includes('down')) {
+                    if(e.type.includes('up')) {
                         let coords = this.diagramController.getCellAtCursor();
                         if(Object.hasOwn(coords, "x")) {
                             this.diagramGrid.insertRemoveRowColAt(coords.x, true, false);
@@ -2632,7 +2694,7 @@
                 ctrlModifier: true,
                 keyCode:      40,
                 action:       function(e) {
-                    if(e.type.includes('down')) {
+                    if(e.type.includes('up')) {
                         let coords = this.diagramController.getCellAtCursor();
                         if(Object.hasOwn(coords, "y")) {
                             this.diagramGrid.insertRemoveRowColAt(coords.y, true, true);
@@ -3006,42 +3068,39 @@
             }.bind(this);
         }
 
+        // TODO: Continue to improve this function.
         setUpControls() {
-            document.getElementById("remove-row").onclick = function() {
-                this.diagramGrid.resize(this.diagramGrid.width, this.diagramGrid.height - 1);
-                this.diagramView.drawGrid();
+            let resizeGridByOne = function(byRow, positive) {
+                return function() {
+                    let offset = positive ? 1 : -1;
+                    let newWidth = byRow ? this.diagramGrid.width            : this.diagramGrid.width + offset;
+                    let newHeight = byRow ? this.diagramGrid.height + offset : this.diagramGrid.height;
+                    this.diagramGrid.resize(newWidth, newHeight);
+                    this.diagramView.drawGrid();
+                }.bind(this);
             }.bind(this);
 
-            document.getElementById("add-row").onclick = function() {
-                this.diagramGrid.resize(this.diagramGrid.width, this.diagramGrid.height + 1);
-                this.diagramView.drawGrid();
+            let simpleGridShift = function(byRow, positive) {
+                return function() {
+                    let offset = positive ? 1 : -1;
+                    this.diagramGrid.shift(0, byRow, offset);
+                }.bind(this);
             }.bind(this);
 
-            document.getElementById("remove-column").onclick = function() {
-                this.diagramGrid.resize(this.diagramGrid.width - 1, this.diagramGrid.height);
-                this.diagramView.drawGrid();
-            }.bind(this);
+            this.menus.forEach(function(menuName) {
+                document.getElementById("open-" + menuName + "-btn").onclick  = this.getOpenMenuFunction(menuName);
+                document.getElementById("close-" + menuName + "-btn").onclick = this.getCloseMenuFunction(menuName);
+            }.bind(this));
 
-            document.getElementById("add-column").onclick = function() {
-                this.diagramGrid.resize(this.diagramGrid.width + 1, this.diagramGrid.height);
-                this.diagramView.drawGrid();
-            }.bind(this);
+            document.getElementById("add-row").onclick       = resizeGridByOne(true,  true);
+            document.getElementById("remove-row").onclick    = resizeGridByOne(true,  false);
+            document.getElementById("add-column").onclick    = resizeGridByOne(false, true);
+            document.getElementById("remove-column").onclick = resizeGridByOne(false, false);
 
-            document.getElementById("shift-left").onclick = function() {
-                this.diagramGrid.shift(0, false, -1);
-            }.bind(this);
-
-            document.getElementById("shift-right").onclick = function() {
-                this.diagramGrid.shift(0, false, 1);
-            }.bind(this);
-
-            document.getElementById("shift-up").onclick = function() {
-                this.diagramGrid.shift(0, true, -1);
-            }.bind(this);
-
-            document.getElementById("shift-down").onclick = function() {
-                this.diagramGrid.shift(0, true, 1);
-            }.bind(this);
+            document.getElementById("shift-left").onclick    = simpleGridShift(false, false);
+            document.getElementById("shift-right").onclick   = simpleGridShift(false, true);
+            document.getElementById("shift-up").onclick      = simpleGridShift(true,  false);
+            document.getElementById("shift-down").onclick    = simpleGridShift(true,  true);
 
             document.getElementById("paint-mode-btn").onclick = function() {
                 // No argument -> Toggle
@@ -3059,68 +3118,11 @@
                 }
             }.bind(this);
 
-            document.getElementById("dark-mode-btn").onclick = function() {
-                this.toggleDarkMode();
-            }.bind(this);
-
-            document.getElementById("undo-btn").onclick = function() {
-                this.diagramController.undo();
-            }.bind(this);
-
-            document.getElementById("redo-btn").onclick = function() {
-                this.diagramController.redo();
-            }.bind(this);
-
-            document.getElementById("term-menu-btn").onclick = function() {
-                let termMenu = document.getElementById("terminal-menu");
-                if(termMenu.classList.contains("closed")) {
-                    termMenu.classList.remove("closed");
-                }
-            };
-
-            // TODO: We can do better than this mess.
-            document.getElementById("main-menu-btn").onclick = function() {
-                let mainMenu = document.getElementById("main-menu");
-                if(mainMenu.classList.contains("closed")) {
-                    mainMenu.classList.remove("closed");
-                    document.getElementById("main-container").style.display = "none";
-                }
-            };
-
-            document.getElementById("open-tutorials-btn").onclick = function() {
-                let tutorials = document.getElementById("tutorials");
-                if(tutorials.classList.contains("closed")) {
-                    tutorials.classList.remove("closed");
-                }
-            };
-
-            document.getElementById("open-instructions-btn").onclick = function() {
-                let instructions = document.getElementById("instructions");
-                if(instructions.classList.contains("closed")) {
-                    instructions.classList.remove("closed");
-                }
-            };
-
-            document.getElementById("open-about-page-btn").onclick = function() {
-                let instructions = document.getElementById("about-page");
-                if(instructions.classList.contains("closed")) {
-                    instructions.classList.remove("closed");
-                }
-            };
-
-            document.getElementById("open-options-btn").onclick = function() {
-                let instructions = document.getElementById("options-menu");
-                if(instructions.classList.contains("closed")) {
-                    instructions.classList.remove("closed");
-                }
-            };
-
-            document.getElementById("close-term-menu-btn").onclick    = this.closeTermMenu;
-            document.getElementById("close-main-menu-btn").onclick    = this.closeMainMenu;
-            document.getElementById("close-tutorials-btn").onclick    = this.closeTutorials;
-            document.getElementById("close-instructions-btn").onclick = this.closeInstructions;
-            document.getElementById("close-about-page-btn").onclick   = this.closeAboutPage;
-            document.getElementById("close-options-btn").onclick      = this.closeOptionsMenu;
+            document.getElementById("dark-mode-btn").onclick = this.toggleDarkMode.bind(this);
+            document.getElementById("undo-btn").onclick = this.diagramController.undo.bind(this);
+            document.getElementById("redo-btn").onclick = this.diagramController.redo.bind(this);
+            document.getElementById('select-palette-btn').onclick = this.changeTheme.bind(this);
+            document.getElementById('toggle-transparency-btn').onclick = this.toggleTransparency.bind(this);
 
             document.getElementById("place-term-btn").onclick = function() {
                 let placeTermButton = document.getElementById("place-term-btn");
@@ -3160,18 +3162,9 @@
                 this.populateTermSelect();
             }.bind(this);
 
-            document.getElementById('select-palette-btn').onclick = function() {
-                this.changeTheme();
-            }.bind(this);
-
-            document.getElementById('toggle-transparency-btn').onclick = function() {
-                this.toggleTransparency();
-            }.bind(this);
-
             document.getElementById('tutorial-btn-0').onclick = function() {
                 if(window.tutorials) {
-                    this.closeTutorials();
-                    this.closeMainMenu();
+                    this.closeAllMenus();
                     this.tutorial = window.tutorials[0].get(this, LayeredGrid);
                     this.tutorial.start();
                 }
@@ -3180,58 +3173,45 @@
             this.setUpLayerSelector();
         }
 
-        // TODO: We can do better than this mess below.
-        closeMainMenu() {
-            let mainMenu = document.getElementById("main-menu");
-            if(!mainMenu.classList.contains("closed")) {
-                mainMenu.classList.add("closed");
-                document.getElementById("main-container").style.display = "block";
-                return true;
-            }
+        getOpenMenuFunction(menuName) {
+            return function() {
+                let menu = document.getElementById(menuName);
+
+                if(menu.classList.contains("closed")) {
+                    menu.classList.remove("closed");
+                }
+
+                if(menuName === "main-menu") {
+                    document.getElementById("main-container").style.display = "none";
+                }
+            };
         }
 
-        closeTutorials() {
-            let tutorials = document.getElementById("tutorials");
-            if(!tutorials.classList.contains("closed")) {
-                tutorials.classList.add("closed");
-                return true;
-            }
-        }
+        getCloseMenuFunction(menuName) {
+            return function() {
+                let menu = document.getElementById(menuName);
 
-        closeInstructions() {
-            let instructions = document.getElementById("instructions");
-            if(!instructions.classList.contains("closed")) {
-                instructions.classList.add("closed");
-                return true;
-            }
-        }
+                if(!menu.classList.contains("closed")) {
+                    menu.classList.add("closed");
 
-        closeTermMenu() {
-            let termMenu = document.getElementById("terminal-menu");
-            if(!termMenu.classList.contains("closed")) {
-                termMenu.classList.add("closed");
-                return true;
-            }
-        }
-
-        closeAboutPage() {
-            let aboutPage = document.getElementById("about-page");
-            if(!aboutPage.classList.contains("closed")) {
-                aboutPage.classList.add("closed");
-                return true;
-            }
-        }
-
-        closeOptionsMenu() {
-            let optionsPage = document.getElementById("options-menu");
-            if(!optionsPage.classList.contains("closed")) {
-                optionsPage.classList.add("closed");
-                return true;
-            }
+                    if(menuName === "main-menu") {
+                        document.getElementById("main-container").style.display = "block";
+                    }
+                    return true;
+                }
+            };
         }
 
         closeTopMenu() {
-            this.closeTutorials() || this.closeAboutPage() || this.closeOptionsMenu() || this.closeInstructions() || this.closeMainMenu() || this.closeTermMenu(); // jshint ignore:line
+            this.menus.some(function(menuName) {
+                return document.getElementById("close-" + menuName + "-btn").onclick();
+            });
+        }
+
+        closeAllMenus() {
+            this.menus.forEach(function(menuName) {
+                document.getElementById("close-" + menuName + "-btn").onclick();
+            });
         }
 
         // Generate an output table.

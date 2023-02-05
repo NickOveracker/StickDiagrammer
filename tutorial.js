@@ -50,8 +50,8 @@
             this.timer = Date.now();
             
             this.instructions = {
-                en_us: "English instructions.",
-                ja_jp: "日本語の手順。",
+                en_us: function() { return `English instructions.`; },
+                ja_jp: function() { return `日本語の手順。`; },
             };
             this.completed     = () => { return true; };
             this.position      = { centerHorizontal: false, centerVertical: false, x: 0, y: 0, flipLeft: false, flipUp: false, };
@@ -62,7 +62,7 @@
 
         display(languageSetting) {
             this.tutorialOverlay.classList.add("tutorial-overlay");
-            this.tutorialOverlay.innerHTML = this.instructions[languageSetting];
+            this.tutorialOverlay.innerHTML = this.instructions[languageSetting]();
             document.body.appendChild(this.tutorialOverlay);
             this.reposition();
         }
@@ -105,6 +105,13 @@
             this.languageSetting = "en_us";
         }
 
+        getLayerSpan(layer, UI) {
+            let layerName, color;
+            layerName = UI.diagramGrid.constructor.layers[layer].name.toUpperCase();
+            color = UI.diagramView.getColor(layer, true);
+            return `<span style="color: ${color}; font-weight: bold;">${layerName}</span>`;
+        }
+
         step() {
             if(this.active) {
                 if(this.steps[this.currentStep].completed()) {
@@ -128,14 +135,14 @@
     }
 
     function setUpInverterTutorial(UI, LayeredGrid) {
-        let tutorial = new Tutorial();
+        let tut = new Tutorial();
 
         ////////////////////////// STEP 1 //////////////////////////
         let tutStep = new TutorialStep(UI);
 
         tutStep.instructions = {
-            en_us: `Toggle dark mode by pressing the on-screen toggle button or by pressing ${UI.darkModeCommand.ctrlModifier ? "CTRL-" : UI.darkModeCommand.shiftModifier ? "SHIFT-" : ""}${String.fromCharCode(UI.darkModeCommand.keyCode)}.`,
-            ja_jp: `ダークモードのトグルボタンを押すか、${UI.darkModeCommand.ctrlModifier ? "CTRL-" : UI.darkModeCommand.shiftModifier ? "SHIFT-" : ""}${String.fromCharCode(UI.darkModeCommand.keyCode)}を押して下さい。`,
+            en_us: function() { return `Toggle dark mode by pressing the on-screen toggle button or by pressing ${UI.darkModeCommand.ctrlModifier ? "CTRL-" : UI.darkModeCommand.shiftModifier ? "SHIFT-" : ""}${String.fromCharCode(UI.darkModeCommand.keyCode)}.`; },
+            ja_jp: function() { return `ダークモードのトグルボタンを押すか、${UI.darkModeCommand.ctrlModifier ? "CTRL-" : UI.darkModeCommand.shiftModifier ? "SHIFT-" : ""}${String.fromCharCode(UI.darkModeCommand.keyCode)}を押して下さい。`; },
         };
 
         tutStep.completed = (function(darkModeSet) {
@@ -169,14 +176,14 @@
 
         tutStep.target = document.getElementById("dark-mode-btn");
         
-        tutorial.steps.push(tutStep);
+        tut.steps.push(tutStep);
 
         ////////////////////////// STEP 2 //////////////////////////
         tutStep = new TutorialStep(UI);
 
         tutStep.instructions = {
-            en_us: "Set the grid to 20 rows and 20 columns.",
-            ja_jp: "グリッドの行数と列数を両方２０に設定しましょう。",
+            en_us: function() { return `Set the grid to 20 rows and 20 columns.`; },
+            ja_jp: function() { return `グリッドの行数と列数を両方２０に設定しましょう。`; },
         };
 
         tutStep.completed = function() {
@@ -253,14 +260,14 @@
         tutStep.position.flipUp = true;
         tutStep.position.centerHorizontal = true;
         
-        tutorial.steps.push(tutStep);
+        tut.steps.push(tutStep);
 
         ////////////////////////// STEP 3 //////////////////////////
         tutStep = new TutorialStep(UI);
 
         tutStep.instructions = {
-            en_us: "Select the METAL1 layer by right clicking a few times, or by pressing the METAL1 layer select button.",
-            ja_jp: "右クリックを数回してMETAL1層に変えるか、METAL1層の選択ボタンを押して下さい。",
+            en_us: function() { return `Select the ${tut.getLayerSpan(UI.diagramGrid.constructor.METAL1, UI)} layer by right clicking a few times, or by pressing the ${tut.getLayerSpan(UI.diagramGrid.constructor.METAL1, UI)} layer select button.`; },
+            ja_jp: function() { return `右クリックを数回してMETAL1層に変えるか、${tut.getLayerSpan(UI.diagramGrid.constructor.METAL1, UI)}層の選択ボタンを押して下さい。`; },
         };
 
         tutStep.completed = function() {
@@ -289,14 +296,14 @@
         tutStep.position.centerHorizontal = true;
         tutStep.position.flipUp = true;
         
-        tutorial.steps.push(tutStep);
+        tut.steps.push(tutStep);
 
         ////////////////////////// STEP 4 //////////////////////////
         tutStep = new TutorialStep(UI);
 
         tutStep.instructions = {
-            en_us: "Connect VDD to METAL1.",
-            ja_jp: "VDDをMETAL1層に接続して下さい。",
+            en_us: function() { return `Connect VDD to ${tut.getLayerSpan(UI.diagramGrid.constructor.METAL1, UI)}.`; },
+            ja_jp: function() { return `VDDを${tut.getLayerSpan(UI.diagramGrid.constructor.METAL1, UI)}層に接続して下さい。`; },
         };
 
         tutStep.completed = function() {
@@ -316,14 +323,14 @@
         tutStep.position.centerHorizontal = true;
         tutStep.position.flipUp = true;
         
-        tutorial.steps.push(tutStep);
+        tut.steps.push(tutStep);
 
         ////////////////////////// STEP 5 //////////////////////////
         tutStep = new TutorialStep(UI);
 
         tutStep.instructions = {
-            en_us: "Select the CONTACT layer by right clicking a few times, or by pressing the METAL1 layer select button.",
-            ja_jp: "右クリックを数回してCONTACT層に変えるか、CONTACT層の選択ボタンを押して下さい。",
+            en_us: function() { return `Select the ${tut.getLayerSpan(UI.diagramGrid.constructor.CONTACT, UI)} layer by right clicking a few times, or by pressing the ${tut.getLayerSpan(UI.diagramGrid.constructor.CONTACT, UI)} layer select button.`; },
+            ja_jp: function() { return `右クリックを数回して${tut.getLayerSpan(UI.diagramGrid.constructor.CONTACT, UI)}層に変えるか、${tut.getLayerSpan(UI.diagramGrid.constructor.CONTACT, UI)}層の選択ボタンを押して下さい。`; },
         };
 
         tutStep.completed = function() {
@@ -376,14 +383,14 @@
         tutStep.position.flipLeft = true;
         tutStep.position.flipUp   = true;
         
-        tutorial.steps.push(tutStep);
+        tut.steps.push(tutStep);
 
         ////////////////////////// STEP 6 //////////////////////////
         tutStep = new TutorialStep(UI);
 
         tutStep.instructions = {
-            en_us: "Place CONTACTs where <span style='color:#88CCEE'>METAL1</span> meets <span style='color:#332288'>PDIFF</span> or <span style='color:#117733'>NDIFF</span>.",
-            ja_jp: "<span style='color:#332288'>PDIFF</span>か<span style='color:#117733'>NDIFF層</span>の層上に<span style='color:#88CCEE'>METAL1</span>層が引かれたところにCONTACTを置いてください。",
+            en_us: function() { return `Place ${tut.getLayerSpan(UI.diagramGrid.constructor.CONTACT, UI)}s where ${tut.getLayerSpan(UI.diagramGrid.constructor.METAL1, UI)} meets ${tut.getLayerSpan(UI.diagramGrid.constructor.PDIFF, UI)} or ${tut.getLayerSpan(UI.diagramGrid.constructor.NDIFF, UI)}.`; },
+            ja_jp: function() { return `${tut.getLayerSpan(UI.diagramGrid.constructor.PDIFF, UI)}か${tut.getLayerSpan(UI.diagramGrid.constructor.NDIFF, UI)}層の上に${tut.getLayerSpan(UI.diagramGrid.constructor.METAL1, UI)}層が引かれたところに${tut.getLayerSpan(UI.diagramGrid.constructor.CONTACT, UI)}を置いてください。`; },
         };
 
         tutStep.completed = function() {
@@ -407,14 +414,14 @@
         tutStep.position.centerHorizontal = true;
         tutStep.position.flipUp = true;
         
-        tutorial.steps.push(tutStep);
+        tut.steps.push(tutStep);
 
         ////////////////////////// STEP 7 //////////////////////////
         tutStep = new TutorialStep(UI);
 
         tutStep.instructions = {
-            en_us: "Select the POLY layer by right clicking a few times, or by pressing the POLY layer select button.",
-            ja_jp: "右クリックを数回してPOLY層に変えるか、POLY層の選択ボタンを押して下さい。",
+            en_us: function() { return `Select the ${tut.getLayerSpan(UI.diagramGrid.constructor.POLY, UI)} layer by right clicking a few times, or by pressing the ${tut.getLayerSpan(UI.diagramGrid.constructor.POLY, UI)} layer select button.`; },
+            ja_jp: function() { return `右クリックを数回して${tut.getLayerSpan(UI.diagramGrid.constructor.POLY, UI)}層に変えるか、${tut.getLayerSpan(UI.diagramGrid.constructor.POLY, UI)}層の選択ボタンを押して下さい。`; },
         };
 
         tutStep.completed = function() {
@@ -467,14 +474,14 @@
         tutStep.target = document.getElementById("poly-swatch");
         tutStep.position.flipUp   = true;
         
-        tutorial.steps.push(tutStep);
+        tut.steps.push(tutStep);
 
         ////////////////////////// STEP 8 //////////////////////////
         tutStep = new TutorialStep(UI);
 
         tutStep.instructions = {
-            en_us: "Draw a line of POLY that spans across the <span style='color:#332288'>PDIFF</span> and <span style='color:#117733'>NDIFF</span> lines between the left and right CONTACTs.",
-            ja_jp: "POLY層で<span style='color:#332288'>PDIFF</span>と<span style='color:#117733'>NDIFF層</span>を通る一本の線を左右のCONTACTの間に引いてください。",
+            en_us: function() { return `Draw a line of ${tut.getLayerSpan(UI.diagramGrid.constructor.POLY, UI)} that spans across the ${tut.getLayerSpan(UI.diagramGrid.constructor.PDIFF, UI)} and ${tut.getLayerSpan(UI.diagramGrid.constructor.NDIFF, UI)} lines between the left and right ${tut.getLayerSpan(UI.diagramGrid.constructor.CONTACT, UI)}.`; },
+            ja_jp: function() { return `${tut.getLayerSpan(UI.diagramGrid.constructor.POLY, UI)}層で${tut.getLayerSpan(UI.diagramGrid.constructor.PDIFF, UI)}と${tut.getLayerSpan(UI.diagramGrid.constructor.NDIFF, UI)}層を通る一本の線を左右の${tut.getLayerSpan(UI.diagramGrid.constructor.CONTACT, UI)}の間に引いてください。`; },
         };
 
         tutStep.completed = function() {
@@ -504,14 +511,14 @@
         tutStep.position.centerHorizontal = true;
         tutStep.position.flipUp = true;
         
-        tutorial.steps.push(tutStep);
+        tut.steps.push(tutStep);
 
         ////////////////////////// STEP 9 //////////////////////////
         tutStep = new TutorialStep(UI);
 
         tutStep.instructions = {
-            en_us: "Open the Terminals menu.",
-            ja_jp: "端子のメニューを開いて下さい。",
+            en_us: function() { return `Open the Terminals menu.`; },
+            ja_jp: function() { return `端子のメニューを開いて下さい。`; },
         };
 
         tutStep.completed = function() {
@@ -535,18 +542,18 @@
             }
         };
 
-        tutStep.target = document.getElementById("term-menu-btn");
+        tutStep.target = document.getElementById("open-terminal-menu-btn");
         tutStep.position.centerHorizontal = true;
         tutStep.position.flipUp = true;
         
-        tutorial.steps.push(tutStep);
+        tut.steps.push(tutStep);
 
         ////////////////////////// STEP 10 //////////////////////////
         tutStep = new TutorialStep(UI);
 
         tutStep.instructions = {
-            en_us: "Select Terminal A.",
-            ja_jp: "A端子を選択してください。",
+            en_us: function() { return `Select Terminal A.`; },
+            ja_jp: function() { return `A端子を選択してください。`; },
         };
 
         tutStep.completed = function() {
@@ -580,14 +587,14 @@
         tutStep.position.centerHorizontal = true;
         tutStep.position.centerVertical = true;
         
-        tutorial.steps.push(tutStep);
+        tut.steps.push(tutStep);
 
         ////////////////////////// STEP 11 //////////////////////////
         tutStep = new TutorialStep(UI);
 
         tutStep.instructions = {
-            en_us: "Press the Place Terminal button.",
-            ja_jp: "端子移動ボタンを押してください。",
+            en_us: function() { return `Press the Place Terminal button.`; },
+            ja_jp: function() { return `端子移動ボタンを押してください。`; },
         };
 
         tutStep.completed = function() {
@@ -615,14 +622,14 @@
         tutStep.position.centerHorizontal = true;
         tutStep.position.centerVertical = true;
         
-        tutorial.steps.push(tutStep);
+        tut.steps.push(tutStep);
 
         ////////////////////////// STEP 12 //////////////////////////
         tutStep = new TutorialStep(UI);
 
         tutStep.instructions = {
-            en_us: "Place the A terminal on the <span='color:#882255'>POLY</span> between the <span style='color:#332288'>PDIFF</span> and <span style='color:#117733'>NDIFF</span> lines.",
-            ja_jp: "A端子を<span style='color:#332288'>PDIFF</span>と<span style='color:#117733'>NDIFF層</span>の間の<span='color:#882255'>POLY</span>層上に置いてください。",
+            en_us: function() { return `Place the A terminal on the ${tut.getLayerSpan(UI.diagramGrid.constructor.POLY, UI)} between the ${tut.getLayerSpan(UI.diagramGrid.constructor.PDIFF, UI)} and ${tut.getLayerSpan(UI.diagramGrid.constructor.NDIFF, UI)} lines.`; },
+            ja_jp: function() { return `A端子を${tut.getLayerSpan(UI.diagramGrid.constructor.PDIFF, UI)}と${tut.getLayerSpan(UI.diagramGrid.constructor.NDIFF, UI)}層の間の${tut.getLayerSpan(UI.diagramGrid.constructor.POLY, UI)}層上に置いてください。`; },
         };
 
         tutStep.completed = function() {
@@ -646,14 +653,14 @@
         tutStep.position.centerHorizontal = true;
         tutStep.position.flipUp = true;
         
-        tutorial.steps.push(tutStep);
+        tut.steps.push(tutStep);
 
         ////////////////////////// STEP 13 //////////////////////////
         tutStep = new TutorialStep(UI);
 
         tutStep.instructions = {
-            en_us: "Good! If you are on PC, you can also place the A terminal by typing \"A\".<br><br>Now delete every terminal except for A.",
-            ja_jp: "完璧！パソコンを使用しているなら、A端子をAキーを打って早く置けます。<br><br>次、A端子以外の入力端子を削除しましょう。",
+            en_us: function() { return `Good! If you are on PC, you can also place the A terminal by typing \`A\`.<br><br>Now delete every terminal except for A.`; },
+            ja_jp: function() { return `完璧！パソコンを使用しているなら、A端子をAキーを打って早く置けます。<br><br>次、A端子以外の入力端子を削除しましょう。`; },
         };
 
         tutStep.completed = function() {
@@ -686,14 +693,14 @@
         tutStep.position.centerHorizontal = true;
         tutStep.position.centerVertical = true;
         
-        tutorial.steps.push(tutStep);
+        tut.steps.push(tutStep);
 
         ////////////////////////// STEP 14 //////////////////////////
         tutStep = new TutorialStep(UI);
 
         tutStep.instructions = {
-            en_us: "Now, close the Terminals menu by pressing the close button or by pressing ESC.",
-            ja_jp: "バツボタンまたはESCキーを押して端子メニューを閉じてください。",
+            en_us: function() { return `Now, close the Terminals menu by pressing the close button or by pressing ESC.`; },
+            ja_jp: function() { return `バツボタンまたはESCキーを押して端子メニューを閉じてください。`; },
         };
 
         tutStep.completed = function() {
@@ -717,18 +724,18 @@
             }
         };
 
-        tutStep.target = document.getElementById("close-term-menu-btn");
+        tutStep.target = document.getElementById("close-terminal-menu-btn");
         tutStep.position.flipLeft = true;
         tutStep.position.flipUp = true;
         
-        tutorial.steps.push(tutStep);
+        tut.steps.push(tutStep);
 
         ////////////////////////// STEP 15 //////////////////////////
         tutStep = new TutorialStep(UI);
 
         tutStep.instructions = {
-            en_us: "Press \"Evaluate\" to generate a truth table for the circuit.",
-            ja_jp: "「Evaluate」を押して回路の真理値表を作成してください。",
+            en_us: function() { return `Press \`Evaluate\` to generate a truth table for the circuit.`; },
+            ja_jp: function() { return `「Evaluate」を押して回路の真理値表を作成してください。`; },
         };
 
         tutStep.completed = function() {
@@ -760,14 +767,14 @@
         tutStep.position.centerHorizontal = true;
         tutStep.position.flipUp = true;
         
-        tutorial.steps.push(tutStep);
+        tut.steps.push(tutStep);
 
         ////////////////////////// STEP 16 //////////////////////////
         tutStep = new TutorialStep(UI);
 
         tutStep.instructions = {
-            en_us: "The output isn't right! Click the \"Z\" output in the truth table to find out why it isn't \"1\".",
-            ja_jp: "出力がおかしい！「Z」の出力を押して、なぜ予想した「１」になっていないか検査しましょう。",
+            en_us: function() { return `The output isn't right! Click the \`Z\` output in the truth table to find out why it isn't \`1\`.`; },
+            ja_jp: function() { return `出力がおかしい！「Z」の出力を押して、なぜ予想した「１」になっていないか検査しましょう。`; },
         };
 
         tutStep.completed = function() {
@@ -799,14 +806,14 @@
         tutStep.position.centerHorizontal = true;
         tutStep.position.centerVertical = true;
         
-        tutorial.steps.push(tutStep);
+        tut.steps.push(tutStep);
 
         ////////////////////////// STEP 17 //////////////////////////
         tutStep = new TutorialStep(UI);
 
         tutStep.instructions = {
-            en_us: "The output path isn't passing through VDD! <span style='color:#88CCEE'>METAL1</span> isn't passing through it.<br>Place <span style='color:#88CCEE'>METAL1</span> on VDD.",
-            ja_jp: "出力の同電路がVDDを通っていません！<span style='color:#88CCEE'>METAL1</span>層がVDDのセルにありません。<br><span style='color:#88CCEE'>METAL1</span>層をVDDに置いてください。",
+            en_us: function() { return `The output path isn't passing through VDD! ${tut.getLayerSpan(UI.diagramGrid.constructor.METAL1, UI)} isn't passing through it.<br>Place ${tut.getLayerSpan(UI.diagramGrid.constructor.METAL1, UI)} on VDD.`; },
+            ja_jp: function() { return `出力の同電路がVDDを通っていません！${tut.getLayerSpan(UI.diagramGrid.constructor.METAL1, UI)}層がVDDのセルにありません。<br>${tut.getLayerSpan(UI.diagramGrid.constructor.METAL1, UI)}層をVDDに置いてください。`; },
         };
 
         tutStep.completed = function() {
@@ -829,14 +836,14 @@
         tutStep.position.centerHorizontal = true;
         tutStep.position.flipUp = true;
         
-        tutorial.steps.push(tutStep);
+        tut.steps.push(tutStep);
 
         ////////////////////////// STEP 18 //////////////////////////
         tutStep = new TutorialStep(UI);
 
         tutStep.instructions = {
-            en_us: "Press \"Evaluate\" to generate an updated truth table for the circuit.",
-            ja_jp: "「Evaluate」を押して回路の真理値表を再作成してください。",
+            en_us: function() { return `Press \`Evaluate\` to generate an updated truth table for the circuit.`; },
+            ja_jp: function() { return `「Evaluate」を押して回路の真理値表を再作成してください。`; },
         };
 
         tutStep.completed = function() {
@@ -866,11 +873,11 @@
         tutStep.position.centerHorizontal = true;
         tutStep.position.flipUp = true;
         
-        tutorial.steps.push(tutStep);
+        tut.steps.push(tutStep);
 
-        return tutorial;
+        return tut;
     }
 
-    tutorials.push({name: "Inverter", get: setUpInverterTutorial,});   
+    tutorials.push({name: "The Basics", get: setUpInverterTutorial,});   
     window.tutorials = tutorials;
 })();
