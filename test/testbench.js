@@ -96,6 +96,8 @@ function runTestbench(runTo) {
                        "Add two outputs keyboard test",
                        "Remove one output keyboard test",
                        "Three overdriven transistors in series with input and two outputs (Known bug)",
+                       "(Layout 1) Three overdriven transistors in series with input and one output",
+                       "(Layout 2) Three overdriven transistors in series with input and one output",
     ];
     runTo = runTo || testCases.length;
 
@@ -2708,8 +2710,6 @@ function runTestbench(runTo) {
             UI.diagram.inputs[0].y  = 5;
             UI.diagram.inputs[1].x  = 9;
             UI.diagram.inputs[1].y  = 23;
-            UI.diagram.inputs[2].x  = 5;
-            UI.diagram.inputs[2].y  = 23;
             UI.diagram.inputs[3].x  = 5;
             UI.diagram.inputs[3].y  = 5;
             UI.diagram.inputs[4].x  = 1;
@@ -2718,10 +2718,6 @@ function runTestbench(runTo) {
             UI.diagram.outputs[0].y = 13;
             UI.diagram.outputs[1].x = 21;
             UI.diagram.outputs[1].y = 13;
-            UI.diagram.vddCell.x    = 7;
-            UI.diagram.vddCell.y    = 5;
-            UI.diagram.gndCell.x    = 7;
-            UI.diagram.gndCell.y    = 23;
         },
 
         // Clear old contacts
@@ -2739,6 +2735,26 @@ function runTestbench(runTo) {
 
         2,
         "XXXXXXZZXXXXXXZZXXXXXXZZZZZZZZZZXXXXXXZZXXXXXXZZXXXXXXZZZZZZZZZZ",
+
+        /* (Layout 1) Three overdriven transistors in series with input and one output */
+        1,
+        function() {
+           UI.diagramController.removeTerminal(true);
+           UI.populateTermSelect();
+        },
+
+        2,
+        "XXXXXXZZXXXXXXZZXXXXXXZZZZZZZZZZ",
+
+        /* (Layout 2) Three overdriven transistors in series with input and one output */
+        1,
+        function() {
+            UI.diagram.inputs[4].x  = 8;
+            UI.diagram.inputs[4].y  = 13;
+        },
+
+        2,
+        "01010101XXXXXXXXXXXXXXXXZZZZZZZZ",
    ];
 
     /** RUN TESTBENCH **/
