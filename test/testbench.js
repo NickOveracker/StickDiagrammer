@@ -2801,7 +2801,7 @@ function runTestbench(runTo) {
 
         // Clean up contacts
         ["mousedown", {button:  2, clientX: mapX(29),  clientY: mapY(14)}],
-        ["mouseup",   {button:  2, clientX: mapX(29),  clientY: mapY(14)}],
+        ["mouseup",   {button:  2, clientX: mapX(29),  clientY: mapY(15)}],
         ["mousedown", {button:  2, clientX: mapX(8),   clientY: mapY(24)}],
         ["mouseup",   {button:  2, clientX: mapX(8),   clientY: mapY(24)}],
 
