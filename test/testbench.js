@@ -2770,7 +2770,7 @@ function runTestbench(runTo) {
         }
     }
     endTime = Date.now();
-    UI.refreshTruthTable(true);
+    UI.refreshTruthTable(/*true*/);
 
     // Only overwrite the results if all tests were run.
     if(runTo < testCases.length) {
