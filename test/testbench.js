@@ -2759,9 +2759,9 @@ function runTestbench(runTo) {
 
     /** SET TO 1 OUTPUT AND 4 INPUTS */
     while(UI.diagram.outputs.length > 1) { UI.diagramController.removeTerminal(true);  }
-    while(UI.diagram.output.lengths < 1) { UI.diagramController.addTerminal(true);     }
-    while(UI.diagram.input.lengths  > 4) { UI.diagramController.removeTerminal(false); }
-    while(UI.diagram.input.lengths  < 4) { UI.diagramController.addTerminal(false);    }
+    while(UI.diagram.outputs.length < 1) { UI.diagramController.addTerminal(true);     }
+    while(UI.diagram.inputs.length  > 4) { UI.diagramController.removeTerminal(false); }
+    while(UI.diagram.inputs.length  < 4) { UI.diagramController.addTerminal(false);    }
     UI.populateTermSelect();
 
     /** RUN TESTBENCH **/
