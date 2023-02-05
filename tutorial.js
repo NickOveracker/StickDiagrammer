@@ -105,11 +105,11 @@
             this.languageSetting = "en_us";
         }
 
-        getLayerNameString(layer, UI) {
+        getLayerSpan(layer, UI) {
             let layerName, color;
-            layerName = this.UI.diagramGrid.constructor.layers(layer).toUpperCase();
-            color = this.UI.diagramView.getColor(layer, true);
-            return `<span style="color: ${color}; font-weight: bold;">${layerName}</span>`
+            layerName = UI.diagramGrid.constructor.layers(layer).toUpperCase();
+            color = UI.diagramView.getColor(layer, true);
+            return `<span style="color: ${color}; font-weight: bold;">${layerName}</span>`;
         }
 
         step() {
@@ -389,8 +389,8 @@
         tutStep = new TutorialStep(UI);
 
         tutStep.instructions = {
-            en_us: "Place CONTACTs where <span style='color:#88CCEE'>METAL1</span> meets <span style='color:#332288'>PDIFF</span> or <span style='color:#117733'>NDIFF</span>.",
-            ja_jp: "<span style='color:#332288'>PDIFF</span>か<span style='color:#117733'>NDIFF層</span>の層上に<span style='color:#88CCEE'>METAL1</span>層が引かれたところにCONTACTを置いてください。",
+            en_us: `Place ${this.getLayerSpan(UI.diagramGrid.constructor.CONTACT, UI)}s where ${this.getLayerSpan(UI.diagramGrid.constructor.METAL1, UI)} meets ${this.getLayerSpan(UI.diagramGrid.constructor.PDIFF, UI)} or ${this.getLayerSpan(UI.diagramGrid.constructor.NDIFF, UI)}.`,
+            ja_jp: `${this.getLayerSpan(UI.diagramGrid.constructor.PDIFF, UI)}か${this.getLayerSpan(UI.diagramGrid.constructor.NDIFF, UI)}層の上に${this.getLayerSpan(UI.diagramGrid.constructor.METAL1, UI)}層が引かれたところに${this.getLayerSpan(UI.diagramGrid.constructor.CONTACT, UI)}を置いてください。`,
         };
 
         tutStep.completed = function() {
@@ -480,8 +480,8 @@
         tutStep = new TutorialStep(UI);
 
         tutStep.instructions = {
-            en_us: "Draw a line of POLY that spans across the <span style='color:#332288'>PDIFF</span> and <span style='color:#117733'>NDIFF</span> lines between the left and right CONTACTs.",
-            ja_jp: "POLY層で<span style='color:#332288'>PDIFF</span>と<span style='color:#117733'>NDIFF層</span>を通る一本の線を左右のCONTACTの間に引いてください。",
+            en_us: `Draw a line of ${this.getLayerSpan(UI.diagramGrid.constructor.POLY, UI)} that spans across the ${this.getLayerSpan(UI.diagramGrid.constructor.PDIFF, UI)} and ${this.getLayerSpan(UI.diagramGrid.constructor.NDIFF, UI)} lines between the left and right ${this.getLayerSpan(UI.diagramGrid.constructor.CONTACT, UI)}.`,
+            ja_jp: `${this.getLayerSpan(UI.diagramGrid.constructor.POLY, UI)}層で${this.getLayerSpan(UI.diagramGrid.constructor.PDIFF, UI)}と${this.getLayerSpan(UI.diagramGrid.constructor.NDIFF, UI)}層を通る一本の線を左右の${this.getLayerSpan(UI.diagramGrid.constructor.CONTACT, UI)}の間に引いてください。`,
         };
 
         tutStep.completed = function() {
@@ -628,8 +628,8 @@
         tutStep = new TutorialStep(UI);
 
         tutStep.instructions = {
-            en_us: "Place the A terminal on the <span='color:#882255'>POLY</span> between the <span style='color:#332288'>PDIFF</span> and <span style='color:#117733'>NDIFF</span> lines.",
-            ja_jp: "A端子を<span style='color:#332288'>PDIFF</span>と<span style='color:#117733'>NDIFF層</span>の間の<span='color:#882255'>POLY</span>層上に置いてください。",
+            en_us: `Place the A terminal on the ${this.getLayerSpan(this.UI.diagramGrid.prototype.POLY, UI)} between the ${this.getLayerSpan(this.UI.diagramGrid.prototype.PDIFF, UI)} and ${this.getLayerSpan(this.UI.diagramGrid.prototype.NDIFF, UI)} lines.`,
+            ja_jp: `A端子を${this.getLayerSpan(this.UI.diagramGrid.prototype.PDIFF, UI)}と${this.getLayerSpan(this.UI.diagramGrid.prototype.NDIFF, UI)}層の間の${this.getLayerSpan(this.UI.diagramGrid.prototype.POLY, UI)}層上に置いてください。`,
         };
 
         tutStep.completed = function() {
@@ -812,8 +812,8 @@
         tutStep = new TutorialStep(UI);
 
         tutStep.instructions = {
-            en_us: "The output path isn't passing through VDD! <span style='color:#88CCEE'>METAL1</span> isn't passing through it.<br>Place <span style='color:#88CCEE'>METAL1</span> on VDD.",
-            ja_jp: "出力の同電路がVDDを通っていません！<span style='color:#88CCEE'>METAL1</span>層がVDDのセルにありません。<br><span style='color:#88CCEE'>METAL1</span>層をVDDに置いてください。",
+            en_us: `The output path isn't passing through VDD! ${this.getLayerSpan(this.UI.diagramGrid.prototype.METAL1, UI)} isn't passing through it.<br>Place ${this.getLayerSpan(this.UI.diagramGrid.prototype.METAL1, UI)} on VDD.`,
+            ja_jp: `出力の同電路がVDDを通っていません！${this.getLayerSpan(this.UI.diagramGrid.prototype.METAL1, UI)}層がVDDのセルにありません。<br>${this.getLayerSpan(this.UI.diagramGrid.prototype.METAL1, UI)}層をVDDに置いてください。`,
         };
 
         tutStep.completed = function() {
