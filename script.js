@@ -2538,7 +2538,7 @@
 
             // I
             this.addInputCommand = {
-                keyCode: 72,
+                keyCode: 73,
                 action:  function(e) {
                     if(e.type.includes('up')) {
                         this.diagramController.addTerminal(false);
@@ -2561,7 +2561,7 @@
             // SHIFT+I
             this.removeInputCommand = {
                 shiftModifier: true,
-                keyCode: 72,
+                keyCode: 73,
                 action:  function(e) {
                     if(e.type.includes('up')) {
                         this.diagramController.removeTerminal(false);
