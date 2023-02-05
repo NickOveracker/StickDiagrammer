@@ -47,6 +47,7 @@
     'use strict';
 
     class LayeredGrid {
+        // TODO: Consider moving to DiagramView if possible.
         // Cycle through the following cursor colors by pressing space: PDIFF, NDIFF, POLY, METAL1, CONTACT
         // Additional colors: DELETE at index (numLayers + 0)
         // Colorblind-friendly template found on [David Nichols's](https://personal.sron.nl/~pault/) website.

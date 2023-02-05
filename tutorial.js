@@ -105,6 +105,13 @@
             this.languageSetting = "en_us";
         }
 
+        getLayerNameString(layer, UI) {
+            let layerName, color;
+            layerName = this.UI.diagramGrid.constructor.layers(layer).toUpperCase();
+            color = this.UI.diagramView.getColor(layer, true);
+            return `<span style="color: ${color}; font-weight: bold;">${layerName}</span>`
+        }
+
         step() {
             if(this.active) {
                 if(this.steps[this.currentStep].completed()) {
