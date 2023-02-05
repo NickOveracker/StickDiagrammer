@@ -2545,7 +2545,7 @@
                         this.populateTermSelect();
                     }
                 }.bind(this),
-            }
+            };
 
             // O
             this.addOutputCommand = {
@@ -2556,7 +2556,7 @@
                         this.populateTermSelect();
                     }
                 }.bind(this),
-            }
+            };
 
             // SHIFT+I
             this.removeInputCommand = {
@@ -2568,7 +2568,7 @@
                         this.populateTermSelect();
                     }
                 }.bind(this),
-            }
+            };
 
             // SHIFT+O
             this.removeOutputCommand = {
@@ -2580,7 +2580,7 @@
                         this.populateTermSelect();
                     }
                 }.bind(this),
-            }
+            };
 
             this.placeIOCommand = {
                 keyCode: null,

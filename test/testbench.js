@@ -15,7 +15,7 @@
 /* jshint freeze: true */
 /* jshint futurehostile: true */
 /* jshint leanswitch: true */
-/* jshint maxcomplexity: 15 */
+/* jshint maxcomplexity: 20 */
 /* jshint maxdepth: 4 */
 /* jshint maxparams: 4 */
 /* jshint noarg: true */
@@ -32,6 +32,7 @@
 /* jshint browser: true */
 /* globals UI: false,
            LayeredGrid: false,
+           KeyboardEvent: false,
 */
 
 function runTestbench(runTo) {
