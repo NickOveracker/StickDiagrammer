@@ -1474,8 +1474,6 @@
         attemptGateConflictResolution(node, targetNode, inputVals) {
             let targetNodeReachable, nodeTerm1, nodeTerm2, od,
                 gndPathOk, vddPathOk, gndPathExistsActivated, vddPathExistsActivated;
-
-            console.log(`ATTEMPTING RESOLUTION: xistor (${node.cell.x}, ${node.cell.y}) to (${targetNode.cell.x}, ${targetNode.cell.y})`);
             // We will need to restore the old map after half of the
             // operation below, but there is no need to restore it at the
             // end. We will have determined that either there is a conflict
@@ -1494,16 +1492,19 @@
 
             // Source and drain nodes are interchangeable.
             // They're just named  that way here for readability
-            let allPathsOk = function(sourceNode, drainNode, targetNode, activePathExists) {
-                let path1 = this.getMapping(sourceNode, targetNode).hasPath;
-                console.log("Path 1: " + path1);
-                let path2 = this.getMapping(drainNode,  targetNode).hasPath;
-                console.log("Path 2: " + path2);
-                console.log("Active path exists: " + activePathExists);
+            let allPathsOk = function(sourceNode, drainNode, testNode, activePathExists) {
+                let path1 = this.getMapping(sourceNode, testNode);
+                let path2 = this.getMapping(drainNode,  testNode);
+                let pathToTarget1 = this.getMapping(sourceNode, targetNode);
+                let pathToTarget2 = this.getMapping(drainNode, targetNode);
+                let directPath    = this.getMapping(testNode, targetNode);
 
                 // Note: Can be undefined.
-                return Boolean(path1) === Boolean(path2) &&
-                       Boolean(path1) === Boolean(activePathExists);
+                return Boolean(directPath.hasPath) ||
+                       Boolean(pathToTarget1.hasPath) && Boolean(path1.hasPath) || 
+                       Boolean(pathToTarget2.hasPath) && Boolean(path2.hasPath) ||
+                       Boolean(path1.hasPath) === Boolean(path2.hasPath) &&
+                       Boolean(path1.hasPath) === Boolean(activePathExists.hasPath);
             }.bind(this);
 
             mapCopy(this.nodeNodeMap, backupNodeNodeMap);
@@ -1520,41 +1521,34 @@
             this.mapNodes(node, nodeTerm2, this.DIRECT_PATH);
                           
             targetNodeReachable = this.recurseThroughEdges(node, targetNode, inputVals).hasPath;
-            console.log(`xistor (${node.cell.x}, ${node.cell.y}) can reach (${targetNode.cell.x}, ${targetNode.cell.y})`);
         
             od = this.overdrivenPath;
             this.overdrivenPath = false;
-            console.log(`od = ${od}`);
 
             // If it is reachable at all, compare the paths for inactive and active states.
             if(targetNodeReachable && Math.min(node.cell.term1.nodes.size, node.cell.term2.nodes.size) > 1) {
-                gndPathExistsActivated = this.recurseThroughEdges(nodeTerm1, this.gndNode, inputVals).hasPath;
-                vddPathExistsActivated = this.recurseThroughEdges(nodeTerm1, this.vddNode, inputVals).hasPath;
-
-                console.log(`xistor (${node.cell.x}, ${node.cell.y}) can still reach (${targetNode.cell.x}, ${targetNode.cell.y})`);
-                console.log(`Path to gnd activated: ${gndPathExistsActivated}    Path to vdd activated: ${vddPathExistsActivated}`);
+                gndPathExistsActivated = this.recurseThroughEdges(nodeTerm1, this.gndNode, inputVals);
+                vddPathExistsActivated = this.recurseThroughEdges(nodeTerm1, this.vddNode, inputVals);
 
                 mapCopy(backupNodeNodeMap, this.nodeNodeMap);
                 od = od || this.overdrivenPath;
                 this.overdrivenPath = false;
-                console.log(`od = ${od}`);
 
                 // If there is a conflict when activated, then the target node is definitely overdriven.
                 // As long as there is no conflict, proceed.
-                if(!gndPathExistsActivated || !vddPathExistsActivated) {
+                if(!gndPathExistsActivated.hasPath || !vddPathExistsActivated.haspPath) {
                     // The active paths are fine.
                     // Now try with the gate inactive.
                     this.deactivateGate(node);
                     this.recurseThroughEdges(node, this.gndNode, inputVals);
                     this.recurseThroughEdges(node, this.vddNode, inputVals);
-                    console.log("Checking deactivated ground path...");
+                    this.recurseThroughEdges(nodeTerm1, targetNode, inputVals);
+                    this.recurseThroughEdges(nodeTerm2, targetNode, inputVals);
                     gndPathOk = allPathsOk(nodeTerm1, nodeTerm2, this.gndNode, gndPathExistsActivated);
-                    console.log("Checking deactivated vdd path...");
                     vddPathOk = allPathsOk(nodeTerm1, nodeTerm2, this.vddNode, vddPathExistsActivated);
                     
                     mapCopy(backupNodeNodeMap, this.nodeNodeMap);
                     od = od || this.overdrivenPath;
-                    console.log(`od = ${od}`);
                 }
 
                 od =  !(gndPathOk && vddPathOk) || od;
@@ -1572,6 +1566,10 @@
             node.edges.some(function(edge) {
                 let otherNode = edge.getOtherNode(node);
                 let mapping = this.getMapping(otherNode, targetNode);
+              
+              	if(!mapping.direct && (otherNode === this.vddNode || otherNode === this.gndNode)) {
+                  return false;
+                }
 
                 // Easy case: We have already found a path from this otherNode.
                 if (mapping.hasPath) {
