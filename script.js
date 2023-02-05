@@ -3065,17 +3065,9 @@
                 }
             }.bind(this);
 
-            document.getElementById("dark-mode-btn").onclick = function() {
-                this.toggleDarkMode();
-            }.bind(this);
-
-            document.getElementById("undo-btn").onclick = function() {
-                this.diagramController.undo();
-            }.bind(this);
-
-            document.getElementById("redo-btn").onclick = function() {
-                this.diagramController.redo();
-            }.bind(this);
+            document.getElementById("dark-mode-btn").onclick = this.toggleDarkMode;
+            document.getElementById("undo-btn").onclick = this.diagramController.undo;
+            document.getElementById("redo-btn").onclick = this.diagramController.redo;
 
             document.getElementById("place-term-btn").onclick = function() {
                 let placeTermButton = document.getElementById("place-term-btn");
@@ -3115,13 +3107,8 @@
                 this.populateTermSelect();
             }.bind(this);
 
-            document.getElementById('select-palette-btn').onclick = function() {
-                this.changeTheme();
-            }.bind(this);
-
-            document.getElementById('toggle-transparency-btn').onclick = function() {
-                this.toggleTransparency();
-            }.bind(this);
+            document.getElementById('select-palette-btn').onclick = this.changeTheme;
+            document.getElementById('toggle-transparency-btn').onclick = this.toggleTransparency;
 
             document.getElementById('tutorial-btn-0').onclick = function() {
                 if(window.tutorials) {
@@ -3148,7 +3135,6 @@
                 }
             };
         }
-
 
         getCloseMenuFunction(menuName) {
             return function() {
