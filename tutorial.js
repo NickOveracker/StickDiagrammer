@@ -266,8 +266,8 @@
         tutStep = new TutorialStep(UI);
 
         tutStep.instructions = {
-            en_us: "Select the METAL1 layer by right clicking a few times, or by pressing the METAL1 layer select button.",
-            ja_jp: "右クリックを数回してMETAL1層に変えるか、METAL1層の選択ボタンを押して下さい。",
+            en_us: `Select the ${tut.getLayerSpan(UI.diagramGrid.constructor.METAL1, UI)} layer by right clicking a few times, or by pressing the METAL1 layer select button.`,
+            ja_jp: `右クリックを数回してMETAL1層に変えるか、${tut.getLayerSpan(UI.diagramGrid.constructor.METAL1, UI)}層の選択ボタンを押して下さい。`,
         };
 
         tutStep.completed = function() {
@@ -302,8 +302,8 @@
         tutStep = new TutorialStep(UI);
 
         tutStep.instructions = {
-            en_us: "Connect VDD to METAL1.",
-            ja_jp: "VDDをMETAL1層に接続して下さい。",
+            en_us: `Connect VDD to ${tut.getLayerSpan(UI.diagramGrid.constructor.METAL1, UI)}.`,
+            ja_jp: `VDDを${tut.getLayerSpan(UI.diagramGrid.constructor.METAL1, UI)}層に接続して下さい。`,
         };
 
         tutStep.completed = function() {
@@ -329,8 +329,8 @@
         tutStep = new TutorialStep(UI);
 
         tutStep.instructions = {
-            en_us: "Select the CONTACT layer by right clicking a few times, or by pressing the METAL1 layer select button.",
-            ja_jp: "右クリックを数回してCONTACT層に変えるか、CONTACT層の選択ボタンを押して下さい。",
+            en_us: `Select the ${tut.getLayerSpan(UI.diagramGrid.constructor.CONTACT, UI)} layer by right clicking a few times, or by pressing the ${tut.getLayerSpan(UI.diagramGrid.constructor.CONTACT, UI)} layer select button.`,
+            ja_jp: `右クリックを数回して${tut.getLayerSpan(UI.diagramGrid.constructor.CONTACT, UI)}層に変えるか、${tut.getLayerSpan(UI.diagramGrid.constructor.CONTACT, UI)}層の選択ボタンを押して下さい。`,
         };
 
         tutStep.completed = function() {
@@ -542,7 +542,7 @@
             }
         };
 
-        tutStep.target = document.getElementById("terminal-menu-btn");
+        tutStep.target = document.getElementById("open-terminal-menu-btn");
         tutStep.position.centerHorizontal = true;
         tutStep.position.flipUp = true;
         
