@@ -50,8 +50,8 @@
             this.timer = Date.now();
             
             this.instructions = {
-                en_us: function() { return "English instructions."; },
-                ja_jp: function() { return "日本語の手順。"; },
+                en_us: function() { return `English instructions.`; },
+                ja_jp: function() { return `日本語の手順。`; },
             };
             this.completed     = () => { return true; };
             this.position      = { centerHorizontal: false, centerVertical: false, x: 0, y: 0, flipLeft: false, flipUp: false, };
@@ -182,8 +182,8 @@
         tutStep = new TutorialStep(UI);
 
         tutStep.instructions = {
-            en_us: function() { return "Set the grid to 20 rows and 20 columns."; },
-            ja_jp: function() { return "グリッドの行数と列数を両方２０に設定しましょう。"; },
+            en_us: function() { return `Set the grid to 20 rows and 20 columns.`; },
+            ja_jp: function() { return `グリッドの行数と列数を両方２０に設定しましょう。`; },
         };
 
         tutStep.completed = function() {
@@ -420,8 +420,8 @@
         tutStep = new TutorialStep(UI);
 
         tutStep.instructions = {
-            en_us: function() { return "Select the ${tut.getLayerSpan(UI.diagramGrid.constructor.POLY, UI)}layer by right clicking a few times, or by pressing the ${tut.getLayerSpan(UI.diagramGrid.constructor.POLY, UI)} layer select button."; },
-            ja_jp: function() { return "右クリックを数回して${tut.getLayerSpan(UI.diagramGrid.constructor.POLY, UI)}層に変えるか、${tut.getLayerSpan(UI.diagramGrid.constructor.POLY, UI)}層の選択ボタンを押して下さい。"; },
+            en_us: function() { return `Select the ${tut.getLayerSpan(UI.diagramGrid.constructor.POLY, UI)}layer by right clicking a few times, or by pressing the ${tut.getLayerSpan(UI.diagramGrid.constructor.POLY, UI)} layer select button.`; },
+            ja_jp: function() { return `右クリックを数回して${tut.getLayerSpan(UI.diagramGrid.constructor.POLY, UI)}層に変えるか、${tut.getLayerSpan(UI.diagramGrid.constructor.POLY, UI)}層の選択ボタンを押して下さい。`; },
         };
 
         tutStep.completed = function() {
@@ -517,8 +517,8 @@
         tutStep = new TutorialStep(UI);
 
         tutStep.instructions = {
-            en_us: function() { return "Open the Terminals menu."; },
-            ja_jp: function() { return "端子のメニューを開いて下さい。"; },
+            en_us: function() { return `Open the Terminals menu.`; },
+            ja_jp: function() { return `端子のメニューを開いて下さい。`; },
         };
 
         tutStep.completed = function() {
@@ -552,8 +552,8 @@
         tutStep = new TutorialStep(UI);
 
         tutStep.instructions = {
-            en_us: function() { return "Select Terminal A."; },
-            ja_jp: function() { return "A端子を選択してください。"; },
+            en_us: function() { return `Select Terminal A.`; },
+            ja_jp: function() { return `A端子を選択してください。`; },
         };
 
         tutStep.completed = function() {
@@ -593,8 +593,8 @@
         tutStep = new TutorialStep(UI);
 
         tutStep.instructions = {
-            en_us: function() { return "Press the Place Terminal button."; },
-            ja_jp: function() { return "端子移動ボタンを押してください。"; },
+            en_us: function() { return `Press the Place Terminal button.`; },
+            ja_jp: function() { return `端子移動ボタンを押してください。`; },
         };
 
         tutStep.completed = function() {
@@ -659,8 +659,8 @@
         tutStep = new TutorialStep(UI);
 
         tutStep.instructions = {
-            en_us: function() { return "Good! If you are on PC, you can also place the A terminal by typing \"A\".<br><br>Now delete every terminal except for A."; },
-            ja_jp: function() { return "完璧！パソコンを使用しているなら、A端子をAキーを打って早く置けます。<br><br>次、A端子以外の入力端子を削除しましょう。"; },
+            en_us: function() { return `Good! If you are on PC, you can also place the A terminal by typing \`A\`.<br><br>Now delete every terminal except for A.`; },
+            ja_jp: function() { return `完璧！パソコンを使用しているなら、A端子をAキーを打って早く置けます。<br><br>次、A端子以外の入力端子を削除しましょう。`; },
         };
 
         tutStep.completed = function() {
@@ -699,8 +699,8 @@
         tutStep = new TutorialStep(UI);
 
         tutStep.instructions = {
-            en_us: function() { return "Now, close the Terminals menu by pressing the close button or by pressing ESC."; },
-            ja_jp: function() { return "バツボタンまたはESCキーを押して端子メニューを閉じてください。"; },
+            en_us: function() { return `Now, close the Terminals menu by pressing the close button or by pressing ESC.`; },
+            ja_jp: function() { return `バツボタンまたはESCキーを押して端子メニューを閉じてください。`; },
         };
 
         tutStep.completed = function() {
@@ -734,8 +734,8 @@
         tutStep = new TutorialStep(UI);
 
         tutStep.instructions = {
-            en_us: function() { return "Press \"Evaluate\" to generate a truth table for the circuit."; },
-            ja_jp: function() { return "「Evaluate」を押して回路の真理値表を作成してください。"; },
+            en_us: function() { return `Press \`Evaluate\` to generate a truth table for the circuit.`; },
+            ja_jp: function() { return `「Evaluate」を押して回路の真理値表を作成してください。`; },
         };
 
         tutStep.completed = function() {
@@ -773,8 +773,8 @@
         tutStep = new TutorialStep(UI);
 
         tutStep.instructions = {
-            en_us: function() { return "The output isn't right! Click the \"Z\" output in the truth table to find out why it isn't \"1\"."; },
-            ja_jp: function() { return "出力がおかしい！「Z」の出力を押して、なぜ予想した「１」になっていないか検査しましょう。"; },
+            en_us: function() { return `The output isn't right! Click the \`Z\` output in the truth table to find out why it isn't \`1\`.`; },
+            ja_jp: function() { return `出力がおかしい！「Z」の出力を押して、なぜ予想した「１」になっていないか検査しましょう。`; },
         };
 
         tutStep.completed = function() {
@@ -842,8 +842,8 @@
         tutStep = new TutorialStep(UI);
 
         tutStep.instructions = {
-            en_us: function() { return "Press \"Evaluate\" to generate an updated truth table for the circuit."; },
-            ja_jp: function() { return "「Evaluate」を押して回路の真理値表を再作成してください。"; },
+            en_us: function() { return `Press \`Evaluate\` to generate an updated truth table for the circuit.`; },
+            ja_jp: function() { return `「Evaluate」を押して回路の真理値表を再作成してください。`; },
         };
 
         tutStep.completed = function() {
