@@ -2536,6 +2536,42 @@
                 }.bind(this),
             };
 
+            // I
+            this.addInputCommand = {
+                keyCode = 72,
+                action:   function() {
+                    this.diagramController.addTerminal(false);
+                    this.populateTermSelect();
+                },
+            }
+
+            // O
+            this.addOutputCommand = {
+                keyCode = 79,
+                action:   function() {
+                    this.diagramController.addTerminal(true);
+                    this.populateTermSelect();
+                },
+            }
+
+            // SHIFT+I
+            this.removeInputCommand = {
+                keyCode = 72,
+                action:   function() {
+                    this.diagramController.removeTerminal(false);
+                    this.populateTermSelect();
+                },
+            }
+
+            // SHIFT+O
+            this.removeOutputCommand = {
+                keyCode = 79,
+                action:   function() {
+                    this.diagramController.removeTerminal(true);
+                    this.populateTermSelect();
+                },
+            }
+
             this.placeIOCommand = {
                 keyCode: null,
                 action:  null,
