@@ -542,7 +542,7 @@
             }
         };
 
-        tutStep.target = document.getElementById("term-menu-btn");
+        tutStep.target = document.getElementById("terminal-menu-btn");
         tutStep.position.centerHorizontal = true;
         tutStep.position.flipUp = true;
         
@@ -724,7 +724,7 @@
             }
         };
 
-        tutStep.target = document.getElementById("close-term-menu-btn");
+        tutStep.target = document.getElementById("close-terminal-menu-btn");
         tutStep.position.flipLeft = true;
         tutStep.position.flipUp = true;
         
