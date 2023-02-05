@@ -2757,6 +2757,13 @@ function runTestbench(runTo) {
         "01010101XXXXXXXXXXXXXXXXZZZZZZZZ",
    ];
 
+    /** SET TO 1 OUTPUT AND 4 INPUTS */
+    while(UI.diagram.outputs > 1) { UI.diagramController.removeTerminal(true); }
+    while(UI.diagram.outputs < 1) { UI.diagramController.addTerminal(true); }
+    while(UI.diagram.inputs > 4)  { UI.diagramController.removeTerminal(false); }
+    while(UI.diagram.inputs < 4)  { UI.diagramController.addTerminal(false); }
+    UI.populateTermSelect();
+
     /** RUN TESTBENCH **/
     startTime = Date.now();
     for(let ii = 0; ii < events.length && testVector < runTo; ii++) {
