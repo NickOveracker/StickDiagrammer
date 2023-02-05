@@ -96,10 +96,11 @@ function runTestbench(runTo) {
                        "Remove one input keyboard test",
                        "Add two outputs keyboard test",
                        "Remove one output keyboard test",
-                       "Three overdriven transistors in series with input and two outputs (Known bug)",
+                       "Three overdriven transistors in series with input and two outputs",
                        "(Layout 1) Three overdriven transistors in series with input and one output",
-                       "(Layout 2) Three overdriven transistors in series with input and one output (Known bug)",
-                       "Output directly connected to VDD in series with overloaded transistor (Known bug)",
+                       "(Layout 2) Three overdriven transistors in series with input and one output",
+                       "Output directly connected to VDD in series with overloaded transistor",
+                       "One overdriven transistor in series with input and two outputs",
     ];
     runTo = runTo || testCases.length;
 
@@ -2764,6 +2765,7 @@ function runTestbench(runTo) {
             UI.diagramController.removeTerminal(false); // Remove E
             UI.diagramController.removeTerminal(false); // Remove D
             UI.diagramController.removeTerminal(false); // Remove C
+            UI.populateTermSelect();
             UI.diagram.vddCell.x  = 11;
             UI.diagram.vddCell.y  = 13;
             // Toggle back to transparent Tol for my eyes' sake
@@ -2779,6 +2781,32 @@ function runTestbench(runTo) {
 
         2,
         "1111",
+
+        /* Output directly connected to VDD in series with overloaded transistor (known bug) */
+        1,
+        function() {
+            UI.diagramController.removeTerminal(false); // Remove B
+            UI.diagramController.addTerminal(true);     // Add X
+            UI.populateTermSelect();
+
+            UI.diagram.inputs[0].x  = 8;
+            UI.diagram.inputs[0].y  = 13;
+            UI.diagram.outputs[0].x = 25;
+            UI.diagram.outputs[0].y = 13;
+            UI.diagram.vddCell.x    = 9;
+            UI.diagram.vddCell.y    = 5;
+            UI.diagram.gndCell.x    = 9;
+            UI.diagram.gndCell.y    = 23;
+        },
+
+        // Clean up contacts
+        ["mousedown", {button:  2, clientX: mapX(29),  clientY: mapY(14)}],
+        ["mouseup",   {button:  2, clientX: mapX(29),  clientY: mapY(15)}],
+        ["mousedown", {button:  2, clientX: mapX(8),   clientY: mapY(24)}],
+        ["mouseup",   {button:  2, clientX: mapX(8),   clientY: mapY(24)}],
+
+        2,
+        "XXXX",
    ];
 
     /** SET TO 1 OUTPUT AND 4 INPUTS */

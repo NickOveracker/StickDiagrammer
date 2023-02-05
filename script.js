@@ -1473,8 +1473,7 @@
         // Unset this.overdrivenPath if the conflict is resolvable.
         attemptGateConflictResolution(node, targetNode, inputVals) {
             let targetNodeReachable, nodeTerm1, nodeTerm2, od,
-                gndPathOk, vddPathOk, gndPathExistsActivated, vddPathExistsActivated;
-
+                gndPathExistsActivated, vddPathExistsActivated;
             // We will need to restore the old map after half of the
             // operation below, but there is no need to restore it at the
             // end. We will have determined that either there is a conflict
@@ -1483,9 +1482,9 @@
             // doesn't change depending on the gate's state).
             // There is no case in which we need to consider the gate
             // to be specifically open or closed after returning.
-            let backupNodeNodeMap = [];
+            const backupNodeNodeMap = [];
 
-            let mapCopy = function(from, to) {
+            const mapCopy = function(from, to) {
                 for(let ii = 0; ii < from.length; ii++) {
                     to[ii] = [...from[ii],];
                 }
@@ -1493,12 +1492,19 @@
 
             // Source and drain nodes are interchangeable.
             // They're just named  that way here for readability
-            let allPathsOk = function(sourceNode, drainNode, targetNode, activePathExists) {
-                let path1 = this.getMapping(sourceNode, targetNode).hasPath;
-                let path2 = this.getMapping(drainNode,  targetNode).hasPath;
+            const allPathsOk = function(sourceNode, drainNode, testNode, activePathExists) {
+                const path1 = this.getMapping(sourceNode, testNode);
+                const path2 = this.getMapping(drainNode,  testNode);
+                const pathToTarget1 = this.getMapping(sourceNode, targetNode);
+                const pathToTarget2 = this.getMapping(drainNode, targetNode);
+                const directPath    = this.getMapping(testNode, targetNode);
 
-                return path1 === path2 &&
-                       path1 === activePathExists;
+                // Note: Can be undefined.
+                return Boolean(directPath.hasPath) ||
+                       Boolean(pathToTarget1.hasPath) && Boolean(path1.hasPath) || 
+                       Boolean(pathToTarget2.hasPath) && Boolean(path2.hasPath) ||
+                       Boolean(path1.hasPath) === Boolean(path2.hasPath) &&
+                       Boolean(path1.hasPath) === Boolean(activePathExists.hasPath);
             }.bind(this);
 
             mapCopy(this.nodeNodeMap, backupNodeNodeMap);
@@ -1521,8 +1527,8 @@
 
             // If it is reachable at all, compare the paths for inactive and active states.
             if(targetNodeReachable && Math.min(node.cell.term1.nodes.size, node.cell.term2.nodes.size) > 1) {
-                gndPathExistsActivated = this.recurseThroughEdges(nodeTerm1, this.gndNode, inputVals).hasPath;
-                vddPathExistsActivated = this.recurseThroughEdges(nodeTerm1, this.vddNode, inputVals).hasPath;
+                gndPathExistsActivated = this.recurseThroughEdges(nodeTerm1, this.gndNode, inputVals);
+                vddPathExistsActivated = this.recurseThroughEdges(nodeTerm1, this.vddNode, inputVals);
 
                 mapCopy(backupNodeNodeMap, this.nodeNodeMap);
                 od = od || this.overdrivenPath;
@@ -1530,20 +1536,21 @@
 
                 // If there is a conflict when activated, then the target node is definitely overdriven.
                 // As long as there is no conflict, proceed.
-                if(!gndPathExistsActivated || !vddPathExistsActivated) {
+                if(!gndPathExistsActivated.hasPath || !vddPathExistsActivated.haspPath) {
                     // The active paths are fine.
                     // Now try with the gate inactive.
                     this.deactivateGate(node);
                     this.recurseThroughEdges(node, this.gndNode, inputVals);
                     this.recurseThroughEdges(node, this.vddNode, inputVals);
-                    gndPathOk = allPathsOk(nodeTerm1, nodeTerm2, this.gndNode, gndPathExistsActivated);
-                    vddPathOk = allPathsOk(nodeTerm1, nodeTerm2, this.vddNode, vddPathExistsActivated);
+                    this.recurseThroughEdges(nodeTerm1, targetNode, inputVals);
+                    this.recurseThroughEdges(nodeTerm2, targetNode, inputVals);
                     
-                    mapCopy(backupNodeNodeMap, this.nodeNodeMap);
-                    od = od || this.overdrivenPath;
-                }
+                    od = od || this.overdrivenPath || 
+                         !allPathsOk(nodeTerm1, nodeTerm2, this.gndNode, gndPathExistsActivated) ||
+                         !allPathsOk(nodeTerm1, nodeTerm2, this.vddNode, vddPathExistsActivated);
 
-                od =  !(gndPathOk && vddPathOk) || od;
+                    mapCopy(backupNodeNodeMap, this.nodeNodeMap);
+                }
             }
 
             // No path to targetNode === No problem
@@ -1558,6 +1565,10 @@
             node.edges.some(function(edge) {
                 let otherNode = edge.getOtherNode(node);
                 let mapping = this.getMapping(otherNode, targetNode);
+              
+              	if(!mapping.direct && (otherNode === this.vddNode || otherNode === this.gndNode)) {
+                  return false;
+                }
 
                 // Easy case: We have already found a path from this otherNode.
                 if (mapping.hasPath) {
@@ -1902,7 +1913,10 @@
             // Save all the results of the analysis for this combination
             // of input values and output node so that we can highlight
             // all connected nodes.
-            this.analyses[inputVals] = [...this.nodeNodeMap,];
+            // Don't do this for overdriven paths; it screws up multiple outputs
+            if(!this.overdrivenPath) {
+                this.analyses[inputVals] = [...this.nodeNodeMap,];
+            }
 
             // Reset the node-node map so that it will be ready for
             // the next time this function is called.
@@ -2241,7 +2255,7 @@
             // (Except when there is also a contact)
 
             let handleCell = function(layer, transistorArray) {
-                if (cell.layer === layer && cell.isSet) {
+                if (!transistorArray.has(cell) && cell.layer === layer && cell.isSet) {
                     if (this.layeredGrid.get(cell.x, cell.y, LayeredGrid.POLY).isSet && !this.layeredGrid.get(cell.x, cell.y, LayeredGrid.CONTACT).isSet) {
                         // Set the gate to the poly cell.
                         cell.gate = this.layeredGrid.get(cell.x, cell.y, LayeredGrid.POLY);
@@ -3235,6 +3249,7 @@
                 // Compute each output.
                 for (let jj = 0; jj < this.diagram.outputs.length; jj++) {
                     tableOutputRow[jj] = this.diagram.computeOutput(ii, this.diagram.outputNodes[jj]);
+                    // Don't reuse the analysis in case of overdriven paths.
                 }
 
                 outputVals[ii] = tableOutputRow;
