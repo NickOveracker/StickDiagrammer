@@ -89,6 +89,8 @@ function runTestbench(runTo) {
                      "One transistor driven by VDD & GND in series w/ overdriven gate & direct input",
                      "Dark mode toggle button test",
                      "Dark mode toggle keyboard test",
+                     "Theme change keyboard test",
+                     "Transparency toggle keyboard test",
     ];
     runTo = runTo || testCases.length;
 
@@ -2581,15 +2583,48 @@ function runTestbench(runTo) {
             let keyboardEvent = new KeyboardEvent("keyup", {
                 bubbles : true,
                 cancelable : true,
-                shiftKey : true,
-                ctrlKey: false,
-                keyCode : 68
+                shiftKey : window.UI.darkModeCommand.shiftModifier,
+                ctrlKey: window.UI.darkModeCommand.ctrlModifier,
+                keyCode: window.UI.darkModeCommand.keyCode, 
             });
             document.dispatchEvent(keyboardEvent);
 
             return window.UI.diagramView.darkMode !== compareTo;
         },
 
+        /* Change the theme via simulated keyboard shortcut */
+        3,
+        function() {
+            let compareTo = window.UI.diagramView.theme;
+
+            let keyboardEvent = new KeyboardEvent("keyup", {
+                bubbles : true,
+                cancelable : true,
+                shiftKey : window.UI.themeCommand.shiftModifier,
+                ctrlKey: window.UI.themeCommand.ctrlModifier,
+                keyCode: window.UI.themeCommand.keyCode, 
+            });
+            document.dispatchEvent(keyboardEvent);
+
+            return window.UI.diagramView.theme !== compareTo;
+        },
+
+        /* Toggle transparency via simulated keyboard shortcut */
+        3,
+        function() {
+            let compareTo = window.UI.diagramView.useFlatColors;
+
+            let keyboardEvent = new KeyboardEvent("keyup", {
+                bubbles : true,
+                cancelable : true,
+                shiftKey : window.UI.transparencyCommand.shiftModifier,
+                ctrlKey: window.UI.transparencyCommand.ctrlModifier,
+                keyCode: window.UI.transparencyCommand.keyCode, 
+            });
+            document.dispatchEvent(keyboardEvent);
+
+            return window.UI.diagramView.useFlatColors !== compareTo;
+        },
    ];
 
     /** RUN TESTBENCH **/
