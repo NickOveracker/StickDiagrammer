@@ -2539,7 +2539,7 @@
             // I
             this.addInputCommand = {
                 keyCode: 72,
-                action:  function() {
+                action:  function(e) {
                     if(e.type.includes('up')) {
                         this.diagramController.addTerminal(false);
                         this.populateTermSelect();
@@ -2550,7 +2550,7 @@
             // O
             this.addOutputCommand = {
                 keyCode: 79,
-                action:  function() {
+                action:  function(e) {
                     if(e.type.includes('up')) {
                         this.diagramController.addTerminal(true);
                         this.populateTermSelect();
@@ -2562,7 +2562,7 @@
             this.removeInputCommand = {
                 shiftModifier: true,
                 keyCode: 72,
-                action:  function() {
+                action:  function(e) {
                     if(e.type.includes('up')) {
                         this.diagramController.removeTerminal(false);
                         this.populateTermSelect();
@@ -2574,7 +2574,7 @@
             this.removeOutputCommand = {
                 shiftModifier: true,
                 keyCode: 79,
-                action:  function() {
+                action:  function(e) {
                     if(e.type.includes('up')) {
                         this.diagramController.removeTerminal(true);
                         this.populateTermSelect();
