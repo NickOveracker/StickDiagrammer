@@ -57,7 +57,7 @@
 * ~~Knowing that I spelled "accolades" correctly (I don't feel like Googling it)~~ *Resolved 2021/11/20*
 
 ## Known Bugs
-* Incorrect output when overdriven transistors drive multiple outputs. (Testbench case 49)
+* ~~Incorrect output when overdriven transistors drive multiple outputs. (Testbench cases 49, 53)~~ *Resoled 2023/2/6*
 * ~~Incorrect output when dead-end overdriven transistors are behind inputs (Testbench cases 51, 52)~~ *Resolved 2023/2/6*
 * ~~The pullup/pulldown alert div displaces the canvas by too much in some browsers, even when not visible.~~ *Resolved 2023/1/30*
 * ~~Highlighted nets are no longer comprehensive.~~ *Resolved 2023/1/22*

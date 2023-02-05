@@ -96,11 +96,11 @@ function runTestbench(runTo) {
                        "Remove one input keyboard test",
                        "Add two outputs keyboard test",
                        "Remove one output keyboard test",
-                       "Three overdriven transistors in series with input and two outputs (Known bug)",
+                       "Three overdriven transistors in series with input and two outputs",
                        "(Layout 1) Three overdriven transistors in series with input and one output",
                        "(Layout 2) Three overdriven transistors in series with input and one output",
                        "Output directly connected to VDD in series with overloaded transistor",
-                       "One overdriven transistor in series with input and two outpus (Known bug)",
+                       "One overdriven transistor in series with input and two outputs",
     ];
     runTo = runTo || testCases.length;
 
