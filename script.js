@@ -2540,8 +2540,10 @@
             this.addInputCommand = {
                 keyCode: 72,
                 action:  function() {
-                    this.diagramController.addTerminal(false);
-                    this.populateTermSelect();
+                    if(e.type.includes('up')) {
+                        this.diagramController.addTerminal(false);
+                        this.populateTermSelect();
+                    }
                 }.bind(this),
             }
 
@@ -2549,26 +2551,34 @@
             this.addOutputCommand = {
                 keyCode: 79,
                 action:  function() {
-                    this.diagramController.addTerminal(true);
-                    this.populateTermSelect();
+                    if(e.type.includes('up')) {
+                        this.diagramController.addTerminal(true);
+                        this.populateTermSelect();
+                    }
                 }.bind(this),
             }
 
             // SHIFT+I
             this.removeInputCommand = {
+                shiftModifier: true,
                 keyCode: 72,
                 action:  function() {
-                    this.diagramController.removeTerminal(false);
-                    this.populateTermSelect();
+                    if(e.type.includes('up')) {
+                        this.diagramController.removeTerminal(false);
+                        this.populateTermSelect();
+                    }
                 }.bind(this),
             }
 
             // SHIFT+O
             this.removeOutputCommand = {
+                shiftModifier: true,
                 keyCode: 79,
                 action:  function() {
-                    this.diagramController.removeTerminal(true);
-                    this.populateTermSelect();
+                    if(e.type.includes('up')) {
+                        this.diagramController.removeTerminal(true);
+                        this.populateTermSelect();
+                    }
                 }.bind(this),
             }
 
@@ -2635,7 +2645,7 @@
                 ctrlModifier: true,
                 keyCode:      37,
                 action:       function(e) {
-                    if(e.type.includes('down')) {
+                    if(e.type.includes('up')) {
                         let coords = this.diagramController.getCellAtCursor();
                         coords = Object.hasOwn(coords, "x") ? coords : {x: this.diagramGrid.width, };
                         if(Object.hasOwn(coords, "x")) {
@@ -2652,7 +2662,7 @@
                 ctrlModifier: true,
                 keyCode:       38,
                 action:        function(e) {
-                    if(e.type.includes('down')) {
+                    if(e.type.includes('up')) {
                         let coords = this.diagramController.getCellAtCursor();
                         if(Object.hasOwn(coords, "y")) {
                             this.diagramGrid.insertRemoveRowColAt(coords.y, false, true);
@@ -2668,7 +2678,7 @@
                 ctrlModifier: true,
                 keyCode:      39,
                 action:       function(e) {
-                    if(e.type.includes('down')) {
+                    if(e.type.includes('up')) {
                         let coords = this.diagramController.getCellAtCursor();
                         if(Object.hasOwn(coords, "x")) {
                             this.diagramGrid.insertRemoveRowColAt(coords.x, true, false);
@@ -2684,7 +2694,7 @@
                 ctrlModifier: true,
                 keyCode:      40,
                 action:       function(e) {
-                    if(e.type.includes('down')) {
+                    if(e.type.includes('up')) {
                         let coords = this.diagramController.getCellAtCursor();
                         if(Object.hasOwn(coords, "y")) {
                             this.diagramGrid.insertRemoveRowColAt(coords.y, true, true);
