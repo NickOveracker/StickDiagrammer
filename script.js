@@ -3119,8 +3119,8 @@
             }.bind(this);
 
             document.getElementById("dark-mode-btn").onclick = this.toggleDarkMode.bind(this);
-            document.getElementById("undo-btn").onclick = this.diagramController.undo.bind(this);
-            document.getElementById("redo-btn").onclick = this.diagramController.redo.bind(this);
+            document.getElementById("undo-btn").onclick = this.diagramController.undo.bind(this.diagramController);
+            document.getElementById("redo-btn").onclick = this.diagramController.redo.bind(this.diagramController);
             document.getElementById('select-palette-btn').onclick = this.changeTheme.bind(this);
             document.getElementById('toggle-transparency-btn').onclick = this.toggleTransparency.bind(this);
 
