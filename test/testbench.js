@@ -2765,6 +2765,10 @@ function runTestbench(runTo) {
             UI.diagramController.removeTerminal(false); // Remove C
             UI.diagram.vddCell.x  = 11;
             UI.diagram.vddCell.y  = 13;
+            // Toggle back to transparent Tol for my eyes' sake
+            UI.changeTheme(); // Stix
+            UI.changeTheme(); // Tol
+            UI.toggleTransparency();
         },
 
         // Remove the two left transistors
