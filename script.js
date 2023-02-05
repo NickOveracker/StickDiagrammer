@@ -1475,7 +1475,7 @@
             let targetNodeReachable, nodeTerm1, nodeTerm2, od,
                 gndPathOk, vddPathOk, gndPathExistsActivated, vddPathExistsActivated;
 
-            console.log(`ATTEMPTING RESOLUTION: xistor (${node.x}, ${node.y}) to (${targetNode.x}, ${targetNode.y})`);
+            console.log(`ATTEMPTING RESOLUTION: xistor (${node.cell.x}, ${node.cell.y}) to (${targetNode.cell.x}, ${targetNode.cell.y})`);
             // We will need to restore the old map after half of the
             // operation below, but there is no need to restore it at the
             // end. We will have determined that either there is a conflict
@@ -1519,7 +1519,7 @@
             this.mapNodes(node, nodeTerm2, this.DIRECT_PATH);
                           
             targetNodeReachable = this.recurseThroughEdges(node, targetNode, inputVals).hasPath;
-            console.log(`xistor (${node.x}, ${node.y}) can reach (${targetNode.x}, ${targetNode.y})`);
+            console.log(`xistor (${node.cell.x}, ${node.cell.y}) can reach (${targetNode.cell.x}, ${targetNode.cell.y})`);
         
             od = this.overdrivenPath;
             this.overdrivenPath = false;
@@ -1530,7 +1530,7 @@
                 gndPathExistsActivated = this.recurseThroughEdges(nodeTerm1, this.gndNode, inputVals).hasPath;
                 vddPathExistsActivated = this.recurseThroughEdges(nodeTerm1, this.vddNode, inputVals).hasPath;
 
-                console.log(`xistor (${node.x}, ${node.y}) can still reach (${targetNode.x}, ${targetNode.y})`);
+                console.log(`xistor (${node.cell.x}, ${node.cell.y}) can still reach (${targetNode.cell.x}, ${targetNode.cell.y})`);
                 console.log(`Path to gnd activated: ${gndPathExistsActivated}    Path to vdd activated: ${vddPathExistsActivated}`);
 
                 mapCopy(backupNodeNodeMap, this.nodeNodeMap);
