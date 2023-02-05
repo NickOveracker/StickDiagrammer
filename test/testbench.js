@@ -98,6 +98,7 @@ function runTestbench(runTo) {
                        "Three overdriven transistors in series with input and two outputs (Known bug)",
                        "(Layout 1) Three overdriven transistors in series with input and one output",
                        "(Layout 2) Three overdriven transistors in series with input and one output (Known bug)",
+                       "Output directly connected to VDD in series with overloaded transistor (Known bug)",
     ];
     runTo = runTo || testCases.length;
 
@@ -2755,6 +2756,24 @@ function runTestbench(runTo) {
 
         2,
         "01010101XXXXXXXXXXXXXXXXZZZZZZZZ",
+
+        /* Output directly connected to VDD in series with overloaded transistor (known bug) */
+        1,
+        function() {
+            UI.diagramController.removeTerminal(false); // Remove E
+            UI.diagramController.removeTerminal(false); // Remove D
+            UI.diagramController.removeTerminal(false); // Remove C
+            UI.diagram.vddCell.x  = 11;
+            UI.diagram.vddCell.y  = 13;
+        },
+
+        // Remove the two left transistors
+        ["mousedown", {button:  2, clientX: mapX(1),   clientY: mapY(1)}],
+        ["mousemove", {buttons: 2, clientX: mapX(9),   clientY: mapY(29)}],
+        ["mouseup",   {button:  2, clientX: mapX(9),   clientY: mapY(29)}],
+
+        2,
+        "1111",
    ];
 
     /** SET TO 1 OUTPUT AND 4 INPUTS */
