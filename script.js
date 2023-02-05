@@ -2368,6 +2368,8 @@
             this.diagramView       = diagram.view;
             this.diagramGrid       = diagram.layeredGrid;
 
+            // Order matters
+            // Lower-indexed menus are displayed at the same level as or over higher-indexed menus.
             this.menus = [
                 "tutorials",
                 "instructions",
@@ -2376,8 +2378,6 @@
                 "main-menu",
                 "terminal-menu",
             ];
-
-
 
             this.allCommands        = [];
             this.shiftCommands      = [];
@@ -3115,8 +3115,7 @@
 
             document.getElementById('tutorial-btn-0').onclick = function() {
                 if(window.tutorials) {
-                    this.closeTutorials();
-                    this.closeMainMenu();
+                    this.closeAllMenus();
                     this.tutorial = window.tutorials[0].get(this, LayeredGrid);
                     this.tutorial.start();
                 }
@@ -3157,6 +3156,12 @@
         closeTopMenu() {
             this.menus.some(function(menuName) {
                 return document.getElementById("close-" + menuName + "-btn").onclick();
+            });
+        }
+
+        closeAllMenus() {
+            this.menus.forEach(function(menuName) {
+                document.getElementById("close-" + menuName + "-btn").onclick();
             });
         }
 
