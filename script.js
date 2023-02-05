@@ -2367,6 +2367,17 @@
             this.diagramView       = diagram.view;
             this.diagramGrid       = diagram.layeredGrid;
 
+            this.menus = [
+                "tutorials",
+                "instructions",
+                "about-page",
+                "options-menu",
+                "main-menu",
+                "terminal-menu",
+            ];
+
+
+
             this.allCommands        = [];
             this.shiftCommands      = [];
             this.ctrlCommands       = [];
@@ -3025,18 +3036,9 @@
                 }.bind(this);
             }.bind(this);
 
-            let menus = [
-                "main-menu",
-                "tutorials",
-                "instructions",
-                "about-page",
-                "options-menu",
-                "terminal-menu",
-            ];
-
-            menus.forEach(function(menuName) {
-                document.getElementById("open-" + menuName + "-btn").onClick  = this.getOpenMenuFunction(menuName);
-                document.getElementById("close-" + menuName + "-btn").onClick = this.getCloseMenuFunction(menuName);
+            this.menus.forEach(function(menuName) {
+                document.getElementById("open-" + menuName + "-btn").onclick  = this.getOpenMenuFunction(menuName);
+                document.getElementById("close-" + menuName + "-btn").onclick = this.getCloseMenuFunction(menuName);
             }.bind(this));
 
             document.getElementById("add-row").onclick       = resizeGridByOne(true,  true);
@@ -3152,7 +3154,9 @@
         }
 
         closeTopMenu() {
-            this.closeTutorials() || this.closeAboutPage() || this.closeOptionsMenu() || this.closeInstructions() || this.closeMainMenu() || this.closeTermMenu(); // jshint ignore:line
+            this.menus.some(function(menuName) {
+                return document.getElementById("close-" + menuName + "-btn").onclick();
+            });
         }
 
         // Generate an output table.
