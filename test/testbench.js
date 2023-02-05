@@ -46,7 +46,6 @@ function runTestbench(runTo) {
     let p;
     let results = [];
     let startTime;
-    let compareTo;
     const testCases = ["Five-stage inverter",
                      "Four-stage buffer",
                      "OR-4",
@@ -2569,7 +2568,7 @@ function runTestbench(runTo) {
         /* Toggle dark mode via simulated button click */
         3,
         function() {
-            compareTo = window.UI.diagramView.darkMode;
+            let compareTo = window.UI.diagramView.darkMode;
             document.getElementById("dark-mode-btn").click();
             return window.UI.diagramView.darkMode !== compareTo;
         },
@@ -2577,23 +2576,15 @@ function runTestbench(runTo) {
         /* Toggle dark mode via simulated keyboard shortcut */
         3,
         function() {
-            compareTo = window.UI.diagramView.darkMode;
+            let compareTo = window.UI.diagramView.darkMode;
 
-            var keyboardEvent = document.createEvent('KeyboardEvent');
-            var initMethod = typeof keyboardEvent.initKeyboardEvent !== 'undefined' ? 'initKeyboardEvent' : 'initKeyEvent';
-
-            keyboardEvent[initMethod] (
-                'keydown', // event type: keydown, keyup, keypress
-                true, // bubbles
-                true, // cancelable
-                window, // view: should be window
-                false, // ctrlKey
-                false, // altKey
-                true, // shiftKey
-                false, // metaKey
-                68, // keyCode: unsigned long - the virtual key code, else 0
-                0, // charCode: unsigned long - the Unicode character associated with the depressed key, else 0
-            );
+            let keyboardEvent = new KeyboardEvent("keyup", {
+                bubbles : true,
+                cancelable : true,
+                shiftKey : true,
+                ctrlKey: false,
+                keyCode : 68
+            });
             document.dispatchEvent(keyboardEvent);
 
             return window.UI.diagramView.darkMode !== compareTo;
