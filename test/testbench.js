@@ -2724,6 +2724,15 @@ function runTestbench(runTo) {
             UI.diagram.gndCell.y    = 23;
         },
 
+        // Clear old contacts
+        ["mousedown", {button:  2, clientX: mapX(1),  clientY: mapY(1)}],
+        ["mouseup",   {button:  2, clientX: mapX(1),  clientY: mapY(1)}],
+        ["mousedown", {button:  2, clientX: mapX(1),  clientY: mapY(15)}],
+        ["mouseup",   {button:  2, clientX: mapX(1),  clientY: mapY(15)}],
+        ["mousedown", {button:  2, clientX: mapX(29), clientY: mapY(15)}],
+        ["mouseup",   {button:  2, clientX: mapX(29), clientY: mapY(15)}],
+
+        // POLY
         ["mousedown", {button:  0, clientX: mapX(10), clientY: mapY(1)}],
         ["mousemove", {buttons: 1, clientX: mapX(10), clientY: mapY(29)}],
         ["mouseup",   {button:  1, clientX: mapX(10), clientY: mapY(29)}],
