@@ -40,12 +40,14 @@ function runTestbench(runTo) {
     let evt;
     let executeNext = false;
     let assertNext = false;
+    let evalBooleanNext = false;
     let tv;
     let testVector = 0;
     let p;
     let results = [];
     let startTime;
-    let testCases = ["Five-stage inverter",
+    let compareTo;
+    const testCases = ["Five-stage inverter",
                      "Four-stage buffer",
                      "OR-4",
                      "NOR-4",
@@ -86,6 +88,8 @@ function runTestbench(runTo) {
                      "Two overdriven transistors in series with VDD w/ grounded gate",
                      "One transistor driven by VDD & GND in series w/ singly-driven gate & direct input",
                      "One transistor driven by VDD & GND in series w/ overdriven gate & direct input",
+                     "Dark mode toggle button test",
+                     "Dark mode toggle keyboard test",
     ];
     runTo = runTo || testCases.length;
 
@@ -2562,6 +2566,39 @@ function runTestbench(runTo) {
         2,
         "XXXXXXZZXXXXXXZZ",
 
+        /* Toggle dark mode via simulated button click */
+        3,
+        function() {
+            compareTo = window.UI.diagramView.darkMode;
+            document.getElementById("dark-mode-btn").click();
+            return window.UI.diagramView.darkMode !== compareTo;
+        },
+
+        /* Toggle dark mode via simulated keyboard shortcut */
+        3,
+        function() {
+            compareTo = window.UI.diagramView.darkMode;
+
+            var keyboardEvent = document.createEvent('KeyboardEvent');
+            var initMethod = typeof keyboardEvent.initKeyboardEvent !== 'undefined' ? 'initKeyboardEvent' : 'initKeyEvent';
+
+            keyboardEvent[initMethod] (
+                'keydown', // event type: keydown, keyup, keypress
+                true, // bubbles
+                true, // cancelable
+                window, // view: should be window
+                false, // ctrlKey
+                false, // altKey
+                shift, // shiftKey
+                false, // metaKey
+                68, // keyCode: unsigned long - the virtual key code, else 0
+                0, // charCode: unsigned long - the Unicode character associated with the depressed key, else 0
+            );
+            document.dispatchEvent(keyboardEvent);
+
+            return window.UI.diagramView.darkMode !== compareTo;
+        },
+
    ];
 
     /** RUN TESTBENCH **/
@@ -2582,20 +2619,15 @@ function runTestbench(runTo) {
             continue;
         }
 
+        if(events[ii] === 3) {
+            evalBooleanNext = true;
+            continue;
+        }
+
         if(executeNext) {
             events[ii]();
             executeNext = false;
-        } else {
-            evt = new MouseEvent(events[ii][0], {
-                view: window,
-                bubbles: true,
-                cancelable: true,
-                ...events[ii][1]
-            });
-            document.getElementById('canvas-wrapper').dispatchEvent(evt);
-        }
-
-        if(assertNext) {
+        } else if(assertNext) {
             // Set CONTACT at the coordinates of each input and output.
             UI.diagram.inputs.forEach(function(input) {
                 UI.diagram.layeredGrid.set(input.x, input.y, LayeredGrid.CONTACT);
@@ -2623,6 +2655,18 @@ function runTestbench(runTo) {
             testVector++;
 
             assertNext = false;
+        } else if(evalBooleanNext) {
+            results[testVector] = events[ii]();
+            testVector++;
+            evalBooleanNext = false;
+        } else {
+            evt = new MouseEvent(events[ii][0], {
+                view: window,
+                bubbles: true,
+                cancelable: true,
+                ...events[ii][1]
+            });
+            document.getElementById('canvas-wrapper').dispatchEvent(evt);
         }
     }
     endTime = Date.now();
