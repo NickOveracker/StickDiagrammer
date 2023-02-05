@@ -1501,8 +1501,9 @@
                 console.log("Path 2: " + path2);
                 console.log("Active path exists: " + activePathExists);
 
-                return path1 === path2 &&
-                       path1 === activePathExists;
+                // Note: Can be undefined.
+                return Boolean(path1) === Boolean(path2) &&
+                       Boolean(path1) === Boolean(activePathExists);
             }.bind(this);
 
             mapCopy(this.nodeNodeMap, backupNodeNodeMap);
