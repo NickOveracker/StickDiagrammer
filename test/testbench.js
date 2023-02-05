@@ -97,7 +97,7 @@ function runTestbench(runTo) {
                        "Remove one output keyboard test",
                        "Three overdriven transistors in series with input and two outputs (Known bug)",
                        "(Layout 1) Three overdriven transistors in series with input and one output",
-                       "(Layout 2) Three overdriven transistors in series with input and one output",
+                       "(Layout 2) Three overdriven transistors in series with input and one output (Known bug)",
     ];
     runTo = runTo || testCases.length;
 
