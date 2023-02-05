@@ -47,54 +47,55 @@ function runTestbench(runTo) {
     let results = [];
     let startTime;
     const testCases = ["Five-stage inverter",
-                     "Four-stage buffer",
-                     "OR-4",
-                     "NOR-4",
-                     "NAND-4",
-                     "AND-4",
-                     "This test always fails",
-                     "Short-circuit #1",
-                     "Short-circuit #2",
-                     "Short-circuit #3",
-                     "Short-circuit #4",
-                     "Short-circuit #5",
-                     "Short-circuit #6",
-                     "Open-circuit #1",
-                     "Open-circuit #2",
-                     "Open-circuit #3",
-                     "Direct input #1",
-                     "Direct input #2",
-                     "Direct input #3",
-                     "Direct input #4",
-                     "A*B*(C+D)",
-                     "AOI4",
-                     "Between transistors",
-                     "SR latch Q",
-                     "SR latch Q'",
-                     "D flip-flop",
-                     "VDD & GND driving single PMOS gate",
-                     "Two inputs driving single PMOS gate",
-                     "VDD & GND driving single NMOS gate",
-                     "Two inputs driving single NMOS gate",
-                     "Indirectly overdriven output via NMOS",
-                     "Indirectly overdriven output via PMOS",
-                     "Indirectly overdriven gates via PMOS",
-                     "Indirectly overdriven gates via NMOS",
-                     "Overdriven dead-end transistor",
-                     "One overdriven transistor in series with VDD w/ grounded gate",
-                     "Two overdriven dead-end transistors in series",
-                     "Two overdriven transistors in series with VDD",
-                     "Two overdriven transistors in series with VDD w/ grounded gate",
-                     "One transistor driven by VDD & GND in series w/ singly-driven gate & direct input",
-                     "One transistor driven by VDD & GND in series w/ overdriven gate & direct input",
-                     "Dark mode toggle button test",
-                     "Dark mode toggle keyboard test",
-                     "Theme change keyboard test",
-                     "Transparency toggle keyboard test",
-                     "Add two inputs keyboard test",
-                     "Remove one input keyboard test",
-                     "Add two outputs keyboard test",
-                     "Remove one output keyboard test",
+                       "Four-stage buffer",
+                       "OR-4",
+                       "NOR-4",
+                       "NAND-4",
+                       "AND-4",
+                       "This test always fails",
+                       "Short-circuit #1",
+                       "Short-circuit #2",
+                       "Short-circuit #3",
+                       "Short-circuit #4",
+                       "Short-circuit #5",
+                       "Short-circuit #6",
+                       "Open-circuit #1",
+                       "Open-circuit #2",
+                       "Open-circuit #3",
+                       "Direct input #1",
+                       "Direct input #2",
+                       "Direct input #3",
+                       "Direct input #4",
+                       "A*B*(C+D)",
+                       "AOI4",
+                       "Between transistors",
+                       "SR latch Q",
+                       "SR latch Q'",
+                       "D flip-flop",
+                       "VDD & GND driving single PMOS gate",
+                       "Two inputs driving single PMOS gate",
+                       "VDD & GND driving single NMOS gate",
+                       "Two inputs driving single NMOS gate",
+                       "Indirectly overdriven output via NMOS",
+                       "Indirectly overdriven output via PMOS",
+                       "Indirectly overdriven gates via PMOS",
+                       "Indirectly overdriven gates via NMOS",
+                       "Overdriven dead-end transistor",
+                       "One overdriven transistor in series with VDD w/ grounded gate",
+                       "Two overdriven dead-end transistors in series",
+                       "Two overdriven transistors in series with VDD",
+                       "Two overdriven transistors in series with VDD w/ grounded gate",
+                       "One transistor driven by VDD & GND in series w/ singly-driven gate & direct input",
+                       "One transistor driven by VDD & GND in series w/ overdriven gate & direct input",
+                       "Dark mode toggle button test",
+                       "Dark mode toggle keyboard test",
+                       "Theme change keyboard test",
+                       "Transparency toggle keyboard test",
+                       "Add two inputs keyboard test",
+                       "Remove one input keyboard test",
+                       "Add two outputs keyboard test",
+                       "Remove one output keyboard test",
+                       "Three overdriven transistors in series with input and two outputs (Known bug)",
     ];
     runTo = runTo || testCases.length;
 
@@ -2699,6 +2700,36 @@ function runTestbench(runTo) {
 
             return window.UI.diagram.outputs.length === compareTo - 1;
         },
+
+        /* Three overdriven transistors in series with input and two outputs */
+        1,
+        function() {
+            UI.diagram.inputs[0].x  = 9;
+            UI.diagram.inputs[0].y  = 5;
+            UI.diagram.inputs[1].x  = 9;
+            UI.diagram.inputs[1].y  = 23;
+            UI.diagram.inputs[2].x  = 5;
+            UI.diagram.inputs[2].y  = 23;
+            UI.diagram.inputs[3].x  = 5;
+            UI.diagram.inputs[3].y  = 5;
+            UI.diagram.inputs[4].x  = 1;
+            UI.diagram.inputs[4].y  = 13;
+            UI.diagram.outputs[0].x = 19;
+            UI.diagram.outputs[0].y = 13;
+            UI.diagram.outputs[1].x = 21;
+            UI.diagram.outputs[1].y = 13;
+            UI.diagram.vddCell.x    = 7;
+            UI.diagram.vddCell.y    = 5;
+            UI.diagram.gndCell.x    = 7;
+            UI.diagram.gndCell.y    = 23;
+        },
+
+        ["mousedown", {button:  0, clientX: mapX(10), clientY: mapY(1)}],
+        ["mousemove", {buttons: 1, clientX: mapX(10), clientY: mapY(29)}],
+        ["mouseup",   {button:  1, clientX: mapX(10), clientY: mapY(29)}],
+
+        2,
+        "XXXXXXZZXXXXXXZZXXXXXXZZZZZZZZZZXXXXXXZZXXXXXXZZXXXXXXZZZZZZZZZZ",
    ];
 
     /** RUN TESTBENCH **/
