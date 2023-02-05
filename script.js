@@ -2579,6 +2579,10 @@
 
             this.allCommands.push(this.placeVddCommand);
             this.allCommands.push(this.placeGndCommand);
+            this.allCommands.push(this.addInputCommand);
+            this.allCommands.push(this.addOutputCommand);
+            this.allCommands.push(this.removeInputCommand);
+            this.allCommands.push(this.removeOutputCommand);
         }
 
         initRowColCommands() {
