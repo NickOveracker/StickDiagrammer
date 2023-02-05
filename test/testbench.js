@@ -2769,8 +2769,8 @@ function runTestbench(runTo) {
 
         // Remove the two left transistors
         ["mousedown", {button:  2, clientX: mapX(1),   clientY: mapY(1)}],
-        ["mousemove", {buttons: 2, clientX: mapX(9),   clientY: mapY(29)}],
-        ["mouseup",   {button:  2, clientX: mapX(9),   clientY: mapY(29)}],
+        ["mousemove", {buttons: 2, clientX: mapX(8),   clientY: mapY(29)}],
+        ["mouseup",   {button:  2, clientX: mapX(8),   clientY: mapY(29)}],
 
         2,
         "1111",
