@@ -91,6 +91,10 @@ function runTestbench(runTo) {
                      "Dark mode toggle keyboard test",
                      "Theme change keyboard test",
                      "Transparency toggle keyboard test",
+                     "Add two inputs keyboard test",
+                     "Remove one input keyboard test",
+                     "Add two outputs keyboard test",
+                     "Remove one output keyboard test",
     ];
     runTo = runTo || testCases.length;
 
@@ -2624,6 +2628,76 @@ function runTestbench(runTo) {
             document.dispatchEvent(keyboardEvent);
 
             return window.UI.diagramView.useFlatColors !== compareTo;
+        },
+
+        /* Add two inputs via simulated keyboard shortcut */
+        3,
+        function() {
+            let compareTo = window.UI.diagram.inputs.length;
+
+            let keyboardEvent = new KeyboardEvent("keyup", {
+                bubbles : true,
+                cancelable : true,
+                shiftKey : window.UI.addInputCommand.shiftModifier,
+                ctrlKey: window.UI.addInputCommand.ctrlModifier,
+                keyCode: window.UI.addInputCommand.keyCode, 
+            });
+            document.dispatchEvent(keyboardEvent);
+            document.dispatchEvent(keyboardEvent);
+
+            return window.UI.diagram.inputs.length === compareTo + 2;
+        },
+
+        /* Remove an input via simulated keyboard shortcut */
+        3,
+        function() {
+            let compareTo = window.UI.diagram.inputs.length;
+
+            let keyboardEvent = new KeyboardEvent("keyup", {
+                bubbles : true,
+                cancelable : true,
+                shiftKey : window.UI.removeInputCommand.shiftModifier,
+                ctrlKey: window.UI.removeInputCommand.ctrlModifier,
+                keyCode: window.UI.removeInputCommand.keyCode, 
+            });
+            document.dispatchEvent(keyboardEvent);
+
+            return window.UI.diagram.inputs.length === compareTo - 1;
+        },
+
+        /* Add two outputs via simulated keyboard shortcut */
+        3,
+        function() {
+            let compareTo = window.UI.diagram.outputs.length;
+
+            let keyboardEvent = new KeyboardEvent("keyup", {
+                bubbles : true,
+                cancelable : true,
+                shiftKey : window.UI.addOutputCommand.shiftModifier,
+                ctrlKey: window.UI.addOutputCommand.ctrlModifier,
+                keyCode: window.UI.addOutputCommand.keyCode, 
+            });
+            document.dispatchEvent(keyboardEvent);
+            document.dispatchEvent(keyboardEvent);
+
+            return window.UI.diagram.outputs.length === compareTo + 2;
+        },
+
+        /* Remove an output via simulated keyboard shortcut */
+        3,
+        function() {
+            let compareTo = window.UI.diagram.outputs.length;
+
+            let keyboardEvent = new KeyboardEvent("keyup", {
+                bubbles : true,
+                cancelable : true,
+                shiftKey : window.UI.removeOutputCommand.shiftModifier,
+                ctrlKey: window.UI.removeOutputCommand.ctrlModifier,
+                keyCode: window.UI.removeOutputCommand.keyCode, 
+            });
+            document.dispatchEvent(keyboardEvent);
+
+            return window.UI.diagram.outputs.length === compareTo - 1;
         },
    ];
 
