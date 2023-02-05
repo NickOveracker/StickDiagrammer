@@ -135,7 +135,7 @@
     }
 
     function setUpInverterTutorial(UI, LayeredGrid) {
-        let tutorial = new Tutorial();
+        let tut = new Tutorial();
 
         ////////////////////////// STEP 1 //////////////////////////
         let tutStep = new TutorialStep(UI);
@@ -176,7 +176,7 @@
 
         tutStep.target = document.getElementById("dark-mode-btn");
         
-        tutorial.steps.push(tutStep);
+        tut.steps.push(tutStep);
 
         ////////////////////////// STEP 2 //////////////////////////
         tutStep = new TutorialStep(UI);
@@ -260,7 +260,7 @@
         tutStep.position.flipUp = true;
         tutStep.position.centerHorizontal = true;
         
-        tutorial.steps.push(tutStep);
+        tut.steps.push(tutStep);
 
         ////////////////////////// STEP 3 //////////////////////////
         tutStep = new TutorialStep(UI);
@@ -296,7 +296,7 @@
         tutStep.position.centerHorizontal = true;
         tutStep.position.flipUp = true;
         
-        tutorial.steps.push(tutStep);
+        tut.steps.push(tutStep);
 
         ////////////////////////// STEP 4 //////////////////////////
         tutStep = new TutorialStep(UI);
@@ -323,7 +323,7 @@
         tutStep.position.centerHorizontal = true;
         tutStep.position.flipUp = true;
         
-        tutorial.steps.push(tutStep);
+        tut.steps.push(tutStep);
 
         ////////////////////////// STEP 5 //////////////////////////
         tutStep = new TutorialStep(UI);
@@ -383,14 +383,14 @@
         tutStep.position.flipLeft = true;
         tutStep.position.flipUp   = true;
         
-        tutorial.steps.push(tutStep);
+        tut.steps.push(tutStep);
 
         ////////////////////////// STEP 6 //////////////////////////
         tutStep = new TutorialStep(UI);
 
         tutStep.instructions = {
-            en_us: `Place ${this.getLayerSpan(UI.diagramGrid.constructor.CONTACT, UI)}s where ${this.getLayerSpan(UI.diagramGrid.constructor.METAL1, UI)} meets ${this.getLayerSpan(UI.diagramGrid.constructor.PDIFF, UI)} or ${this.getLayerSpan(UI.diagramGrid.constructor.NDIFF, UI)}.`,
-            ja_jp: `${this.getLayerSpan(UI.diagramGrid.constructor.PDIFF, UI)}か${this.getLayerSpan(UI.diagramGrid.constructor.NDIFF, UI)}層の上に${this.getLayerSpan(UI.diagramGrid.constructor.METAL1, UI)}層が引かれたところに${this.getLayerSpan(UI.diagramGrid.constructor.CONTACT, UI)}を置いてください。`,
+            en_us: `Place ${tut.getLayerSpan(UI.diagramGrid.constructor.CONTACT, UI)}s where ${tut.getLayerSpan(UI.diagramGrid.constructor.METAL1, UI)} meets ${tut.getLayerSpan(UI.diagramGrid.constructor.PDIFF, UI)} or ${tut.getLayerSpan(UI.diagramGrid.constructor.NDIFF, UI)}.`,
+            ja_jp: `${tut.getLayerSpan(UI.diagramGrid.constructor.PDIFF, UI)}か${tut.getLayerSpan(UI.diagramGrid.constructor.NDIFF, UI)}層の上に${tut.getLayerSpan(UI.diagramGrid.constructor.METAL1, UI)}層が引かれたところに${tut.getLayerSpan(UI.diagramGrid.constructor.CONTACT, UI)}を置いてください。`,
         };
 
         tutStep.completed = function() {
@@ -414,7 +414,7 @@
         tutStep.position.centerHorizontal = true;
         tutStep.position.flipUp = true;
         
-        tutorial.steps.push(tutStep);
+        tut.steps.push(tutStep);
 
         ////////////////////////// STEP 7 //////////////////////////
         tutStep = new TutorialStep(UI);
@@ -474,14 +474,14 @@
         tutStep.target = document.getElementById("poly-swatch");
         tutStep.position.flipUp   = true;
         
-        tutorial.steps.push(tutStep);
+        tut.steps.push(tutStep);
 
         ////////////////////////// STEP 8 //////////////////////////
         tutStep = new TutorialStep(UI);
 
         tutStep.instructions = {
-            en_us: `Draw a line of ${this.getLayerSpan(UI.diagramGrid.constructor.POLY, UI)} that spans across the ${this.getLayerSpan(UI.diagramGrid.constructor.PDIFF, UI)} and ${this.getLayerSpan(UI.diagramGrid.constructor.NDIFF, UI)} lines between the left and right ${this.getLayerSpan(UI.diagramGrid.constructor.CONTACT, UI)}.`,
-            ja_jp: `${this.getLayerSpan(UI.diagramGrid.constructor.POLY, UI)}層で${this.getLayerSpan(UI.diagramGrid.constructor.PDIFF, UI)}と${this.getLayerSpan(UI.diagramGrid.constructor.NDIFF, UI)}層を通る一本の線を左右の${this.getLayerSpan(UI.diagramGrid.constructor.CONTACT, UI)}の間に引いてください。`,
+            en_us: `Draw a line of ${tut.getLayerSpan(UI.diagramGrid.constructor.POLY, UI)} that spans across the ${tut.getLayerSpan(UI.diagramGrid.constructor.PDIFF, UI)} and ${tut.getLayerSpan(UI.diagramGrid.constructor.NDIFF, UI)} lines between the left and right ${tut.getLayerSpan(UI.diagramGrid.constructor.CONTACT, UI)}.`,
+            ja_jp: `${tut.getLayerSpan(UI.diagramGrid.constructor.POLY, UI)}層で${tut.getLayerSpan(UI.diagramGrid.constructor.PDIFF, UI)}と${tut.getLayerSpan(UI.diagramGrid.constructor.NDIFF, UI)}層を通る一本の線を左右の${tut.getLayerSpan(UI.diagramGrid.constructor.CONTACT, UI)}の間に引いてください。`,
         };
 
         tutStep.completed = function() {
@@ -511,7 +511,7 @@
         tutStep.position.centerHorizontal = true;
         tutStep.position.flipUp = true;
         
-        tutorial.steps.push(tutStep);
+        tut.steps.push(tutStep);
 
         ////////////////////////// STEP 9 //////////////////////////
         tutStep = new TutorialStep(UI);
@@ -546,7 +546,7 @@
         tutStep.position.centerHorizontal = true;
         tutStep.position.flipUp = true;
         
-        tutorial.steps.push(tutStep);
+        tut.steps.push(tutStep);
 
         ////////////////////////// STEP 10 //////////////////////////
         tutStep = new TutorialStep(UI);
@@ -587,7 +587,7 @@
         tutStep.position.centerHorizontal = true;
         tutStep.position.centerVertical = true;
         
-        tutorial.steps.push(tutStep);
+        tut.steps.push(tutStep);
 
         ////////////////////////// STEP 11 //////////////////////////
         tutStep = new TutorialStep(UI);
@@ -622,14 +622,14 @@
         tutStep.position.centerHorizontal = true;
         tutStep.position.centerVertical = true;
         
-        tutorial.steps.push(tutStep);
+        tut.steps.push(tutStep);
 
         ////////////////////////// STEP 12 //////////////////////////
         tutStep = new TutorialStep(UI);
 
         tutStep.instructions = {
-            en_us: `Place the A terminal on the ${this.getLayerSpan(this.UI.diagramGrid.prototype.POLY, UI)} between the ${this.getLayerSpan(this.UI.diagramGrid.prototype.PDIFF, UI)} and ${this.getLayerSpan(this.UI.diagramGrid.prototype.NDIFF, UI)} lines.`,
-            ja_jp: `A端子を${this.getLayerSpan(this.UI.diagramGrid.prototype.PDIFF, UI)}と${this.getLayerSpan(this.UI.diagramGrid.prototype.NDIFF, UI)}層の間の${this.getLayerSpan(this.UI.diagramGrid.prototype.POLY, UI)}層上に置いてください。`,
+            en_us: `Place the A terminal on the ${tut.getLayerSpan(UI.diagramGrid.prototype.POLY, UI)} between the ${tut.getLayerSpan(UI.diagramGrid.prototype.PDIFF, UI)} and ${tut.getLayerSpan(UI.diagramGrid.prototype.NDIFF, UI)} lines.`,
+            ja_jp: `A端子を${tut.getLayerSpan(UI.diagramGrid.prototype.PDIFF, UI)}と${tut.getLayerSpan(UI.diagramGrid.prototype.NDIFF, UI)}層の間の${tut.getLayerSpan(UI.diagramGrid.prototype.POLY, UI)}層上に置いてください。`,
         };
 
         tutStep.completed = function() {
@@ -653,7 +653,7 @@
         tutStep.position.centerHorizontal = true;
         tutStep.position.flipUp = true;
         
-        tutorial.steps.push(tutStep);
+        tut.steps.push(tutStep);
 
         ////////////////////////// STEP 13 //////////////////////////
         tutStep = new TutorialStep(UI);
@@ -693,7 +693,7 @@
         tutStep.position.centerHorizontal = true;
         tutStep.position.centerVertical = true;
         
-        tutorial.steps.push(tutStep);
+        tut.steps.push(tutStep);
 
         ////////////////////////// STEP 14 //////////////////////////
         tutStep = new TutorialStep(UI);
@@ -728,7 +728,7 @@
         tutStep.position.flipLeft = true;
         tutStep.position.flipUp = true;
         
-        tutorial.steps.push(tutStep);
+        tut.steps.push(tutStep);
 
         ////////////////////////// STEP 15 //////////////////////////
         tutStep = new TutorialStep(UI);
@@ -767,7 +767,7 @@
         tutStep.position.centerHorizontal = true;
         tutStep.position.flipUp = true;
         
-        tutorial.steps.push(tutStep);
+        tut.steps.push(tutStep);
 
         ////////////////////////// STEP 16 //////////////////////////
         tutStep = new TutorialStep(UI);
@@ -806,14 +806,14 @@
         tutStep.position.centerHorizontal = true;
         tutStep.position.centerVertical = true;
         
-        tutorial.steps.push(tutStep);
+        tut.steps.push(tutStep);
 
         ////////////////////////// STEP 17 //////////////////////////
         tutStep = new TutorialStep(UI);
 
         tutStep.instructions = {
-            en_us: `The output path isn't passing through VDD! ${this.getLayerSpan(this.UI.diagramGrid.prototype.METAL1, UI)} isn't passing through it.<br>Place ${this.getLayerSpan(this.UI.diagramGrid.prototype.METAL1, UI)} on VDD.`,
-            ja_jp: `出力の同電路がVDDを通っていません！${this.getLayerSpan(this.UI.diagramGrid.prototype.METAL1, UI)}層がVDDのセルにありません。<br>${this.getLayerSpan(this.UI.diagramGrid.prototype.METAL1, UI)}層をVDDに置いてください。`,
+            en_us: `The output path isn't passing through VDD! ${tut.getLayerSpan(UI.diagramGrid.prototype.METAL1, UI)} isn't passing through it.<br>Place ${tut.getLayerSpan(UI.diagramGrid.prototype.METAL1, UI)} on VDD.`,
+            ja_jp: `出力の同電路がVDDを通っていません！${tut.getLayerSpan(UI.diagramGrid.prototype.METAL1, UI)}層がVDDのセルにありません。<br>${tut.getLayerSpan(UI.diagramGrid.prototype.METAL1, UI)}層をVDDに置いてください。`,
         };
 
         tutStep.completed = function() {
@@ -836,7 +836,7 @@
         tutStep.position.centerHorizontal = true;
         tutStep.position.flipUp = true;
         
-        tutorial.steps.push(tutStep);
+        tut.steps.push(tutStep);
 
         ////////////////////////// STEP 18 //////////////////////////
         tutStep = new TutorialStep(UI);
@@ -873,11 +873,11 @@
         tutStep.position.centerHorizontal = true;
         tutStep.position.flipUp = true;
         
-        tutorial.steps.push(tutStep);
+        tut.steps.push(tutStep);
 
-        return tutorial;
+        return tut;
     }
 
-    tutorials.push({name: "Inverter", get: setUpInverterTutorial,});   
+    tutorials.push({name: "The Basics", get: setUpInverterTutorial,});   
     window.tutorials = tutorials;
 })();
