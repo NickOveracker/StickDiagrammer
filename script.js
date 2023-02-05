@@ -1914,7 +1914,10 @@
             // Save all the results of the analysis for this combination
             // of input values and output node so that we can highlight
             // all connected nodes.
-            this.analyses[inputVals] = [...this.nodeNodeMap,];
+            // Don't do this for overdriven paths; it screws up multiple outputs
+            if(!this.overdrivenPath) {
+                this.analyses[inputVals] = [...this.nodeNodeMap,];
+            }
 
             // Reset the node-node map so that it will be ready for
             // the next time this function is called.
@@ -3247,6 +3250,7 @@
                 // Compute each output.
                 for (let jj = 0; jj < this.diagram.outputs.length; jj++) {
                     tableOutputRow[jj] = this.diagram.computeOutput(ii, this.diagram.outputNodes[jj]);
+                    // Don't reuse the analysis in case of overdriven paths.
                 }
 
                 outputVals[ii] = tableOutputRow;
