@@ -1232,8 +1232,8 @@
             let codeByte = 0;
 
             // Header
-            code.push(this.inputs.count);
-            code.push(this.outputs.count);
+            code.push(this.inputs.length);
+            code.push(this.outputs.length);
             code.push(this.layeredGrid.width);
             code.push(this.layeredGrid.height);
             code.push(this.layeredGrid.layers - 1);
