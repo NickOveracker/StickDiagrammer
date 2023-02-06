@@ -1239,7 +1239,7 @@
             code.push(this.layeredGrid.layers - 1);
 
             // Terminal locations
-            this.inputs.concat(this.outputs).forEach(function(terminal) {
+            [this.vddCell, this.gndCell,].concat(this.inputs.concat(this.outputs)).forEach(function(terminal) {
                 code.push(terminal.x);
                 code.push(terminal.y);
             });
