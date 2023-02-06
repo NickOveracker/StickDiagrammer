@@ -1300,11 +1300,9 @@
 
                 for(let ii = hintInsertIndex; ii < code.length; ii++) {
                     if(code[ii] === 0) {
-                        if(code[ii-1] !== 0 && zeroRun1 < 3) {
-                            zeroRun1 = 1;
-                            zeroRunIndex = ii;
-                        } else if(code[ii-1] !== 0) {
-                            zeroRun1++;
+                        if(code[ii-1] === 0) {
+                            zeroRun1++;;
+                            zeroRunIndex = zeroRun1 === 1 ? ii : zeroRunIndex;
                         }
 
                         if(zeroRun1 === 3) {
