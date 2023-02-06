@@ -1301,7 +1301,7 @@
                 for(let ii = hintInsertIndex; ii < code.length; ii++) {
                     if(code[ii] === 0) {
                         if(code[ii-1] === 0) {
-                            zeroRun1++;;
+                            zeroRun1++;
                             zeroRunIndex = zeroRun1 === 1 ? ii : zeroRunIndex;
                         }
 
@@ -1325,7 +1325,7 @@
             }
 
             hints.unshift(hints.length);
-            code.splice(hintInsertIndex, 0, [... hints,]);
+            code.splice(hintInsertIndex, 0, ... hints);
 
             return code;
         }
