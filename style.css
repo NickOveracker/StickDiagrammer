@@ -37,6 +37,10 @@ html {
     -ms-user-select: none; /* Internet Explorer/Edge */
 }
 
+.package-link {
+    text-decoration: underline;
+}
+
 .pullup-pulldown-warning {
     text-align: center;
     background: red;
