@@ -2489,7 +2489,7 @@
             // Order matters
             // Lower-indexed menus are displayed at the same level as or over higher-indexed menus.
             this.menus = [
-                "licenses",
+                "licenses-menu",
                 "tutorials",
                 "instructions",
                 "about-page",
