@@ -1226,6 +1226,52 @@
             this.controller = new DiagramController(this, this.view, mainCanvas);
         }
 
+        encode() {
+            let code = [];
+            let bitNo = 7;
+            let codeByte = 0;
+
+            // Header
+            code.push(this.inputs.count);
+            code.push(this.outputs.count);
+            code.push(this.layeredGrid.width);
+            code.push(this.layeredGrid.height);
+            code.push(this.layeredGrid.layers - 1);
+
+            // Terminal locations
+            this.inputs.concat(this.outputs).forEach(function(terminal) {
+                code.push(terminal.x);
+                code.push(terminal.y);
+            });
+
+            // Cells
+            for(let row = 0; row < this.layeredGrid.height; row++) {
+                for(let col = 0; col < this.layeredGrid.width; col++) {
+                    for(let lyr = 0; lyr < this.layeredGrid.layers - 1; lyr++) {
+                        if(this.layeredGrid.get(row,col,lyr).isSet) {
+                            /*jslint bitwise: true */
+                            codeByte = codeByte | (1 << bitNo);
+                            /*jslint bitwise: false */
+                        }
+                        bitNo--;
+
+                        if(bitNo < 0) {
+                            bitNo = 7;
+                            code.push(codeByte);
+                            codeByte = 0;
+                        }
+                    }
+                }
+            }
+
+            // Leftover bits
+            if(bitNo < 7) {
+                code.push(codeByte);
+            }
+
+            return code;
+        }
+
         initCells() {
             let startWidth  = 29;
             let startHeight = 29;
