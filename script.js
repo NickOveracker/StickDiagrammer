@@ -1311,11 +1311,12 @@
                             hints.push(zeroRunIndex);
                         }
                     } else {
-                        if(zeroRun1 > 0) {
+                        if(zeroRun1 >= 3) {
                             hints.push(zeroRun1);
                             code.splice(zeroRunIndex, zeroRun1);
                             ii = ii - zeroRun1 + 1;
                         }
+                        zeroRun1 = 0;
                     }
                 }
             }
@@ -1326,7 +1327,7 @@
             }
 
             hints.unshift(hints.length);
-            code.splice(hintInsertIndex, 0, hints);
+            code.splice(hintInsertIndex, 0, [... hints,]);
 
             return code;
         }
