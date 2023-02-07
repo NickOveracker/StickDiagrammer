@@ -1312,6 +1312,7 @@
                             this.layeredGrid.clear(row, col, lyr);
                         }
                         /*jslint bitwise: false */
+                        cellIndex++;
                     }
                 }
             }
