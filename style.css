@@ -290,7 +290,6 @@ li.clickable {
 
 .menu-btn-content h1 {
     font-size: 2.5vh;
-    margin-bottom: 1vh;
 }
 
 .teacher-btn{
@@ -302,7 +301,7 @@ li.clickable {
 
 .box-btn{
     padding: 2vh;
-    margin-bottom: 4vh;
+    margin: 4vh;
     border: solid 2px #FFFFFF;
     color: #FFFFFF;
     width: auto;
