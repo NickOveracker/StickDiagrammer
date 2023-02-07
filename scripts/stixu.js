@@ -1274,7 +1274,7 @@
         }
 
         decode(stringBase64) {
-            return LZUTF8.decompress(stringBase64, {inputEncoding: "Base64",});
+            return LZUTF8.decompress(stringBase64, {outputEncoding: "ByteArray", inputEncoding: "Base64",});
         }
 
         initCells() {
