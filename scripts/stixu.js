@@ -1273,6 +1273,10 @@
             return LZUTF8.compress(new Uint8Array(code), {outputEncoding: "Base64",});
         }
 
+        decode(stringBase64) {
+            return LZUTF8.decompress(stringBase64, {inputEncoding: "Base64",});
+        }
+
         initCells() {
             let startWidth  = 29;
             let startHeight = 29;
