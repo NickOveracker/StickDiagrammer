@@ -1249,7 +1249,7 @@
             for(let lyr = 0; lyr < this.layeredGrid.layers - 1; lyr++) {
                 for(let col = 0; col < this.layeredGrid.width; col++) {
                     for(let row = 0; row < this.layeredGrid.height; row++) {
-                        if(this.layeredGrid.get(row,col,lyr).isSet) {
+                        if(this.layeredGrid.get(col,row,lyr).isSet) {
                             /*jslint bitwise: true */
                             codeByte = codeByte | (1 << bitNo);
                             /*jslint bitwise: false */
@@ -1309,9 +1309,9 @@
                         bitShift = 1 << (7 - cellIndex % 8);
                         byte = Math.floor(cellIndex/8);
                         if(setGrid[byte] & bitShift) {
-                            this.layeredGrid.set(row, col, lyr);
+                            this.layeredGrid.set(col, row, lyr);
                         } else {
-                            this.layeredGrid.clear(row, col, lyr);
+                            this.layeredGrid.clear(col, row, lyr);
                         }
                         /*jslint bitwise: false */
                         cellIndex++;
