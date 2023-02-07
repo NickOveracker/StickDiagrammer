@@ -37,8 +37,17 @@ html {
     -ms-user-select: none; /* Internet Explorer/Edge */
 }
 
+.sparse {
+    margin-bottom: 5vh;
+}
+
+.package-name {
+    display: block;
+}
+
 .package-link {
     text-decoration: underline;
+    font-size: small;
 }
 
 .pullup-pulldown-warning {
