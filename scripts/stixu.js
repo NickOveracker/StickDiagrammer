@@ -42,7 +42,8 @@
 /* jshint browser: true */
 /* jshint latedef: true */
 /* globals runTestbench:     false,
-           debugDefinitions: false */
+           debugDefinitions: false
+           LZUTF8:           false */
 (() => {
     'use strict';
 
@@ -1228,7 +1229,6 @@
 
         encode() {
             const code = [];
-            const hints = [];
             let bitNo = 7;
             let codeByte = 0;
 
@@ -1270,11 +1270,58 @@
                 code.push(codeByte);
             }
 
-            return LZUTF8.compress(new Uint8Array(code), {outputEncoding: "Base64",});
+            return window.LZUTF8.compress(new Uint8Array(code), {outputEncoding: "Base64",});
         }
 
         decode(stringBase64) {
-            return LZUTF8.decompress(stringBase64, {outputEncoding: "ByteArray", inputEncoding: "Base64",});
+            const setGrid    = window.LZUTF8.decompress(stringBase64, {outputEncoding: "ByteArray", inputEncoding: "Base64",});
+            const setWidth   = setGrid.splice(0,1)[0];
+            const setHeight  = setGrid.splice(0,1)[0];
+            const setDepth   = setGrid.splice(0,1)[0];
+            const numInputs  = setGrid.splice(0,1)[0];
+            const numOutputs = setGrid.splice(0,1)[0];
+
+            this.vddCell.x   = setGrid.splice(0,1)[0];
+            this.vddCell.y   = setGrid.splice(0,1)[0];
+            this.gndCell.x   = setGrid.splice(0,1)[0];
+            this.gndCell.y   = setGrid.splice(0,1)[0];
+
+            this.inputs.length = 0;
+            this.outputs.length = 0;
+            this.layeredGrid.resize(setWidth, setHeight);
+
+            for(let ii = 0; ii < numInputs + numOutputs; ii++) {
+                if(ii < numInputs) {
+                    this.inputs[ii].x = setGrid.splice(0,1)[0];
+                    this.inputs[ii].y = setGrid.splice(0,1)[0];
+                } else {
+                    this.outputs[ii - numInputs].x = setGrid.splice(0,1)[0];
+                    this.outputs[ii - numInputs].y = setGrid.splice(0,1)[0];
+                }
+            }
+
+            // Cells
+            let cellIndex = 0;
+            let bitShift;
+            for(let lyr = 0; lyr < this.layeredGrid.layers - 1 && lyr < setDepth; lyr++) {
+                for(let col = 0; col < this.layeredGrid.width; col++) {
+                    for(let row = 0; row < this.layeredGrid.height; row++) {
+                        /*jslint bitwise: true */
+                        bitShift = 1 << (7 - cellIndex % 8);
+                        if(setGrid[Math.floor(cellIndex/8)] & bitShift) {
+                            this.layeredGrid.set(row, col, lyr);
+                        } else {
+                            this.layeredGrid.clear(row, col, lyr);
+                        }
+                        /*jslint bitwise: false */
+                    }
+                }
+            }
+
+            // Terminals
+            [this.vddCell, this.gndCell,].concat(this.inputs.concat(this.outputs)).forEach(function(cell) {
+                this.controller.placeTerminal(cell, cell, true);
+            }.bind(this));
         }
 
         initCells() {
