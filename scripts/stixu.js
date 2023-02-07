@@ -1274,7 +1274,7 @@
         }
 
         decode(stringBase64) {
-            const setGrid    = window.LZUTF8.decompress(stringBase64, {outputEncoding: "ByteArray", inputEncoding: "Base64",});
+            const setGrid    = Array.from(new Uint8Array(window.LZUTF8.decompress(stringBase64, {outputEncoding: "ByteArray", inputEncoding: "Base64",})));
             const setWidth   = setGrid.splice(0,1)[0];
             const setHeight  = setGrid.splice(0,1)[0];
             const setDepth   = setGrid.splice(0,1)[0];
