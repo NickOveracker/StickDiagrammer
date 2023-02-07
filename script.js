@@ -1231,9 +1231,11 @@
             const hints = [];
             let bitNo = 7;
             let codeByte = 0;
-            let zeroRun1, zeroRun2, zeroRunIndex;
 
             // Header
+            code.push(this.layeredGrid.width);
+            code.push(this.layeredGrid.height);
+            code.push(this.layeredGrid.layers - 1);
             code.push(this.inputs.length);
             code.push(this.outputs.length);
 
@@ -1243,13 +1245,6 @@
                 code.push(terminal.y);
             });
             
-            code.push(this.layeredGrid.width);
-            code.push(this.layeredGrid.height);
-            code.push(this.layeredGrid.layers - 1);
-
-            // Code compression hints
-            const hintInsertIndex = code.length;
-
             // Cells
             for(let lyr = 0; lyr < this.layeredGrid.layers - 1; lyr++) {
                 for(let col = 0; col < this.layeredGrid.width; col++) {
@@ -1274,58 +1269,6 @@
             if(bitNo < 7) {
                 code.push(codeByte);
             }
-
-            // Scan for consecutive zeroes.
-            // If we find at least 1 run of 4 zeroes
-            // or 2 runs of 3 zeroes, then hinting is worthwhile.
-            for(let ii = hintInsertIndex; ii < code.length; ii++) {
-                if(code[ii] === 0) {
-                    if(code[ii-1] !== 0 && zeroRun1 < 3) {
-                        zeroRun1 = 1;
-                    } else if(code[ii-1] !== 0) {
-                        zeroRun2 = 1;
-                    } else if(zeroRun2 > 0) {
-                        zeroRun2++;
-                    } else {
-                        zeroRun1++;
-                    }
-                    if(zeroRun1 === 4 || zeroRun2 === 3) {
-                        break;
-                    }
-                }
-            }
-
-            if(zeroRun1 > 3 || zeroRun2 >= 3) {
-                zeroRun1 = 0;
-
-                for(let ii = hintInsertIndex; ii < code.length; ii++) {
-                    if(code[ii] === 0) {
-                        if(code[ii-1] === 0) {
-                            zeroRun1++;
-                            zeroRunIndex = zeroRun1 === 1 ? ii : zeroRunIndex;
-                        }
-
-                        if(zeroRun1 === 3) {
-                            hints.push(zeroRunIndex);
-                        }
-                    } else {
-                        if(zeroRun1 >= 3) {
-                            hints.push(zeroRun1);
-                            code.splice(zeroRunIndex, zeroRun1);
-                            ii = ii - zeroRun1 + 1;
-                        }
-                        zeroRun1 = 0;
-                    }
-                }
-            }
-
-            // TODO: Count # bytes for each entry in hints, and its length
-            for(let ii = 0; ii < hints.length; ii += 2) {
-                hints[ii] += hints.length + 1;
-            }
-
-            hints.unshift(hints.length);
-            code.splice(hintInsertIndex, 0, ... hints);
 
             return code;
         }
