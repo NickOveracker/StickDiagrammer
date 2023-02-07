@@ -1292,11 +1292,9 @@
 
             for(let ii = 0; ii < numInputs + numOutputs; ii++) {
                 if(ii < numInputs) {
-                    this.inputs[ii].x = setGrid.splice(0,1)[0];
-                    this.inputs[ii].y = setGrid.splice(0,1)[0];
+                    this.inputs.push({x: setGrid.splice(0,1)[0], y: setGrid.splice(0,1)[0]});
                 } else {
-                    this.outputs[ii - numInputs].x = setGrid.splice(0,1)[0];
-                    this.outputs[ii - numInputs].y = setGrid.splice(0,1)[0];
+                    this.outputs.push({x: setGrid.splice(0,1)[0], y: setGrid.splice(0,1)[0]});
                 }
             }
 
