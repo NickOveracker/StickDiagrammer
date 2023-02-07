@@ -254,7 +254,7 @@ li.clickable {
     height: 100vh;
     width: 100%;
     z-index: 9999;
-    background-color: rgba(76,38,184,97%);
+    background-color: rgb(76,38,184);
     position: fixed;
     top: 0;
     font-family: 'Josefin Sans', sans-serif;
