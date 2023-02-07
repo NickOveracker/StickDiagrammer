@@ -311,6 +311,7 @@ li.clickable {
     border:solid 2px #221D1D;
     background-color: #221D1D;
     margin-top: 1vh;
+    margin-bottom: 0;
 }
 
 .menu-text{
