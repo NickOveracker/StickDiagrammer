@@ -1301,12 +1301,14 @@
             // Cells
             let cellIndex = 0;
             let bitShift;
+            let byte;
             for(let lyr = 0; lyr < this.layeredGrid.layers - 1 && lyr < setDepth; lyr++) {
                 for(let col = 0; col < this.layeredGrid.width; col++) {
                     for(let row = 0; row < this.layeredGrid.height; row++) {
                         /*jslint bitwise: true */
                         bitShift = 1 << (7 - cellIndex % 8);
-                        if(setGrid[Math.floor(cellIndex/8)] & bitShift) {
+                        byte = Math.floor(cellIndex/8);
+                        if(setGrid[byte] & bitShift) {
                             this.layeredGrid.set(row, col, lyr);
                         } else {
                             this.layeredGrid.clear(row, col, lyr);
