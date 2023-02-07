@@ -1270,7 +1270,7 @@
                 code.push(codeByte);
             }
 
-            return code;
+            return LZUTF8.compress(new Uint8Array(code), {outputEncoding: "Base64",});
         }
 
         initCells() {
