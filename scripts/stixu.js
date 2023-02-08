@@ -1336,6 +1336,11 @@
         decode(stringBase64) {
             const decompress = atob(window.LZUTF8.decompress(stringBase64, {inputEncoding: "Base64",}));
             const setGrid    = [];
+
+            for(let ii = 0; ii < decompress.length; ii++) {
+                setGrid[ii] = decompress.charCodeAt(ii);
+            }
+
             const setWidth   = setGrid.splice(0,1)[0];
             const setHeight  = setGrid.splice(0,1)[0];
             const setDepth   = setGrid.splice(0,1)[0];
@@ -1346,10 +1351,6 @@
             this.vddCell.y   = setGrid.splice(0,1)[0];
             this.gndCell.x   = setGrid.splice(0,1)[0];
             this.gndCell.y   = setGrid.splice(0,1)[0];
-
-            for(let ii = 0; ii < decompress.length; ii++) {
-                setGrid[ii] = decompress.charCodeAt(ii);
-            }
 
             this.inputs.length = 0;
             this.outputs.length = 0;
