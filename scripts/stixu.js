@@ -3198,7 +3198,7 @@
             }.bind(this));
             
             window.addEventListener("contextmenu", function(e) {
-                if (e.button === 2) {
+                if (e.button === 2 && this.document.getElementById("main-menu").classList.contains("closed")) {
                     // Don't show a context menu.
                     e.preventDefault();
                 }
@@ -3363,6 +3363,15 @@
                 return document.getElementById("close-" + menuName + "-btn").onclick();
             });
         }
+
+        /*
+        // Not needed now but maybe someday
+        menuIsOpen() {
+            return this.menus.some(function(menuName) {
+                return !document.getElementById(menuName).classList.contains("closed");
+            });
+        }
+        */
 
         closeAllMenus() {
             this.menus.forEach(function(menuName) {
