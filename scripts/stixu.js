@@ -41,9 +41,6 @@
 /* jshint varstmt: true */
 /* jshint browser: true */
 /* jshint latedef: true */
-/* globals runTestbench:     false,
-           debugDefinitions: false
-           LZUTF8:           false */
 (() => {
     'use strict';
 
@@ -1227,61 +1224,6 @@
             this.controller = new DiagramController(this, this.view, mainCanvas);
         }
 
-        /*
-        static get Base64Map() {
-            return [
-                "A", // 0x00
-                "B",
-                "C",
-                "D",
-                "E",
-                "F",
-                "G",
-                "H",
-                "I",
-                "J",
-                "K",
-                "L",
-                "M",
-                "N",
-                "O",
-                "P", //0x0F
-                "Q",
-                "R",
-                "S",
-                "T",
-                "U",
-                "V",
-                "W",
-                "X",
-                "Y",
-                "Z",
-                "a",
-                "b",
-                "c",
-                "d",
-                "e",
-                "f", // 0x1F
-                "g",
-                "h",
-                "i",
-                "j",
-                "k",
-                "l",
-                "m",
-                "n",
-                "o",
-                "p",
-                "q",
-                "r",
-                "s",
-                "t",
-                "u",
-                "v", // 0x2F
-            ];
-        }
-        */
-
         encode() {
             const code = [];
             let bitNo = 7;
@@ -1358,9 +1300,9 @@
 
             for(let ii = 0; ii < numInputs + numOutputs; ii++) {
                 if(ii < numInputs) {
-                    this.inputs.push({x: setGrid.splice(0,1)[0], y: setGrid.splice(0,1)[0]});
+                    this.inputs.push( {x: setGrid.splice(0,1)[0], y: setGrid.splice(0,1)[0], });
                 } else {
-                    this.outputs.push({x: setGrid.splice(0,1)[0], y: setGrid.splice(0,1)[0]});
+                    this.outputs.push( {x: setGrid.splice(0,1)[0], y: setGrid.splice(0,1)[0], } );
                 }
             }
 
@@ -2550,6 +2492,7 @@
             // Order matters
             // Lower-indexed menus are displayed at the same level as or over higher-indexed menus.
             this.menus = [
+                "-menu",
                 "licenses-menu",
                 "tutorials",
                 "instructions",
@@ -3272,6 +3215,15 @@
                 document.getElementById("close-" + menuName + "-btn").onclick = this.getCloseMenuFunction(menuName);
             }.bind(this));
 
+            let temp = document.getElementById("open-qrcode-menu").onclick;
+            document.getElementById("open-qrcode-menu").onclick = function() {
+                document.getElementById("qrcode").innerHTML = "";
+                /* jshint nonew: false */
+                new window.QRCode(document.getElementById("qrcode"), window.location + "?d=" + this.diagram.encode());
+                /* jshint nonew: true */
+                temp();
+            };
+
             document.getElementById("add-row").onclick       = resizeGridByOne(true,  true);
             document.getElementById("remove-row").onclick    = resizeGridByOne(true,  false);
             document.getElementById("add-column").onclick    = resizeGridByOne(false, true);
@@ -3669,8 +3621,8 @@
             window.Diagram = Diagram;
             window.LayeredGrid = LayeredGrid;
             window.DiagramController = DiagramController;
-            debugDefinitions();
-            runTestbench();
+            window.debugDefinitions();
+            window.runTestbench();
         } else {
             const urlParams = new URLSearchParams(window.location.search);
             if(urlParams.get("d")) {
