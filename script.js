@@ -47,6 +47,7 @@
     'use strict';
 
     class LayeredGrid {
+        // TODO: Consider moving to DiagramView if possible.
         // Cycle through the following cursor colors by pressing space: PDIFF, NDIFF, POLY, METAL1, CONTACT
         // Additional colors: DELETE at index (numLayers + 0)
         // Colorblind-friendly template found on [David Nichols's](https://personal.sron.nl/~pault/) website.
@@ -1472,8 +1473,7 @@
         // Unset this.overdrivenPath if the conflict is resolvable.
         attemptGateConflictResolution(node, targetNode, inputVals) {
             let targetNodeReachable, nodeTerm1, nodeTerm2, od,
-                gndPathOk, vddPathOk, gndPathExistsActivated, vddPathExistsActivated;
-
+                gndPathExistsActivated, vddPathExistsActivated;
             // We will need to restore the old map after half of the
             // operation below, but there is no need to restore it at the
             // end. We will have determined that either there is a conflict
@@ -1482,9 +1482,9 @@
             // doesn't change depending on the gate's state).
             // There is no case in which we need to consider the gate
             // to be specifically open or closed after returning.
-            let backupNodeNodeMap = [];
+            const backupNodeNodeMap = [];
 
-            let mapCopy = function(from, to) {
+            const mapCopy = function(from, to) {
                 for(let ii = 0; ii < from.length; ii++) {
                     to[ii] = [...from[ii],];
                 }
@@ -1492,12 +1492,19 @@
 
             // Source and drain nodes are interchangeable.
             // They're just named  that way here for readability
-            let allPathsOk = function(sourceNode, drainNode, targetNode, activePathExists) {
-                let path1 = this.getMapping(sourceNode, targetNode).hasPath;
-                let path2 = this.getMapping(drainNode,  targetNode).hasPath;
+            const allPathsOk = function(sourceNode, drainNode, testNode, activePathExists) {
+                const path1 = this.getMapping(sourceNode, testNode);
+                const path2 = this.getMapping(drainNode,  testNode);
+                const pathToTarget1 = this.getMapping(sourceNode, targetNode);
+                const pathToTarget2 = this.getMapping(drainNode, targetNode);
+                const directPath    = this.getMapping(testNode, targetNode);
 
-                return path1 === path2 &&
-                       path1 === activePathExists;
+                // Note: Can be undefined.
+                return Boolean(directPath.hasPath) ||
+                       Boolean(pathToTarget1.hasPath) && Boolean(path1.hasPath) || 
+                       Boolean(pathToTarget2.hasPath) && Boolean(path2.hasPath) ||
+                       Boolean(path1.hasPath) === Boolean(path2.hasPath) &&
+                       Boolean(path1.hasPath) === Boolean(activePathExists.hasPath);
             }.bind(this);
 
             mapCopy(this.nodeNodeMap, backupNodeNodeMap);
@@ -1520,8 +1527,8 @@
 
             // If it is reachable at all, compare the paths for inactive and active states.
             if(targetNodeReachable && Math.min(node.cell.term1.nodes.size, node.cell.term2.nodes.size) > 1) {
-                gndPathExistsActivated = this.recurseThroughEdges(nodeTerm1, this.gndNode, inputVals).hasPath;
-                vddPathExistsActivated = this.recurseThroughEdges(nodeTerm1, this.vddNode, inputVals).hasPath;
+                gndPathExistsActivated = this.recurseThroughEdges(nodeTerm1, this.gndNode, inputVals);
+                vddPathExistsActivated = this.recurseThroughEdges(nodeTerm1, this.vddNode, inputVals);
 
                 mapCopy(backupNodeNodeMap, this.nodeNodeMap);
                 od = od || this.overdrivenPath;
@@ -1529,20 +1536,21 @@
 
                 // If there is a conflict when activated, then the target node is definitely overdriven.
                 // As long as there is no conflict, proceed.
-                if(!gndPathExistsActivated || !vddPathExistsActivated) {
+                if(!gndPathExistsActivated.hasPath || !vddPathExistsActivated.haspPath) {
                     // The active paths are fine.
                     // Now try with the gate inactive.
                     this.deactivateGate(node);
                     this.recurseThroughEdges(node, this.gndNode, inputVals);
                     this.recurseThroughEdges(node, this.vddNode, inputVals);
-                    gndPathOk = allPathsOk(nodeTerm1, nodeTerm2, this.gndNode, gndPathExistsActivated);
-                    vddPathOk = allPathsOk(nodeTerm1, nodeTerm2, this.vddNode, vddPathExistsActivated);
+                    this.recurseThroughEdges(nodeTerm1, targetNode, inputVals);
+                    this.recurseThroughEdges(nodeTerm2, targetNode, inputVals);
                     
-                    mapCopy(backupNodeNodeMap, this.nodeNodeMap);
-                    od = od || this.overdrivenPath;
-                }
+                    od = od || this.overdrivenPath || 
+                         !allPathsOk(nodeTerm1, nodeTerm2, this.gndNode, gndPathExistsActivated) ||
+                         !allPathsOk(nodeTerm1, nodeTerm2, this.vddNode, vddPathExistsActivated);
 
-                od =  !(gndPathOk && vddPathOk) || od;
+                    mapCopy(backupNodeNodeMap, this.nodeNodeMap);
+                }
             }
 
             // No path to targetNode === No problem
@@ -1557,6 +1565,10 @@
             node.edges.some(function(edge) {
                 let otherNode = edge.getOtherNode(node);
                 let mapping = this.getMapping(otherNode, targetNode);
+              
+              	if(!mapping.direct && (otherNode === this.vddNode || otherNode === this.gndNode)) {
+                  return false;
+                }
 
                 // Easy case: We have already found a path from this otherNode.
                 if (mapping.hasPath) {
@@ -1901,7 +1913,10 @@
             // Save all the results of the analysis for this combination
             // of input values and output node so that we can highlight
             // all connected nodes.
-            this.analyses[inputVals] = [...this.nodeNodeMap,];
+            // Don't do this for overdriven paths; it screws up multiple outputs
+            if(!this.overdrivenPath) {
+                this.analyses[inputVals] = [...this.nodeNodeMap,];
+            }
 
             // Reset the node-node map so that it will be ready for
             // the next time this function is called.
@@ -2240,7 +2255,7 @@
             // (Except when there is also a contact)
 
             let handleCell = function(layer, transistorArray) {
-                if (cell.layer === layer && cell.isSet) {
+                if (!transistorArray.has(cell) && cell.layer === layer && cell.isSet) {
                     if (this.layeredGrid.get(cell.x, cell.y, LayeredGrid.POLY).isSet && !this.layeredGrid.get(cell.x, cell.y, LayeredGrid.CONTACT).isSet) {
                         // Set the gate to the poly cell.
                         cell.gate = this.layeredGrid.get(cell.x, cell.y, LayeredGrid.POLY);
@@ -2366,6 +2381,17 @@
             this.diagramController = diagram.controller;
             this.diagramView       = diagram.view;
             this.diagramGrid       = diagram.layeredGrid;
+
+            // Order matters
+            // Lower-indexed menus are displayed at the same level as or over higher-indexed menus.
+            this.menus = [
+                "tutorials",
+                "instructions",
+                "about-page",
+                "options-menu",
+                "main-menu",
+                "terminal-menu",
+            ];
 
             this.allCommands        = [];
             this.shiftCommands      = [];
@@ -2524,6 +2550,52 @@
                 }.bind(this),
             };
 
+            // I
+            this.addInputCommand = {
+                keyCode: 73,
+                action:  function(e) {
+                    if(e.type.includes('up')) {
+                        this.diagramController.addTerminal(false);
+                        this.populateTermSelect();
+                    }
+                }.bind(this),
+            };
+
+            // O
+            this.addOutputCommand = {
+                keyCode: 79,
+                action:  function(e) {
+                    if(e.type.includes('up')) {
+                        this.diagramController.addTerminal(true);
+                        this.populateTermSelect();
+                    }
+                }.bind(this),
+            };
+
+            // SHIFT+I
+            this.removeInputCommand = {
+                shiftModifier: true,
+                keyCode: 73,
+                action:  function(e) {
+                    if(e.type.includes('up')) {
+                        this.diagramController.removeTerminal(false);
+                        this.populateTermSelect();
+                    }
+                }.bind(this),
+            };
+
+            // SHIFT+O
+            this.removeOutputCommand = {
+                shiftModifier: true,
+                keyCode: 79,
+                action:  function(e) {
+                    if(e.type.includes('up')) {
+                        this.diagramController.removeTerminal(true);
+                        this.populateTermSelect();
+                    }
+                }.bind(this),
+            };
+
             this.placeIOCommand = {
                 keyCode: null,
                 action:  null,
@@ -2531,6 +2603,10 @@
 
             this.allCommands.push(this.placeVddCommand);
             this.allCommands.push(this.placeGndCommand);
+            this.allCommands.push(this.addInputCommand);
+            this.allCommands.push(this.addOutputCommand);
+            this.allCommands.push(this.removeInputCommand);
+            this.allCommands.push(this.removeOutputCommand);
         }
 
         initRowColCommands() {
@@ -2583,7 +2659,7 @@
                 ctrlModifier: true,
                 keyCode:      37,
                 action:       function(e) {
-                    if(e.type.includes('down')) {
+                    if(e.type.includes('up')) {
                         let coords = this.diagramController.getCellAtCursor();
                         coords = Object.hasOwn(coords, "x") ? coords : {x: this.diagramGrid.width, };
                         if(Object.hasOwn(coords, "x")) {
@@ -2600,7 +2676,7 @@
                 ctrlModifier: true,
                 keyCode:       38,
                 action:        function(e) {
-                    if(e.type.includes('down')) {
+                    if(e.type.includes('up')) {
                         let coords = this.diagramController.getCellAtCursor();
                         if(Object.hasOwn(coords, "y")) {
                             this.diagramGrid.insertRemoveRowColAt(coords.y, false, true);
@@ -2616,7 +2692,7 @@
                 ctrlModifier: true,
                 keyCode:      39,
                 action:       function(e) {
-                    if(e.type.includes('down')) {
+                    if(e.type.includes('up')) {
                         let coords = this.diagramController.getCellAtCursor();
                         if(Object.hasOwn(coords, "x")) {
                             this.diagramGrid.insertRemoveRowColAt(coords.x, true, false);
@@ -2632,7 +2708,7 @@
                 ctrlModifier: true,
                 keyCode:      40,
                 action:       function(e) {
-                    if(e.type.includes('down')) {
+                    if(e.type.includes('up')) {
                         let coords = this.diagramController.getCellAtCursor();
                         if(Object.hasOwn(coords, "y")) {
                             this.diagramGrid.insertRemoveRowColAt(coords.y, true, true);
@@ -3006,42 +3082,39 @@
             }.bind(this);
         }
 
+        // TODO: Continue to improve this function.
         setUpControls() {
-            document.getElementById("remove-row").onclick = function() {
-                this.diagramGrid.resize(this.diagramGrid.width, this.diagramGrid.height - 1);
-                this.diagramView.drawGrid();
+            let resizeGridByOne = function(byRow, positive) {
+                return function() {
+                    let offset = positive ? 1 : -1;
+                    let newWidth = byRow ? this.diagramGrid.width            : this.diagramGrid.width + offset;
+                    let newHeight = byRow ? this.diagramGrid.height + offset : this.diagramGrid.height;
+                    this.diagramGrid.resize(newWidth, newHeight);
+                    this.diagramView.drawGrid();
+                }.bind(this);
             }.bind(this);
 
-            document.getElementById("add-row").onclick = function() {
-                this.diagramGrid.resize(this.diagramGrid.width, this.diagramGrid.height + 1);
-                this.diagramView.drawGrid();
+            let simpleGridShift = function(byRow, positive) {
+                return function() {
+                    let offset = positive ? 1 : -1;
+                    this.diagramGrid.shift(0, byRow, offset);
+                }.bind(this);
             }.bind(this);
 
-            document.getElementById("remove-column").onclick = function() {
-                this.diagramGrid.resize(this.diagramGrid.width - 1, this.diagramGrid.height);
-                this.diagramView.drawGrid();
-            }.bind(this);
+            this.menus.forEach(function(menuName) {
+                document.getElementById("open-" + menuName + "-btn").onclick  = this.getOpenMenuFunction(menuName);
+                document.getElementById("close-" + menuName + "-btn").onclick = this.getCloseMenuFunction(menuName);
+            }.bind(this));
 
-            document.getElementById("add-column").onclick = function() {
-                this.diagramGrid.resize(this.diagramGrid.width + 1, this.diagramGrid.height);
-                this.diagramView.drawGrid();
-            }.bind(this);
+            document.getElementById("add-row").onclick       = resizeGridByOne(true,  true);
+            document.getElementById("remove-row").onclick    = resizeGridByOne(true,  false);
+            document.getElementById("add-column").onclick    = resizeGridByOne(false, true);
+            document.getElementById("remove-column").onclick = resizeGridByOne(false, false);
 
-            document.getElementById("shift-left").onclick = function() {
-                this.diagramGrid.shift(0, false, -1);
-            }.bind(this);
-
-            document.getElementById("shift-right").onclick = function() {
-                this.diagramGrid.shift(0, false, 1);
-            }.bind(this);
-
-            document.getElementById("shift-up").onclick = function() {
-                this.diagramGrid.shift(0, true, -1);
-            }.bind(this);
-
-            document.getElementById("shift-down").onclick = function() {
-                this.diagramGrid.shift(0, true, 1);
-            }.bind(this);
+            document.getElementById("shift-left").onclick    = simpleGridShift(false, false);
+            document.getElementById("shift-right").onclick   = simpleGridShift(false, true);
+            document.getElementById("shift-up").onclick      = simpleGridShift(true,  false);
+            document.getElementById("shift-down").onclick    = simpleGridShift(true,  true);
 
             document.getElementById("paint-mode-btn").onclick = function() {
                 // No argument -> Toggle
@@ -3059,68 +3132,11 @@
                 }
             }.bind(this);
 
-            document.getElementById("dark-mode-btn").onclick = function() {
-                this.toggleDarkMode();
-            }.bind(this);
-
-            document.getElementById("undo-btn").onclick = function() {
-                this.diagramController.undo();
-            }.bind(this);
-
-            document.getElementById("redo-btn").onclick = function() {
-                this.diagramController.redo();
-            }.bind(this);
-
-            document.getElementById("term-menu-btn").onclick = function() {
-                let termMenu = document.getElementById("terminal-menu");
-                if(termMenu.classList.contains("closed")) {
-                    termMenu.classList.remove("closed");
-                }
-            };
-
-            // TODO: We can do better than this mess.
-            document.getElementById("main-menu-btn").onclick = function() {
-                let mainMenu = document.getElementById("main-menu");
-                if(mainMenu.classList.contains("closed")) {
-                    mainMenu.classList.remove("closed");
-                    document.getElementById("main-container").style.display = "none";
-                }
-            };
-
-            document.getElementById("open-tutorials-btn").onclick = function() {
-                let tutorials = document.getElementById("tutorials");
-                if(tutorials.classList.contains("closed")) {
-                    tutorials.classList.remove("closed");
-                }
-            };
-
-            document.getElementById("open-instructions-btn").onclick = function() {
-                let instructions = document.getElementById("instructions");
-                if(instructions.classList.contains("closed")) {
-                    instructions.classList.remove("closed");
-                }
-            };
-
-            document.getElementById("open-about-page-btn").onclick = function() {
-                let instructions = document.getElementById("about-page");
-                if(instructions.classList.contains("closed")) {
-                    instructions.classList.remove("closed");
-                }
-            };
-
-            document.getElementById("open-options-btn").onclick = function() {
-                let instructions = document.getElementById("options-menu");
-                if(instructions.classList.contains("closed")) {
-                    instructions.classList.remove("closed");
-                }
-            };
-
-            document.getElementById("close-term-menu-btn").onclick    = this.closeTermMenu;
-            document.getElementById("close-main-menu-btn").onclick    = this.closeMainMenu;
-            document.getElementById("close-tutorials-btn").onclick    = this.closeTutorials;
-            document.getElementById("close-instructions-btn").onclick = this.closeInstructions;
-            document.getElementById("close-about-page-btn").onclick   = this.closeAboutPage;
-            document.getElementById("close-options-btn").onclick      = this.closeOptionsMenu;
+            document.getElementById("dark-mode-btn").onclick = this.toggleDarkMode.bind(this);
+            document.getElementById("undo-btn").onclick = this.diagramController.undo.bind(this.diagramController);
+            document.getElementById("redo-btn").onclick = this.diagramController.redo.bind(this.diagramController);
+            document.getElementById('select-palette-btn').onclick = this.changeTheme.bind(this);
+            document.getElementById('toggle-transparency-btn').onclick = this.toggleTransparency.bind(this);
 
             document.getElementById("place-term-btn").onclick = function() {
                 let placeTermButton = document.getElementById("place-term-btn");
@@ -3160,18 +3176,9 @@
                 this.populateTermSelect();
             }.bind(this);
 
-            document.getElementById('select-palette-btn').onclick = function() {
-                this.changeTheme();
-            }.bind(this);
-
-            document.getElementById('toggle-transparency-btn').onclick = function() {
-                this.toggleTransparency();
-            }.bind(this);
-
             document.getElementById('tutorial-btn-0').onclick = function() {
                 if(window.tutorials) {
-                    this.closeTutorials();
-                    this.closeMainMenu();
+                    this.closeAllMenus();
                     this.tutorial = window.tutorials[0].get(this, LayeredGrid);
                     this.tutorial.start();
                 }
@@ -3180,58 +3187,45 @@
             this.setUpLayerSelector();
         }
 
-        // TODO: We can do better than this mess below.
-        closeMainMenu() {
-            let mainMenu = document.getElementById("main-menu");
-            if(!mainMenu.classList.contains("closed")) {
-                mainMenu.classList.add("closed");
-                document.getElementById("main-container").style.display = "block";
-                return true;
-            }
+        getOpenMenuFunction(menuName) {
+            return function() {
+                let menu = document.getElementById(menuName);
+
+                if(menu.classList.contains("closed")) {
+                    menu.classList.remove("closed");
+                }
+
+                if(menuName === "main-menu") {
+                    document.getElementById("main-container").style.display = "none";
+                }
+            };
         }
 
-        closeTutorials() {
-            let tutorials = document.getElementById("tutorials");
-            if(!tutorials.classList.contains("closed")) {
-                tutorials.classList.add("closed");
-                return true;
-            }
-        }
+        getCloseMenuFunction(menuName) {
+            return function() {
+                let menu = document.getElementById(menuName);
 
-        closeInstructions() {
-            let instructions = document.getElementById("instructions");
-            if(!instructions.classList.contains("closed")) {
-                instructions.classList.add("closed");
-                return true;
-            }
-        }
+                if(!menu.classList.contains("closed")) {
+                    menu.classList.add("closed");
 
-        closeTermMenu() {
-            let termMenu = document.getElementById("terminal-menu");
-            if(!termMenu.classList.contains("closed")) {
-                termMenu.classList.add("closed");
-                return true;
-            }
-        }
-
-        closeAboutPage() {
-            let aboutPage = document.getElementById("about-page");
-            if(!aboutPage.classList.contains("closed")) {
-                aboutPage.classList.add("closed");
-                return true;
-            }
-        }
-
-        closeOptionsMenu() {
-            let optionsPage = document.getElementById("options-menu");
-            if(!optionsPage.classList.contains("closed")) {
-                optionsPage.classList.add("closed");
-                return true;
-            }
+                    if(menuName === "main-menu") {
+                        document.getElementById("main-container").style.display = "block";
+                    }
+                    return true;
+                }
+            };
         }
 
         closeTopMenu() {
-            this.closeTutorials() || this.closeAboutPage() || this.closeOptionsMenu() || this.closeInstructions() || this.closeMainMenu() || this.closeTermMenu(); // jshint ignore:line
+            this.menus.some(function(menuName) {
+                return document.getElementById("close-" + menuName + "-btn").onclick();
+            });
+        }
+
+        closeAllMenus() {
+            this.menus.forEach(function(menuName) {
+                document.getElementById("close-" + menuName + "-btn").onclick();
+            });
         }
 
         // Generate an output table.
@@ -3255,6 +3249,7 @@
                 // Compute each output.
                 for (let jj = 0; jj < this.diagram.outputs.length; jj++) {
                     tableOutputRow[jj] = this.diagram.computeOutput(ii, this.diagram.outputNodes[jj]);
+                    // Don't reuse the analysis in case of overdriven paths.
                 }
 
                 outputVals[ii] = tableOutputRow;

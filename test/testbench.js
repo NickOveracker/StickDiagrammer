@@ -15,7 +15,7 @@
 /* jshint freeze: true */
 /* jshint futurehostile: true */
 /* jshint leanswitch: true */
-/* jshint maxcomplexity: 15 */
+/* jshint maxcomplexity: 20 */
 /* jshint maxdepth: 4 */
 /* jshint maxparams: 4 */
 /* jshint noarg: true */
@@ -32,6 +32,7 @@
 /* jshint browser: true */
 /* globals UI: false,
            LayeredGrid: false,
+           KeyboardEvent: false,
 */
 
 function runTestbench(runTo) {
@@ -40,52 +41,66 @@ function runTestbench(runTo) {
     let evt;
     let executeNext = false;
     let assertNext = false;
+    let evalBooleanNext = false;
     let tv;
     let testVector = 0;
     let p;
     let results = [];
     let startTime;
-    let testCases = ["Five-stage inverter",
-                     "Four-stage buffer",
-                     "OR-4",
-                     "NOR-4",
-                     "NAND-4",
-                     "AND-4",
-                     "This test always fails",
-                     "Short-circuit #1",
-                     "Short-circuit #2",
-                     "Short-circuit #3",
-                     "Short-circuit #4",
-                     "Short-circuit #5",
-                     "Short-circuit #6",
-                     "Open-circuit #1",
-                     "Open-circuit #2",
-                     "Open-circuit #3",
-                     "Direct input #1",
-                     "Direct input #2",
-                     "Direct input #3",
-                     "Direct input #4",
-                     "A*B*(C+D)",
-                     "AOI4",
-                     "Between transistors",
-                     "SR latch Q",
-                     "SR latch Q'",
-                     "D flip-flop",
-                     "VDD & GND driving single PMOS gate",
-                     "Two inputs driving single PMOS gate",
-                     "VDD & GND driving single NMOS gate",
-                     "Two inputs driving single NMOS gate",
-                     "Indirectly overdriven output via NMOS",
-                     "Indirectly overdriven output via PMOS",
-                     "Indirectly overdriven gates via PMOS",
-                     "Indirectly overdriven gates via NMOS",
-                     "Overdriven dead-end transistor",
-                     "One overdriven transistor in series with VDD w/ grounded gate",
-                     "Two overdriven dead-end transistors in series",
-                     "Two overdriven transistors in series with VDD",
-                     "Two overdriven transistors in series with VDD w/ grounded gate",
-                     "One transistor driven by VDD & GND in series w/ singly-driven gate & direct input",
-                     "One transistor driven by VDD & GND in series w/ overdriven gate & direct input",
+    const testCases = ["Five-stage inverter",
+                       "Four-stage buffer",
+                       "OR-4",
+                       "NOR-4",
+                       "NAND-4",
+                       "AND-4",
+                       "This test always fails",
+                       "Short-circuit #1",
+                       "Short-circuit #2",
+                       "Short-circuit #3",
+                       "Short-circuit #4",
+                       "Short-circuit #5",
+                       "Short-circuit #6",
+                       "Open-circuit #1",
+                       "Open-circuit #2",
+                       "Open-circuit #3",
+                       "Direct input #1",
+                       "Direct input #2",
+                       "Direct input #3",
+                       "Direct input #4",
+                       "A*B*(C+D)",
+                       "AOI4",
+                       "Between transistors",
+                       "SR latch Q",
+                       "SR latch Q'",
+                       "D flip-flop",
+                       "VDD & GND driving single PMOS gate",
+                       "Two inputs driving single PMOS gate",
+                       "VDD & GND driving single NMOS gate",
+                       "Two inputs driving single NMOS gate",
+                       "Indirectly overdriven output via NMOS",
+                       "Indirectly overdriven output via PMOS",
+                       "Indirectly overdriven gates via PMOS",
+                       "Indirectly overdriven gates via NMOS",
+                       "Overdriven dead-end transistor",
+                       "One overdriven transistor in series with VDD w/ grounded gate",
+                       "Two overdriven dead-end transistors in series",
+                       "Two overdriven transistors in series with VDD",
+                       "Two overdriven transistors in series with VDD w/ grounded gate",
+                       "One transistor driven by VDD & GND in series w/ singly-driven gate & direct input",
+                       "One transistor driven by VDD & GND in series w/ overdriven gate & direct input",
+                       "Dark mode toggle button test",
+                       "Dark mode toggle keyboard test",
+                       "Theme change keyboard test",
+                       "Transparency toggle keyboard test",
+                       "Add two inputs keyboard test",
+                       "Remove one input keyboard test",
+                       "Add two outputs keyboard test",
+                       "Remove one output keyboard test",
+                       "Three overdriven transistors in series with input and two outputs",
+                       "(Layout 1) Three overdriven transistors in series with input and one output",
+                       "(Layout 2) Three overdriven transistors in series with input and one output",
+                       "Output directly connected to VDD in series with overloaded transistor",
+                       "One overdriven transistor in series with input and two outputs",
     ];
     runTo = runTo || testCases.length;
 
@@ -2562,7 +2577,244 @@ function runTestbench(runTo) {
         2,
         "XXXXXXZZXXXXXXZZ",
 
+        /* Toggle dark mode via simulated button click */
+        3,
+        function() {
+            let compareTo = window.UI.diagramView.darkMode;
+            document.getElementById("dark-mode-btn").click();
+            return window.UI.diagramView.darkMode !== compareTo;
+        },
+
+        /* Toggle dark mode via simulated keyboard shortcut */
+        3,
+        function() {
+            let compareTo = window.UI.diagramView.darkMode;
+
+            let keyboardEvent = new KeyboardEvent("keyup", {
+                bubbles : true,
+                cancelable : true,
+                shiftKey : window.UI.darkModeCommand.shiftModifier,
+                ctrlKey: window.UI.darkModeCommand.ctrlModifier,
+                keyCode: window.UI.darkModeCommand.keyCode, 
+            });
+            document.dispatchEvent(keyboardEvent);
+
+            return window.UI.diagramView.darkMode !== compareTo;
+        },
+
+        /* Change the theme via simulated keyboard shortcut */
+        3,
+        function() {
+            let compareTo = window.UI.diagramView.theme;
+
+            let keyboardEvent = new KeyboardEvent("keyup", {
+                bubbles : true,
+                cancelable : true,
+                shiftKey : window.UI.themeCommand.shiftModifier,
+                ctrlKey: window.UI.themeCommand.ctrlModifier,
+                keyCode: window.UI.themeCommand.keyCode, 
+            });
+            document.dispatchEvent(keyboardEvent);
+
+            return window.UI.diagramView.theme !== compareTo;
+        },
+
+        /* Toggle transparency via simulated keyboard shortcut */
+        3,
+        function() {
+            let compareTo = window.UI.diagramView.useFlatColors;
+
+            let keyboardEvent = new KeyboardEvent("keyup", {
+                bubbles : true,
+                cancelable : true,
+                shiftKey : window.UI.transparencyCommand.shiftModifier,
+                ctrlKey: window.UI.transparencyCommand.ctrlModifier,
+                keyCode: window.UI.transparencyCommand.keyCode, 
+            });
+            document.dispatchEvent(keyboardEvent);
+
+            return window.UI.diagramView.useFlatColors !== compareTo;
+        },
+
+        /* Add two inputs via simulated keyboard shortcut */
+        3,
+        function() {
+            let compareTo = window.UI.diagram.inputs.length;
+
+            let keyboardEvent = new KeyboardEvent("keyup", {
+                bubbles : true,
+                cancelable : true,
+                shiftKey : window.UI.addInputCommand.shiftModifier,
+                ctrlKey: window.UI.addInputCommand.ctrlModifier,
+                keyCode: window.UI.addInputCommand.keyCode, 
+            });
+            document.dispatchEvent(keyboardEvent);
+            document.dispatchEvent(keyboardEvent);
+
+            return window.UI.diagram.inputs.length === compareTo + 2;
+        },
+
+        /* Remove an input via simulated keyboard shortcut */
+        3,
+        function() {
+            let compareTo = window.UI.diagram.inputs.length;
+
+            let keyboardEvent = new KeyboardEvent("keyup", {
+                bubbles : true,
+                cancelable : true,
+                shiftKey : window.UI.removeInputCommand.shiftModifier,
+                ctrlKey: window.UI.removeInputCommand.ctrlModifier,
+                keyCode: window.UI.removeInputCommand.keyCode, 
+            });
+            document.dispatchEvent(keyboardEvent);
+
+            return window.UI.diagram.inputs.length === compareTo - 1;
+        },
+
+        /* Add two outputs via simulated keyboard shortcut */
+        3,
+        function() {
+            let compareTo = window.UI.diagram.outputs.length;
+
+            let keyboardEvent = new KeyboardEvent("keyup", {
+                bubbles : true,
+                cancelable : true,
+                shiftKey : window.UI.addOutputCommand.shiftModifier,
+                ctrlKey: window.UI.addOutputCommand.ctrlModifier,
+                keyCode: window.UI.addOutputCommand.keyCode, 
+            });
+            document.dispatchEvent(keyboardEvent);
+            document.dispatchEvent(keyboardEvent);
+
+            return window.UI.diagram.outputs.length === compareTo + 2;
+        },
+
+        /* Remove an output via simulated keyboard shortcut */
+        3,
+        function() {
+            let compareTo = window.UI.diagram.outputs.length;
+
+            let keyboardEvent = new KeyboardEvent("keyup", {
+                bubbles : true,
+                cancelable : true,
+                shiftKey : window.UI.removeOutputCommand.shiftModifier,
+                ctrlKey: window.UI.removeOutputCommand.ctrlModifier,
+                keyCode: window.UI.removeOutputCommand.keyCode, 
+            });
+            document.dispatchEvent(keyboardEvent);
+
+            return window.UI.diagram.outputs.length === compareTo - 1;
+        },
+
+        /* Three overdriven transistors in series with input and two outputs */
+        1,
+        function() {
+            UI.diagram.inputs[0].x  = 9;
+            UI.diagram.inputs[0].y  = 5;
+            UI.diagram.inputs[1].x  = 9;
+            UI.diagram.inputs[1].y  = 23;
+            UI.diagram.inputs[3].x  = 5;
+            UI.diagram.inputs[3].y  = 5;
+            UI.diagram.inputs[4].x  = 1;
+            UI.diagram.inputs[4].y  = 13;
+            UI.diagram.outputs[0].x = 19;
+            UI.diagram.outputs[0].y = 13;
+            UI.diagram.outputs[1].x = 21;
+            UI.diagram.outputs[1].y = 13;
+        },
+
+        // Clear old contacts
+        ["mousedown", {button:  2, clientX: mapX(1),  clientY: mapY(1)}],
+        ["mouseup",   {button:  2, clientX: mapX(1),  clientY: mapY(1)}],
+        ["mousedown", {button:  2, clientX: mapX(1),  clientY: mapY(15)}],
+        ["mouseup",   {button:  2, clientX: mapX(1),  clientY: mapY(15)}],
+        ["mousedown", {button:  2, clientX: mapX(29), clientY: mapY(15)}],
+        ["mouseup",   {button:  2, clientX: mapX(29), clientY: mapY(15)}],
+
+        // POLY
+        ["mousedown", {button:  0, clientX: mapX(10), clientY: mapY(1)}],
+        ["mousemove", {buttons: 1, clientX: mapX(10), clientY: mapY(29)}],
+        ["mouseup",   {button:  1, clientX: mapX(10), clientY: mapY(29)}],
+
+        2,
+        "XXXXXXZZXXXXXXZZXXXXXXZZZZZZZZZZXXXXXXZZXXXXXXZZXXXXXXZZZZZZZZZZ",
+
+        /* (Layout 1) Three overdriven transistors in series with input and one output */
+        1,
+        function() {
+           UI.diagramController.removeTerminal(true);
+           UI.populateTermSelect();
+        },
+
+        2,
+        "XXXXXXZZXXXXXXZZXXXXXXZZZZZZZZZZ",
+
+        /* (Layout 2) Three overdriven transistors in series with input and one output */
+        1,
+        function() {
+            UI.diagram.inputs[4].x  = 8;
+            UI.diagram.inputs[4].y  = 13;
+        },
+
+        2,
+        "01010101XXXXXXXXXXXXXXXXZZZZZZZZ",
+
+        /* Output directly connected to VDD in series with overloaded transistor (known bug) */
+        1,
+        function() {
+            UI.diagramController.removeTerminal(false); // Remove E
+            UI.diagramController.removeTerminal(false); // Remove D
+            UI.diagramController.removeTerminal(false); // Remove C
+            UI.populateTermSelect();
+            UI.diagram.vddCell.x  = 11;
+            UI.diagram.vddCell.y  = 13;
+            // Toggle back to transparent Tol for my eyes' sake
+            UI.changeTheme(); // Stix
+            UI.changeTheme(); // Tol
+            UI.toggleTransparency();
+        },
+
+        // Remove the two left transistors
+        ["mousedown", {button:  2, clientX: mapX(1),   clientY: mapY(1)}],
+        ["mousemove", {buttons: 2, clientX: mapX(8),   clientY: mapY(29)}],
+        ["mouseup",   {button:  2, clientX: mapX(8),   clientY: mapY(29)}],
+
+        2,
+        "1111",
+
+        /* Output directly connected to VDD in series with overloaded transistor (known bug) */
+        1,
+        function() {
+            UI.diagramController.removeTerminal(false); // Remove B
+            UI.diagramController.addTerminal(true);     // Add X
+            UI.populateTermSelect();
+
+            UI.diagram.inputs[0].x  = 8;
+            UI.diagram.inputs[0].y  = 13;
+            UI.diagram.outputs[0].x = 25;
+            UI.diagram.outputs[0].y = 13;
+            UI.diagram.vddCell.x    = 9;
+            UI.diagram.vddCell.y    = 5;
+            UI.diagram.gndCell.x    = 9;
+            UI.diagram.gndCell.y    = 23;
+        },
+
+        // Clean up contacts
+        ["mousedown", {button:  2, clientX: mapX(29),  clientY: mapY(14)}],
+        ["mouseup",   {button:  2, clientX: mapX(29),  clientY: mapY(15)}],
+        ["mousedown", {button:  2, clientX: mapX(8),   clientY: mapY(24)}],
+        ["mouseup",   {button:  2, clientX: mapX(8),   clientY: mapY(24)}],
+
+        2,
+        "XXXX",
    ];
+
+    /** SET TO 1 OUTPUT AND 4 INPUTS */
+    while(UI.diagram.outputs.length > 1) { UI.diagramController.removeTerminal(true);  }
+    while(UI.diagram.outputs.length < 1) { UI.diagramController.addTerminal(true);     }
+    while(UI.diagram.inputs.length  > 4) { UI.diagramController.removeTerminal(false); }
+    while(UI.diagram.inputs.length  < 4) { UI.diagramController.addTerminal(false);    }
+    UI.populateTermSelect();
 
     /** RUN TESTBENCH **/
     startTime = Date.now();
@@ -2582,20 +2834,15 @@ function runTestbench(runTo) {
             continue;
         }
 
+        if(events[ii] === 3) {
+            evalBooleanNext = true;
+            continue;
+        }
+
         if(executeNext) {
             events[ii]();
             executeNext = false;
-        } else {
-            evt = new MouseEvent(events[ii][0], {
-                view: window,
-                bubbles: true,
-                cancelable: true,
-                ...events[ii][1]
-            });
-            document.getElementById('canvas-wrapper').dispatchEvent(evt);
-        }
-
-        if(assertNext) {
+        } else if(assertNext) {
             // Set CONTACT at the coordinates of each input and output.
             UI.diagram.inputs.forEach(function(input) {
                 UI.diagram.layeredGrid.set(input.x, input.y, LayeredGrid.CONTACT);
@@ -2623,10 +2870,22 @@ function runTestbench(runTo) {
             testVector++;
 
             assertNext = false;
+        } else if(evalBooleanNext) {
+            results[testVector] = events[ii]();
+            testVector++;
+            evalBooleanNext = false;
+        } else {
+            evt = new MouseEvent(events[ii][0], {
+                view: window,
+                bubbles: true,
+                cancelable: true,
+                ...events[ii][1]
+            });
+            document.getElementById('canvas-wrapper').dispatchEvent(evt);
         }
     }
     endTime = Date.now();
-    UI.refreshTruthTable(true);
+    UI.refreshTruthTable(/*true*/);
 
     // Only overwrite the results if all tests were run.
     if(runTo < testCases.length) {
