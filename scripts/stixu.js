@@ -9,8 +9,9 @@
  * ## Stipulations for updates
  *    - All builds must pass JSHint with no warnings (https://jshint.com/)
  *      - This following tags may be disabled, but only on a line-by-line basis.
- *      - "jshint bitwise" (bitwise operators)
- *      - "jshint -W093" (returning and assigning in one step)
+ *      - "jshint bitwise"    (bitwise operators)
+ *      - "jshint -W093"      (returning and assigning in one step)
+ *      - "jshint nonew"      (using "new" for side-effects)
  *      - "jshint complexity" (cyclomatic complexity, function-by-function basis)
  *    - All builds must pass testbench
  *      - The testbench may need to be modified for some breaking changes (e.g., new layers)
@@ -307,6 +308,7 @@
         // Sign should be a positive or negative integer
         shift(startIndex, byRow, sign) {
             // Cannot be reasonably reduced further than this; make an exception.
+            // TODO: Reduce if at all possible in the future.
             /* jshint maxcomplexity: 12 */ 
 
             let oldGrid, startX, startY, coords, oldCell, isInShiftRange,
@@ -639,6 +641,28 @@
             this.placeTermMode    = false;
             this.selectedTerminal = null;
             this.currentCell      = null;
+        }
+
+        setTerminalCounts(numInputs, numOutputs) {
+            // Delete all
+            const terminals = [
+                { arr: this.diagram.inputs,  num: numInputs,  isOutput: false, },
+                { arr: this.diagram.outputs, num: numOutputs, isOutput: true,  },
+            ];
+
+            // Delete excess terminals first.
+            terminals.forEach(function(ioObj) {
+                while(ioObj.arr.length > ioObj.num) {
+                    this.removeTerminal(ioObj.isOutput);
+                }
+            }.bind(this));
+
+            // Now add up to the correct number.
+            terminals.forEach(function(ioObj) {
+                while(ioObj.arr.length < ioObj.num) {
+                    this.addTerminal(ioObj.isOutput);
+                }
+            }.bind(this));
         }
 
         removeTerminal(isOutput) {
@@ -1278,6 +1302,7 @@
         decode(stringBase64) {
             const decompress = atob(window.LZUTF8.decompress(stringBase64, {inputEncoding: "Base64",}));
             const setGrid    = [];
+            let byte, bitShift, cellIndex = 0;
 
             for(let ii = 0; ii < decompress.length; ii++) {
                 setGrid[ii] = decompress.charCodeAt(ii);
@@ -1294,36 +1319,17 @@
             this.gndCell.x   = setGrid.splice(0,1)[0];
             this.gndCell.y   = setGrid.splice(0,1)[0];
 
-            while(this.inputs.length > numInputs) {
-                this.controller.removeTerminal(false);
-            }
-            while(this.inputs.length < numInputs) {
-                this.controller.addTerminal(false);
-            }
-
-            while(this.outputs.length < numOutputs) {
-                this.controller.addTerminal(true);
-            }
-            while(this.outputs.length > numOutputs) {
-                this.controller.removeTerminal(true);
-            }
-
+            this.controller.setTerminalCounts(numInputs, numOutputs);
             this.layeredGrid.resize(setWidth, setHeight);
 
-            for(let ii = 0; ii < numInputs + numOutputs; ii++) {
-                if(ii < numInputs) {
-                    this.inputs[ii] = {x: setGrid.splice(0,1)[0], y: setGrid.splice(0,1)[0], };
-                    this.controller.placeTerminal(this.inputs[ii], this.inputs[ii], true);
-                } else {
-                    this.outputs[ii-numInputs] = {x: setGrid.splice(0,1)[0], y: setGrid.splice(0,1)[0], };
-                    this.controller.placeTerminal(this.outputs[ii-numInputs], this.outputs[ii-numInputs], true);
+            [ this.inputs, this.outputs, ].forEach(function(arr) {
+                for(let ii = 0; ii < arr.length; ii++) {
+                    arr[ii] = {x: setGrid.splice(0,1)[0], y: setGrid.splice(0,1)[0], };
+                    this.controller.placeTerminal(arr[ii], arr[ii], true);
                 }
-            }
+            });
 
             // Cells
-            let cellIndex = 0;
-            let bitShift;
-            let byte;
             for(let lyr = 0; lyr < this.layeredGrid.layers - 1 && lyr < setDepth; lyr++) {
                 for(let col = 0; col < this.layeredGrid.width; col++) {
                     for(let row = 0; row < this.layeredGrid.height; row++) {
