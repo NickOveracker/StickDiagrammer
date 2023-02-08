@@ -3231,10 +3231,14 @@
 
             let temp = document.getElementById("open-qrcode-menu-btn").onclick;
             document.getElementById("open-qrcode-menu-btn").onclick = function() {
+                let url = document.getElementById("qrcode"), window.location + "?d=" + this.diagram.encode();
+
                 document.getElementById("qrcode").innerHTML = "";
                 /* jshint nonew: false */
-                new window.QRCode(document.getElementById("qrcode"), window.location + "?d=" + this.diagram.encode(), {correctLevel : QRCode.CorrectLevel.H,});
+                new window.QRCode(url, {correctLevel : QRCode.CorrectLevel.H,});
                 /* jshint nonew: true */
+
+                document.getElementById("share-url").href = url;
                 temp();
             }.bind(this);
 
