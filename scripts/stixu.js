@@ -1300,10 +1300,10 @@
             while(this.outputs.length > numInputs) {
                 this.controller.removeTerminal(true);
             }
-            while(this.inputs.length < numInputs) {
+            while(this.inputs.length < numOutputs) {
                 this.controller.addTerminal(false);
             }
-            while(this.outputs.length < numInputs) {
+            while(this.outputs.length < numOutputs) {
                 this.controller.addTerminal(true);
             }
 
