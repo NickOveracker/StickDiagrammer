@@ -23,12 +23,12 @@
 * Allow user to selectively hide layers (to verify connections).
 * Allow custom command mappings.
 * Allow custom terminal labels.
-* Share small diagrams by URL arguments and QR codes.
 * HDL generation.
 * Student/Teacher modes with generating/grading homework, practice problems, etc.
 * Draw CMOS circuit schematic corresponding to the painted topology.
 * Logical effort calculations (allow user to set constants)
 * Export netlist for use in electronics design software.
+* ~~Share small diagrams by URL arguments and QR codes.~~ *Resolved 2023/2/8*
 * ~~Interactive tutorial.~~ *Resolved 2023/2/4*
 * ~~Replace pullup/pulldown alert popups with less obtrusive warnings.~~ *Resolved 2023/1/29*
 * ~~Allow users to select where to insert rows and columns.~~ *Resolved 2023/1/29*
@@ -57,7 +57,7 @@
 * ~~Knowing that I spelled "accolades" correctly (I don't feel like Googling it)~~ *Resolved 2021/11/20*
 
 ## Known Bugs
-* ~~Incorrect output when overdriven transistors drive multiple outputs. (Testbench cases 49, 53)~~ *Resoled 2023/2/6*
+* ~~Incorrect output when overdriven transistors drive multiple outputs. (Testbench cases 49, 53)~~ *Resolved 2023/2/6*
 * ~~Incorrect output when dead-end overdriven transistors are behind inputs (Testbench cases 51, 52)~~ *Resolved 2023/2/6*
 * ~~The pullup/pulldown alert div displaces the canvas by too much in some browsers, even when not visible.~~ *Resolved 2023/1/30*
 * ~~Highlighted nets are no longer comprehensive.~~ *Resolved 2023/1/22*

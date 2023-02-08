@@ -37,6 +37,25 @@ html {
     -ms-user-select: none; /* Internet Explorer/Edge */
 }
 
+#qrcode-menu img {
+    max-width: min(100vw, 70vh);
+    max-height: min(100vw, 70vh);
+    margin: auto;
+}
+
+ul.sparse li {
+    margin-bottom: 5vh;
+}
+
+.package-name {
+    display: block;
+}
+
+.package-link {
+    text-decoration: underline;
+    font-size: large;
+}
+
 .pullup-pulldown-warning {
     text-align: center;
     background: red;
@@ -241,7 +260,7 @@ li.clickable {
     height: 100vh;
     width: 100%;
     z-index: 9999;
-    background-color: rgba(76,38,184,97%);
+    background-color: rgb(76,38,184);
     position: fixed;
     top: 0;
     font-family: 'Josefin Sans', sans-serif;
@@ -285,9 +304,7 @@ li.clickable {
 }
 
 .menu-btn-content h1 {
-    margin-top: 4vh;
     font-size: 2.5vh;
-   
 }
 
 .teacher-btn{
@@ -299,8 +316,8 @@ li.clickable {
 
 .box-btn{
     padding: 2vh;
-    margin-top: 4vh;
-    border:solid 2px #FFFFFF;
+    margin: 2vh;
+    border: solid 2px #FFFFFF;
     color: #FFFFFF;
     width: auto;
 }
@@ -309,6 +326,7 @@ li.clickable {
     border:solid 2px #221D1D;
     background-color: #221D1D;
     margin-top: 1vh;
+    margin-bottom: 0;
 }
 
 .menu-text{
@@ -694,7 +712,7 @@ body.light {
     }
 
     .menu-content{
-        top: 5vh;
+        margin-top: 3vh;
     }
 
     .menu-content li{

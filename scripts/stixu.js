@@ -9,8 +9,9 @@
  * ## Stipulations for updates
  *    - All builds must pass JSHint with no warnings (https://jshint.com/)
  *      - This following tags may be disabled, but only on a line-by-line basis.
- *      - "jshint bitwise" (bitwise operators)
- *      - "jshint -W093" (returning and assigning in one step)
+ *      - "jshint bitwise"    (bitwise operators)
+ *      - "jshint -W093"      (returning and assigning in one step)
+ *      - "jshint nonew"      (using "new" for side-effects)
  *      - "jshint complexity" (cyclomatic complexity, function-by-function basis)
  *    - All builds must pass testbench
  *      - The testbench may need to be modified for some breaking changes (e.g., new layers)
@@ -41,8 +42,6 @@
 /* jshint varstmt: true */
 /* jshint browser: true */
 /* jshint latedef: true */
-/* globals runTestbench:     false,
-           debugDefinitions: false */
 (() => {
     'use strict';
 
@@ -309,6 +308,7 @@
         // Sign should be a positive or negative integer
         shift(startIndex, byRow, sign) {
             // Cannot be reasonably reduced further than this; make an exception.
+            // TODO: Reduce if at all possible in the future.
             /* jshint maxcomplexity: 12 */ 
 
             let oldGrid, startX, startY, coords, oldCell, isInShiftRange,
@@ -641,6 +641,28 @@
             this.placeTermMode    = false;
             this.selectedTerminal = null;
             this.currentCell      = null;
+        }
+
+        setTerminalCounts(numInputs, numOutputs) {
+            // Delete all
+            const terminals = [
+                { arr: this.diagram.inputs,  num: numInputs,  isOutput: false, },
+                { arr: this.diagram.outputs, num: numOutputs, isOutput: true,  },
+            ];
+
+            // Delete excess terminals first.
+            terminals.forEach(function(ioObj) {
+                while(ioObj.arr.length > ioObj.num) {
+                    this.removeTerminal(ioObj.isOutput);
+                }
+            }.bind(this));
+
+            // Now add up to the correct number.
+            terminals.forEach(function(ioObj) {
+                while(ioObj.arr.length < ioObj.num) {
+                    this.addTerminal(ioObj.isOutput);
+                }
+            }.bind(this));
         }
 
         removeTerminal(isOutput) {
@@ -1224,6 +1246,111 @@
             
             this.view = new DiagramView(this, mainCanvas, gridCanvas);
             this.controller = new DiagramController(this, this.view, mainCanvas);
+        }
+
+        encode() {
+            const code = [];
+            let bitNo = 7;
+            let codeByte = 0;
+
+            // Header
+            code.push(this.layeredGrid.width);
+            code.push(this.layeredGrid.height);
+            code.push(this.layeredGrid.layers - 1);
+            code.push(this.inputs.length);
+            code.push(this.outputs.length);
+
+            // Terminal locations
+            [this.vddCell, this.gndCell,].concat(this.inputs.concat(this.outputs)).forEach(function(terminal) {
+                code.push(terminal.x);
+                code.push(terminal.y);
+            });
+            
+            // Cells
+            for(let lyr = 0; lyr < this.layeredGrid.layers - 1; lyr++) {
+                for(let col = 0; col < this.layeredGrid.width; col++) {
+                    for(let row = 0; row < this.layeredGrid.height; row++) {
+                        if(this.layeredGrid.get(col,row,lyr).isSet) {
+                            /*jslint bitwise: true */
+                            codeByte = codeByte | (1 << bitNo);
+                            /*jslint bitwise: false */
+                        }
+                        bitNo--;
+
+                        if(bitNo < 0) {
+                            bitNo = 7;
+                            code.push(codeByte);
+                            codeByte = 0;
+                        }
+                    }
+                }
+            }
+
+            // Leftover bits
+            if(bitNo < 7) {
+                code.push(codeByte);
+            }
+
+            let str = "";
+            code.forEach((char) => {
+                str += String.fromCharCode(char);
+            });
+
+            return window.LZUTF8.compress(btoa(str), {outputEncoding: "Base64",});
+        }
+
+        decode(stringBase64) {
+            const decompress = atob(window.LZUTF8.decompress(stringBase64, {inputEncoding: "Base64",}));
+            const setGrid    = [];
+            let byte, bitShift, cellIndex = 0;
+
+            for(let ii = 0; ii < decompress.length; ii++) {
+                setGrid[ii] = decompress.charCodeAt(ii);
+            }
+
+            const setWidth   = setGrid.splice(0,1)[0];
+            const setHeight  = setGrid.splice(0,1)[0];
+            const setDepth   = setGrid.splice(0,1)[0];
+            const numInputs  = setGrid.splice(0,1)[0];
+            const numOutputs = setGrid.splice(0,1)[0];
+
+            this.vddCell.x   = setGrid.splice(0,1)[0];
+            this.vddCell.y   = setGrid.splice(0,1)[0];
+            this.gndCell.x   = setGrid.splice(0,1)[0];
+            this.gndCell.y   = setGrid.splice(0,1)[0];
+
+            this.controller.setTerminalCounts(numInputs, numOutputs);
+            this.layeredGrid.resize(setWidth, setHeight);
+
+            [ this.inputs, this.outputs, ].forEach(function(arr) {
+                for(let ii = 0; ii < arr.length; ii++) {
+                    arr[ii] = {x: setGrid.splice(0,1)[0], y: setGrid.splice(0,1)[0], };
+                    this.controller.placeTerminal(arr[ii], arr[ii], true);
+                }
+            });
+
+            // Cells
+            for(let lyr = 0; lyr < this.layeredGrid.layers - 1 && lyr < setDepth; lyr++) {
+                for(let col = 0; col < this.layeredGrid.width; col++) {
+                    for(let row = 0; row < this.layeredGrid.height; row++) {
+                        /*jslint bitwise: true */
+                        bitShift = 1 << (7 - cellIndex % 8);
+                        byte = Math.floor(cellIndex/8);
+                        if(setGrid[byte] & bitShift) {
+                            this.layeredGrid.set(col, row, lyr);
+                        } else {
+                            this.layeredGrid.clear(col, row, lyr);
+                        }
+                        /*jslint bitwise: false */
+                        cellIndex++;
+                    }
+                }
+            }
+
+            // Terminals
+            [this.vddCell, this.gndCell,].concat(this.inputs.concat(this.outputs)).forEach(function(cell) {
+                this.controller.placeTerminal(cell, cell, true);
+            }.bind(this));
         }
 
         initCells() {
@@ -2385,6 +2512,8 @@
             // Order matters
             // Lower-indexed menus are displayed at the same level as or over higher-indexed menus.
             this.menus = [
+                "qrcode-menu",
+                "licenses-menu",
                 "tutorials",
                 "instructions",
                 "about-page",
@@ -3069,7 +3198,7 @@
             }.bind(this));
             
             window.addEventListener("contextmenu", function(e) {
-                if (e.button === 2) {
+                if (e.button === 2 && this.document.getElementById("main-menu").classList.contains("closed")) {
                     // Don't show a context menu.
                     e.preventDefault();
                 }
@@ -3105,6 +3234,19 @@
                 document.getElementById("open-" + menuName + "-btn").onclick  = this.getOpenMenuFunction(menuName);
                 document.getElementById("close-" + menuName + "-btn").onclick = this.getCloseMenuFunction(menuName);
             }.bind(this));
+
+            let temp = document.getElementById("open-qrcode-menu-btn").onclick;
+            document.getElementById("open-qrcode-menu-btn").onclick = function() {
+                let url = window.location.href.split('?')[0] + "?d=" + this.diagram.encode();
+
+                document.getElementById("qrcode").innerHTML = "";
+                /* jshint nonew: false */
+                new window.QRCode(document.getElementById("qrcode"), url);
+                /* jshint nonew: true */
+
+                document.getElementById("share-url").href = url;
+                temp();
+            }.bind(this);
 
             document.getElementById("add-row").onclick       = resizeGridByOne(true,  true);
             document.getElementById("remove-row").onclick    = resizeGridByOne(true,  false);
@@ -3221,6 +3363,15 @@
                 return document.getElementById("close-" + menuName + "-btn").onclick();
             });
         }
+
+        /*
+        // Not needed now but maybe someday
+        menuIsOpen() {
+            return this.menus.some(function(menuName) {
+                return !document.getElementById(menuName).classList.contains("closed");
+            });
+        }
+        */
 
         closeAllMenus() {
             this.menus.forEach(function(menuName) {
@@ -3503,8 +3654,14 @@
             window.Diagram = Diagram;
             window.LayeredGrid = LayeredGrid;
             window.DiagramController = DiagramController;
-            debugDefinitions();
-            runTestbench();
+            window.debugDefinitions();
+            window.runTestbench();
+        } else {
+            const urlParams = new URLSearchParams(window.location.search);
+            if(urlParams.get("d")) {
+                diagram.decode(urlParams.get("d"));
+                UI.populateTermSelect();
+            }
         }
     };
 })();
