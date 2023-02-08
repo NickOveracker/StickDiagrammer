@@ -1297,14 +1297,15 @@
             while(this.inputs.length > numInputs) {
                 this.controller.removeTerminal(false);
             }
-            while(this.outputs.length > numInputs) {
-                this.controller.removeTerminal(true);
-            }
-            while(this.inputs.length < numOutputs) {
+            while(this.inputs.length < numInputs) {
                 this.controller.addTerminal(false);
             }
+
             while(this.outputs.length < numOutputs) {
                 this.controller.addTerminal(true);
+            }
+            while(this.outputs.length > numOutputs) {
+                this.controller.removeTerminal(true);
             }
 
             this.layeredGrid.resize(setWidth, setHeight);
