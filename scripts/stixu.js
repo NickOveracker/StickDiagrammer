@@ -3671,6 +3671,11 @@
             window.DiagramController = DiagramController;
             debugDefinitions();
             runTestbench();
+        } else {
+            const urlParams = new URLSearchParams(window.location.search);
+            if(urlParams.get("d")) {
+                diagram.decode(urlParams.get("d"));
+            }
         }
     };
 })();
