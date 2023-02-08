@@ -1327,7 +1327,7 @@
                     arr[ii] = {x: setGrid.splice(0,1)[0], y: setGrid.splice(0,1)[0], };
                     this.controller.placeTerminal(arr[ii], arr[ii], true);
                 }
-            });
+            }.bind(this));
 
             // Cells
             for(let lyr = 0; lyr < this.layeredGrid.layers - 1 && lyr < setDepth; lyr++) {
