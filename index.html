@@ -7,11 +7,11 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Stixu Stick Diagrammer</title>
     <script src="https://kit.fontawesome.com/039fa42282.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="https://nturley.github.io/netlistsvg/elk.bundled.js"></script>
-    <script type="text/javascript" src="https://nturley.github.io/netlistsvg/built/netlistsvg.bundle.js"></script>
-    <script src="tutorial.js"></script>
-    <script src="script.js"></script>
-    <link rel="stylesheet" href="style.css">
+    <script src="./scripts/lzutf8.min.js" id="lzutf8"></script>
+    <script src="./scripts/qrcode.min.js"></script>
+    <script src="./scripts/tutorial.js"></script>
+    <script src="./scripts/stixu.js"></script>
+    <link rel="stylesheet" href="./styles/stixu.css">
 </head>
 
 <body class="dark">
@@ -160,36 +160,43 @@
     <section class="menu scrollable closed" id="main-menu">
         <i class="fas fa-times clickable" id="close-main-menu-btn"></i>
 
-        <div class="menu-content">
-            <ul>
-                <li class="clickable" id="open-tutorials-btn">Tutorials</li>
-                <li class="clickable" id="open-instructions-btn">Instructions</li>
-                <li class="clickable" id="open-about-page-btn">About</li>
-                <li class="clickable"><a href="mailto:nick.overacker@okstate.edu">Bug Report</a></li>
-                <li class="clickable"><a href="mailto:nick.overacker@okstate.edu">Contact</a></li>
-            </ul>
 
+        <div class="menu-content">
             <div class="menu-btn-content">
-                <div class="box-btn clickable options-btn" id="open-options-menu-btn">
-                    <i class="fas fa-cogs menu-text">
-                        <span>&nbsp;Option</span>
-                    </i>
-                </div>
-                <!--<div class="teacher-btn clickable"><i class="fas fa-glasses menu-text"><span>&nbsp;Teacher Mode</span></i></div>-->
                 <h1>Support this project!</h1>
                 <div class="box-btn clickable">
                     <a href="https://patreon.com/twentynine" target="_blank">
                         <i class="fab fa-patreon menu-text">
-                            <span>&nbsp;Patron</span>
+                            <span>&nbsp;Patreon</span>
                         </i>
                     </a>
                 </div>
+
                 <div class="box-btn clickable">
                     <a href="https://ko-fi.com/twentynine" target="_blank">
                         <i class="fas fa-coffee menu-text">
                             <span>&nbsp;Ko-Fi</span>
                         </i>
                     </a>
+                </div>
+                <!--<div class="teacher-btn clickable"><i class="fas fa-glasses menu-text"><span>&nbsp;Teacher Mode</span></i></div>-->
+            </div>
+
+            <ul>
+                <li class="clickable" id="open-tutorials-btn">Tutorials</li>
+                <li class="clickable" id="open-instructions-btn">Instructions</li>
+                <li class="clickable" id="open-about-page-btn">About</li>
+                <li class="clickable"><a href="mailto:nick.overacker@okstate.edu">Bug Report</a></li>
+                <li class="clickable"><a href="mailto:nick.overacker@okstate.edu">Contact</a></li>
+                <li class="clickable" id="open-licenses-menu-btn">Source Licences</span>
+                <li class="clickable" id="open-qrcode-menu-btn">Generate QR Code</span>
+            </ul>
+
+            <div class="menu-btn-content">
+                <div class="box-btn clickable options-btn" id="open-options-menu-btn">
+                    <i class="fas fa-cogs menu-text">
+                        <span>&nbsp;Options</span>
+                    </i>
                 </div>
             </div>
         </div>
@@ -298,5 +305,23 @@
         </div>
     </section>
 
+    <section class="menu scrollable closed" id="licenses-menu">
+        <i class="fas fa-times clickable" id="close-licenses-menu-btn"></i>
+        <div class="menu-content">
+            <ul class="sparse">
+                <li><span class="package-name">Stixu.io</span><a class="package-link clickable" href="https://github.com/NickOveracker/StickDiagrammer/">Source</a> | <a class="package-link clickable" href="./licenses/LICENSE.txt">Polyform Strict License 1.0.0</a></li>
+                <li><span class="package-name">lzutf8.js</span><a class="package-link clickable" href="https://github.com/rotemdan/lzutf8.js/">Source</a> | <a class="package-link clickable" href="./licenses/lzutf8_js_LICENSE.txt">MIT License</a></li>
+                <li><span class="package-name">qrcodejs</span><a class="package-link clickable" href="https://github.com/KeeeX/qrcodejs">Source</a> | <a class="package-link clickable" href="./licenses/qrcodejs_LICENSE.txt">MIT License</a></li>
+            </u>
+        </div>
+    </section>
+
+    <section class="menu scrollable closed" id="qrcode-menu">
+        <i class="fas fa-times clickable" id="close-qrcode-menu-btn"></i>
+        <div class="menu-long-text">
+            <h1><a class="clickable" id="share-url">Share this Diagram</a></h1>
+            <div id="qrcode"></div>
+        </div>
+    </section>
 </body>
 </html>
