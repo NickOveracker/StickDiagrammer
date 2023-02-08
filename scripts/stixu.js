@@ -1347,7 +1347,7 @@
             this.gndCell.x   = setGrid.splice(0,1)[0];
             this.gndCell.y   = setGrid.splice(0,1)[0];
 
-            for(ii = 0; ii < decompress.length; ii++) {
+            for(let ii = 0; ii < decompress.length; ii++) {
                 setGrid[ii] = decompress.charCodeAt(ii);
             }
 
