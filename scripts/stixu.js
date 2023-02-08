@@ -1312,8 +1312,10 @@
             for(let ii = 0; ii < numInputs + numOutputs; ii++) {
                 if(ii < numInputs) {
                     this.inputs[ii] = {x: setGrid.splice(0,1)[0], y: setGrid.splice(0,1)[0], };
+                    this.controller.placeTerminal(this.inputs[ii], this.inputs[ii], true);
                 } else {
                     this.outputs[ii-numInputs] = {x: setGrid.splice(0,1)[0], y: setGrid.splice(0,1)[0], };
+                    this.controller.placeTerminal(this.outputs[ii], this.outputs[ii], true);
                 }
             }
 
