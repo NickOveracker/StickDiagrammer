@@ -1227,6 +1227,61 @@
             this.controller = new DiagramController(this, this.view, mainCanvas);
         }
 
+        /*
+        static get Base64Map() {
+            return [
+                "A", // 0x00
+                "B",
+                "C",
+                "D",
+                "E",
+                "F",
+                "G",
+                "H",
+                "I",
+                "J",
+                "K",
+                "L",
+                "M",
+                "N",
+                "O",
+                "P", //0x0F
+                "Q",
+                "R",
+                "S",
+                "T",
+                "U",
+                "V",
+                "W",
+                "X",
+                "Y",
+                "Z",
+                "a",
+                "b",
+                "c",
+                "d",
+                "e",
+                "f", // 0x1F
+                "g",
+                "h",
+                "i",
+                "j",
+                "k",
+                "l",
+                "m",
+                "n",
+                "o",
+                "p",
+                "q",
+                "r",
+                "s",
+                "t",
+                "u",
+                "v", // 0x2F
+            ];
+        }
+        */
+
         encode() {
             const code = [];
             let bitNo = 7;
@@ -1270,11 +1325,17 @@
                 code.push(codeByte);
             }
 
-            return window.LZUTF8.compress(new Uint8Array(code), {outputEncoding: "Base64",});
+            let str = "";
+            code.forEach((char) => {
+                str += String.fromCharCode(char);
+            });
+
+            return window.LZUTF8.compress(btoa(str), {outputEncoding: "Base64",});
         }
 
         decode(stringBase64) {
-            const setGrid    = Array.from(new Uint8Array(window.LZUTF8.decompress(stringBase64, {outputEncoding: "ByteArray", inputEncoding: "Base64",})));
+            const decompress = atob(window.LZUTF8.decompress(stringBase64, {inputEncoding: "Base64",}));
+            const setGrid    = [];
             const setWidth   = setGrid.splice(0,1)[0];
             const setHeight  = setGrid.splice(0,1)[0];
             const setDepth   = setGrid.splice(0,1)[0];
@@ -1285,6 +1346,10 @@
             this.vddCell.y   = setGrid.splice(0,1)[0];
             this.gndCell.x   = setGrid.splice(0,1)[0];
             this.gndCell.y   = setGrid.splice(0,1)[0];
+
+            for(ii = 0; ii < decompress.length; ii++) {
+                setGrid[ii] = decompress.charCodeAt(ii);
+            }
 
             this.inputs.length = 0;
             this.outputs.length = 0;
