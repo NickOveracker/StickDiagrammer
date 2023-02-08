@@ -1294,15 +1294,26 @@
             this.gndCell.x   = setGrid.splice(0,1)[0];
             this.gndCell.y   = setGrid.splice(0,1)[0];
 
-            this.inputs.length = 0;
-            this.outputs.length = 0;
+            while(this.inputs.length > numInputs) {
+                this.controller.removeTerminal(false);
+            }
+            while(this.outputs.length > numInputs) {
+                this.controller.removeTerminal(true);
+            }
+            while(this.inputs.length < numInputs) {
+                this.controller.addTerminal(false);
+            }
+            while(this.outputs.length < numInputs) {
+                this.controller.addTerminal(true);
+            }
+
             this.layeredGrid.resize(setWidth, setHeight);
 
             for(let ii = 0; ii < numInputs + numOutputs; ii++) {
                 if(ii < numInputs) {
-                    this.inputs.push( {x: setGrid.splice(0,1)[0], y: setGrid.splice(0,1)[0], });
+                    this.inputs[ii] = {x: setGrid.splice(0,1)[0], y: setGrid.splice(0,1)[0], };
                 } else {
-                    this.outputs.push( {x: setGrid.splice(0,1)[0], y: setGrid.splice(0,1)[0], } );
+                    this.outputs[ii-numInputs] = {x: setGrid.splice(0,1)[0], y: setGrid.splice(0,1)[0], };
                 }
             }
 
