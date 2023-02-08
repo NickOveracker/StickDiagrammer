@@ -3233,7 +3233,7 @@
             document.getElementById("open-qrcode-menu-btn").onclick = function() {
                 document.getElementById("qrcode").innerHTML = "";
                 /* jshint nonew: false */
-                new window.QRCode(document.getElementById("qrcode"), window.location + "?d=" + this.diagram.encode(), {correctLevel : QRCode.CorrectLevel.L,});
+                new window.QRCode(document.getElementById("qrcode"), window.location + "?d=" + this.diagram.encode(), {correctLevel : QRCode.CorrectLevel.H,});
                 /* jshint nonew: true */
                 temp();
             }.bind(this);
