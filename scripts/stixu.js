@@ -3231,7 +3231,7 @@
 
             let temp = document.getElementById("open-qrcode-menu-btn").onclick;
             document.getElementById("open-qrcode-menu-btn").onclick = function() {
-                let url = window.location + "?d=" + this.diagram.encode();
+                let url = window.location.href.split('?')[0] + "?d=" + this.diagram.encode();
 
                 document.getElementById("qrcode").innerHTML = "";
                 /* jshint nonew: false */
