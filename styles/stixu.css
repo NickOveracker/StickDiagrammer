@@ -40,6 +40,7 @@ html {
 #qrcode-menu img {
     max-width: min(100vw, 70vh);
     max-height: min(100vw, 70vh);
+    margin: auto;
 }
 
 ul.sparse li {
