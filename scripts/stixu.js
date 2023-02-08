@@ -3222,7 +3222,7 @@
                 new window.QRCode(document.getElementById("qrcode"), window.location + "?d=" + this.diagram.encode());
                 /* jshint nonew: true */
                 temp();
-            };
+            }.bind(this);
 
             document.getElementById("add-row").onclick       = resizeGridByOne(true,  true);
             document.getElementById("remove-row").onclick    = resizeGridByOne(true,  false);
