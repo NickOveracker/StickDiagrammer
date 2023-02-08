@@ -1315,7 +1315,7 @@
                     this.controller.placeTerminal(this.inputs[ii], this.inputs[ii], true);
                 } else {
                     this.outputs[ii-numInputs] = {x: setGrid.splice(0,1)[0], y: setGrid.splice(0,1)[0], };
-                    this.controller.placeTerminal(this.outputs[ii], this.outputs[ii], true);
+                    this.controller.placeTerminal(this.outputs[ii-numInputs], this.outputs[ii-numInputs], true);
                 }
             }
 
