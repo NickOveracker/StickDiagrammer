@@ -869,7 +869,9 @@
                 cell = this.getCellAtCursor();
             }
 
-            if (Object.hasOwn(cell, "x") && !event.ctrlKey) {
+            const hasOwn = Object.hasOwn ? Object.hasOwn(coords, "x") : coords.hasOwnProperty("x"); // compatibility
+
+            if (hasOwn && !event.ctrlKey) {
                 // First, note the current coordinates.
                 oldX = terminal.x;
                 oldY = terminal.y;
@@ -2789,9 +2791,10 @@
                 keyCode:      37,
                 action:       function(e) {
                     if(e.type.includes('up')) {
-                        let coords = this.diagramController.getCellAtCursor();
-                        coords = Object.hasOwn(coords, "x") ? coords : {x: this.diagramGrid.width, };
-                        if(Object.hasOwn(coords, "x")) {
+                        const coords = this.diagramController.getCellAtCursor();
+                        const hasOwn = Object.hasOwn ? Object.hasOwn(coords, "x") : coords.hasOwnProperty("x"); // compatibility
+                        coords = hasOwn ? coords : {x: this.diagramGrid.width, };
+                        if(hasOwn) {
                             this.diagramGrid.insertRemoveRowColAt(coords.x, false, false);
                         } else {
                             this.diagramGrid.resize(this.diagramGrid.width - 1, this.diagramGrid.height);
@@ -2806,8 +2809,9 @@
                 keyCode:       38,
                 action:        function(e) {
                     if(e.type.includes('up')) {
-                        let coords = this.diagramController.getCellAtCursor();
-                        if(Object.hasOwn(coords, "y")) {
+                        const coords = this.diagramController.getCellAtCursor();
+                        const hasOwn = Object.hasOwn ? Object.hasOwn(coords, "y") : coords.hasOwnProperty("y"); // compatibility
+                        if(hasOwn) {
                             this.diagramGrid.insertRemoveRowColAt(coords.y, false, true);
                         } else {
                             this.diagramGrid.resize(this.diagramGrid.width, this.diagramGrid.height - 1);
@@ -2822,8 +2826,9 @@
                 keyCode:      39,
                 action:       function(e) {
                     if(e.type.includes('up')) {
-                        let coords = this.diagramController.getCellAtCursor();
-                        if(Object.hasOwn(coords, "x")) {
+                        const coords = this.diagramController.getCellAtCursor();
+                        const hasOwn = Object.hasOwn ? Object.hasOwn(coords, "x") : coords.hasOwnProperty("x"); // compatibility
+                        if(hasOwn) {
                             this.diagramGrid.insertRemoveRowColAt(coords.x, true, false);
                         } else {
                             this.diagramGrid.resize(this.diagramGrid.width + 1, this.diagramGrid.height);
@@ -2838,8 +2843,9 @@
                 keyCode:      40,
                 action:       function(e) {
                     if(e.type.includes('up')) {
-                        let coords = this.diagramController.getCellAtCursor();
-                        if(Object.hasOwn(coords, "y")) {
+                        const coords = this.diagramController.getCellAtCursor();
+                        const hasOwn = Object.hasOwn ? Object.hasOwn(coords, "y") : coords.hasOwnProperty("y"); // compatibility
+                        if(hasOwn) {
                             this.diagramGrid.insertRemoveRowColAt(coords.y, true, true);
                         } else {
                             this.diagramGrid.resize(this.diagramGrid.width, this.diagramGrid.height + 1);
