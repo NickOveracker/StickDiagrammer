@@ -869,7 +869,7 @@
                 cell = this.getCellAtCursor();
             }
 
-            const hasOwn = Object.hasOwn ? Object.hasOwn(coords, "x") : coords.hasOwnProperty("x"); // compatibility
+            const hasOwn = Object.hasOwn ? Object.hasOwn(cell, "x") : cell.hasOwnProperty("x"); // compatibility
 
             if (hasOwn && !event.ctrlKey) {
                 // First, note the current coordinates.
