@@ -38,7 +38,7 @@ html {
 }
 
 .schematic {
-    width: min-content;
+    width: fit-content;
     margin: auto;
 }
 
