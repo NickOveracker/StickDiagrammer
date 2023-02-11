@@ -1251,13 +1251,13 @@
         }
 
         getNetlistJSON() {
+            const nets = [];
             let jj;
-            nets = [];
 
-            netlist = '{\n'
-                    + '\t"modules": {\n'
-                    + '\t\t"resistor_divider": {\n'
-                    + '\t\t\t"ports": {\n';
+            let netlist = '{\n'                     +
+                      '\t"modules": {\n'            +
+                      '\t\t"resistor_divider": {\n' +
+                      '\t\t\t"ports": {\n';
 
             for(let ii = 0; ii < this.inputNodes.length; ii++) {
                 let node = this.inputNodes[ii];
@@ -1273,10 +1273,10 @@
                     nets.push(this.getNet(node.cell));
                 }
             
-                netlist += `\t\t\t\t"${String.fromCharCode(65 + ii)}": {\n`
-                        +  '\t\t\t\t\t"direction": "input",\n'
-                        +  '\t\t\t\t\t"bits": [${jj + 1}]\n'
-                        +  '\t\t\t\t}';
+                netlist += `\t\t\t\t"${String.fromCharCode(65 + ii)}": {\n` +
+                           '\t\t\t\t\t"direction": "input",\n'              +
+                           '\t\t\t\t\t"bits": [${jj + 1}]\n'                +
+                           '\t\t\t\t}';
 
                 if(ii < this.inputNodes.length - 1 || this.outputNodes.length > 0) {
                     netlist += ',\n';
@@ -1299,10 +1299,10 @@
                     nets.push(this.getNet(node.cell));
                 }
             
-                netlist += `\t\t\t\t"${String.fromCharCode(89 - ii)}": {\n`
-                        +  '\t\t\t\t\t"direction": "output",\n'
-                        +  `\t\t\t\t\t"bits": [${jj + 1}]\n`
-                        +  '\t\t\t\t}\n';
+                netlist += `\t\t\t\t"${String.fromCharCode(89 - ii)}": {\n` +
+                           '\t\t\t\t\t"direction": "output",\n'             +
+                           `\t\t\t\t\t"bits": [${jj + 1}]\n`                +
+                           '\t\t\t\t}\n';
                 if(ii < this.outputNodes.length - 1) {
                     netlist += ',\n';
                 }
@@ -1310,9 +1310,8 @@
                 netlist += '\n';
             }
 
-            netlist += '\n\n\n},\n'
-                    +  '\n\n\n"cells": {\n';
-            jj;
+            netlist += '\n\n\n},\n' +
+                       '\n\n\n"cells": {\n';
             for(jj = 0; jj < nets.length; jj++) {
                 if(this.vddNet.isIdentical(nets[jj])) {
                     break;
@@ -1323,15 +1322,15 @@
                 nets.push(this.vddNet);
             }
 
-            netlist += '\t\t\t\t"vdd": {\n'
-                    +  '\t\t\t\t\t"type": "vcc",\n'
-                    +  '\t\t\t\t\t"connections": {\n'
-                    +  `\t\t\t\t\t\t"A": [${jj + 1}]\n`
-                    +  '\t\t\t\t\t},\n'
-                    +  '\t\t\t\t\t"attributes": {\n'
-                    +  '\t\t\t\t\t\t"name":"VDD"'
-                    +  '\t\t\t\t\t}\n'
-                    +  '\t\t\t\t},\n';
+            netlist += '\t\t\t\t"vdd": {\n'             +
+                       '\t\t\t\t\t"type": "vcc",\n'     +
+                       '\t\t\t\t\t"connections": {\n'   +
+                       `\t\t\t\t\t\t"A": [${jj + 1}]\n` +
+                       '\t\t\t\t\t},\n'                 +
+                       '\t\t\t\t\t"attributes": {\n'    +
+                       '\t\t\t\t\t\t"name":"VDD"'       +
+                       '\t\t\t\t\t}\n'                  +
+                       '\t\t\t\t},\n';
 
             for(jj = 0; jj < nets.length; jj++) {
                 if(this.gndNet.isIdentical(nets[jj])) {
@@ -1343,18 +1342,18 @@
                 nets.push(this.gndNet);
             }
 
-            netlist += '\t\t\t\t"gnd": {\n'
-                    +  '\t\t\t\t\t"type": "gnd",\n'
-                    +  '\t\t\t\t\t"connections": {\n'
-                    +  `\t\t\t\t\t\t"A": [${jj + 1}]\n`
-                    +  '\t\t\t\t\t},\n'
-                    +  '\t\t\t\t\t"attributes": {\n'
-                    +  '\t\t\t\t\t\t"name":"GND"\n'
-                    +  '\t\t\t\t\t}\n'
-                    +  '\t\t\t\t},\n'
+            netlist += '\t\t\t\t"gnd": {\n'             +
+                       '\t\t\t\t\t"type": "gnd",\n'     +
+                       '\t\t\t\t\t"connections": {\n'   +
+                       `\t\t\t\t\t\t"A": [${jj + 1}]\n` +
+                       '\t\t\t\t\t},\n'                 +
+                       '\t\t\t\t\t"attributes": {\n'    +
+                       '\t\t\t\t\t\t"name":"GND"\n'     +
+                       '\t\t\t\t\t}\n'                  +
+                       '\t\t\t\t},\n';
 
-            checked = new Set();
-            function getDistance(transistor, rail) {
+            let checked = new Set();
+            getDistance = function(transistor, rail) {
                 checked.add(transistor);
                 let term1Iterator = transistor.cell.term1.nodes.values();
                 let term2Iterator = transistor.cell.term2.nodes.values();
@@ -1404,7 +1403,7 @@
                 checked.delete(transistor);
                 transistor.minDistance = Math.min(min1, min2);
                 return transistor.minDistance;
-            }
+            }.bind(this);
 
             nmos = [];
             pmos = [];
@@ -1414,12 +1413,12 @@
                 if(node.isNmos) {
                     nmos.push(node);
                 } else if(node.isPmos) {
-                    pmos.push(node)
+                    pmos.push(node);
                 } else {
                     continue;
                 }
                 
-                let jj, term1Index, term2Index, gateIndex;
+                let jj;
                 
                 for(jj = 0; jj < nets.length; jj++) {
                     if(node.cell.term1.isIdentical(nets[jj])) {
@@ -1460,29 +1459,29 @@
                 getDistance(node, node.isPmos ? this.vddNode : this.gndNode);
                 checked = new Set();
                 
-                netlist += `\t\t\t\t"Q${nmos.length + pmos.length}": {\n`
-                        +  `\t\t\t\t\t"type": "q_${node.isNmos ? "npn" : "pnp"}",\n`
-                        +  '\t\t\t\t\t"port_directions": {\n'
-                        +  '\t\t\t\t\t\t"C": "input",\n'
-                        +  '\t\t\t\t\t\t"B": "input",\n'
-                        +  '\t\t\t\t\t\t"E": "output"\n'
-                        +  '\t\t\t\t\t},\n'
-                        +  '\t\t\t\t\t"connections": {\n'
-                        +  `\t\t\t\t\t\t"C": [${node.term1Index + 1}],\n`
-                        +  `\t\t\t\t\t\t"B": [${node.gateIndex  + 1}],\n`
-                        +  `\t\t\t\t\t\t"E": [${node.term2Index + 1}]\n`
-                        +  '\t\t\t\t\t}\n'
-                        +  '\t\t\t\t}';
+                netlist += `\t\t\t\t"Q${nmos.length + pmos.length}": {\n`            +
+                           `\t\t\t\t\t"type": "q_${node.isNmos ? "npn" : "pnp"}",\n` +
+                           '\t\t\t\t\t"port_directions": {\n'                        +
+                           '\t\t\t\t\t\t"C": "input",\n'                             +
+                           '\t\t\t\t\t\t"B": "input",\n'                             +
+                           '\t\t\t\t\t\t"E": "output"\n'                             +
+                           '\t\t\t\t\t},\n'                                          +
+                           '\t\t\t\t\t"connections": {\n'                            +
+                           `\t\t\t\t\t\t"C": [${node.term1Index + 1}],\n`            +
+                           `\t\t\t\t\t\t"B": [${node.gateIndex  + 1}],\n`            +
+                           `\t\t\t\t\t\t"E": [${node.term2Index + 1}]\n`             +
+                           '\t\t\t\t\t}\n'                                           +
+                           '\t\t\t\t}';
                 if(nmos.length + pmos.length < this.nmos.size + this.pmos.size) {
                     netlist += ',\n';
                 }
                 netlist += '\n';
             }
 
-            netlist += '\t\t\t}\n'
-                    +  '\t\t}\n'
-                    +  '\t}\n'
-                    +  '}\n';
+            netlist += '\t\t\t}\n' +
+                       '\t\t}\n'   +
+                       '\t}\n'     +
+                       '}\n';
 
             console.log("1");
             console.log(netlist);
@@ -3030,7 +3029,7 @@
                 keyCode:      37,
                 action:       function(e) {
                     if(e.type.includes('up')) {
-                        const coords = this.diagramController.getCellAtCursor();
+                        let coords = this.diagramController.getCellAtCursor();
                         const hasOwn = Object.hasOwn ? Object.hasOwn(coords, "x") : coords.hasOwnProperty("x"); // compatibility
                         coords = hasOwn ? coords : {x: this.diagramGrid.width, };
                         if(hasOwn) {
