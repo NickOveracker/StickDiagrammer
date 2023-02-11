@@ -1275,7 +1275,7 @@
             
                 netlist += `\t\t\t\t"${String.fromCharCode(65 + ii)}": {\n` +
                            '\t\t\t\t\t"direction": "input",\n'              +
-                           '\t\t\t\t\t"bits": [${jj + 1}]\n'                +
+                           `\t\t\t\t\t"bits": [${jj + 1}]\n`                +
                            '\t\t\t\t}';
 
                 if(ii < this.inputNodes.length - 1 || this.outputNodes.length > 0) {
@@ -1302,7 +1302,7 @@
                 netlist += `\t\t\t\t"${String.fromCharCode(89 - ii)}": {\n` +
                            '\t\t\t\t\t"direction": "output",\n'             +
                            `\t\t\t\t\t"bits": [${jj + 1}]\n`                +
-                           '\t\t\t\t}\n';
+                           '\t\t\t\t}';
                 if(ii < this.outputNodes.length - 1) {
                     netlist += ',\n';
                 }
@@ -1310,8 +1310,8 @@
                 netlist += '\n';
             }
 
-            netlist += '\n\n\n},\n' +
-                       '\n\n\n"cells": {\n';
+            netlist += '\t\t\t},\n' +
+                       '\t\t\t"cells": {\n';
             for(jj = 0; jj < nets.length; jj++) {
                 if(this.vddNet.isIdentical(nets[jj])) {
                     break;
@@ -1328,7 +1328,7 @@
                        `\t\t\t\t\t\t"A": [${jj + 1}]\n` +
                        '\t\t\t\t\t},\n'                 +
                        '\t\t\t\t\t"attributes": {\n'    +
-                       '\t\t\t\t\t\t"name":"VDD"'       +
+                       '\t\t\t\t\t\t"name":"VDD"\n'     +
                        '\t\t\t\t\t}\n'                  +
                        '\t\t\t\t},\n';
 
@@ -1483,9 +1483,11 @@
                        '\t}\n'     +
                        '}\n';
 
-            console.log("1");
-            console.log(netlist);
-            console.log("2");
+            return netlist;
+        }
+
+        getSchematicSVG() {
+            return netlistsvg.render(netlistsvg.analogSkin, this.getNetlistJSON(), (err, result) => console.log(result));
         }
 
         encode() {
@@ -2752,6 +2754,7 @@
             // Order matters
             // Lower-indexed menus are displayed at the same level as or over higher-indexed menus.
             this.menus = [
+                "schematic-menu",
                 "qrcode-menu",
                 "licenses-menu",
                 "tutorials",
@@ -3479,7 +3482,14 @@
                 document.getElementById("close-" + menuName + "-btn").onclick = this.getCloseMenuFunction(menuName);
             }.bind(this));
 
-            let temp = document.getElementById("open-qrcode-menu-btn").onclick;
+            let temp1 = document.getElementById("open-schematic-menu-btn").onclick;
+            document.getElementById("open-schematic-menu-btn").onclick = function() {
+                document.getElementById("schematic").innerHTML = "Loading...";
+                this.diagram.getSchematicSVG().then((svg) => document.getElementById("schematic").innerHTML = svg);
+                temp1();
+            }.bind(this);
+
+            let temp2 = document.getElementById("open-qrcode-menu-btn").onclick;
             document.getElementById("open-qrcode-menu-btn").onclick = function() {
                 let url = window.location.href.split('?')[0] + "?d=" + this.diagram.encode();
 
@@ -3489,7 +3499,7 @@
                 /* jshint nonew: true */
 
                 document.getElementById("share-url").href = url;
-                temp();
+                temp2();
             }.bind(this);
 
             document.getElementById("add-row").onclick       = resizeGridByOne(true,  true);

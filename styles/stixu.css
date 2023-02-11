@@ -37,6 +37,11 @@ html {
     -ms-user-select: none; /* Internet Explorer/Edge */
 }
 
+svg {
+    width: auto;
+    margin: auto;
+}
+
 #qrcode-menu img {
     max-width: min(100vw, 70vh);
     max-height: min(100vw, 70vh);
