@@ -1487,7 +1487,7 @@
         }
 
         getSchematicSVG() {
-            return netlistsvg.render(netlistsvg.analogSkin, this.getNetlistJSON(), (err, result) => console.log(result));
+            return netlistsvg.render(netlistsvg.analogSkin, JSON.parse(this.getNetlistJSON()), (err, result) => console.log(result));
         }
 
         encode() {
