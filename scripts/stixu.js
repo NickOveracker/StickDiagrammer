@@ -1353,7 +1353,7 @@
                        '\t\t\t\t},\n';
 
             let checked = new Set();
-            getDistance = function(transistor, rail) {
+            let getDistance = function(transistor, rail) {
                 checked.add(transistor);
                 let term1Iterator = transistor.cell.term1.nodes.values();
                 let term2Iterator = transistor.cell.term2.nodes.values();
@@ -1405,8 +1405,8 @@
                 return transistor.minDistance;
             }.bind(this);
 
-            nmos = [];
-            pmos = [];
+            const nmos = [];
+            const pmos = [];
             for(let ii = 0; ii < this.graph.nodes.length; ii++) {
                 let node = this.graph.nodes[ii];
                 
