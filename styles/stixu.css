@@ -37,8 +37,8 @@ html {
     -ms-user-select: none; /* Internet Explorer/Edge */
 }
 
-svg {
-    width: auto;
+.schematic {
+    width: min-content;
     margin: auto;
 }
 
