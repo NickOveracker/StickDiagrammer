@@ -1250,6 +1250,245 @@
             this.controller = new DiagramController(this, this.view, mainCanvas);
         }
 
+        getNetlistJSON() {
+            let jj;
+            nets = [];
+
+            netlist = '{\n'
+                    + '\t"modules": {\n'
+                    + '\t\t"resistor_divider": {\n'
+                    + '\t\t\t"ports": {\n';
+
+            for(let ii = 0; ii < this.inputNodes.length; ii++) {
+                let node = this.inputNodes[ii];
+                let jj;
+            
+                for(jj = 0; jj < nets.length; jj++) {
+                    if(this.getNet(node.cell).isIdentical(nets[jj])) {
+                        break;
+                    }
+                }
+            
+                if(jj === nets.length) {
+                    nets.push(this.getNet(node.cell));
+                }
+            
+                netlist += `\t\t\t\t"${String.fromCharCode(65 + ii)}": {\n`
+                        +  '\t\t\t\t\t"direction": "input",\n'
+                        +  '\t\t\t\t\t"bits": [${jj + 1}]\n'
+                        +  '\t\t\t\t}';
+
+                if(ii < this.inputNodes.length - 1 || this.outputNodes.length > 0) {
+                    netlist += ',\n';
+                }
+
+                netlist += '\n';
+            }
+
+            for(let ii = 0; ii < this.outputNodes.length; ii++) {
+                let node = this.outputNodes[ii];
+                let jj;
+            
+                for(jj = 0; jj < nets.length; jj++) {
+                    if(this.getNet(node.cell).isIdentical(nets[jj])) {
+                        break;
+                    }
+                }
+            
+                if(jj === nets.length) {
+                    nets.push(this.getNet(node.cell));
+                }
+            
+                netlist += `\t\t\t\t"${String.fromCharCode(89 - ii)}": {\n`
+                        +  '\t\t\t\t\t"direction": "output",\n'
+                        +  `\t\t\t\t\t"bits": [${jj + 1}]\n`
+                        +  '\t\t\t\t}\n';
+                if(ii < this.outputNodes.length - 1) {
+                    netlist += ',\n';
+                }
+
+                netlist += '\n';
+            }
+
+            netlist += '\n\n\n},\n'
+                    +  '\n\n\n"cells": {\n';
+            jj;
+            for(jj = 0; jj < nets.length; jj++) {
+                if(this.vddNet.isIdentical(nets[jj])) {
+                    break;
+                }
+            }
+
+            if(jj === nets.length) {
+                nets.push(this.vddNet);
+            }
+
+            netlist += '\t\t\t\t"vdd": {\n'
+                    +  '\t\t\t\t\t"type": "vcc",\n'
+                    +  '\t\t\t\t\t"connections": {\n'
+                    +  `\t\t\t\t\t\t"A": [${jj + 1}]\n`
+                    +  '\t\t\t\t\t},\n'
+                    +  '\t\t\t\t\t"attributes": {\n'
+                    +  '\t\t\t\t\t\t"name":"VDD"'
+                    +  '\t\t\t\t\t}\n'
+                    +  '\t\t\t\t},\n';
+
+            for(jj = 0; jj < nets.length; jj++) {
+                if(this.gndNet.isIdentical(nets[jj])) {
+                    break;
+                }
+            }
+
+            if(jj === nets.length) {
+                nets.push(this.gndNet);
+            }
+
+            netlist += '\t\t\t\t"gnd": {\n'
+                    +  '\t\t\t\t\t"type": "gnd",\n'
+                    +  '\t\t\t\t\t"connections": {\n'
+                    +  `\t\t\t\t\t\t"A": [${jj + 1}]\n`
+                    +  '\t\t\t\t\t},\n'
+                    +  '\t\t\t\t\t"attributes": {\n'
+                    +  '\t\t\t\t\t\t"name":"GND"\n'
+                    +  '\t\t\t\t\t}\n'
+                    +  '\t\t\t\t},\n'
+
+            checked = new Set();
+            function getDistance(transistor, rail) {
+                checked.add(transistor);
+                let term1Iterator = transistor.cell.term1.nodes.values();
+                let term2Iterator = transistor.cell.term2.nodes.values();
+                
+                let min1 = Infinity;
+                for(let node = term1Iterator.next(); !node.done; node = term1Iterator.next()) {
+                    node = node.value;
+
+                    if(checked.has(node)) {
+                        continue;
+                    }
+
+                    if(node === rail) {
+                    min1 = 1;
+                        break;
+                    }
+                    
+                    if(node.isTransistor()) {
+                        min1 = Math.min(min1, getDistance(node, rail) + 1);
+                    }
+                }
+                
+                let min2 = Infinity;
+                for(let node = term2Iterator.next(); !node.done; node = term2Iterator.next()) {
+                    node = node.value;
+
+                    if(checked.has(node)) {
+                        continue;
+                    }
+
+                    if(node === rail) {
+                        min2 = 1;
+                        break;
+                    }
+                    
+                    if(node.isTransistor()) {
+                        min2 = Math.min(min2, getDistance(node, rail));
+                    }
+                }
+                
+                if((rail === this.vddNode) && (min1 > min2) || (rail === this.gndNode) && (min1 < min2)) {
+                    let temp = transistor.term1Index;
+                    transistor.term1Index = transistor.term2Index;
+                    transistor.term2Index = temp;
+                }
+                
+                checked.delete(transistor);
+                transistor.minDistance = Math.min(min1, min2);
+                return transistor.minDistance;
+            }
+
+            nmos = [];
+            pmos = [];
+            for(let ii = 0; ii < this.graph.nodes.length; ii++) {
+                let node = this.graph.nodes[ii];
+                
+                if(node.isNmos) {
+                    nmos.push(node);
+                } else if(node.isPmos) {
+                    pmos.push(node)
+                } else {
+                    continue;
+                }
+                
+                let jj, term1Index, term2Index, gateIndex;
+                
+                for(jj = 0; jj < nets.length; jj++) {
+                    if(node.cell.term1.isIdentical(nets[jj])) {
+                        break;
+                    }
+                }
+                
+                if(jj === nets.length) {
+                    nets.push(node.cell.term1);
+                }
+                
+                node.term1Index = jj;
+                
+                for(jj = 0; jj < nets.length; jj++) {
+                    if(node.cell.term2.isIdentical(nets[jj])) {
+                        break;
+                    }
+                }
+                
+                if(jj === nets.length) {
+                    nets.push(node.cell.term2);
+                }
+                
+                node.term2Index = jj;
+                
+                for(jj = 0; jj < nets.length; jj++) {
+                    if(node.cell.gate.isIdentical(nets[jj])) {
+                        break;
+                    }
+                }
+                
+                if(jj === nets.length) {
+                    nets.push(node.cell.gate);
+                }
+                
+                node.gateIndex = jj;
+                
+                getDistance(node, node.isPmos ? this.vddNode : this.gndNode);
+                checked = new Set();
+                
+                netlist += `\t\t\t\t"Q${nmos.length + pmos.length}": {\n`
+                        +  `\t\t\t\t\t"type": "q_${node.isNmos ? "npn" : "pnp"}",\n`
+                        +  '\t\t\t\t\t"port_directions": {\n'
+                        +  '\t\t\t\t\t\t"C": "input",\n'
+                        +  '\t\t\t\t\t\t"B": "input",\n'
+                        +  '\t\t\t\t\t\t"E": "output"\n'
+                        +  '\t\t\t\t\t},\n'
+                        +  '\t\t\t\t\t"connections": {\n'
+                        +  `\t\t\t\t\t\t"C": [${node.term1Index + 1}],\n`
+                        +  `\t\t\t\t\t\t"B": [${node.gateIndex  + 1}],\n`
+                        +  `\t\t\t\t\t\t"E": [${node.term2Index + 1}]\n`
+                        +  '\t\t\t\t\t}\n'
+                        +  '\t\t\t\t}';
+                if(nmos.length + pmos.length < this.nmos.size + this.pmos.size) {
+                    netlist += ',\n';
+                }
+                netlist += '\n';
+            }
+
+            netlist += '\t\t\t}\n'
+                    +  '\t\t}\n'
+                    +  '\t}\n'
+                    +  '}\n';
+
+            console.log("1");
+            console.log(netlist);
+            console.log("2");
+        }
+
         encode() {
             const code = [];
             let bitNo = 7;
@@ -1695,8 +1934,8 @@
                 let otherNode = edge.getOtherNode(node);
                 let mapping = this.getMapping(otherNode, targetNode);
               
-              	if(!mapping.direct && (otherNode === this.vddNode || otherNode === this.gndNode)) {
-                  return false;
+                if(!mapping.direct && (otherNode === this.vddNode || otherNode === this.gndNode)) {
+                    return false;
                 }
 
                 // Easy case: We have already found a path from this otherNode.
