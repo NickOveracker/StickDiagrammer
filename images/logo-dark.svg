@@ -1,7 +1,7 @@
 <svg width="800" height="275" viewBox="0 0 800 275" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_1_2)">
-<path fill-rule="evenodd" clip-rule="evenodd" d="M650 225H750V75H800V275H600V75H650V225Z" fill="white"/>
-<path fill-rule="evenodd" clip-rule="evenodd" d="M225 75V50H100V0H350V50H275V75H350V275H300V125H275V250H225V125H50V150H200V275H0V225H150V200H0V75H225Z" fill="white"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M650 225H750V75H800V275H600V75H650V225Z" fill="#CCCCCC" fill-opacity="0.76"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M225 75V50H100V0H350V50H275V75H350V275H300V125H275V250H225V125H50V150H200V275H0V225H150V200H0V75H225Z" fill="#CCCCCC" fill-opacity="0.76"/>
 <path fill-rule="evenodd" clip-rule="evenodd" d="M575 257.322L492.678 175L575 92.6775V257.322ZM557.322 75L475 157.322L392.678 75H557.322ZM392.678 275L475 192.678L557.322 275H392.678ZM375 92.6775L457.322 175L375 257.322V92.6775Z" fill="#F20D5E"/>
 <path d="M350 75H300V125H350V75Z" fill="#F20D5E"/>
 </g>
