@@ -493,6 +493,8 @@ body.light {
 
 .logo{
     src: "./images/logo-light.svg";
+    width: auto;
+    height: 8lvh;
 }
 
 .dark .logo {
