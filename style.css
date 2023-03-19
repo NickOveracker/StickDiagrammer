@@ -492,13 +492,13 @@ body.light {
 }
 
 .logo{
-    src: "./images/logo-light.svg";
+    content:url("./images/logo-light.svg");
     width: auto;
     height: 8lvh;
 }
 
 .dark .logo {
-    src: "./images/logo-dark.svg";
+    content:url("./images/logo-dark.svg");
 }
 
 /*--------Header-end----------*/
