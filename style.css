@@ -492,8 +492,11 @@ body.light {
 }
 
 .logo{
-    font-family: 'Josefin Sans', sans-serif;
-    font-size: 20px;
+    src: "./images/logo-light.svg";
+}
+
+.dark .logo {
+    src: "./images/logo-dark.svg";
 }
 
 /*--------Header-end----------*/
