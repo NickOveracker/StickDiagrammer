@@ -209,28 +209,204 @@
         <i class="fas fa-times clickable" id="close-instructions-btn"></i>
 
         <section class="menu-long-text desktop">
-            <h1>Basic Mouse/Keyboard Controls</h1>
-            <ul>
-                <li>Left-click to paint a cell with the selected layer.
-                    <ul><li>Left-click and drag to paint a line.</li></ul>
-                </li>
+            <div id="keymappings">
+                <h3>Keyboard Shortcuts</h3>
+                <button id="keymap-button">Remap</button>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Action</th>
+                            <th>Current</th>
+                            <th><kbd><kbd>SHIFT</kbd></kbd></th>
+                            <th><kbd><kbd>CTRL</kbd></kbd></th>
+                            <th>Key</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td="undo-action-text">Undo</td>
+                            <td><kbd id="undo-shortcut"><kbd>CTRL</kbd> + <kbd>Z</kbd></kbd></td>
+                            <td><input type="checkbox" id="shift-undo" disabled></td>
+                            <td><input type="checkbox" id="ctrl-undo" checked disabled></td>
+                            <td><input type="text" id="undo-keymap" maxlength="1" value="Z" disabled></td>
+                        </tr>
+                        <tr>
+                            <td id="redo-action-text">Redo</td>
+                            <td><kbd id="redo-shortcut"><kbd>CTRL</kbd> + <kbd>Y</kbd></kbd></td>
+                            <td><input type="checkbox" id="shift-redo" disabled></td>
+                            <td><input type="checkbox" id="ctrl-redo" checked disabled></td>
+                            <td><input type="text" id="redo-keymap" value="Y" disabled></td>
+                        </tr>
+                        <tr>
+                            <td id="exit-action-text">Exit menu</td>
+                            <td><kbd id="exit-shortcut"><kbd>ESC</kbd></kbd></td>
+                            <td><input type="checkbox" id="shift-exit" disabled></td>
+                            <td><input type="checkbox" id="ctrl-exit" disabled></td>
+                            <td><input type="text" id="exit-keymap" value="ESC" disabled></td>
+                        </tr>
+                        <tr>
+                            <td id="eval-action-text">Evaluate diagram</td>
+                            <td><kbd id="eval-shortcut"><kbd>ENTER</kbd></kbd></td>
+                            <td><input type="checkbox" id="shift-eval" disabled></td>
+                            <td><input type="checkbox" id="ctrl-eval" disabled></td>
+                            <td><input type="text" id="eval-keymap" value="ENTER" disabled></td>
+                        </tr>
+                        <tr>
+                            <td id="vdd-action-text">Place VDD terminal</td>
+                            <td><kbd id="vdd-shortcut"><kbd>SHIFT</kbd> + <kbd>V</kbd></kbd></td>
+                            <td><input type="checkbox" id="shift-vdd"></td>
+                            <td><input type="checkbox" id="ctrl-vdd"></td>
+                            <td><input type="text" id="vdd-keymap" maxlength="1"></td>
+                        </tr>
+                        <tr>
+                            <td id="gnd-action-text">Place GND terminal</td>
+                            <td><kbd id="gnd-shortcut"><kbd>SHIFT</kbd> + <kbd>G</kbd></kbd></td>
+                            <td><input type="checkbox" id="shift-gnd"></td>
+                            <td><input type="checkbox" id="ctrl-gnd"></td>
+                            <td><input type="text" id="gnd-keymap" maxlength="1"></td>
+                        </tr>
+                        <tr>
+                            <td id="addinput-action-text">Add input terminal</td>
+                            <td><kbd id="addinput-shortcut"><kbd>I</kbd></kbd></td>
+                            <td><input type="checkbox" id="shift-addinput"></td>
+                            <td><input type="checkbox" id="ctrl-addinput"></td>
+                            <td><input type="text" id="addinput-keymap" maxlength="1"></td>
+                        </tr>
+                        <tr>
+                            <td id="addoutput-action-text">Add output terminal</td>
+                            <td><kbd id="addoutput-shortcut"><kbd>O</kbd></kbd></td>
+                            <td><input type="checkbox" id="shift-addoutput"></td>
+                            <td><input type="checkbox" id="ctrl-addoutput"></td>
+                            <td><input type="text" id="addoutput-keymap" maxlength="1"></td>
+                        </tr>
+                        <tr>
+                            <td id="removeinput-action-text">Remove input terminal</td>
+                            <td><kbd id="removeinput-shortcut"><kbd>SHIFT</kbd> + <kbd>I</kbd></kbd></td>
+                            <td><input type="checkbox" id="shift-removeinput"></td>
+                            <td><input type="checkbox" id="ctrl-removeinput"></td>
+                            <td><input type="text" id="removeinput-keymap" maxlength="1"></td>
+                        </tr>
+                        <tr>
+                            <td id="removeoutput-action-text">Remove output terminal</td>
+                            <td><kbd id="removeoutput-shortcut"><kbd>SHIFT</kbd> + <kbd>O</kbd></kbd></td>
+                            <td><input type="checkbox" id="shift-removeoutput"></td>
+                            <td><input type="checkbox" id="ctrl-removeoutput"></td>
+                            <td><input type="text" id="removeoutput-keymap" maxlength="1"></td>
+                        </tr>
+                        <tr>
+                            <td id="shiftleft-action-text">Shift diagram left</td>
+                            <td><kbd id="shiftleft-shortcut"><kbd>SHIFT</kbd> + <kbd>LEFT</kbd></kbd></td>
+                            <td><input type="checkbox" id="shift-shiftleft"></td>
+                            <td><input type="checkbox" id="ctrl-shiftleft"></td>
+                            <td><input type="text" id="shiftleft-keymap" maxlength="1"></td>
+                        </tr>
+                        <tr>
+                            <td id="shiftright-action-text">Shift diagram right</td>
+                            <td><kbd id="undo-shiftright"><kbd>SHIFT</kbd> + <kbd>RIGHT</kbd></kbd></td>
+                            <td><input type="checkbox" id="shift-shiftright"></td>
+                            <td><input type="checkbox" id="ctrl-shiftright"></td>
+                            <td><input type="text" id="shiftright-keymap" maxlength="1"></td>
+                        </tr>
+                        <tr>
+                            <td id="shiftup-action-text">Shift diagram up</td>
+                            <td><kbd id="shiftup-shortcut"><kbd>SHIFT</kbd> + <kbd>UP</kbd></kbd></td>
+                            <td><input type="checkbox" id="shift-shiftup"></td>
+                            <td><input type="checkbox" id="ctrl-shiftup"></td>
+                            <td><input type="text" id="shiftup-keymap" maxlength="1"></td>
+                        </tr>
+                        <tr>
+                            <td id="shiftdown-action-text">Shift diagram down</td>
+                            <td><kbd id="shiftdown-shortcut"><kbd>SHIFT</kbd> + <kbd>DOWN</kbd></kbd></td>
+                            <td><input type="checkbox" id="shift-shiftdown"></td>
+                            <td><input type="checkbox" id="ctrl-shiftdown"></td>
+                            <td><input type="text" id="shiftdown-keymap" maxlength="1"></td>
+                        </tr>
+                        <tr>
+                            <td id="deletecol-action-text">Delete column</td>
+                            <td><kbd id="deletecol-shortcut"><kbd>CTRL</kbd> + <kbd>LEFT</kbd></kbd></td>
+                            <td><input type="checkbox" id="shift-deletecol"></td>
+                            <td><input type="checkbox" id="ctrl-deletecol"></td>
+                            <td><input type="text" id="deletecol-keymap" maxlength="1"></td>
+                        </tr>
+                        <tr>
+                            <td id="deleterow-action-text">Delete row</td>
+                            <td><kbd id="deleterow-shortcut"><kbd>CTRL</kbd> + <kbd>UP</kbd></kbd></td>
+                            <td><input type="checkbox" id="shift-deleterow"></td>
+                            <td><input type="checkbox" id="ctrl-deleterow"></td>
+                            <td><input type="text" id="deleterow-keymap" maxlength="1"></td>
+                        </tr>
+                        <tr>
+                            <td id="insertcol-action-text">Insert column</td>
+                            <td><kbd id="insertcol-shortcut"><kbd>CTRL</kbd> + <kbd>RIGHT</kbd></kbd></td>
+                            <td><input type="checkbox" id="shift-insertcol"></td>
+                            <td><input type="checkbox" id="ctrl-insertcol"></td>
+                            <td><input type="text" id="insertcol-keymap" maxlength="1"></td>
+                        </tr>
+                        <tr>
+                            <td id="insertrow-action-text">Insert row</td>
+                            <td><kbd id="insertrow-shortcut"><kbd>CTRL</kbd> + <kbd>DOWN</kbd></kbd></td>
+                            <td><input type="checkbox" id="shift-insertrow"></td>
+                            <td><input type="checkbox" id="ctrl-insertrow"></td>
+                            <td><input type="text" id="insertrow-keymap" maxlength="1"></td>
+                        </tr>
+                        <tr>
+                            <td id="toggledark-action-text">Toggle dark mode</td>
+                            <td><kbd id="toggledark-shortcut"><kbd>SHIFT</kbd> + <kbd>D</kbd></kbd></td>
+                            <td><input type="checkbox" id="shift-toggledark"></td>
+                            <td><input type="checkbox" id="ctrl-toggledark"></td>
+                            <td><input type="text" id="toggledark-keymap" maxlength="1"></td>
+                        </tr>
+                        <tr>
+                            <td id="toggleflat-action-text">Toggle transparency</td>
+                            <td><kbd id="toggleflat-shortcut"><kbd>SHIFT</kbd> + <kbd>F</kbd></kbd></td>
+                            <td><input type="checkbox" id="shift-toggleflat"></td>
+                            <td><input type="checkbox" id="ctrl-toggleflat"></td>
+                            <td><input type="text" id="toggleflat-keymap" maxlength="1"></td>
+                        </tr>
+                        <tr>
+                            <td id="cycletheme-action-text">Change color scheme</td>
+                            <td><kbd id="cycletheme-shortcut"><kbd>SHIFT</kbd> + <kbd>T</kbd></kbd></td>
+                            <td><input type="checkbox" id="shift-cycletheme"></td>
+                            <td><input type="checkbox" id="ctrl-cycletheme"></td>
+                            <td><input type="text" id="cycletheme-keymap" maxlength="1"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
 
-                <li>Right-click to clear all layers on the selected cell.
-                    <ul><li>Right-click and drag to clear all cells in the selected area.</li></ul>
-                </li>
-
-                <li>Right-click in an unpainted area to change layers.
-                    <ul><li>The layer name is displayed at the top of the canvas.</li></ul>
-                </li>
-
-                <li>Point at a cell and type SHIFT + V to move the VDD contact to that cell.</li>
-                <li>Point at a cell and type SHIFT + G to move the GND contact to that cell.</li>
-                <li>Point at a cell and type the name of that terminal (A, B, C, ...) to move the chosen contact to that cell.</li>
-                <li>Press Enter or click "Evaluate" to generate a truth table for the painted diagram.
-                    <ul><li>Not all paths are evaluated for overdriven (simultaneously high and low) outputs.</li></ul>
-                </li>
-                <!--<li>See additional keyboard shortcuts in the Options menu.</li>-->
-            </ul>
+            <div id="mousemappings">
+            <h3>Mouse Controls</h3>
+            <table>
+                <thead>
+                <tr>
+                    <th>Action</th>
+                    <th><kbd>SHIFT</kbd></th>
+                    <th><kbd>CTRL</kbd></th>
+                    <th>Left</th>
+                    <th>Middle</th>
+                    <th>Right</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td id="draw-action-text">Draw active layer</td>
+                    <td><input type="checkbox" id="shift-draw"></td>
+                    <td><input type="checkbox" id="ctrl-draw"></td>
+                    <td><input type="radio" id="draw-left-click" name="draw-mapping" value="left-click" checked></td>
+                    <td><input type="radio" id="draw-middle-click" name="draw-mapping" value="middle-click"></td>
+                    <td><input type="radio" id="draw-right-click" name="draw-mapping" value="right-click"></td>
+                </tr>
+                <tr>
+                    <td id="erase-action-text">Erase all layers / Cycle to next layer</td>
+                    <td><input type="checkbox" id="shift-erase"></td>
+                    <td><input type="checkbox" id="ctrl-erase"></td>
+                    <td><input type="radio" id="erase-left-click" name="erase-mapping" value="left-click"></td>
+                    <td><input type="radio" id="erase-middle-click" name="erase-mapping" value="middle-click"></td>
+                    <td><input type="radio" id="erase-right-click" name="erase-mapping" value="right-click" checked></td>
+                </tr>
+                </tbody>
+            </table>
+            </div>
         </section>
 
         <section class="menu-long-text">
