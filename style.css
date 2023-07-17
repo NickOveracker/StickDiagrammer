@@ -37,6 +37,13 @@ html {
     -ms-user-select: none; /* Internet Explorer/Edge */
 }
 
+kbd>kbd {
+  border-radius: 3px;
+  padding: 1px 2px 0;
+  background-color: white;
+  border: 1px solid black;
+}
+
 .pullup-pulldown-warning {
     text-align: center;
     background: red;
