@@ -459,7 +459,7 @@ body.light {
     justify-content: center;
     display: flex;
     */
-    min-height: 30px;
+    min-height: 50px;
 }
 
 /*
@@ -512,6 +512,11 @@ body.light {
     margin-top: 10px;
     font-size: 30px;
     color: #4C26B8;
+}
+
+.logo {
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
 .dark .logo {
