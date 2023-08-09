@@ -454,12 +454,15 @@ body.light {
 }
 
 /*--------Header----------*/
-/*
 .overall-header{
+    /*
     justify-content: center;
     display: flex;
+    */
+    min-height: 30px;
 }
 
+/*
 .header-left {
     width: 25%;
     text-align: center;
@@ -705,11 +708,13 @@ body.light {
 
 /*-------responsive--------*/
 @media screen and (orientation: landscape){
+    /*
     .overall-header {
         top: 2vh;
         height: 13vh;
         position: absolute;
     }
+    */
 
     .controls{
         margin-top: 18vh;
@@ -726,10 +731,12 @@ body.light {
         font-size: 5vh;
     }
 
+    /*
     .logo {
         font-size: min(5vh,4vw);
         padding: 4vh;
     }
+    */
 
     .fa-times{
         font-size: 2.5vw;
@@ -889,10 +896,13 @@ body.light {
     }
 
     .overall-header{
+        /*
         position: relative;
         top: 0;
         padding-top: 2vh;
         padding-bottom: 2vh;
+        */
+        min-height: 4vh;
     }
 
     .header-button {
@@ -901,6 +911,7 @@ body.light {
         height: 4vh;
     }
 
+    /*
     #menu-bar{
         left: 90%;
     }
@@ -908,6 +919,7 @@ body.light {
     .logo{
         font-size: 4vh;
     }
+    */
 
     .controls{
         margin-top: 2vh;
