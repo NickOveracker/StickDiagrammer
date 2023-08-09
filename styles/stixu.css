@@ -454,6 +454,7 @@ body.light {
 }
 
 /*--------Header----------*/
+/*
 .overall-header{
     justify-content: center;
     display: flex;
@@ -477,6 +478,7 @@ body.light {
     margin-top: auto;
     margin-bottom: auto;
 }
+*/
 
 .header-button {
     font-size: 30px;
@@ -489,7 +491,7 @@ body.light {
     justify-content: center;
 }
 
-.instructions{
+.instructions {
     width: auto;
     padding: 10px;
     color: #FFFFFF;
@@ -502,16 +504,19 @@ body.light {
     background: #4C26B8;
 }
 
-#dark-mode{
+#dark-mode {
     margin-left: 50px;
     margin-top: 10px;
     font-size: 30px;
     color: #4C26B8;
 }
 
-.logo{
-    font-family: 'Josefin Sans', sans-serif;
-    font-size: 20px;
+.dark .logo {
+    background-image: url("../images/logo-dark.svg");
+}
+
+.light .logo {
+    background-image: url("../images/logo-light.svg");
 }
 
 /*--------Header-end----------*/
