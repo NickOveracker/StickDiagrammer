@@ -1,6 +1,362 @@
-.logo {
-    background-image: url("../../images/logo-dark.svg");
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: contain;
+/**********************************************************************************************************************
+ * Legal Stuff:
+ * 
+ * Copyright Nick Overacker & Miho Kobayashi.
+ * This code is offered under the Strict License 1.0.0 (https://polyformproject.org/licenses/strict/1.0.0/),
+ * which permits users to use this code for noncommercial purposes but reserves most right for the copyright holders.
+ * For uses not permitted under the license, please contact: nick.overacker@okstate.edu
+ *********************************************************************************************************************/
+
+@import "../../.bootstrap/bootstrap";
+/*
+@import "../../.bootstrap/functions";
+@import "../../.bootstrap/variables";
+@import "../../.bootstrap/variables-dark";
+@import "../../.bootstrap/maps";
+@import "../../.bootstrap/mixins";
+@import "../../.bootstrap/utilities";
+@import "../../.bootstrap/grid";
+@import "../../.bootstrap/containers";
+@import "../../.bootstrap/toasts";
+@import "../../.bootstrap/offcanvas";
+@import "../../.bootstrap/utilities/api";
+*/
+
+@media print {
+	.print-layout {
+		width: 100lvw;
+		height: 100lvh;
+	//	overflow: hidden;
+
+		.color-change {
+			margin-top: 0;
+		}
+
+		.print-logo {
+			font-size: 3rem;
+			height: 4rem;
+			line-height: 4rem;
+
+			img {
+				height: 3.5rem;
+				padding-left: 0.3rem;
+				padding-bottom: 0.85rem;
+			}
+		}
+
+		i {
+			margin-top: 5px;
+		}
+	}
+
+	@media (orientation: landscape) {
+		.color-change {
+			display: inline-flex;
+			flex-direction: column;
+			justify-content: flex-start;
+			float: left;
+			width: 4.5rem;
+
+			.print-color-label {
+				display: grid;
+				grid-template-rows: 2rem 2rem;
+				grid-template-rows: auto;
+				height: 15lvh;
+			}
+
+			span, i {
+				justify-self: center;
+			}
+
+			span {
+				grid-row: 1;
+			}
+
+			i {
+				grid-row: 2;
+			}
+		}
+
+		.print-canvas {
+			display: inline-block;
+			width: 100lvh;
+			height: 100lvh;
+		}
+
+		.print-logo {
+			position: absolute;
+			bottom: 0;
+			right: 0;
+
+			span {
+				display: none;
+			}
+		}
+
+		.print-table-container {
+			display: inline-block;
+			width: calc(100lvw - 100lvh - 4.5rem);
+			float: right;
+			border: 2px solid black;
+			table {
+				border: 1px solid black;
+				width: 100%;
+				text-align: center;
+
+				td {
+					margin: auto;
+					border: 1px solid black;
+				}
+
+				thead {
+					border: 2px solid black;
+					font-weight: bold;
+
+					td {
+						border: none;
+					}
+				}
+
+			}
+		}
+	}
+	@media (orientation: portrait) {
+		.color-change{
+			display: flex;
+			text-align: center;
+			height: 4rem;
+
+			.print-color-label {
+				flex-grow: 1;
+			}
+
+			.fa-circle {
+				margin-top: 5px;
+				margin-bottom: 5px;
+			}
+
+			i, span {
+				display: block;
+			}
+		}
+
+		.color-change, .print-canvas, .print-logo {
+			width: 100lvw;
+		}
+
+		.print-logo {
+			text-align: center;
+		}
+
+		table {
+			display: none;
+		}
+	}
+
 }
+
+body * {
+	user-select: none;
+}
+
+button.unstyled {
+	background: none;
+	border: none;
+	padding: 0;
+	color: inherit;
+}
+
+body {
+	overflow-y: scroll;
+
+	&.dark {
+		background: #221D1D;
+		color: #ffffff;
+
+		.logo {
+			background-image: url("../images/logo-dark.svg");
+		}
+	}
+
+	&.light {
+		background: #ffffff;
+		color: #000000;
+
+		.logo {
+			background-image: url("../images/logo-light.svg");
+		}
+	}
+}
+
+.clickable {
+	cursor: pointer;
+}
+
+.main-header {
+	margin-top:    1rem !important;
+	margin-bottom: 1rem;
+
+	& * {
+		font-size: 1.8rem;
+	}
+
+	.logo {
+		flex:   0 0 auto;
+		height: 50px;
+
+		background-size:       contain;
+		background-repeat:     no-repeat;
+		background-position-x: center;
+		background-position-y: center;
+	}
+
+	.main-header-btn {
+		flex: 0 0 auto;
+
+		i {
+			color:           #FFFFFF;
+			width:           50px;
+			height:          50px;
+			padding:         10px;
+			font-size:       30px;
+
+			background: linear-gradient(
+					180deg,
+					#832AF4 0%,
+					rgba(80, 84, 186, 0.99) 100%
+			);
+		}
+	}
+
+	@media only screen and (orientation: portrait),
+	       only screen and (width < map-get($grid-breakpoints, "md")) {
+		.logo {
+			width: 50%;
+		}
+
+		.main-header-btn {
+			width: 25%;
+		}
+	}
+
+	@media only screen and (orientation: landscape) 
+	                   and (min-width: map-get($grid-breakpoints, "md")) {
+		.logo {
+			background-position-x: 12px;
+			width: 83.33333333%;
+		}
+
+		.main-header-btn {
+			width: 8.33333333%;
+		}
+	}
+}
+
+.offcanvas {
+	@media only screen and (orientation: landscape) {
+		top: 0;
+		right: 0;
+		border-left: var(--#{$prefix}offcanvas-border-width) solid var(--#{$prefix}offcanvas-border-color);
+		transform: translateX(100%);
+
+		.close-button {
+			text-align: left;
+		}
+
+		.fa-times {
+			font-size: 2.5vw;
+			padding: 2.5vw;
+		}
+
+		@media only screen and (orientation: landscape) {
+		        @media (min-width: map-get($grid-breakpoints, "md")) {
+				width: 33.33333333%;
+			}
+
+			@media (min-width: map-get($grid-breakpoints, "lg")) {
+				width: 50%;
+			}
+		}
+	}
+
+	@media only screen and (orientation: portrait) {
+		right: 0;
+		left: 0;
+		height: var(--#{$prefix}offcanvas-height);
+		max-height: 100%;
+		border-top: var(--#{$prefix}offcanvas-border-width) solid var(--#{$prefix}offcanvas-border-color);
+		transform: translateY(100%);
+
+		.fa-times {
+			font-size: 5vh;
+			margin-left: auto;
+			margin-right: auto;
+			margin-top: 1vh;
+			padding: 1vh;
+			width: 5vh;
+			height: 5vh;
+		}
+	}
+}
+
+.portrait-full-width {
+	@media only screen and (orientation: portrait) {
+		width: 100%;
+	}
+}
+
+.fa-times {
+	//color: #FFFFFF;
+}
+
+.color-change{
+	display: flex;
+	justify-content: center;
+	text-align: center;
+	margin-top: 30px;
+	order: 1;
+
+	.fa-circle{
+	    font-size: 30px;
+	    margin: 10px;
+	}
+}
+
+/*-----Edit-section-------*/
+
+.edit-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    width: 50%;
+    position: relative;
+    margin-top: 10px;
+    order: 2;
+}
+
+.edit-back {
+	@extend .border;
+	@extend .border-2;
+	@extend .rounded-circle;
+	@extend .p-1;
+	font-size: 2vw;
+	height: 2vw;
+	width: 2vw;
+}
+
+.edit-back.small  {
+    height: 2.6vh;
+    width: 2.6vh;
+    font-size: 2.6vh;
+    padding: 1.3vh;
+}
+
+.edit-btn-content h5 {
+    font-size: 2vh;
+    font-weight: bold;
+    margin-top: 1vh;
+    margin-bottom: 2vh;
+}
+/*-----Edit-section-end-------*/
+

@@ -1,41 +1,4 @@
-/**********************************************************************************************************************
- * Legal Stuff:
- * 
- * Copyright Nick Overacker & Miho Kobayashi.
- * This code is offered under the Strict License 1.0.0 (https://polyformproject.org/licenses/strict/1.0.0/),
- * which permits users to use this code for noncommercial purposes but reserves most right for the copyright holders.
- * For uses not permitted under the license, please contact: nick.overacker@okstate.edu
- *********************************************************************************************************************/
- 
-/*------------*/
-/*body*/
-/*header 60*/
-/*controls 130*/
-/*edit-section 212*/
-/*responsive 293*/
-/*Canvas 444*/
-/*truth-table 457*/
-/*Dark-mode 498*/
-/*Main-menu 533*/
-/*Edit-open 619*/
-/*------------*/
-
 @import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@600&display=swap');
-
-html {
-    overflow-y: scroll;
-}
-
-*{
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    user-select: none; /* supported by Chrome and Opera */
-    -webkit-user-select: none; /* Safari */
-    -khtml-user-select: none; /* Konqueror HTML */
-    -moz-user-select: none; /* Firefox */
-    -ms-user-select: none; /* Internet Explorer/Edge */
-}
 
 #qrcode-menu img {
     max-width: min(100vw, 70vh);
@@ -439,6 +402,7 @@ canvas {
     touch-action: none;
 }
 
+/*
 body.dark {
     background: #221D1D;
     color: #ffffff;
@@ -448,21 +412,20 @@ body.light {
     background: #ffffff;
     color: #000000;
 }
+*/
 
 .clickable{
     cursor: pointer;
 }
 
 /*--------Header----------*/
+/*
 .overall-header{
-    /*
     justify-content: center;
     display: flex;
-    */
     min-height: 50px;
 }
 
-/*
 .header-left {
     width: 25%;
     text-align: center;
@@ -481,7 +444,6 @@ body.light {
     margin-top: auto;
     margin-bottom: auto;
 }
-*/
 
 .header-button {
     font-size: 30px;
@@ -493,6 +455,7 @@ body.light {
     height: 30px;
     justify-content: center;
 }
+*/
 
 .instructions {
     width: auto;
@@ -525,12 +488,6 @@ body.light {
 
 .light .logo {
     background-image: url("../images/logo-light.svg");
-}
-
-/*--------Header-end----------*/
-.main{
-    display: flex;
-    
 }
 
 /*-------Controls--------*/
@@ -597,58 +554,8 @@ body.light {
     margin-top: 10px;
 }
 
-.colorChange{
-    display: flex;
-    justify-content: center;
-    text-align: center;
-    margin-top: 30px;
-    width: 200px;
-    order: 1;
-}
-
-.fa-circle{
-    font-size: 30px;
-    margin: 10px;
-}
-
 /*-------Controls-END--------*/
 
-/*-----Edit-section-------*/
-
-.edit-btn{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    width: 50%;
-    position: relative;
-    margin-top: 10px;
-    order: 2;
-}
-
-.edit-back{
-    font-size: 2vw;
-    height: 2vw;
-    width: 2vw;
-    border: solid 2px;
-    padding: 1vw;
-    border-radius: 100%;
-}
-
-.edit-back.small {
-    height: 2.6vh;
-    width: 2.6vh;
-    font-size: 2.6vh;
-    padding: 1.3vh;
-}
-
-.edit-btn-content h5{
-    font-size: 2vh;
-    font-weight: bold;
-    margin-top: 1vh;
-    margin-bottom: 2vh;
-}
-/*-----Edit-section-end-------*/
 
 .evaluate-btn{
     display: flex;
@@ -713,14 +620,6 @@ body.light {
 
 /*-------responsive--------*/
 @media screen and (orientation: landscape){
-    /*
-    .overall-header {
-        top: 2vh;
-        height: 13vh;
-        position: absolute;
-    }
-    */
-
     .controls{
         margin-top: 18vh;
         position: relative;
@@ -734,18 +633,6 @@ body.light {
         margin-top: 1vh;
         margin-bottom: 1vh;
         font-size: 5vh;
-    }
-
-    /*
-    .logo {
-        font-size: min(5vh,4vw);
-        padding: 4vh;
-    }
-    */
-
-    .fa-times{
-        font-size: 2.5vw;
-        padding: 2.5vw;
     }
 
     .edit-btn-content.small {
@@ -928,10 +815,6 @@ body.light {
 
     .controls{
         margin-top: 2vh;
-    }
-
-    .main{
-        flex-direction: column;
     }
 
     .canvas-group {

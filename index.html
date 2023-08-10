@@ -2,329 +2,368 @@
 <!-- LICENSE: https://polyformproject.org/licenses/strict/1.0.0/ -->
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Stixu Stick Diagrammer</title>
-    <!--link href="./styles/stixu.css" rel="stylesheet"-->
-    <link href="./styles/styles.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
-    <script src="https://kit.fontawesome.com/039fa42282.js" crossorigin="anonymous"></script>
-    <script defer src="./scripts/stixu.js"></script>
-    <script defer src="./scripts/lzutf8.min.js" id="lzutf8"></script>
-    <script defer src="./scripts/qrcode.min.js"></script>
-    <script defer src="./scripts/tutorial.js"></script>
+	<title>Stixu Stick Diagrammer</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<!--link href="./styles/stixu.css" rel="stylesheet"-->
+	<link href="./styles/styles.css" rel="stylesheet">
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+	<script src="https://kit.fontawesome.com/039fa42282.js" crossorigin="anonymous"></script>
+	<script defer src="./scripts/stixu.js"></script>
+	<script defer src="./scripts/lzutf8.min.js" id="lzutf8"></script>
+	<script defer src="./scripts/qrcode.min.js"></script>
+	<script defer src="./scripts/tutorial.js"></script>
 </head>
 
 <body class="dark">
-    <div id="main-container" class="container">
-        <!-- Header -->
-        <div class="row text-center">
-            <div class="col-3"><i class="fas fa-cloud-moon header-button clickable" id="dark-mode-btn"></i></div>
-            <div class="logo col-6"></div>
-            <div class="col-3"><i id="open-main-menu-btn" class="fas fa-bars header-button clickable"></i></div>
-        </div>
-        <!-- Header-END -->
+	<div class="d-none d-print-block print-layout">
+		<div class="color-change">
+			<div class="print-color-label">
+				<span>PDIFF</span><i class="fas fa-circle"></i>
+			</div>
+			<div class="print-color-label">
+				<span>NDIFF</span><i class="fas fa-circle"></i>
+			</div>
+			<div class="print-color-label">
+				<span>POLY</span><i class="fas fa-circle"></i>
+			</div>
+			<div class="print-color-label">
+				<span>METAL1</span><i class="fas fa-circle"></i>
+			</div>
+			<div class="print-color-label">
+				<span>METAL2</span><i class="fas fa-circle"></i>
+			</div>
+			<div class="print-color-label">
+				<span>CONTACT</span><i class="fas fa-circle"></i>
+			</div>
+		</div>
+		<img class="print-canvas"id="print-canvas">
+		<div class="print-table-container"><table id="print-table"></table></div>
+		<p class="print-logo"><span>Made with </span><img src="./images/logo-light.svg"></p>
+	</div>
+	<div id="main-container" class="container-fluid d-print-none">
+		<header class="main-header row text-center">
+			<div aria-label="Stixu logo" class="logo order-1"></div>
+			<div aria-label="Dark mode toggle" class="main-header-btn order-first order-md-2">
+			<i class="fas fa-lightbulb header-button clickable float-start float-md-end" id="dark-mode-btn"></i>
+		</div>
+			<div aria-label="Open menu" class="main-header-btn order-3">
+			<i id="open-main-menu-btn" class="fas fa-bars header-button clickable float-end"></i>
+		</div>
+		</header>
 
-        <section class="main">
-            <!-- canvas -->
-            <div id="canvas-group-wrapper">
-                <div class="canvas-group">
-                    <div class="active-layers">
-                        <div id="CONTACT"></div>
-                        <div id="METAL2" class="cmos-layer"></div>
-                        <div id="METAL1" class="cmos-layer"></div>
-                        <div id="POLY"   class="cmos-layer"></div>
-                        <div id="DIFF"   class="cmos-layer"></div>
-                    </div>
-                    <div id="canvas-wrapper" class="canvas-wrapper">
-                        <div id="pullup-pulldown-warning" class="pullup-pulldown-warning">N pull-up or P pull-down detected. Simulation may be inaccurate.</div>
-                        <canvas id="canvas"></canvas>
-                        <canvas id="grid-canvas"></canvas>
-                    </div>
-                </div>
-            </div>
-            <!-- canvas end -->
+		<section class="row">
+			<div class="col-8 col-lg-6 portrait-full-width">
+				<div class="canvas-group">
+					<div class="active-layers">
+						<div id="CONTACT"></div>
+						<div id="METAL2" class="cmos-layer"></div>
+						<div id="METAL1" class="cmos-layer"></div>
+						<div id="POLY"   class="cmos-layer"></div>
+						<div id="DIFF"   class="cmos-layer"></div>
+					</div>
+					<div id="canvas-wrapper" class="canvas-wrapper">
+						<canvas id="canvas"></canvas>
+						<canvas id="grid-canvas"></canvas>
+					</div>
+				</div>
+			</div>
+			<!-- Right-side -->
+			<div class="controls col-4 col-lg-6 portrait-full-width">
+				<!-- colorBtn -->
+				<div class="color-change">
+					<i class="fas fa-circle clickable" id="pdiff-swatch"></i>
+					<i class="fas fa-circle clickable" id="ndiff-swatch"></i>
+					<i class="fas fa-circle clickable" id="poly-swatch"></i>
+					<i class="fas fa-circle clickable" id="metal1-swatch"></i>
+					<i class="fas fa-circle clickable" id="metal2-swatch"></i>
+					<i class="fas fa-circle clickable" id="contact-swatch"></i>
+				</div>
+				<!-- colorBtn END -->
 
-        <!-- Right-side -->
-            <section class="controls">
+				<!-- Edit-section -->
+				<div class="edit-btn">
+					<div class="edit-btn-content small">
+						<i id="undo-btn" class="fas fa-undo edit-back clickable small"></i>
+					</div>
+					<div class="edit-btn-content">
+						<i id="paint-mode-btn" class="fas fa-paint-brush edit-back clickable"></i>
+						<h5>Paint/Erase</h5>
+					</div>
+					<div class="edit-btn-content">
+						<button class="unstyled" type="button" data-bs-toggle="offcanvas" data-bs-target="#terminal-menu" aria-controls="terminal-menu">
+							<i id="open-terminal-menu-btn" class="fas fa-edit edit-back clickable"></i>
+						</button>
+						<h5>Terminals</h5>
+					</div>
+					<div class="edit-btn-content small">
+						<i id="redo-btn" class="fas fa-redo edit-back clickable small"></i>
+					</div>
+				</div>
+				<!-- Edit-section-END -->
+				<div class="offscreen">
+					<div class="rowBtn-1">
+						<!-- row-btn -->
+						<div class="rowBtn">
+							<div class="row-content">
+								<h3>Rows: <span id="num-rows"><!-- AUTO --></span></h3>
+							</div>
+							<div class="row-icon">
+								<i class="fas fa-plus icon-back clickable" id="add-row"></i>
+								<i class="fas fa-minus icon-back clickable" id="remove-row"></i>
+							</div>
+						</div>
+						<!-- colum-btn -->
+						<div class="rowBtn">
+							<div class="row-content">
+								<h3>Cols: <span id="num-cols"><!-- AUTO --></span></h3>
+							</div>
+							<div class="row-icon">
+								<i class="fas fa-plus icon-back clickable" id="add-column"></i>
+								<i class="fas fa-minus icon-back clickable" id="remove-column"></i>
+							</div>
+						</div>
+					</div>
 
-            <!-- Edit-open -->
-            <div id="terminal-menu" class="edit-open closed">
-                <i class="fas fa-times clickable" id="close-terminal-menu-btn"></i>
-                <div class="terminal">
-                    <h3>Manage Terminals</h3>
-                    <div id="termselect-list" class="terminal-select">
-                        <!-- AUTO -->
-                    </div>
-                    <div class="terminal-select2">
-                        <div class="select-content" id="remove-input-btn">
-                            <i class="fas fa-minus terminalBtn clickable"></i><span class="small">Delete an Input</span>
-                        </div>
-                        <div class="select-content" id="add-input-btn">
-                            <i class="fas fa-plus terminalBtn clickable"></i><span class="small">Add an Input</span>
-                        </div>
-                        <div class="select-content" id="place-term-btn">
-                            <i class="fas fa-map-pin terminalBtn clickable"></i><span class="small">Place Terminal</span>
-                        </div>
-                        <div class="select-content" id="remove-output-btn">
-                            <i class="fas fa-minus terminalBtn clickable"></i><span class="small">Delete an Output</span>
-                        </div>
-                        <div class="select-content" id="add-output-btn">
-                            <i class="fas fa-plus terminalBtn clickable"></i><span class="small">Add an Output</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Edit-open-end -->
+					<!-- Shift grid-btn -->
+					<div class="rowBtn-2">
+						<div class="row-content">
+							<h3>Shift grid</h3>
+						</div>
+						<div class="row-icon">
+							<i class="fas fa-chevron-left icon-back clickable" id="shift-left"></i>
+							<i class="fas fa-chevron-up icon-back clickable" id="shift-up" ></i>
+							<i class="fas fa-chevron-down icon-back clickable" id="shift-down"></i>
+							<i class="fas fa-chevron-right icon-back clickable" id="shift-right"></i>
+						</div>
+					</div>
 
-                <!-- colorBtn -->
-                <div class="colorChange" id="colorChange">
-                    <i class="fas fa-circle clickable" id="pdiff-swatch"></i>
-                    <i class="fas fa-circle clickable" id="ndiff-swatch"></i>
-                    <i class="fas fa-circle clickable" id="poly-swatch"></i>
-                    <i class="fas fa-circle clickable" id="metal1-swatch"></i>
-                    <i class="fas fa-circle clickable" id="metal2-swatch"></i>
-                    <i class="fas fa-circle clickable" id="contact-swatch"></i>
-                </div>
-                <!-- colorBtn END -->
+					<div class="evaluate-btn clickable" id="evaluate-btn">Evaluate</div>
+					
+					<section class="truth-table-section">
+						<div id="truth-table-container">
+							<table id="truth-table"></table>
+						</div>
+					</section>
+					<div id="results"><!-- AUTO --></div>
+				</div>
+			</div>
+			<!-- Right-side-END -->
+		</section>
+	</div>
 
-                <!-- Edit-section -->
-                <div class="edit-btn">
-                    <div class="edit-btn-content small">
-                        <i id="undo-btn" class="fas fa-undo edit-back clickable small"></i>
-                    </div>
-                    <div class="edit-btn-content">
-                        <i id="paint-mode-btn" class="fas fa-paint-brush edit-back clickable"></i>
-                        <h5>Paint/Erase</h5>
-                    </div>
-                    <div class="edit-btn-content">
-                        <i id="open-terminal-menu-btn" class="fas fa-edit edit-back clickable"></i>
-                        <h5>Terminals</h5>
-                    </div>
-                    <div class="edit-btn-content small">
-                        <i id="redo-btn" class="fas fa-redo edit-back clickable small"></i>
-                    </div>
-                </div>
-                <!-- Edit-section-END -->
-                <div class="offscreen">
-                    <div class="rowBtn-1">
-                        <!-- row-btn -->
-                        <div class="rowBtn">
-                            <div class="row-content">
-                                <h3>Rows: <span id="num-rows"><!-- AUTO --></span></h3>
-                            </div>
-                            <div class="row-icon">
-                                <i class="fas fa-plus icon-back clickable" id="add-row"></i>
-                                <i class="fas fa-minus icon-back clickable" id="remove-row"></i>
-                            </div>
-                        </div>
-                        <!-- colum-btn -->
-                        <div class="rowBtn">
-                            <div class="row-content">
-                                <h3>Cols: <span id="num-cols"><!-- AUTO --></span></h3>
-                            </div>
-                            <div class="row-icon">
-                                <i class="fas fa-plus icon-back clickable" id="add-column"></i>
-                                <i class="fas fa-minus icon-back clickable" id="remove-column"></i>
-                            </div>
-                        </div>
-                    </div>
+	<!-- Main-Menu -->
+	<section class="menu scrollable closed d-print-none" id="main-menu">
+		<i class="fas fa-times clickable" id="close-main-menu-btn"></i>
+		<div class="menu-content">
+			<div class="menu-btn-content">
+				<h1>Support this project!</h1>
+				<div class="box-btn clickable">
+					<a href="https://patreon.com/twentynine" target="_blank">
+						<i class="fab fa-patreon menu-text">
+							<span>&nbsp;Patreon</span>
+						</i>
+					</a>
+				</div>
 
-                    <!-- Shift grid-btn -->
-                    <div class="rowBtn-2">
-                        <div class="row-content">
-                            <h3>Shift grid</h3>
-                        </div>
-                        <div class="row-icon">
-                            <i class="fas fa-chevron-left icon-back clickable" id="shift-left"></i>
-                            <i class="fas fa-chevron-up icon-back clickable" id="shift-up" ></i>
-                            <i class="fas fa-chevron-down icon-back clickable" id="shift-down"></i>
-                            <i class="fas fa-chevron-right icon-back clickable" id="shift-right"></i>
-                        </div>
-                    </div>
+				<div class="box-btn clickable">
+					<a href="https://ko-fi.com/twentynine" target="_blank">
+						<i class="fas fa-coffee menu-text">
+							<span>&nbsp;Ko-Fi</span>
+						</i>
+					</a>
+				</div>
+				<!--<div class="teacher-btn clickable"><i class="fas fa-glasses menu-text"><span>&nbsp;Teacher Mode</span></i></div>-->
+			</div>
 
-                    <div class="evaluate-btn clickable" id="evaluate-btn">Evaluate</div>
-                    
-                    <section class="truth-table-section">
-                        <div id="truth-table-container">
-                            <table id="truth-table"></table>
-                        </div>
-                    </section>
-                    <div id="results"><!-- AUTO --></div>
-                </div>
-            </section>
-            <!-- Right-side-END -->
-        </section>
-    </div>
+			<ul>
+				<li class="clickable" id="open-tutorials-btn">Tutorials</li>
+				<li class="clickable" id="open-instructions-btn">Instructions</li>
+				<li class="clickable" id="open-about-page-btn">About</li>
+				<li class="clickable"><a href="mailto:nick.overacker@okstate.edu">Bug Report</a></li>
+				<li class="clickable"><a href="mailto:nick.overacker@okstate.edu">Contact</a></li>
+				<li class="clickable" id="open-licenses-menu-btn">Source Licences</span>
+				<li class="clickable" id="open-qrcode-menu-btn">Generate QR Code</span>
+			</ul>
 
-    <!-- Main-Menu -->
-    <section class="menu scrollable closed" id="main-menu">
-        <i class="fas fa-times clickable" id="close-main-menu-btn"></i>
+			<div class="menu-btn-content">
+				<div class="box-btn clickable options-btn" id="open-options-menu-btn">
+					<i class="fas fa-cogs menu-text">
+						<span>&nbsp;Options</span>
+					</i>
+				</div>
+			</div>
+		</div>
+	</section>
+	<!-- Main-menu-end -->
 
+	<section class="menu scrollable closed d-print-none" id="tutorials">
+		<i class="fas fa-times clickable" id="close-tutorials-btn"></i>
+		<div class="menu-content">
+			<ul>
+				<li class="clickable" id="tutorial-btn-0">The Basics</li>
+			</ul>
+		</div>
+	</section>
 
-        <div class="menu-content">
-            <div class="menu-btn-content">
-                <h1>Support this project!</h1>
-                <div class="box-btn clickable">
-                    <a href="https://patreon.com/twentynine" target="_blank">
-                        <i class="fab fa-patreon menu-text">
-                            <span>&nbsp;Patreon</span>
-                        </i>
-                    </a>
-                </div>
+	<section class="menu scrollable closed column-flex d-print-none" id="instructions">
+		<i class="fas fa-times clickable" id="close-instructions-btn"></i>
 
-                <div class="box-btn clickable">
-                    <a href="https://ko-fi.com/twentynine" target="_blank">
-                        <i class="fas fa-coffee menu-text">
-                            <span>&nbsp;Ko-Fi</span>
-                        </i>
-                    </a>
-                </div>
-                <!--<div class="teacher-btn clickable"><i class="fas fa-glasses menu-text"><span>&nbsp;Teacher Mode</span></i></div>-->
-            </div>
+		<section class="menu-long-text desktop">
+			<h1>Basic Mouse/Keyboard Controls</h1>
+			<ul>
+				<li>Left-click to paint a cell with the selected layer.
+					<ul><li>Left-click and drag to paint a line.</li></ul>
+				</li>
 
-            <ul>
-                <li class="clickable" id="open-tutorials-btn">Tutorials</li>
-                <li class="clickable" id="open-instructions-btn">Instructions</li>
-                <li class="clickable" id="open-about-page-btn">About</li>
-                <li class="clickable"><a href="mailto:nick.overacker@okstate.edu">Bug Report</a></li>
-                <li class="clickable"><a href="mailto:nick.overacker@okstate.edu">Contact</a></li>
-                <li class="clickable" id="open-licenses-menu-btn">Source Licences</span>
-                <li class="clickable" id="open-qrcode-menu-btn">Generate QR Code</span>
-            </ul>
+				<li>Right-click to clear all layers on the selected cell.
+					<ul><li>Right-click and drag to clear all cells in the selected area.</li></ul>
+				</li>
 
-            <div class="menu-btn-content">
-                <div class="box-btn clickable options-btn" id="open-options-menu-btn">
-                    <i class="fas fa-cogs menu-text">
-                        <span>&nbsp;Options</span>
-                    </i>
-                </div>
-            </div>
-        </div>
-    </section>
-    <!-- Main-menu-end -->
+				<li>Right-click in an unpainted area to change layers.
+					<ul><li>The layer name is displayed at the top of the canvas.</li></ul>
+				</li>
 
-    <section class="menu scrollable closed" id="tutorials">
-        <i class="fas fa-times clickable" id="close-tutorials-btn"></i>
-        <div class="menu-content">
-            <ul>
-                <li class="clickable" id="tutorial-btn-0">The Basics</li>
-            </ul>
-        </div>
-    </section>
+				<li>Point at a cell and type SHIFT + V to move the VDD contact to that cell.</li>
+				<li>Point at a cell and type SHIFT + G to move the GND contact to that cell.</li>
+				<li>Point at a cell and type the name of that terminal (A, B, C, ...) to move the chosen contact to that cell.</li>
+				<li>Press Enter or click "Evaluate" to generate a truth table for the painted diagram.
+					<ul><li>Not all paths are evaluated for overdriven (simultaneously high and low) outputs.</li></ul>
+				</li>
+				<!--<li>See additional keyboard shortcuts in the Options menu.</li>-->
+			</ul>
+		</section>
 
-    <section class="menu scrollable closed column-flex" id="instructions">
-        <i class="fas fa-times clickable" id="close-instructions-btn"></i>
+		<section class="menu-long-text">
+			<h1>Basic Touch-Friendly Controls</h1>
+			<ul>
+				<li>Tap the Paint <i class="fas fa-paint-brush inline"></i>
+					or Erase <i class="fas fa-eraser inline"></i>
+					icon to switch between paint and erase mode.</li>
+				<li>Tap to paint or clear a cell with the selected layer.
+					<ul><li>Touch and drag to paint a line or clear an area.</li></ul>
+				</li>
 
-        <section class="menu-long-text desktop">
-            <h1>Basic Mouse/Keyboard Controls</h1>
-            <ul>
-                <li>Left-click to paint a cell with the selected layer.
-                    <ul><li>Left-click and drag to paint a line.</li></ul>
-                </li>
+				<li>Tap one of the colored circles to change paint layers.
+					<ul><li>The layer name is displayed at the top of the canvas.</li></ul>
+				</li>
 
-                <li>Right-click to clear all layers on the selected cell.
-                    <ul><li>Right-click and drag to clear all cells in the selected area.</li></ul>
-                </li>
+				<li>Tap the Terminal menu button <i class="fas fa-edit inline"></i> to edit I/O terminals.
+					<ul>
+						<li>Use the <i class="fas fa-minus inline"></i> and <i class="fas fa-plus inline"></i> buttons to remove and add terminals.
+							<ul>
+								<li>The buttons on the left control input terminals.</li>
+								<li>The buttons on the right control output terminals.</li>
+							</ul>
+						</li>
+						<li>Select a terminal from the list and tap the <i class="fas fa-map-pin inline"></i> button to enter terminal placement mode.
+							<ul>
+								<li>Tap any cell in the canvas to place the terminal.</li>
+							</ul>
+						</li>
+					</ul>
+				</li>
+				<li>Scroll down and tap "Evaluate" to generate a truth table for the painted diagram.</li>
+				<li>Tap any output value in the truth table to highlight the evaluated path to the output.
+					<ul><li>Not all paths are evaluated for overdriven (simultaneously high and low) outputs.</li></ul>
+				</li>
+			</ul>
+		</section>
+	</section>
 
-                <li>Right-click in an unpainted area to change layers.
-                    <ul><li>The layer name is displayed at the top of the canvas.</li></ul>
-                </li>
+	<section class="menu scrollable closed d-print-none" id="about-page">
+		<i class="fas fa-times clickable" id="close-about-page-btn"></i>
+		<div class="menu-long-text">
+			<h1>About Stixu</h1>
+			<span>Stixu is a tool for designing and validating CMOS logic circuits.
+			<br><br>
+			The tool was conceived and developed by Nick Overacker, an Oklahoma State University Computer Engineering graduate currently living in Japan.
+			<br><br>
+			The user interface was designed and implemented with the help of Miho Kobayashi, a Kansai Gaidai University graduate, former OSU exchange student, and freelance web designer.
+			<br><br>
+			The default canvas palette was borrowed from <a href="https://personal.sron.nl/~pault/" target="_blank">Paul Tol's</a> work.
+			<br><br>
+			The alternate "Sorcery" palette was inspired by the <a href="http://opencircuitdesign.com/magic/" target="_blank">Magic</a> VLSI layout tool.
+			</span>
+		
+		</div>
+	</section>
 
-                <li>Point at a cell and type SHIFT + V to move the VDD contact to that cell.</li>
-                <li>Point at a cell and type SHIFT + G to move the GND contact to that cell.</li>
-                <li>Point at a cell and type the name of that terminal (A, B, C, ...) to move the chosen contact to that cell.</li>
-                <li>Press Enter or click "Evaluate" to generate a truth table for the painted diagram.
-                    <ul><li>Not all paths are evaluated for overdriven (simultaneously high and low) outputs.</li></ul>
-                </li>
-                <!--<li>See additional keyboard shortcuts in the Options menu.</li>-->
-            </ul>
-        </section>
+	<section class="menu scrollable closed d-print-none" id="options-menu">
+		<i class="fas fa-times clickable" id="close-options-menu-btn"></i>
+		<div class="menu-content">
+			<ul>
+				<li class="clickable" id="select-palette-btn">Palette: <span id="palette-setting">Tol</span></li>
+				<li class="clickable" id="toggle-transparency-btn">Layer transparency: <span id="transparency-setting">ON</span></li>
+			</ul>
+		</div>
+	</section>
 
-        <section class="menu-long-text">
-            <h1>Basic Touch-Friendly Controls</h1>
-            <ul>
-                <li>Tap the Paint <i class="fas fa-paint-brush inline"></i>
-                    or Erase <i class="fas fa-eraser inline"></i>
-                    icon to switch between paint and erase mode.</li>
-                <li>Tap to paint or clear a cell with the selected layer.
-                    <ul><li>Touch and drag to paint a line or clear an area.</li></ul>
-                </li>
+	<section class="menu scrollable closed d-print-none" id="licenses-menu">
+		<i class="fas fa-times clickable" id="close-licenses-menu-btn"></i>
+		<div class="menu-content">
+			<ul class="sparse">
+				<li><span class="package-name">Stixu.io</span><a class="package-link clickable" href="https://github.com/NickOveracker/StickDiagrammer/">Source</a> | <a class="package-link clickable" href="./licenses/LICENSE.txt">Polyform Strict License 1.0.0</a></li>
+				<li><span class="package-name">lzutf8.js</span><a class="package-link clickable" href="https://github.com/rotemdan/lzutf8.js/">Source</a> | <a class="package-link clickable" href="./licenses/lzutf8_js_LICENSE.txt">MIT License</a></li>
+				<li><span class="package-name">qrcodejs</span><a class="package-link clickable" href="https://github.com/KeeeX/qrcodejs">Source</a> | <a class="package-link clickable" href="./licenses/qrcodejs_LICENSE.txt">MIT License</a></li>
+			</u>
+		</div>
+	</section>
 
-                <li>Tap one of the colored circles to change paint layers.
-                    <ul><li>The layer name is displayed at the top of the canvas.</li></ul>
-                </li>
+	<section class="menu scrollable closed d-print-none" id="qrcode-menu">
+		<i class="fas fa-times clickable" id="close-qrcode-menu-btn"></i>
+		<div class="menu-long-text">
+			<h1><a class="clickable" id="share-url">Share this Diagram</a></h1>
+			<div id="qrcode"></div>
+		</div>
+	</section>
 
-                <li>Tap the Terminal menu button <i class="fas fa-edit inline"></i> to edit I/O terminals.
-                    <ul>
-                        <li>Use the <i class="fas fa-minus inline"></i> and <i class="fas fa-plus inline"></i> buttons to remove and add terminals.
-                            <ul>
-                                <li>The buttons on the left control input terminals.</li>
-                                <li>The buttons on the right control output terminals.</li>
-                            </ul>
-                        </li>
-                        <li>Select a terminal from the list and tap the <i class="fas fa-map-pin inline"></i> button to enter terminal placement mode.
-                            <ul>
-                                <li>Tap any cell in the canvas to place the terminal.</li>
-                            </ul>
-                        </li>
-                    </ul>
-                </li>
-                <li>Scroll down and tap "Evaluate" to generate a truth table for the painted diagram.</li>
-                <li>Tap any output value in the truth table to highlight the evaluated path to the output.
-                    <ul><li>Not all paths are evaluated for overdriven (simultaneously high and low) outputs.</li></ul>
-                </li>
-            </ul>
-        </section>
-    </section>
+	<!-- offcanvas -->
+	<div id="terminal-menu" class="terminal offcanvas d-print-none" tabindex="-1" data-bs-scroll="true" data-bs-backdrop="false" aria-labelledby="terminal-menu-header">
+		<button type="button" class="unstyled close-button" data-bs-dismiss="offcanvas" aria-label="Close">
+			<i class="fas fa-times clickable" id="close-terminal-menu-btn"></i>
+		</button>
+		<div class="offcanvas-header">
+			<h3 class="offcanvas-title" id="terminal-menu-header">Manage Terminals</h3>
+		</div>
+		<div class="offcanvas-body">
+			<div id="termselect-list" class="terminal-select">
+				<!-- AUTO -->
+			</div>
+			<div class="terminal-select2">
+				<div class="select-content" id="remove-input-btn">
+					<i class="fas fa-minus terminalBtn clickable"></i><span class="small">Delete an Input</span>
+				</div>
+				<div class="select-content" id="add-input-btn">
+					<i class="fas fa-plus terminalBtn clickable"></i><span class="small">Add an Input</span>
+				</div>
+				<div class="select-content" id="place-term-btn">
+					<i class="fas fa-map-pin terminalBtn clickable"></i><span class="small">Place Terminal</span>
+				</div>
+				<div class="select-content" id="remove-output-btn">
+					<i class="fas fa-minus terminalBtn clickable"></i><span class="small">Delete an Output</span>
+				</div>
+				<div class="select-content" id="add-output-btn">
+					<i class="fas fa-plus terminalBtn clickable"></i><span class="small">Add an Output</span>
+				</div>
+			</div>
+		</div>
+	</div>
 
-    <section class="menu scrollable closed" id="about-page">
-        <i class="fas fa-times clickable" id="close-about-page-btn"></i>
-        <div class="menu-long-text">
-            <h1>About Stixu</h1>
-            <span>Stixu is a tool for designing and validating CMOS logic circuits.
-            <br><br>
-            The tool was conceived and developed by Nick Overacker, an Oklahoma State University Computer Engineering graduate currently living in Japan.
-            <br><br>
-            The user interface was designed and implemented with the help of Miho Kobayashi, a Kansai Gaidai University graduate, former OSU exchange student, and freelance web designer.
-            <br><br>
-            The default canvas palette was borrowed from <a href="https://personal.sron.nl/~pault/" target="_blank">Paul Tol's</a> work.
-            <br><br>
-            The alternate "Sorcery" palette was inspired by the <a href="http://opencircuitdesign.com/magic/" target="_blank">Magic</a> VLSI layout tool.
-            </span>
-        
-        </div>
-    </section>
-
-    <section class="menu scrollable closed" id="options-menu">
-        <i class="fas fa-times clickable" id="close-options-menu-btn"></i>
-        <div class="menu-content">
-            <ul>
-                <li class="clickable" id="select-palette-btn">Palette: <span id="palette-setting">Tol</span></li>
-                <li class="clickable" id="toggle-transparency-btn">Layer transparency: <span id="transparency-setting">ON</span></li>
-            </ul>
-        </div>
-    </section>
-
-    <section class="menu scrollable closed" id="licenses-menu">
-        <i class="fas fa-times clickable" id="close-licenses-menu-btn"></i>
-        <div class="menu-content">
-            <ul class="sparse">
-                <li><span class="package-name">Stixu.io</span><a class="package-link clickable" href="https://github.com/NickOveracker/StickDiagrammer/">Source</a> | <a class="package-link clickable" href="./licenses/LICENSE.txt">Polyform Strict License 1.0.0</a></li>
-                <li><span class="package-name">lzutf8.js</span><a class="package-link clickable" href="https://github.com/rotemdan/lzutf8.js/">Source</a> | <a class="package-link clickable" href="./licenses/lzutf8_js_LICENSE.txt">MIT License</a></li>
-                <li><span class="package-name">qrcodejs</span><a class="package-link clickable" href="https://github.com/KeeeX/qrcodejs">Source</a> | <a class="package-link clickable" href="./licenses/qrcodejs_LICENSE.txt">MIT License</a></li>
-            </u>
-        </div>
-    </section>
-
-    <section class="menu scrollable closed" id="qrcode-menu">
-        <i class="fas fa-times clickable" id="close-qrcode-menu-btn"></i>
-        <div class="menu-long-text">
-            <h1><a class="clickable" id="share-url">Share this Diagram</a></h1>
-            <div id="qrcode"></div>
-        </div>
-    </section>
+	<!-- Toast warning (pullup/pulldown) -->
+	<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+		<div id="pullWarningToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
+			<div class="toast-header">
+				<i class="fas fa-circle text-danger me-2"></i>
+				<strong class="me-auto">Warning</strong>
+				<button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+			</div>
+			<div id="pullup-pulldown-warning" class="toast-body">
+				N pull-up or P pull-down detected.<br>
+				Simulation may be inaccurate.
+			</div>
+		</div>
+	</div>
 </body>
 </html>

@@ -1075,6 +1075,7 @@
         drawLabels() {
             // Draw labels on the canvas above each input and output.
             this.ctx.font = "bold " + Math.floor(this.cellHeight) + "px Arial";
+            this.ctx.textAlign = 'center';
             this.ctx.fillStyle = this.darkMode ? "#ffffff" : "#000000";
 
             // Draw labels for all terminals.
@@ -1162,10 +1163,18 @@
         }
 
         // Initialize everything
-        refreshCanvas() {
+        refreshCanvas(printOnly = false) {
+            let tempDarkMode = this.darkMode;
+            let tempFlatMode = this.useFlatColors;
+
+            if(printOnly) {
+                this.darkMode = false;
+                this.useFlatColors = true;
+            }
+
             this.resizeCanvas();
 
-            let currentCell = this.diagram.controller.getCellAtCursor();
+            let currentCell = printOnly ? {} : this.diagram.controller.getCellAtCursor();
 
             if(currentCell.contact) {
                 document.getElementById("CONTACT").style.backgroundColor = this.getColor(LayeredGrid.CONTACT, true);
@@ -1222,11 +1231,18 @@
             }.bind(this), this.diagram.controller.dragging || this.diagram.controller.placeTermMode);
 
             // set the outer border of the canvas to the cursor color
-            this.drawBorder();
+            if(!printOnly) this.drawBorder();
             this.drawLabels();
 
             document.getElementById("num-rows").innerHTML = this.diagram.layeredGrid.height;
             document.getElementById("num-cols").innerHTML = this.diagram.layeredGrid.width;
+
+            if(printOnly) {
+                document.querySelector("#print-canvas").src = this.canvas.toDataURL();
+                this.darkMode = tempDarkMode;
+                this.useFlatColors = tempFlatMode;
+                this.refreshCanvas();
+            }
         }
     }
 
@@ -1695,7 +1711,7 @@
                 let otherNode = edge.getOtherNode(node);
                 let mapping = this.getMapping(otherNode, targetNode);
               
-              	if(!mapping.direct && (otherNode === this.vddNode || otherNode === this.gndNode)) {
+                  if(!mapping.direct && (otherNode === this.vddNode || otherNode === this.gndNode)) {
                   return false;
                 }
 
@@ -2521,7 +2537,6 @@
                 "about-page",
                 "options-menu",
                 "main-menu",
-                "terminal-menu",
             ];
 
             this.allCommands        = [];
@@ -2554,10 +2569,13 @@
             this.setDarkMode(new Date().getHours() > 19 || new Date().getHours() < 7);
             this.populateTermSelect();
 
+            this.pullWarningToast = new bootstrap.Toast(document.querySelector("#pullWarningToast"), {delay: 10000});
+
             if(window.runTestbench) {
                 // Must initialize the canvas before the testbench runs.
                 this.diagramView.refreshCanvas();
             }
+
         }
 
         keydownHandler(event) {
@@ -2896,6 +2914,19 @@
                     if(e.type.includes('up')) {
                         this.changeTheme();
                     }
+                }.bind(this),
+            };
+
+            // SHIFT + T
+            this.themeCommand = {
+                ctrlModifier: true,
+                keyCode: 80,
+                action:  function(e) {
+                    e.preventDefault();
+                    this.diagramView.refreshCanvas(true);
+                    this.refreshTruthTable();
+                    document.querySelector('#print-table').innerHTML = document.querySelector('#truth-table').innerHTML;
+                    window.print();
                 }.bind(this),
             };
 
@@ -3466,9 +3497,11 @@
             }.bind(this));
 
             // Create the rest of the table.
+            let tBody = tableElement.createTBody();
+
             table.forEach(function (row, rowIndex) {
                 if(rowIndex === 0) { return; }
-                let tRow = tableElement.insertRow(rowIndex);
+                let tRow = tBody.insertRow(rowIndex - 1);
 
                 row.forEach(function (cell, colIndex) {
                     let tCell = tRow.insertCell(colIndex);
@@ -3495,9 +3528,7 @@
             }.bind(this));
             
             if (this.diagram.nmosPullup || this.diagram.pmosPulldown) {
-                document.getElementById("pullup-pulldown-warning").classList.add("active");
-            } else if(document.getElementById("pullup-pulldown-warning").classList.contains("active")) {
-                document.getElementById("pullup-pulldown-warning").classList.remove("active");
+            this.pullWarningToast.show();
             }
 
             if(!suppressSetNets) {
@@ -3523,26 +3554,27 @@
             if (this.diagramView.darkMode) {
                 document.body.classList.add('dark');
                 document.body.classList.remove('light');
-                document.getElementById('dark-mode-btn').classList.remove('fa-cloud-moon');
-                document.getElementById('dark-mode-btn').classList.add('fa-sun');
+                document.getElementById('dark-mode-btn').classList.remove('fas');
+                document.getElementById('dark-mode-btn').classList.add('far');
             } else {
                 document.body.classList.add('light');
                 document.body.classList.remove('dark');
-                document.getElementById('dark-mode-btn').classList.remove('fa-sun');
-                document.getElementById('dark-mode-btn').classList.add('fa-cloud-moon');
+                document.getElementById('dark-mode-btn').classList.remove('far');
+                document.getElementById('dark-mode-btn').classList.add('fas');
             }
         }
 
         setUpLayerSelector() {
             // Loop through all layer select buttons.
-            Array.from(document.getElementById("colorChange").children).forEach(function(element, index) {
+            document.querySelectorAll('.color-change i').forEach(function(element, index) {
+                let colorIndex = index % (this.diagramGrid.layers - 1);
 
                 // Set up the onclick event if not already set.
-                if(!element.onclick) {
+                if(!element.onclick && element.classList.contains('clickable')) {
                     element.onclick = function() {
-                        let paintModeButton = document.getElementById("paint-mode-btn");
+                        let paintModeButton = document.getElementById('paint-mode-btn');
 
-                        this.diagramController.changeLayer(index);
+                        this.diagramController.changeLayer(colorIndex);
 
                         // Set the icon.
                         if (this.diagramController.eraseMode) {
@@ -3555,7 +3587,7 @@
                 }
 
                 // Color with flat color (rgb, not rgba).
-                element.style.color = this.diagramView.getColor(index);
+                element.style.color = this.diagramView.getColor(colorIndex);
             }.bind(this));
         }
 
