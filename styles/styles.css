@@ -7798,32 +7798,37 @@ body {
   }
 }
 
-@media only screen and (orientation: landscape) {
+@media only screen and (orientation: landscape) and (min-width: 768px) {
   .offcanvas {
     top: 0;
     right: 0;
     border-left: var(--bs-offcanvas-border-width) solid var(--bs-offcanvas-border-color);
     transform: translateX(100%);
   }
-  .offcanvas .close-button {
-    text-align: left;
+  .offcanvas .btn-close {
+    width: 100%;
   }
   .offcanvas .fa-times {
-    font-size: 2.5vw;
-    padding: 2.5vw;
+    font-size: 2rem;
+    padding: 1rem;
   }
 }
-@media only screen and (orientation: landscape) and (orientation: landscape) and (min-width: 768px) {
+@media only screen and (orientation: landscape) and (min-width: 768px) and (orientation: landscape) and (min-width: 768px) {
   .offcanvas {
-    width: 33.33333333%;
+    min-width: 35%;
   }
 }
-@media only screen and (orientation: landscape) and (orientation: landscape) and (min-width: 992px) {
+@media only screen and (orientation: landscape) and (min-width: 768px) and (orientation: landscape) and (min-width: 992px) {
   .offcanvas {
-    width: 50%;
+    min-width: 41.66666667%;
   }
 }
-@media only screen and (orientation: portrait) {
+@media only screen and (orientation: landscape) and (min-width: 768px) and (orientation: landscape) and (min-width: 1200px) {
+  .offcanvas {
+    min-width: 50%;
+  }
+}
+@media only screen and (orientation: portrait), only screen and (width < 768px) {
   .offcanvas {
     right: 0;
     left: 0;
@@ -7843,7 +7848,7 @@ body {
   }
 }
 
-@media only screen and (orientation: portrait) {
+@media only screen and (orientation: portrait), only screen and (width < 768px) {
   .portrait-full-width {
     width: 100%;
   }
@@ -7859,14 +7864,14 @@ body {
   padding: 9px;
   width: min(30px, 4dvw);
 }
-@media only screen and (orientation: landscape) {
+@media only screen and (orientation: landscape) and (min-width: 768px) {
   .controls .color-change {
     max-width: 290px;
     margin: 60px auto 0 auto;
     justify-content: space-between;
   }
 }
-@media only screen and (orientation: portrait) {
+@media only screen and (orientation: portrait), only screen and (width < 768px) {
   .controls .color-change {
     width: 100%;
     order: 0;
@@ -7899,12 +7904,12 @@ body {
   touch-action: none;
   aspect-ratio: 1/1;
 }
-@media only screen and (orientation: landscape) {
+@media only screen and (orientation: landscape) and (min-width: 768px) {
   .canvas-row canvas {
     width: min(100%, 100svh - 68px - 2rem);
   }
 }
-@media only screen and (orientation: portrait) {
+@media only screen and (orientation: portrait), only screen and (width < 768px) {
   .canvas-row .canvas-wrapper {
     display: flex;
     width: 100%;
@@ -7930,7 +7935,7 @@ body {
 .edit-btn-row .edit-btn-content {
   padding: 0;
 }
-@media only screen and (orientation: landscape) {
+@media only screen and (orientation: landscape) and (min-width: 768px) {
   .edit-btn-row {
     max-width: 350px;
   }
@@ -7965,17 +7970,22 @@ body {
 }
 
 /*-----Edit-section-end-------*/
+/*--------------truth-table-----------------*/
 table {
   border: 2px solid black;
   width: 100%;
+  margin: 0;
+  padding: 0;
+  border-collapse: collapse;
   text-align: center;
 }
 table tr td {
   margin: auto;
-  border: 1px solid black;
+  border: 1px dotted;
+  width: auto;
 }
 table colgroup col.output-vals {
-  border-left: 2px solid black;
+  border-left: 3px double;
 }
 table thead {
   border: 2px solid black;
@@ -7985,6 +7995,7 @@ table thead td {
   border: none;
 }
 
+/*--------------truth-table-end-----------------*/
 html[data-bs-theme=dark] body .logo {
   background-image: url("../images/logo-dark.svg");
 }
@@ -8053,12 +8064,259 @@ html[data-bs-theme=light] body .logo {
   font-size: 20px;
   font-weight: bold;
   font-family: "Josefin Sans", sans-serif;
-  width: 300px;
   height: 50px;
   margin: 30px auto 0 auto;
   order: 5;
 }
+@media only screen and (orientation: portrait), only screen and (width < 768px) {
+  .evaluate-btn {
+    width: 100%;
+  }
+}
+@media only screen and (orientation: landscape) and (min-width: 768px) {
+  .evaluate-btn {
+    min-width: 50%;
+  }
+}
+
+input[type=radio] {
+  display: none;
+}
+
+.active .terminal-btn {
+  background-color: #D4AF37;
+}
+
+.terminal-select label {
+  padding-top: 1.5vh;
+  padding-bottom: 1.5vh;
+  color: #221D1D;
+}
+
+.terminal-select > input:checked + label {
+  background-color: #221D1D;
+  color: #fff;
+}
 
 /*-------Controls-END--------*/
+/*-----------Edit-open-------------*/
+.terminal-menu {
+  width: 100%;
+  height: 100vh;
+  background-color: rgba(76, 38, 184, 0.98);
+  position: sticky;
+  top: 0;
+  right: 0;
+  z-index: 1000;
+}
+
+.terminal {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  align-items: center;
+  font-family: "Josefin Sans", sans-serif;
+}
+
+.terminal h3, .terminal .h3 {
+  font-size: 25px;
+  color: #FFFFFF;
+  text-transform: uppercase;
+}
+
+.terminal-select {
+  display: flex;
+  background-color: rgba(255, 255, 255, 0.8);
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.terminal-select2 {
+  margin-top: 30px;
+  display: flex;
+}
+
+.terminal-btn {
+  font-size: 25px;
+  margin: 10px;
+  padding: 20px;
+  width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  color: #221D1D;
+  box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 12px;
+  background-color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+}
+
+.select-content {
+  flex-direction: column;
+  text-align: center;
+}
+
+span.small {
+  font-size: 12px;
+  color: #FFFFFF;
+  margin-top: 0;
+  display: block;
+}
+
+/*---------------------------Edit-open-end*/
+.icon-back:active {
+  background: #4C26B8;
+}
+
+.fa-circle:active {
+  opacity: 0.7;
+}
+
+.evaluate-btn:active {
+  background-color: #4C26B8;
+}
+
+@media (hover: hover) {
+  .icon-back:hover {
+    background: #4C26B8;
+    transition: 0.5s;
+  }
+  .fa-circle:hover {
+    opacity: 0.7;
+    transition: 0.5;
+  }
+  .evaluate-btn:hover {
+    background-color: #4C26B8;
+    transition: 0.5s;
+  }
+  .clickable:hover {
+    color: #d4af37;
+    transition: 0.5s;
+  }
+  .dark .icon-back:hover {
+    background: #4C26B8;
+    transition: 0.5s;
+  }
+  .terminal-select label:hover {
+    background-color: rgba(76, 38, 184, 0.9);
+    color: #FFFFFF;
+    transition: 0.5s;
+  }
+}
+/*-------responsive--------*/
+@media screen and (orientation: landscape) {
+  .menu-content {
+    margin-top: 3vh;
+  }
+  .menu-content li {
+    margin-top: 1vh;
+    margin-bottom: 1vh;
+    font-size: 5vh;
+  }
+  /*-------------Canvas---------------*/
+  .active-layers {
+    width: 11vh;
+    height: 20vh;
+    margin-left: -13vh;
+    margin-top: 30vh;
+    position: absolute;
+  }
+  #CONTACT {
+    height: 20vh;
+    width: 5vh;
+    margin-left: 3vh;
+    position: absolute;
+  }
+  .cmos-layer {
+    height: 5vh;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  /*-------------Canvas-END---------------*/
+  .offscreen {
+    display: flex;
+    flex-direction: column;
+    order: 2;
+  }
+  .terminal-select {
+    border-radius: 10px;
+  }
+  .terminal-select label {
+    font-size: 1.3vw;
+    width: 100%;
+  }
+  .terminal-select label.first {
+    border-radius: 10px 0 0 10px;
+  }
+  .terminal-select label.last {
+    border-radius: 0 10px 10px 0;
+  }
+}
+@media screen and (orientation: portrait) {
+  .column-flex .desktop {
+    order: 2;
+  }
+  .terminal h3, .terminal .h3 {
+    display: none;
+  }
+  .menu {
+    padding-top: 1vh;
+  }
+  .menu-content {
+    top: 10vh;
+  }
+  .menu-content li {
+    margin-top: 2vh;
+    margin-bottom: 2vh;
+    font-size: 3vh;
+  }
+  .terminal-select {
+    max-width: 100%;
+    margin-top: 0;
+    border-radius: 0;
+  }
+  .terminal-select2 {
+    margin-top: 1vh;
+    max-width: 100%;
+  }
+  h3, .h3 {
+    font-size: 2vh;
+  }
+  .select-content .small {
+    display: none;
+  }
+  .terminalBtn {
+    font-size: 1.8vh;
+    padding: 1.8vh;
+    width: 1.8vh;
+    height: 1.8vh;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+  }
+  .row-content {
+    font-size: 2.5vh;
+    margin-bottom: 1vh;
+  }
+  .offscreen {
+    position: absolute;
+    top: 100vh;
+  }
+  .icon-back {
+    padding: 20px;
+    color: #FFFFFF;
+    background: #221D1D;
+    align-items: center;
+    margin: 10px;
+    margin-top: 0;
+  }
+  .rowBtn-2 {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    margin-top: 10px;
+  }
+}
 
 /*# sourceMappingURL=styles.css.map */
