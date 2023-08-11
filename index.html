@@ -133,14 +133,9 @@
 						</div>
 					</div>
 
-					<div class="evaluate-btn clickable" id="evaluate-btn">Evaluate</div>
-					
-					<section class="truth-table-section">
-						<div id="truth-table-container">
-							<table id="truth-table"></table>
-						</div>
-					</section>
-					<div id="results"><!-- AUTO --></div>
+					<button class="evaluate-btn clickable" id="evaluate-btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#truth-table-drawer" aria-controls="truth-table-drawer">
+						Evaluate
+					</button>
 				</div>
 			</div>
 			<!-- Right-side-END -->
@@ -365,6 +360,28 @@
 		</div>
 	</div>
 
+	<div id="truth-table-drawer" class="truth-table-section offcanvas d-print-none" tabindex="-1" data-bs-scroll="true" data-bs-backdrop="false" data-bs-keyboard="true" aria-labelledby="truth-table-header">
+		<button id="close-terminal-menu-btn" type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close">
+			<i class="fas fa-times clickable"></i>
+		</button>
+
+		<div class="offcanvas-header">
+			<h3 class="offcanvas-title" id="terminal-menu-header">Truth Table</h3>
+		</div>
+
+		<div class="offcanvas-body" id="truth-table-container">
+			<table id="truth-table"></table>
+		</div>
+	</div>
+
+	<div class="active-layers d-print-none">
+		<div id="CONTACT"></div>
+		<div id="METAL2" class="cmos-layer"></div>
+		<div id="METAL1" class="cmos-layer"></div>
+		<div id="POLY"   class="cmos-layer"></div>
+		<div id="DIFF"   class="cmos-layer"></div>
+	</div>
+
 	<!-- Toast warning (pullup/pulldown) -->
 	<div class="position-fixed bottom-0 end-0 p-3 d-print-none" style="z-index: 11">
 		<div id="pullWarningToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
@@ -382,13 +399,6 @@
 		</div>
 	</div>
 
-	<div class="active-layers d-print-none">
-		<div id="CONTACT"></div>
-		<div id="METAL2" class="cmos-layer"></div>
-		<div id="METAL1" class="cmos-layer"></div>
-		<div id="POLY"   class="cmos-layer"></div>
-		<div id="DIFF"   class="cmos-layer"></div>
-	</div>
 
 </body>
 </html>

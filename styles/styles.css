@@ -7892,6 +7892,11 @@ body {
   height: calc(100svh - 50px - 2rem);
 }
 .canvas-row canvas {
+  padding-left: 0;
+  padding-right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  touch-action: none;
   aspect-ratio: 1/1;
 }
 @media only screen and (orientation: landscape) {

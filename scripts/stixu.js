@@ -3501,7 +3501,6 @@
                                 outputNodeIndex = this.diagram.graph.getIndexByNode(this.diagram.outputNodes[outputNum]);
                                 path = this.diagram.analyses[rowIndex - 1][outputNodeIndex];
                                 this.diagramView.setPathHighlight(path);
-                                window.scrollTo({behavior: "smooth", top: Math.ceil(document.body.getBoundingClientRect().top), left: 0,});
                             }.bind(this));
                         }.bind(this))(rowIndex, colIndex);
                     }
@@ -3510,10 +3509,6 @@
 
             if (this.diagram.nmosPullup || this.diagram.pmosPulldown) {
                 this.pullWarningToast.show();
-            }
-
-            if(!suppressSetNets) {
-                window.scrollTo({behavior: "smooth", top: Math.ceil(tableElement.getBoundingClientRect().top + window.scrollY), left: 0,});
             }
         }
 
