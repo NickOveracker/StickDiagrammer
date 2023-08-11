@@ -190,21 +190,6 @@ input[type="radio"] {
 }
 /*--------------truth-table-end-----------------*/
 
-/*-------Dark-mode-----*/
-.dark .edit-back {
-    color: #221D1D;
-    background:#FFFFFF;
-}
-
-.dark .evaluate-btn {
-    color: #FFFFFF;
-    background:#4C26B8;
-}
-
-.dark .icon-back {
-    color: #FFFFFF;
-    background:rgba(109,110,106,.7);
-}
 
 /*---------Main-Menu------------*/
 li{
@@ -477,101 +462,6 @@ body.light {
     color: #4C26B8;
 }
 
-.logo {
-    background-repeat: no-repeat;
-    background-position: center;
-}
-
-.dark .logo {
-    background-image: url("../images/logo-dark.svg");
-}
-
-.light .logo {
-    background-image: url("../images/logo-light.svg");
-}
-
-/*-------Controls--------*/
-.controls{
-    margin-top: 100px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-.rowBtn-1{
-    display: flex;
-    justify-content: center;
-    text-align: center;
-}
-
-.rowBtn{
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    text-align: center;
-}
-
-.row-content{
-    display: flex;
-    justify-content:center;
-    text-align: center;
-    margin-bottom: 1vh;
-    font-size: 2.5vh;
-    font-weight: bold;
-    font-family: 'Josefin Sans', sans-serif;
-}
-
-#row-number{
-    margin-left: 10px;
-    padding: 10px;
-    box-shadow: rgba(9, 30, 66, 0.25) 0px 1px 1px, rgba(9, 30, 66, 0.13) 0px 0px 1px 1px;
-}
-
-#col-number{
-    margin-left: 10px;
-    padding: 10px;
-    box-shadow: rgba(9, 30, 66, 0.25) 0px 1px 1px, rgba(9, 30, 66, 0.13) 0px 0px 1px 1px;
-}
-
-.icon-back{
-    font-size: 20px;
-    padding: 10px;
-    color: #FFFFFF;
-    background:#221D1D;
-    width: 20px;
-    height: 20px;
-    justify-content: center;
-    text-align: center;
-    border-radius: 10%;
-}
-
-.rowBtn-2{
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    text-align: center;
-    margin-top: 10px;
-}
-
-/*-------Controls-END--------*/
-
-
-.evaluate-btn{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    font-size: 20px;
-    font-weight: bold;
-    font-family: 'Josefin Sans', sans-serif;
-    width: 300px;
-    height: 50px;
-    background-color: #221D1D;
-    color: #FFFFFF;
-    margin-top: 30px;
-    order: 5;
-}
 
 .icon-back:active{
     background:#4C26B8;

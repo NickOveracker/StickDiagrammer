@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- LICENSE: https://polyformproject.org/licenses/strict/1.0.0/ -->
-<html lang="en">
+<html lang="en" data-bs-theme="dark">
 <head>
 	<title>Stixu Stick Diagrammer</title>
 	<meta charset="UTF-8">
@@ -16,7 +16,7 @@
 	<script defer src="./scripts/tutorial.js"></script>
 </head>
 
-<body class="dark">
+<body>
 	<div class="d-none d-print-block print-layout">
 		<div class="color-change">
 			<div class="print-color-label">
@@ -38,7 +38,7 @@
 				<span>CONTACT</span><i class="fas fa-circle"></i>
 			</div>
 		</div>
-		<img class="print-canvas"id="print-canvas">
+		<img class="print-canvas" id="print-canvas">
 		<div class="print-table-container"><table id="print-table"></table></div>
 		<p class="print-logo"><span>Made with </span><img src="./images/logo-light.svg"></p>
 	</div>
@@ -46,62 +46,56 @@
 		<header class="main-header row text-center">
 			<div aria-label="Stixu logo" class="logo order-1"></div>
 			<div aria-label="Dark mode toggle" class="main-header-btn order-first order-md-2">
-			<i class="fas fa-lightbulb header-button clickable float-start float-md-end" id="dark-mode-btn"></i>
+			<i class="fas fa-lightbulb header-button clickable float-start float-md-end bg-secondary" id="dark-mode-btn"></i>
 		</div>
 			<div aria-label="Open menu" class="main-header-btn order-3">
-			<i id="open-main-menu-btn" class="fas fa-bars header-button clickable float-end"></i>
+			<i id="open-main-menu-btn" class="fas fa-bars header-button clickable float-end bg-secondary"></i>
 		</div>
 		</header>
 
-		<section class="row">
-			<div class="col-8 col-lg-6 portrait-full-width">
-				<div class="canvas-group">
-					<div class="active-layers">
-						<div id="CONTACT"></div>
-						<div id="METAL2" class="cmos-layer"></div>
-						<div id="METAL1" class="cmos-layer"></div>
-						<div id="POLY"   class="cmos-layer"></div>
-						<div id="DIFF"   class="cmos-layer"></div>
-					</div>
-					<div id="canvas-wrapper" class="canvas-wrapper">
+		<section class="row canvas-row">
+			<div class="col-8 col-lg-7 col-xl-6 portrait-full-width">
+				<div class="row canvas-group">
+					<div id="canvas-wrapper" class="col-12 canvas-wrapper">
 						<canvas id="canvas"></canvas>
-						<canvas id="grid-canvas"></canvas>
 					</div>
-				</div>
+			</div>
 			</div>
 			<!-- Right-side -->
-			<div class="controls col-4 col-lg-6 portrait-full-width">
+			<div class="controls col-4 col-lg-5 col-xl-6 portrait-full-width">
 				<!-- colorBtn -->
-				<div class="color-change">
-					<i class="fas fa-circle clickable" id="pdiff-swatch"></i>
-					<i class="fas fa-circle clickable" id="ndiff-swatch"></i>
-					<i class="fas fa-circle clickable" id="poly-swatch"></i>
-					<i class="fas fa-circle clickable" id="metal1-swatch"></i>
-					<i class="fas fa-circle clickable" id="metal2-swatch"></i>
-					<i class="fas fa-circle clickable" id="contact-swatch"></i>
+				<div class="row color-change">
+					<i class="col-1 fas fa-circle clickable" id="pdiff-swatch"></i>
+					<i class="col-1 fas fa-circle clickable" id="ndiff-swatch"></i>
+					<i class="col-1 fas fa-circle clickable" id="poly-swatch"></i>
+					<i class="col-1 fas fa-circle clickable" id="metal1-swatch"></i>
+					<i class="col-1 fas fa-circle clickable" id="metal2-swatch"></i>
+					<i class="col-1 fas fa-circle clickable" id="contact-swatch"></i>
 				</div>
 				<!-- colorBtn END -->
 
 				<!-- Edit-section -->
-				<div class="edit-btn">
-					<div class="edit-btn-content small">
-						<i id="undo-btn" class="fas fa-undo edit-back clickable small"></i>
+				<div class="row edit-btn-row">
+					<div class="col-2 edit-btn-content small">
+						<i id="undo-btn" class="fas fa-undo edit-back clickable small bg-secondary"></i>
 					</div>
-					<div class="edit-btn-content">
-						<i id="paint-mode-btn" class="fas fa-paint-brush edit-back clickable"></i>
+					<div class="col-4 edit-btn-content">
+						<i id="paint-mode-btn" class="fas fa-paint-brush edit-back clickable bg-primary"></i>
 						<h5>Paint/Erase</h5>
 					</div>
-					<div class="edit-btn-content">
+					<div class="col-4 edit-btn-content">
 						<button class="unstyled" type="button" data-bs-toggle="offcanvas" data-bs-target="#terminal-menu" aria-controls="terminal-menu">
-							<i id="open-terminal-menu-btn" class="fas fa-edit edit-back clickable"></i>
+							<i id="open-terminal-menu-btn" class="fas fa-edit edit-back clickable bg-primary"></i>
 						</button>
 						<h5>Terminals</h5>
 					</div>
-					<div class="edit-btn-content small">
-						<i id="redo-btn" class="fas fa-redo edit-back clickable small"></i>
+					<div class="col-2 edit-btn-content small">
+						<i id="redo-btn" class="fas fa-redo edit-back clickable small bg-secondary"></i>
 					</div>
 				</div>
+
 				<!-- Edit-section-END -->
+
 				<div class="offscreen">
 					<div class="rowBtn-1">
 						<!-- row-btn -->
@@ -155,7 +149,9 @@
 
 	<!-- Main-Menu -->
 	<section class="menu scrollable closed d-print-none" id="main-menu">
-		<i class="fas fa-times clickable" id="close-main-menu-btn"></i>
+		<button id="close-main-menu-btn" type="button" class="btn-close" aria-label="Close">
+			<i class="fas fa-times clickable"></i>
+		</button>
 		<div class="menu-content">
 			<div class="menu-btn-content">
 				<h1>Support this project!</h1>
@@ -199,7 +195,10 @@
 	<!-- Main-menu-end -->
 
 	<section class="menu scrollable closed d-print-none" id="tutorials">
-		<i class="fas fa-times clickable" id="close-tutorials-btn"></i>
+		<button id="close-tutorials-btn" type="button" class="btn-close" aria-label="Close">
+			<i class="fas fa-times clickable"></i>
+		</button>
+
 		<div class="menu-content">
 			<ul>
 				<li class="clickable" id="tutorial-btn-0">The Basics</li>
@@ -208,7 +207,9 @@
 	</section>
 
 	<section class="menu scrollable closed column-flex d-print-none" id="instructions">
-		<i class="fas fa-times clickable" id="close-instructions-btn"></i>
+		<button id="close-instructions-btn" type="button" class="btn-close" aria-label="Close">
+			<i class="fas fa-times clickable"></i>
+		</button>
 
 		<section class="menu-long-text desktop">
 			<h1>Basic Mouse/Keyboard Controls</h1>
@@ -273,7 +274,10 @@
 	</section>
 
 	<section class="menu scrollable closed d-print-none" id="about-page">
-		<i class="fas fa-times clickable" id="close-about-page-btn"></i>
+		<button id="close-about-page-btn" type="button" class="btn-close" aria-label="Close">
+			<i class="fas fa-times clickable"></i>
+		</button>
+
 		<div class="menu-long-text">
 			<h1>About Stixu</h1>
 			<span>Stixu is a tool for designing and validating CMOS logic circuits.
@@ -291,7 +295,10 @@
 	</section>
 
 	<section class="menu scrollable closed d-print-none" id="options-menu">
-		<i class="fas fa-times clickable" id="close-options-menu-btn"></i>
+		<button id="close-options-menu-btn" type="button" class="btn-close" aria-label="Close">
+			<i class="fas fa-times clickable"></i>
+		</button>
+
 		<div class="menu-content">
 			<ul>
 				<li class="clickable" id="select-palette-btn">Palette: <span id="palette-setting">Tol</span></li>
@@ -301,7 +308,10 @@
 	</section>
 
 	<section class="menu scrollable closed d-print-none" id="licenses-menu">
-		<i class="fas fa-times clickable" id="close-licenses-menu-btn"></i>
+		<button id="close-licenses-menu-btn" type="button" class="btn-close" aria-label="Close">
+			<i class="fas fa-times clickable"></i>
+		</button>
+
 		<div class="menu-content">
 			<ul class="sparse">
 				<li><span class="package-name">Stixu.io</span><a class="package-link clickable" href="https://github.com/NickOveracker/StickDiagrammer/">Source</a> | <a class="package-link clickable" href="./licenses/LICENSE.txt">Polyform Strict License 1.0.0</a></li>
@@ -312,7 +322,10 @@
 	</section>
 
 	<section class="menu scrollable closed d-print-none" id="qrcode-menu">
-		<i class="fas fa-times clickable" id="close-qrcode-menu-btn"></i>
+		<button id="close-qrcode-menu-btn" type="button" class="btn-close" aria-label="Close">
+			<i class="fas fa-times clickable"></i>
+		</button>
+
 		<div class="menu-long-text">
 			<h1><a class="clickable" id="share-url">Share this Diagram</a></h1>
 			<div id="qrcode"></div>
@@ -320,10 +333,11 @@
 	</section>
 
 	<!-- offcanvas -->
-	<div id="terminal-menu" class="terminal offcanvas d-print-none" tabindex="-1" data-bs-scroll="true" data-bs-backdrop="false" aria-labelledby="terminal-menu-header">
-		<button type="button" class="unstyled close-button" data-bs-dismiss="offcanvas" aria-label="Close">
-			<i class="fas fa-times clickable" id="close-terminal-menu-btn"></i>
+	<div id="terminal-menu" class="terminal offcanvas d-print-none" tabindex="-1" data-bs-scroll="true" data-bs-backdrop="false" data-bs-keyboard="true" aria-labelledby="terminal-menu-header">
+		<button id="close-terminal-menu-btn" type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close">
+			<i class="fas fa-times clickable"></i>
 		</button>
+
 		<div class="offcanvas-header">
 			<h3 class="offcanvas-title" id="terminal-menu-header">Manage Terminals</h3>
 		</div>
@@ -352,12 +366,14 @@
 	</div>
 
 	<!-- Toast warning (pullup/pulldown) -->
-	<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+	<div class="position-fixed bottom-0 end-0 p-3 d-print-none" style="z-index: 11">
 		<div id="pullWarningToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
 			<div class="toast-header">
 				<i class="fas fa-circle text-danger me-2"></i>
 				<strong class="me-auto">Warning</strong>
-				<button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+				<button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close">
+					<i class="fas fa-times clickable"></i>
+				</button>
 			</div>
 			<div id="pullup-pulldown-warning" class="toast-body">
 				N pull-up or P pull-down detected.<br>
@@ -365,5 +381,14 @@
 			</div>
 		</div>
 	</div>
+
+	<div class="active-layers d-print-none">
+		<div id="CONTACT"></div>
+		<div id="METAL2" class="cmos-layer"></div>
+		<div id="METAL1" class="cmos-layer"></div>
+		<div id="POLY"   class="cmos-layer"></div>
+		<div id="DIFF"   class="cmos-layer"></div>
+	</div>
+
 </body>
 </html>

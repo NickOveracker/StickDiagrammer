@@ -1,5 +1,5 @@
 /**************************************************************************************************
- * 
+ *
  * ## Legal Stuff
  * Copyright Nick Overacker & Miho Kobayashi.
  * This code is offered under the Strict License 1.0.0 (https://polyformproject.org/licenses/strict/1.0.0/),
@@ -15,7 +15,7 @@
  *      - "jshint complexity" (cyclomatic complexity, function-by-function basis)
  *    - All builds must pass testbench
  *      - The testbench may need to be modified for some breaking changes (e.g., new layers)
- * 
+ *
  **************************************************************************************************/
 
 /* jshint curly: true */
@@ -81,7 +81,7 @@
             this.grid = new Array(width * height * layers);
             this.defaultCell = { isSet: false, };
         }
-        
+
         // Get the value at a given coordinate
         // If it isn't set, return the default value
         // If it's out of bounds, return null
@@ -100,7 +100,7 @@
 
             return cell;
         }
-        
+
         // Set the value at a given coordinate
         // If it's out of bounds, do nothing
         set(x, y, layer) {
@@ -118,7 +118,7 @@
                 gate: null,
             };
 
-            // Only allow one of NDIFF or PDIFF to be set
+            // Only allow one of NDIFF or PDIFF to be set if(layer === LayeredGrid.PDIFF) {
             if(layer === LayeredGrid.PDIFF) {
                 this.clear(x, y, LayeredGrid.NDIFF);
             } else if(layer === LayeredGrid.NDIFF) {
@@ -257,7 +257,7 @@
                 top: 0,
                 bottom: this.height - 1,
             }; // layer information unneeded
-        
+
             for(let layer = oldBounds.lowLayer; layer <= oldBounds.highLayer; layer++) {
                 for(let y = oldBounds.top; y <= oldBounds.bottom; y++) {
                     for(let x = oldBounds.left; x <= oldBounds.right; x++) {
@@ -276,15 +276,15 @@
             this.moveWithinBounds(this.diagram.vddCell, newBounds);
             this.moveWithinBounds(this.diagram.gndCell, newBounds);
         }
-        
+
         insertRemoveRowColAt(rowColIndex, isInsert, isRow) {
             // Add or remove?
             let addend    = isInsert ? 1 : -1;
-            
+
             // Set the new width and height.
             let newWidth  = isRow    ? this.width           : this.width + addend;
             let newHeight = isRow    ? this.height + addend : this.height;
-            
+
             // If it's an insert, add the row/column before shifting the existing contents.
             if(isInsert) {
                 // Update grid size first so we have room to shift
@@ -317,7 +317,7 @@
 
             oldGrid = this.grid;
             startX = startY = xOffset = yOffset = 0;
-            
+
             this.grid = new Array(this.width * this.height * this.layers);
 
             for(let index = 0; index < this.grid.length; index++) {
@@ -546,7 +546,7 @@
             // are disconnected.
             return this === otherNode;
         }
-     
+
         isTransistor() {
             return this.isPmos || this.isNmos;
         }
@@ -764,11 +764,11 @@
         }
 
         pixelIsInBounds() {
-            let boundingBox = this.view.canvas.getBoundingClientRect();
-            return this.currentX > boundingBox.left   + this.view.cellWidth &&
-                   this.currentX < boundingBox.right  - this.view.cellWidth &&
-                   this.currentY > boundingBox.top    + this.view.cellHeight &&
-                   this.currentY < boundingBox.bottom - this.view.cellHeight;
+            let x = Math.floor((this.currentX - this.view.canvas.getBoundingClientRect().left - this.view.cellWidth) / this.view.cellWidth);
+            let y = Math.floor((this.currentY - this.view.canvas.getBoundingClientRect().top - this.view.cellHeight) / this.view.cellHeight);
+
+            return x >= 0 && x < this.diagram.layeredGrid.width &&
+                   y >= 0 && y < this.diagram.layeredGrid.height;
         }
 
         getCellAtCursor() {
@@ -914,14 +914,10 @@
             ];
         }
 
-        constructor(diagram, mainCanvas, gridCanvas) {
+        constructor(diagram, mainCanvas) {
             this.diagram = diagram;
             this.canvas = mainCanvas;
-            this.gridCanvas = gridCanvas;
             this.ctx = this.canvas.getContext("2d");
-            this.gridCtx = this.gridCanvas.getContext('2d');
-            this.canvasWidth = Math.min(document.getElementById('canvas-wrapper').clientWidth, document.getElementById('canvas-wrapper').clientHeight);
-            this.canvasHeight = this.canvasWidth;
             this.cellWidth  = this.canvasWidth  / (this.diagram.layeredGrid.width  + 2);
             this.cellHeight = this.canvasHeight / (this.diagram.layeredGrid.height + 2);
             this.useFlatColors = false;
@@ -937,48 +933,34 @@
         getCellHoverColor() {
             return this.darkMode ? "rgba(255, 255, 255, 0.3)" : "rgba(0, 0, 0, 0.3)";
         }
-        
+
         // Draw a faint grid on the canvas.
         // Add an extra 2 units to the width and height for a border.
         drawGrid() {
-            // Place the grid canvas behind the main canvas.
-            // Same size as the canvas.
-            this.gridCanvas.width = this.canvasWidth;
-            this.gridCanvas.height = this.canvasHeight;
-            this.gridCanvas.style.width = this.canvasWidth + 'px';
-            this.gridCanvas.style.height = this.canvasHeight + 'px';
-            this.gridCanvas.style.position = 'absolute';
-            this.gridCanvas.style.left = this.canvas.offsetLeft + 'px';
-            this.gridCanvas.style.top = this.canvas.offsetTop + 'px';
-            this.gridCanvas.style.zIndex = -1;
-
-            // Set the gridCanvas context.
+            this.ctx.lineWidth = 1;
             this.cellWidth = this.canvasWidth / (this.diagram.layeredGrid.width + 2);
             this.cellHeight = this.canvasHeight / (this.diagram.layeredGrid.height + 2);
-
-            // Clear the grid canvas.
-            this.gridCtx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
 
             // Set stroke color depending on whether the dark mode is on or off.
             // Should be faintly visible in both modes.
             if(this.darkMode) {
-                this.gridCtx.strokeStyle = this.darkModeGridColor;
+                this.ctx.strokeStyle = this.darkModeGridColor;
             } else {
-                this.gridCtx.strokeStyle = this.lightModeGridColor;
+                this.ctx.strokeStyle = this.lightModeGridColor;
             }
 
             for (let ii = 1; ii <= Math.max(this.diagram.layeredGrid.width, this.diagram.layeredGrid.height); ii++) {
                 if(ii <= this.diagram.layeredGrid.width) {
-                    this.gridCtx.beginPath();
-                    this.gridCtx.moveTo(ii * this.cellWidth, this.cellHeight);
-                    this.gridCtx.lineTo(ii * this.cellWidth, this.gridCanvas.height - this.cellHeight);
-                    this.gridCtx.stroke();
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(ii * this.cellWidth, this.cellHeight);
+                    this.ctx.lineTo(ii * this.cellWidth, this.canvasHeight - this.cellHeight);
+                    this.ctx.stroke();
                 }
                 if(ii <= this.diagram.layeredGrid.height) {
-                    this.gridCtx.beginPath();
-                    this.gridCtx.moveTo(this.cellWidth, ii * this.cellHeight);
-                    this.gridCtx.lineTo(this.canvasWidth - this.cellWidth, ii * this.cellHeight);
-                    this.gridCtx.stroke();
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(this.cellWidth, ii * this.cellHeight);
+                    this.ctx.lineTo(this.canvasWidth - this.cellWidth, ii * this.cellHeight);
+                    this.ctx.stroke();
                 }
             }
         }
@@ -996,7 +978,7 @@
                 return color;
             }
         }
-        
+
         // Draw the outer border of the canvas.
         drawBorder() {
             if(this.diagram.controller.eraseMode) {
@@ -1005,7 +987,7 @@
                 this.ctx.strokeStyle = this.getColor(this.diagram.controller.cursorIndex);
             }
             this.ctx.lineWidth = this.cellWidth;
-            this.ctx.strokeRect(this.cellWidth / 2, this.cellWidth / 2, this.canvasWidth - this.cellWidth, this.canvas.height - this.cellWidth);
+            this.ctx.strokeRect(this.cellWidth / 2, this.cellWidth / 2, this.canvasWidth - this.cellWidth, this.canvasHeight - this.cellWidth);
 
             // Draw a thick border on the edge of the border drawn above.
             this.ctx.lineWidth = this.cellWidth / 4;
@@ -1035,33 +1017,22 @@
 
         // Resize the canvas to the largest square that fits in the window.
         resizeCanvas() {
-            if(window.innerWidth > window.innerHeight &&
-                Math.min(window.innerHeight, window.innerWidth) * 0.95 + 300 > window.innerWidth) {
-                if(!document.body.classList.contains('no-controls')) {
-                    document.body.classList.add('no-controls');
-                }
-            } else if(document.body.classList.contains('no-controls')) {
-                document.body.classList.remove('no-controls');
+            this.canvasWidth  = this.canvas.clientWidth;
+            this.canvasHeight = this.canvas.clientHeight;
+
+            if(this.canvas.width !== this.canvasWidth) {
+                this.canvas.width = this.canvasWidth;
             }
-
-            let containerWidth = document.getElementById('canvas-wrapper').clientWidth;
-            let containerHeight = document.getElementById('canvas-wrapper').clientHeight;
-            let containerSize = Math.min(containerWidth, containerHeight);
-           
-            this.canvas.width = containerSize;
-            this.canvas.height = containerSize;
-            this.canvas.style.width = containerSize + 'px';
-            this.canvas.style.width = containerSize + 'px';
-            this.canvasWidth = containerSize;
-            this.canvasHeight = containerSize;
-
-            this.drawGrid();
+            if(this.canvas.height !== this.canvasHeight) {
+                this.canvas.height = this.canvasHeight;
+            }
         }
 
         decorateContact(x, y) {
             x = x + 1;
             y = y + 1;
-            this.ctx.fillStyle = "#000000";
+            this.ctx.strokeStyle = "rgba(0, 0, 0, 1)";
+            this.ctx.lineWidth = 1;
             this.ctx.beginPath();
             this.ctx.moveTo(x * this.cellWidth + this.cellWidth + 1, y * this.cellHeight - 1);
             this.ctx.lineTo(x * this.cellWidth, y * this.cellHeight + this.cellHeight + 1);
@@ -1095,7 +1066,7 @@
             isCurrentCol  = ii === currentCell.x;
             isCurrentRow  = jj === currentCell.y;
             isCurrentCell = isCurrentCol && isCurrentRow;
-            
+
             if(this.diagram.controller.dragging || this.diagram.controller.placeTermMode) {
                 hoverCell = (isCurrentRow || isCurrentCol);
             } else {
@@ -1119,7 +1090,7 @@
 
             this.setCellHighlight(this.ctx, ii, jj);
         }
-            
+
         setCellHighlight(ctx, x, y) {
             if(this.highlightNets && this.netHighlightGrid[x] && this.netHighlightGrid[x][y]) {
                 let baseColor = this.getColor(LayeredGrid.DELETE, false).slice(0, -4);
@@ -1164,18 +1135,19 @@
 
         // Initialize everything
         refreshCanvas(printOnly = false) {
-            let tempDarkMode = this.darkMode;
             let tempFlatMode = this.useFlatColors;
 
-            if(printOnly) {
-                this.darkMode = false;
-                this.useFlatColors = true;
-            }
-
+            // Clear the grid canvas.
+            this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
             this.resizeCanvas();
 
-            let currentCell = printOnly ? {} : this.diagram.controller.getCellAtCursor();
+            if(printOnly) {
+                this.useFlatColors = true;
+            } else {
+                this.drawGrid();
+            }
 
+            let currentCell = printOnly ? {} : this.diagram.controller.getCellAtCursor();
             if(currentCell.contact) {
                 document.getElementById("CONTACT").style.backgroundColor = this.getColor(LayeredGrid.CONTACT, true);
             } else {
@@ -1207,7 +1179,7 @@
             } else {
                 document.getElementById("DIFF").style.backgroundColor = "transparent";
             }
-            
+
             // Draw each layer in order.
             let bounds = {
                 left: 0,
@@ -1234,12 +1206,11 @@
             if(!printOnly) this.drawBorder();
             this.drawLabels();
 
-            document.getElementById("num-rows").innerHTML = this.diagram.layeredGrid.height;
-            document.getElementById("num-cols").innerHTML = this.diagram.layeredGrid.width;
+            document.querySelector('#num-rows').innerHTML = this.diagram.layeredGrid.height;
+            document.querySelector('#num-cols').innerHTML = this.diagram.layeredGrid.width;
 
             if(printOnly) {
                 document.querySelector("#print-canvas").src = this.canvas.toDataURL();
-                this.darkMode = tempDarkMode;
                 this.useFlatColors = tempFlatMode;
                 this.refreshCanvas();
             }
@@ -1247,7 +1218,7 @@
     }
 
     class Diagram {
-        constructor(mainCanvas, gridCanvas) {
+        constructor(mainCanvas) {
             this.DIRECT_PATH         = { indeterminate: false, hasPath: true,  direct: true,  label: "1", }; // Originally [true]
             this.VIRTUAL_PATH        = { indeterminate: true,  hasPath: true,  direct: false, label: "v", }; // Originally ["i"]
             this.VIRTUAL_PATH_ONLY   = { indeterminate: false, hasPath: true,  direct: false, label: "I", }; // Originally ["I"]
@@ -1261,8 +1232,8 @@
 
             this.nmosPullup = this.pmosPulldown = false;
             this.maxTerminals = 8;
-            
-            this.view = new DiagramView(this, mainCanvas, gridCanvas);
+
+            this.view = new DiagramView(this, mainCanvas);
             this.controller = new DiagramController(this, this.view, mainCanvas);
         }
 
@@ -1283,7 +1254,7 @@
                 code.push(terminal.x);
                 code.push(terminal.y);
             });
-            
+
             // Cells
             for(let lyr = 0; lyr < this.layeredGrid.layers - 1; lyr++) {
                 for(let col = 0; col < this.layeredGrid.width; col++) {
@@ -1489,7 +1460,7 @@
                 this.syncEdges(this.nodeNodeMap.length - ii - 1, node2, node1, setPath);
             }
         }
-        
+
         isRailNode(node) {
             return node === this.gndNode || node === this.vddNode;
         }
@@ -1498,7 +1469,7 @@
             this.nodeNodeMap[mapNode1Index][mapNode2Index] = mapping;
             this.nodeNodeMap[mapNode2Index][mapNode1Index] = mapping;
         }
-        
+
         updateVirtualPath(compareNodeMapping, nodeToMap, remapNode, setPath) {
             if(compareNodeMapping === this.DIRECT_PATH) {
                 if(setPath === this.DIRECT_PATH) {
@@ -1515,20 +1486,20 @@
                 this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.VIRTUAL_PATH_ONLY);
             }
         }
-        
+
         updateNoPath(compareNode, nodeToMap, remapNode, setPath) {
             let compareNodeMapping = this.nodeNodeMap[nodeToMap][this.graph.getIndexByNode(compareNode)];
             let mapFromRail = this.isRailNode(compareNode);
-            
+
             if(!mapFromRail && setPath === this.DIRECT_PATH && compareNodeMapping.direct === false) {
                 this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.VIRTUAL_PATH_ONLY);
             }
         }
-        
+
         updateUndefinedPath(compareNode, nodeToMap, remapNode, setPath) {
             let compareNodeMapping = this.nodeNodeMap[nodeToMap][this.graph.getIndexByNode(compareNode)];
             let mapFromRail = this.isRailNode(compareNode);
-            
+
             if(setPath === this.DIRECT_PATH) {
                 if(compareNodeMapping.direct) {
                     this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), compareNodeMapping);
@@ -1559,7 +1530,7 @@
             // Get the existing mappings between the remapped nodes and node ii.
             let compareNodeMapping = this.nodeNodeMap[nodeToMap][this.graph.getIndexByNode(compareNode)];
             let remapNodeMapping = this.nodeNodeMap[nodeToMap][this.graph.getIndexByNode(remapNode)];
-            
+
             // Case 0: Insufficient information to remap nodes.
             if(compareNodeMapping.hasPath === undefined || setPath.hasPath === undefined) {
                 return;
@@ -1597,7 +1568,7 @@
             /*jslint bitwise: true */
             evalInput = !!((inputVals >> inputNum) & 1);
             /*jslint bitwise: false */
-            
+
             return evalInput ? this.vddNode : this.gndNode;
         }
 
@@ -1656,7 +1627,7 @@
 
             // Assume the path is resolvable to begin.
             this.overdrivenPath = false;
-            
+
             // First, see if any of the adjacent nodes that are not currently null-mapped
             // (i.e., not under investigation) have a path to targetNode.
             nodeTerm1 = node.getTerm1Node();
@@ -1664,9 +1635,9 @@
 
             this.mapNodes(node, nodeTerm1, this.DIRECT_PATH);
             this.mapNodes(node, nodeTerm2, this.DIRECT_PATH);
-                          
+
             targetNodeReachable = this.recurseThroughEdges(node, targetNode, inputVals).hasPath;
-        
+
             od = this.overdrivenPath;
             this.overdrivenPath = false;
 
@@ -1689,7 +1660,7 @@
                     this.recurseThroughEdges(node, this.vddNode, inputVals);
                     this.recurseThroughEdges(nodeTerm1, targetNode, inputVals);
                     this.recurseThroughEdges(nodeTerm2, targetNode, inputVals);
-                    
+
                     od = od || this.overdrivenPath || 
                          !allPathsOk(nodeTerm1, nodeTerm2, this.gndNode, gndPathExistsActivated) ||
                          !allPathsOk(nodeTerm1, nodeTerm2, this.vddNode, vddPathExistsActivated);
@@ -1710,7 +1681,7 @@
             node.edges.some(function(edge) {
                 let otherNode = edge.getOtherNode(node);
                 let mapping = this.getMapping(otherNode, targetNode);
-              
+
                   if(!mapping.direct && (otherNode === this.vddNode || otherNode === this.gndNode)) {
                   return false;
                 }
@@ -1723,7 +1694,7 @@
                     return pathFound = mapping;
                     /*jshint +W093 */
                 }
-                
+
                 // Recursive case: We do not yet know if there is a path from otherNode.
                 if(mapping === this.UNCHECKED) {
                     mapping = this.computeOutputRecursive(otherNode, targetNode, inputVals);
@@ -1858,7 +1829,7 @@
                 gateNet.containsNode(this.vddNode) && gateNet.containsNode(this.gndNode);
 
             evalInput = (evalInput || gateNet.containsNode(this.vddNode)) && !gateNet.containsNode(this.gndNode);
-            
+
             // Pass-through positive for NMOS.
             // Invert for PMOS.
             /*jslint bitwise: true */
@@ -2010,12 +1981,12 @@
                 }
                 /*jslint bitwise: false */
             }
-      
+
             // Compute output
             this.inputNodes.forEach(testPath);
             testPath(this.vddNode);
             testPath(this.gndNode);
-      
+
             // If there are no overdriven paths,
             // proceed to map out every path to the output.
             // We can ignore overdriven paths here because
@@ -2366,11 +2337,11 @@
             }
             return null;
         }
-       
+
         // Helper function to set the terminals of transistors.
         setTerminals(transistor, x, y, layer) {
             let cell = this.layeredGrid.get(x, y, layer);
-            
+
             if (!!cell && cell.isSet) {
                 if(this.layeredGrid.get(x, y, LayeredGrid.POLY).isSet) {
                     // If the foolish user set a wide poly, then skip this cell and move on.
@@ -2564,7 +2535,7 @@
 
             this.addListeners();
             this.setUpControls();
-        
+
             // Set to dark mode if it is night time
             this.setDarkMode(new Date().getHours() > 19 || new Date().getHours() < 7);
             this.populateTermSelect();
@@ -2582,11 +2553,11 @@
             if(!document.getElementById("main-menu").classList.contains("closed")) {
                 return;
             }
-            
+
             let isInput  = function(keyCode) {
                 return (keyCode >= 65) && (keyCode < 65 + this.diagram.inputs.length);
             }.bind(this);
-            
+
             let isOutput = function(keyCode) {
                 return (keyCode <= 89) && (keyCode > 89 - this.diagram.outputs.length);
             }.bind(this);
@@ -2905,7 +2876,7 @@
                     }
                 }.bind(this),
             };
-            
+
             // SHIFT + T
             this.themeCommand = {
                 shiftModifier: true,
@@ -2917,22 +2888,26 @@
                 }.bind(this),
             };
 
-            // SHIFT + T
-            this.themeCommand = {
+            // CTRL + P
+            this.printCommand = {
                 ctrlModifier: true,
                 keyCode: 80,
                 action:  function(e) {
                     e.preventDefault();
+                    let tempDarkMode = this.diagramView.darkMode;
+                    this.setDarkMode(false);
                     this.diagramView.refreshCanvas(true);
                     this.refreshTruthTable();
                     document.querySelector('#print-table').innerHTML = document.querySelector('#truth-table').innerHTML;
                     window.print();
+                    this.setDarkMode(tempDarkMode);
                 }.bind(this),
             };
 
             this.allCommands.push(this.darkModeCommand);
             this.allCommands.push(this.transparencyCommand);
             this.allCommands.push(this.themeCommand);
+            this.allCommands.push(this.printCommand);
         }
 
         changeTheme() {
@@ -2990,7 +2965,7 @@
             if(this.diagramController.pixelIsInBounds()) {
                 event.preventDefault();
             }
-         
+
             if (this.diagramController.isPrimaryInput(event) || event.button === 2) {
                 if(this.diagramController.isPrimaryInput(event) && this.diagramController.placeTermMode) {
                     this.diagramController.placeTerminal(event, this.diagramController.selectedTerminal);
@@ -3229,11 +3204,11 @@
             window.addEventListener("keydown", function(e) {
                 this.keydownHandler(e);
             }.bind(this));
-            
+
             window.addEventListener("keyup", function(e) {
                 this.keyupHandler(e);
             }.bind(this));
-            
+
             window.addEventListener("contextmenu", function(e) {
                 if (e.button === 2 && this.document.getElementById("main-menu").classList.contains("closed")) {
                     // Don't show a context menu.
@@ -3486,6 +3461,17 @@
                 return;
             }
 
+            let colgroup = document.createElement("COLGROUP");
+            let col = document.createElement("COL");
+            col.span = this.diagram.inputs.length;
+            col.classList.add("input-vals");
+            colgroup.appendChild(col);
+            col = document.createElement("COL");
+            col.span = this.diagram.outputs.length;
+            col.classList.add("output-vals");
+            colgroup.appendChild(col);
+            tableElement.appendChild(colgroup)
+
             let header = tableElement.createTHead();
             let headerRow = header.insertRow(0);
             headerRow.className = "header";
@@ -3493,7 +3479,6 @@
             table[0].forEach(function (element, index) {
                 let cell = headerRow.insertCell(index);
                 cell.innerHTML = element;
-                cell.className = index < this.diagram.inputs.length ? "input" : "output";
             }.bind(this));
 
             // Create the rest of the table.
@@ -3507,12 +3492,8 @@
                     let tCell = tRow.insertCell(colIndex);
                     tCell.innerHTML = cell;
 
-                    // Set the cell class depending on whether this is
-                    // an input or output cell.
-                    if(colIndex < this.diagram.inputs.length) {
-                        tCell.className = "input";
-                    } else {
-                        tCell.className = "output";
+                    // Make output cells clickable to highlight paths.
+                    if(colIndex >= this.diagram.inputs.length) {
                         tCell.onclick   = (function (rowIndex, colIndex) {
                             return (function() {
                                 let path, outputNum, outputNodeIndex;
@@ -3526,9 +3507,9 @@
                     }
                 }.bind(this));
             }.bind(this));
-            
+
             if (this.diagram.nmosPullup || this.diagram.pmosPulldown) {
-            this.pullWarningToast.show();
+                this.pullWarningToast.show();
             }
 
             if(!suppressSetNets) {
@@ -3552,16 +3533,13 @@
             this.diagramView.darkMode = !this.diagramView.darkMode;
 
             if (this.diagramView.darkMode) {
-                document.body.classList.add('dark');
-                document.body.classList.remove('light');
-                document.getElementById('dark-mode-btn').classList.remove('fas');
-                document.getElementById('dark-mode-btn').classList.add('far');
+                document.querySelector('html').setAttribute('data-bs-theme', 'dark');
             } else {
-                document.body.classList.add('light');
-                document.body.classList.remove('dark');
-                document.getElementById('dark-mode-btn').classList.remove('far');
-                document.getElementById('dark-mode-btn').classList.add('fas');
+                document.querySelector('html').setAttribute('data-bs-theme', 'light');
             }
+
+            document.querySelector('#dark-mode-btn').classList.toggle('fas');
+            document.querySelector('#dark-mode-btn').classList.toggle('far');
         }
 
         setUpLayerSelector() {
@@ -3587,7 +3565,7 @@
                 }
 
                 // Color with flat color (rgb, not rgba).
-                element.style.color = this.diagramView.getColor(colorIndex);
+                element.style.color = this.diagramView.getColor(colorIndex, true);
             }.bind(this));
         }
 
@@ -3651,7 +3629,7 @@
                 termSelectList.appendChild(termSelectItemLabel);
             }
         }
-        
+
         refreshScreen() {
             this.diagramView.refreshCanvas();
 
@@ -3667,7 +3645,7 @@
         // Clear local storage
         localStorage.clear();
         let diagram = new Diagram(document.getElementById("canvas"), document.getElementById("grid-canvas"));
-        
+
         // Set up the UI object.
         let UI = new UserInterface(diagram);
 
