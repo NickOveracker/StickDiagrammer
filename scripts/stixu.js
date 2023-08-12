@@ -916,10 +916,16 @@
 
         constructor(diagram, mainCanvas) {
             this.diagram = diagram;
+
             this.canvas = mainCanvas;
+            this.canvasWidth  = this.canvas.clientWidth;
+            this.canvasHeight = this.canvas.clientHeight;
+            this.canvas.width = this.canvasWidth;
+            this.canvas.height = this.canvasHeight;
             this.ctx = this.canvas.getContext("2d");
             this.cellWidth  = this.canvasWidth  / (this.diagram.layeredGrid.width  + 2);
             this.cellHeight = this.canvasHeight / (this.diagram.layeredGrid.height + 2);
+
             this.useFlatColors = false;
             this.trailCursor = false;
             this.highlightNets = false;
@@ -928,6 +934,11 @@
             this.darkMode = false;
             this.darkModeGridColor  = '#cccccc';
             this.lightModeGridColor = '#999999';
+        }
+
+        hasResized() {
+            return this.canvas.clientWidth  !== this.canvasWidth ||
+                   this.canvas.clientHeight !== this.canvasHeight;
         }
 
         getCellHoverColor() {
@@ -2497,6 +2508,7 @@
             this.diagramController = diagram.controller;
             this.diagramView       = diagram.view;
             this.diagramGrid       = diagram.layeredGrid;
+            this.update            = true;
 
             // Order matters
             // Lower-indexed menus are displayed at the same level as or over higher-indexed menus.
@@ -2549,6 +2561,23 @@
 
         }
 
+        shouldUpdate() {
+            let resized = false;
+
+            resized = this.diagramView.hasResized();
+
+            // Copy & clear the flag since this only checks for updates since the last call.
+            let _update = this.update;
+            this.update = false;
+
+            return _update || resized;
+        }
+
+        updateUI(fn, evt) {
+            fn(evt);
+            this.update = true;
+        }
+
         keydownHandler(event) {
             if(!document.getElementById("main-menu").classList.contains("closed")) {
                 return;
@@ -2565,19 +2594,21 @@
 
             if (event.shiftKey && this.shiftCommands[event.keyCode]) {
                 event.preventDefault();
-                this.shiftCommands[event.keyCode](event);
+                this.updateUI(this.shiftCommands[event.keyCode], event);
             }
-            else if (event.ctrlKey && this.ctrlCommands[event.keyCode])           {
+            else if (event.ctrlKey && this.ctrlCommands[event.keyCode]) {
                 event.preventDefault();
-                this.ctrlCommands[event.keyCode](event);
+                this.updateUI(this.ctrlCommands[event.keyCode], event);
             }
             else if (isInput(event.keyCode))  {
                 event.preventDefault();
                 this.diagramController.placeTerminal(event, this.diagram.inputs[event.keyCode - 65]);
+                this.update = true;
             }
             else if (isOutput(event.keyCode)) {
                 event.preventDefault();
                 this.diagramController.placeTerminal(event, this.diagram.outputs[this.diagram.outputs.length - 90 + event.keyCode]);
+                this.update = true;
             }
         }
 
@@ -2587,17 +2618,17 @@
                 // Only do the following if ctrl is pressed.
                 if (event.ctrlKey && this.ctrlCommands[event.keyCode]) {
                     // Run the registered shift command.
-                    this.ctrlCommands[event.keyCode](event);
+                    this.updateUI(this.ctrlCommands[event.keyCode], event);
                 }
                 // Only do the following if shift is pressed.
                 else if (event.shiftKey && this.shiftCommands[event.keyCode]) {
                     // Run the registered shift command.
-                    this.shiftCommands[event.keyCode](event);
+                    this.updateUI(this.shiftCommands[event.keyCode], event);
                 }
             }
 
             if (!event.shiftKey && !event.ctrlKey && this.noModifierCommands[event.keyCode]) {
-                this.noModifierCommands[event.keyCode](event);
+                this.updateUI(this.noModifierCommands[event.keyCode], event);
             }
         }
 
@@ -2914,11 +2945,13 @@
             this.diagramView.theme = this.diagramView.theme < DiagramView.themes.length - 1 ? this.diagramView.theme + 1 : 0;
             document.getElementById('palette-setting').innerHTML = DiagramView.themes[this.diagramView.theme];
             this.setUpLayerSelector();
+            this.update = true;
         }
 
         toggleTransparency() {
             this.diagramView.useFlatColors = !this.diagramView.useFlatColors;
             document.getElementById('transparency-setting').innerHTML = this.diagramView.useFlatColors ? "OFF" : "ON";
+            this.update = true;
         }
 
         cellClickHandler(event) {
@@ -2953,6 +2986,7 @@
 
             if(changed) {
                 document.getElementById("truth-table").innerHTML = "";
+                this.update = true;
             }
         }
 
@@ -2988,6 +3022,7 @@
                 this.diagramController.currentX = this.diagramController.currentY = -1;
             }
 
+            this.update = true;
         }
 
         // Show a preview line when the user is dragging the mouse.
@@ -3014,6 +3049,8 @@
                     this.drag(event);
                 }
             }
+
+            this.update = true;
         }
 
         dragPrimary(bounds) {
@@ -3035,6 +3072,8 @@
                     this.diagramGrid.set(x, y, layer);
                 }.bind(this), true);
             }
+
+            this.update = true;
         }
 
         dragSecondary(bounds) {
@@ -3044,6 +3083,8 @@
             this.diagramGrid.map(bounds, function (x, y, layer) {
                 this.diagramGrid.set(x, y, layer);
             }.bind(this), true);
+
+            this.update = true;
         }
 
         drag(event) {
@@ -3106,6 +3147,8 @@
             } else {
                 this.dragSecondary(bounds);
             }
+
+            this.update = true;
         }
 
         endDrag(event) {
@@ -3139,6 +3182,8 @@
                     this.diagramGrid.clear(x, y, layer);
                 }.bind(this));
             }
+
+            this.update = true;
         }
 
         // Note the grid coordinates when the left mouse button is pressed.
@@ -3160,6 +3205,8 @@
                     controller.startY = -1;
                 }
             }
+
+            this.update = true;
         }
 
         addListeners() {
@@ -3231,7 +3278,7 @@
                     let newWidth = byRow ? this.diagramGrid.width            : this.diagramGrid.width + offset;
                     let newHeight = byRow ? this.diagramGrid.height + offset : this.diagramGrid.height;
                     this.diagramGrid.resize(newWidth, newHeight);
-                    this.diagramView.drawGrid();
+                    this.update = true;
                 }.bind(this);
             }.bind(this);
 
@@ -3239,6 +3286,7 @@
                 return function() {
                     let offset = positive ? 1 : -1;
                     this.diagramGrid.shift(0, byRow, offset);
+                    this.update = true;
                 }.bind(this);
             }.bind(this);
 
@@ -3284,13 +3332,35 @@
                     paintModeButton.classList.remove('fa-eraser');
                     paintModeButton.classList.add('fa-paint-brush');
                 }
+
+                this.update = true;
             }.bind(this);
 
-            document.getElementById("dark-mode-btn").onclick = this.toggleDarkMode.bind(this);
-            document.getElementById("undo-btn").onclick = this.diagramController.undo.bind(this.diagramController);
-            document.getElementById("redo-btn").onclick = this.diagramController.redo.bind(this.diagramController);
-            document.getElementById('select-palette-btn').onclick = this.changeTheme.bind(this);
-            document.getElementById('toggle-transparency-btn').onclick = this.toggleTransparency.bind(this);
+            document.getElementById("dark-mode-btn").onclick = function() {
+                this.toggleDarkMode();
+                this.update = true;
+            }.bind(this);
+
+            document.getElementById("undo-btn").onclick = function() {
+                this.diagramController.undo();
+                this.update = true;
+            }.bind(this);
+
+            document.getElementById("redo-btn").onclick = function() {
+                this.diagramController.redo();
+                this.update = true;
+            }.bind(this);
+
+            document.getElementById('select-palette-btn').onclick = function() {
+                this.changeTheme();
+                this.update = true;
+            }.bind(this);
+
+            document.getElementById('toggle-transparency-btn').onclick = function() {
+                this.toggleTransparency();
+                this.update = true;
+            }.bind(this);
+
 
             document.getElementById("place-term-btn").onclick = function() {
                 let placeTermButton = document.getElementById("place-term-btn");
@@ -3308,26 +3378,36 @@
                 term = parseInt(term.value);
                 this.setPlaceTerminalMode(term);
                 placeTermButton.classList.add("active");
+
+                this.update = true;
             }.bind(this);
 
             document.getElementById('add-input-btn').onclick = function() {
                 this.diagramController.addTerminal(false);
                 this.populateTermSelect();
+
+                this.update = true;
             }.bind(this);
 
             document.getElementById('remove-input-btn').onclick = function() {
                 this.diagramController.removeTerminal(false);
                 this.populateTermSelect();
+
+                this.update = true;
             }.bind(this);
 
             document.getElementById('add-output-btn').onclick = function() {
                 this.diagramController.addTerminal(true);
                 this.populateTermSelect();
+
+                this.update = true;
             }.bind(this);
 
             document.getElementById('remove-output-btn').onclick = function() {
                 this.diagramController.removeTerminal(true);
                 this.populateTermSelect();
+
+                this.update = true;
             }.bind(this);
 
             document.getElementById('tutorial-btn-0').onclick = function() {
@@ -3336,6 +3416,8 @@
                     this.tutorial = window.tutorials[0].get(this, LayeredGrid);
                     this.tutorial.start();
                 }
+
+                this.update = true;
             }.bind(this);
 
             this.setUpLayerSelector();
@@ -3375,15 +3457,6 @@
                 return document.getElementById("close-" + menuName + "-btn").onclick();
             });
         }
-
-        /*
-        // Not needed now but maybe someday
-        menuIsOpen() {
-            return this.menus.some(function(menuName) {
-                return !document.getElementById(menuName).classList.contains("closed");
-            });
-        }
-        */
 
         closeAllMenus() {
             this.menus.forEach(function(menuName) {
@@ -3522,6 +3595,8 @@
                 this.diagramView.darkMode = true;
                 this.toggleDarkMode();
             }
+
+            this.update = true;
         }
 
         toggleDarkMode() {
@@ -3535,6 +3610,8 @@
 
             document.querySelector('#dark-mode-btn').classList.toggle('fas');
             document.querySelector('#dark-mode-btn').classList.toggle('far');
+
+            this.update = true;
         }
 
         setUpLayerSelector() {
@@ -3584,6 +3661,8 @@
             else {
                 this.diagramController.eraseMode = !this.diagramController.eraseMode;
             }
+
+            this.update = true;
         }
 
         isEraseEvent(event) {
@@ -3626,7 +3705,9 @@
         }
 
         refreshScreen() {
-            this.diagramView.refreshCanvas();
+            if(this.shouldUpdate() || this.diagramView.highlightNets) {
+                this.diagramView.refreshCanvas();
+            }
 
             if(this.tutorial && this.tutorial.active) {
                 this.tutorial.step();

@@ -7,7 +7,7 @@
  * For uses not permitted under the license, please contact: nick.overacker@okstate.edu
  *********************************************************************************************************************/
 
-@import "../../.bootstrap/bootstrap";
+@import "../../.bootstrap/scss/bootstrap";
 @import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@600&display=swap');
 /*
 @import "../../.bootstrap/functions";
@@ -23,9 +23,11 @@
 @import "../../.bootstrap/utilities/api";
 */
 
+/*
 *:not(i) {
-	//border: 1px solid gold;
+	border: 1px solid gold;
 }
+*/
 
 i {
 	box-sizing: content-box;
@@ -284,9 +286,11 @@ body {
 	}
 }
 
+/*
 .fa-times {
 	//color: #FFFFFF;
 }
+*/
 
 .controls {
 	.color-change {
