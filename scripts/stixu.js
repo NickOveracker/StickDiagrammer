@@ -925,6 +925,7 @@
             this.ctx = this.canvas.getContext("2d");
             this.cellWidth  = this.canvasWidth  / (this.diagram.layeredGrid.width  + 2);
             this.cellHeight = this.canvasHeight / (this.diagram.layeredGrid.height + 2);
+            this.resizeTimeout = true;
 
             this.useFlatColors = false;
             this.trailCursor = false;
@@ -937,8 +938,16 @@
         }
 
         hasResized() {
-            return this.canvas.clientWidth  !== this.canvasWidth ||
-                   this.canvas.clientHeight !== this.canvasHeight;
+            if(this.resizeTimeout) {
+                this.resizeTimeout = false;
+
+                setTimeout((() => this.resizeTimeout = false).bind(this), 5);
+
+                return this.canvas.clientWidth  !== this.canvasWidth ||
+                    this.canvas.clientHeight !== this.canvasHeight;
+            }
+
+            return false;
         }
 
         getCellHoverColor() {
