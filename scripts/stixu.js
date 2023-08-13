@@ -275,6 +275,12 @@
             }.bind(this));
             this.moveWithinBounds(this.diagram.vddCell, newBounds);
             this.moveWithinBounds(this.diagram.gndCell, newBounds);
+
+            // Update CSS variables
+            const r = document.querySelector(':root');
+            // Include +2 for the border
+            r.style.setProperty('--num-cols', width + 2);
+            r.style.setProperty('--num-rows', height + 2);
         }
 
         insertRemoveRowColAt(rowColIndex, isInsert, isRow) {
@@ -932,9 +938,8 @@
             this.highlightNets = false;
             this.netHighlightGrid = [];
             this.theme = 0;
-            this.darkMode = false;
-            this.darkModeGridColor  = '#cccccc';
-            this.lightModeGridColor = '#999999';
+            this.darkModeGridColor  = '#a1a1aa';
+            this.lightModeGridColor = '#71717a';
         }
 
         hasResized() {
@@ -951,7 +956,11 @@
         }
 
         getCellHoverColor() {
-            return this.darkMode ? "rgba(255, 255, 255, 0.3)" : "rgba(0, 0, 0, 0.3)";
+            if(document.documentElement.classList.contains('dark')) {
+                return "rgba(255, 255, 255, 0.3)";
+            } else {
+                return "rgba(0, 0, 0, 0.3)";
+            }
         }
 
         // Draw a faint grid on the canvas.
@@ -963,7 +972,7 @@
 
             // Set stroke color depending on whether the dark mode is on or off.
             // Should be faintly visible in both modes.
-            if(this.darkMode) {
+            if(document.documentElement.classList.contains('dark')) {
                 this.ctx.strokeStyle = this.darkModeGridColor;
             } else {
                 this.ctx.strokeStyle = this.lightModeGridColor;
@@ -1001,6 +1010,8 @@
 
         // Draw the outer border of the canvas.
         drawBorder() {
+            let darkMode = document.documentElement.classList.contains('dark');
+
             if(this.diagram.controller.eraseMode) {
                 this.ctx.strokeStyle = this.getColor(LayeredGrid.DELETE);
             } else {
@@ -1011,7 +1022,7 @@
 
             // Draw a thick border on the edge of the border drawn above.
             this.ctx.lineWidth = this.cellWidth / 4;
-            this.ctx.strokeStyle = this.darkMode ? "#ffffff" : "#000000";
+            this.ctx.strokeStyle = darkMode ? '#fafafa' : '#09090b';
             this.ctx.strokeRect(1 + this.cellWidth - this.ctx.lineWidth / 2,
                 1 + this.cellHeight - this.ctx.lineWidth / 2,
                 this.canvasWidth - 2 * this.cellWidth + this.ctx.lineWidth / 2,
@@ -1019,12 +1030,12 @@
             );
 
             // For the middle 11 cells of the upper border, fill with the grid color.
-            this.ctx.fillStyle = this.darkMode ? "#ffffff" : "#000000";
+            this.ctx.fillStyle = darkMode ? '#fafafa' : '#09090b';
             let startCell = Math.floor(this.diagram.layeredGrid.width / 2) - 4;
             this.ctx.fillRect(startCell * this.cellWidth, 0, this.cellWidth * 11, this.cellHeight);
 
             // Write the cursor color name in the middle of the upper border of the canvas.
-            this.ctx.fillStyle = this.darkMode ? '#000000' : '#ffffff';
+            this.ctx.fillStyle = darkMode ? '#09090b' : '#fafafa';
             this.ctx.font = Math.floor(this.cellHeight) + 'px Arial';
             this.ctx.textAlign = 'center';
 
@@ -1051,7 +1062,7 @@
         decorateContact(x, y) {
             x = x + 1;
             y = y + 1;
-            this.ctx.strokeStyle = "rgba(0, 0, 0, 1)";
+            this.ctx.strokeStyle = '#09090b';
             this.ctx.lineWidth = 1;
             this.ctx.beginPath();
             this.ctx.moveTo(x * this.cellWidth + this.cellWidth + 1, y * this.cellHeight - 1);
@@ -1067,7 +1078,7 @@
             // Draw labels on the canvas above each input and output.
             this.ctx.font = "bold " + Math.floor(this.cellHeight) + "px Arial";
             this.ctx.textAlign = 'center';
-            this.ctx.fillStyle = this.darkMode ? "#ffffff" : "#000000";
+            this.ctx.fillStyle = document.documentElement.classList.contains('dark') ? '#fafafa' : '#09090b';
 
             // Draw labels for all terminals.
             this.diagram.getTerminals().forEach(((terminal, index) => {
@@ -2557,11 +2568,16 @@
             this.addListeners();
             this.setUpControls();
 
-            // Set to dark mode if it is night time
-            this.setDarkMode(new Date().getHours() > 19 || new Date().getHours() < 7);
-            this.populateTermSelect();
+            // On page load or when changing themes, best to add inline in `head` to avoid FOUC
+            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark')
+                this.setDarkMode(true);
+            } else {
+                document.documentElement.classList.remove('dark')
+                this.setDarkMode(false);
+            }
 
-            this.pullWarningToast = new bootstrap.Toast(document.querySelector("#pullWarningToast"), {delay: 10000});
+            this.populateTermSelect();
 
             if(window.runTestbench) {
                 // Must initialize the canvas before the testbench runs.
@@ -2934,7 +2950,7 @@
                 keyCode: 80,
                 action:  function(e) {
                     e.preventDefault();
-                    let tempDarkMode = this.diagramView.darkMode;
+                    let tempDarkMode = document.documentElement.classList.contains('dark');
                     this.setDarkMode(false);
                     this.diagramView.refreshCanvas(true);
                     this.refreshTruthTable();
@@ -3590,42 +3606,61 @@
             }.bind(this));
 
             if (this.diagram.nmosPullup || this.diagram.pmosPulldown) {
-                this.pullWarningToast.show();
+                this.callback = this.callback || this.dismissWarning.bind(this);
+
+                document.querySelector("#pull-warning").classList.remove('hidden');
+                document.body.addEventListener("keydown",   this.callback);
+                document.body.addEventListener("mousedown", this.callback);
+                document.body.addEventListener("keyup",     this.callback);
+                document.body.addEventListener("mouseup",   this.callback);
+            }
+        }
+
+        dismissWarning(event) {
+            event.stopPropagation();
+            event.preventDefault();
+
+            if(event.type === 'mouseup' || event.type === 'keyup') {
+                if (event.keyCode && !([13, 27, 32].includes(event.keyCode))) {
+                    return;
+                }
+
+                document.body.removeEventListener('click',     this.callback);
+                document.body.removeEventListener('keyup',     this.callback);
+                document.body.removeEventListener('keydown',   this.callback);
+                document.body.removeEventListener('mousedown', this.callback);
+
+                document.querySelector('#pull-warning').classList.add('hidden');
             }
         }
 
         setDarkMode(setToDark) {
             if (setToDark) {
-                // Set to false so that toggleDarkMode() will set to true.
-                this.diagramView.darkMode = false;
-                this.toggleDarkMode();
+                document.documentElement.classList.add('dark');
             } else {
-                // Set to true so that toggleDarkMode() will set to false.
-                this.diagramView.darkMode = true;
-                this.toggleDarkMode();
+                document.documentElement.classList.remove('dark');
             }
 
             this.update = true;
         }
 
         toggleDarkMode() {
-            this.diagramView.darkMode = !this.diagramView.darkMode;
-
-            if (this.diagramView.darkMode) {
-                document.querySelector('html').setAttribute('data-bs-theme', 'dark');
-            } else {
-                document.querySelector('html').setAttribute('data-bs-theme', 'light');
-            }
-
+            document.documentElement.classList.toggle('dark');
             document.querySelector('#dark-mode-btn').classList.toggle('fas');
             document.querySelector('#dark-mode-btn').classList.toggle('far');
+
+            if(document.documentElement.classList.contains('dark')) {
+                localStorage.theme = 'dark'
+            } else {
+                localStorage.theme = 'light'
+            }
 
             this.update = true;
         }
 
         setUpLayerSelector() {
             // Loop through all layer select buttons.
-            document.querySelectorAll('.color-change i').forEach(function(element, index) {
+            document.querySelectorAll('.palette i').forEach(function(element, index) {
                 let colorIndex = index % (this.diagramGrid.layers - 1);
 
                 // Set up the onclick event if not already set.

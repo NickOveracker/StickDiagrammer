@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+:root {
+  --num-cols: 29;
+  --num-rows: 29;
+  --min-size: 320px;
+}
+
+@layer base {
+  @media only screen and (orientation: landscape) and (min-width: 768px) {
+    .main-container {
+      height: 100svh !important;
+    }
+    .canvas-wrapper {
+      height: min(100dvw * var(--num-rows) / var(--num-cols), 100svh - 6rem);
+      width: min((100svh - 6rem) * var(--num-cols) / var(--num-rows), 100%);
+    }
+  }
+  @media only screen and (orientation: portrait), only screen and (width < 768px) {
+    .canvas-wrapper {
+      height: min(100dvw * var(--num-rows) / var(--num-cols), 100svh - 6rem - 170px);
+      width: min((100svh - 6rem - 170px) * var(--num-cols) / var(--num-rows), 100%);
+    }
+  }
+  body {
+    @apply bg-zinc-100 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50;
+    min-width: var(--min-size);
+    min-height: var(--min-size);
+  }
+  .button-bg {
+    @apply bg-zinc-900 dark:bg-zinc-100 text-zinc-50 dark:text-zinc-950 rounded-full;
+  }
+  .canvas-wrapper {
+    @apply mx-auto;
+    aspect-ratio: var(--num-cols)/var(--num-rows);
+  }
+  .canvas-wrapper .canvas {
+    @apply w-full h-full;
+  }
+  .palette {
+    @apply flex text-center mt-8 mx-1;
+  }
+  .palette .swatch-group {
+    @apply flex-auto;
+  }
+  .palette .swatch-group .swatch {
+    @apply w-full inline-block text-3xl;
+  }
+  .palette .swatch-group .swatch-label {
+    @apply hidden md:landscape:inline-block;
+  }
+  .print-view {
+    @apply hidden print:block text-black text-center;
+    -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+  }
+  .print-view .palette {
+    @apply w-full flex;
+  }
+  .print-view .palette .swatch-group {
+    @apply flex-auto;
+  }
+  .print-view .palette .swatch-group .swatch {
+    @apply mt-2 w-full inline-block;
+  }
+  .print-view .palette .swatch-group .swatch-label {
+    @apply w-full inline-block;
+  }
+  .print-view .canvas-img {
+    @apply break-after-page w-full;
+  }
+  .print-view .logo {
+    @apply fixed bottom-0 right-0;
+  }
+}

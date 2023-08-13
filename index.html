@@ -1,15 +1,13 @@
 <!DOCTYPE html>
 <!-- LICENSE: https://polyformproject.org/licenses/strict/1.0.0/ -->
-<html lang="en" data-bs-theme="dark">
+<html lang="en">
 <head>
 	<title>Stixu Stick Diagrammer</title>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta http-equiv="X-UA-Compatible" content="ie=edge">
-	<!--link href="./styles/stixu.css" rel="stylesheet"-->
-	<link href="./styles/styles.css" rel="stylesheet">
-	<!--script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script-->
-	<script src="./scripts/bootstrap.bundle.js"></script>
+	<!--<link href="./styles/styles.css" rel="stylesheet">-->
+	<link href="./styles/stixu_styles.css" rel="stylesheet">
 	<script src="https://kit.fontawesome.com/039fa42282.js" crossorigin="anonymous"></script>
 	<script defer src="./scripts/stixu.js"></script>
 	<script defer src="./scripts/lzutf8.min.js" id="lzutf8"></script>
@@ -18,86 +16,68 @@
 </head>
 
 <body>
-	<div class="d-none d-print-block print-layout">
-		<div class="color-change">
-			<div class="print-color-label">
-				<span>PDIFF</span><i class="fas fa-circle"></i>
+	<div id="main-container" class="main-container print:hidden w-full h-screen landscape:md:flex landscape:md:flex-col">
+		<header class="w-full h-24 py-4 flex-grow-0 flex-shrink-0">
+			<div aria-label="Stixu logo" class="header-logo bg-center bg-no-repeat bg-contain h-16 bg-[url('../images/logo-light.svg')] dark:bg-[url('../images/logo-dark.svg')] md:landscape:bg-[1rem_center]">
+				<i id="open-main-menu-btn" aria-label="Open menu" class="fas fa-bars float-right p-4 text-[2rem]"></i>
+				<i id="dark-mode-btn" aria-label="Dark mode toggle" class="fas fa-lightbulb portrait:float-left float-right p-4 text-[2rem]"></i>
 			</div>
-			<div class="print-color-label">
-				<span>NDIFF</span><i class="fas fa-circle"></i>
-			</div>
-			<div class="print-color-label">
-				<span>POLY</span><i class="fas fa-circle"></i>
-			</div>
-			<div class="print-color-label">
-				<span>METAL1</span><i class="fas fa-circle"></i>
-			</div>
-			<div class="print-color-label">
-				<span>METAL2</span><i class="fas fa-circle"></i>
-			</div>
-			<div class="print-color-label">
-				<span>CONTACT</span><i class="fas fa-circle"></i>
-			</div>
-		</div>
-		<img class="print-canvas" id="print-canvas">
-		<div class="print-table-container"><table id="print-table"></table></div>
-		<p class="print-logo"><span>Made with </span><img src="./images/logo-light.svg"></p>
-	</div>
-	<div id="main-container" class="container d-print-none">
-		<header class="main-header row text-center">
-			<div aria-label="Stixu logo" class="logo order-1"></div>
-			<div aria-label="Dark mode toggle" class="main-header-btn order-first order-md-2">
-			<i class="fas fa-lightbulb header-button clickable float-start float-md-end bg-secondary" id="dark-mode-btn"></i>
-		</div>
-			<div aria-label="Open menu" class="main-header-btn order-3">
-			<i id="open-main-menu-btn" class="fas fa-bars header-button clickable float-end bg-secondary"></i>
-		</div>
 		</header>
 
-		<section class="row canvas-row">
-			<div class="col-8 col-lg-7 col-xl-6 portrait-full-width">
-				<div class="row canvas-group">
-					<div id="canvas-wrapper" class="col-12 canvas-wrapper">
-						<canvas id="canvas"></canvas>
-					</div>
-			</div>
+		<section class="flex flex-auto portrait:flex-col">
+			<div id="canvas-wrapper" class="canvas-wrapper">
+				<canvas id="canvas" class="canvas"></canvas>
 			</div>
 			<!-- Right-side -->
-			<div class="controls col-4 col-lg-5 col-xl-6 portrait-full-width">
-				<!-- colorBtn -->
-				<div class="row color-change">
-					<i class="col-1 fas fa-circle clickable" id="pdiff-swatch"></i>
-					<i class="col-1 fas fa-circle clickable" id="ndiff-swatch"></i>
-					<i class="col-1 fas fa-circle clickable" id="poly-swatch"></i>
-					<i class="col-1 fas fa-circle clickable" id="metal1-swatch"></i>
-					<i class="col-1 fas fa-circle clickable" id="metal2-swatch"></i>
-					<i class="col-1 fas fa-circle clickable" id="contact-swatch"></i>
+			<div class="portrait:w-full portrait:flex portrait:flex-col gap-8">
+				<div class="palette">
+					<div class="swatch-group">
+						<span class="swatch-label">PDIFF</span>
+						<i class="fas fa-circle swatch"></i>
+					</div>
+					<div class="swatch-group">
+						<span class="swatch-label">NDIFF</span>
+						<i class="fas fa-circle swatch"></i>
+					</div>
+					<div class="swatch-group">
+						<span class="swatch-label">POLY</span>
+						<i class="fas fa-circle swatch"></i>
+					</div>
+					<div class="swatch-group">
+						<span class="swatch-label">METAL1</span>
+						<i class="fas fa-circle swatch"></i>
+					</div>
+					<div class="swatch-group">
+						<span class="swatch-label">METAL2</span>
+						<i class="fas fa-circle swatch"></i>
+					</div>
+					<div class="swatch-group">
+						<span class="swatch-label">CONTACT</span>
+						<i class="fas fa-circle swatch"></i>
+					</div>
 				</div>
-				<!-- colorBtn END -->
 
 				<!-- Edit-section -->
-				<div class="row edit-btn-row">
-					<div class="col-2 edit-btn-content small">
-						<i id="undo-btn" class="fas fa-undo edit-back clickable small bg-secondary"></i>
+				<div class="flex text-center">
+					<div class="md:hidden landscape:hidden flex-auto">
+						<i id="undo-btn" class="button-bg fas fa-undo text-xl p-2"></i>
 					</div>
-					<div class="col-4 edit-btn-content">
-						<i id="paint-mode-btn" class="fas fa-paint-brush edit-back clickable bg-primary"></i>
-						<h5>Paint/Erase</h5>
+					<div class="flex-auto">
+						<i id="paint-mode-btn" class="button-bg fas fa-paint-brush text-4xl p-4"></i>
+						<h5 class="hidden md:landscape:block">Paint/Erase</h5>
 					</div>
-					<div class="col-4 edit-btn-content">
-						<button class="unstyled" type="button" data-bs-toggle="offcanvas" data-bs-target="#terminal-menu" aria-controls="terminal-menu">
-							<i id="open-terminal-menu-btn" class="fas fa-edit edit-back clickable bg-primary"></i>
-						</button>
-						<h5>Terminals</h5>
+					<div class="flex-auto">
+						<i id="open-terminal-menu-btn" class="button-bg fas fa-edit text-4xl p-4"></i>
+						<h5 class="hidden md:landscape:block">Terminals</h5>
 					</div>
-					<div class="col-2 edit-btn-content small">
-						<i id="redo-btn" class="fas fa-redo edit-back clickable small bg-secondary"></i>
+					<div class="md:hidden landscape:hidden flex-auto">
+						<i id="redo-btn" class="button-bg fas fa-redo text-xl p-2"></i>
 					</div>
 				</div>
 
 				<!-- Edit-section-END -->
 
-				<div class="offscreen">
+				<div class="absolute top-[100svh]">
 					<div class="rowBtn-1">
 						<!-- row-btn -->
 						<div class="rowBtn">
@@ -105,8 +85,8 @@
 								<h3>Rows: <span id="num-rows"><!-- AUTO --></span></h3>
 							</div>
 							<div class="row-icon">
-								<i class="fas fa-plus icon-back clickable" id="add-row"></i>
-								<i class="fas fa-minus icon-back clickable" id="remove-row"></i>
+								<i class="fas fa-plus button-bg icon-back clickable" id="add-row"></i>
+								<i class="fas fa-minus button-bg icon-back clickable" id="remove-row"></i>
 							</div>
 						</div>
 						<!-- colum-btn -->
@@ -115,8 +95,8 @@
 								<h3>Cols: <span id="num-cols"><!-- AUTO --></span></h3>
 							</div>
 							<div class="row-icon">
-								<i class="fas fa-plus icon-back clickable" id="add-column"></i>
-								<i class="fas fa-minus icon-back clickable" id="remove-column"></i>
+								<i class="fas fa-plus button-bg icon-back clickable" id="add-column"></i>
+								<i class="fas fa-minus button-bg icon-back clickable" id="remove-column"></i>
 							</div>
 						</div>
 					</div>
@@ -127,14 +107,14 @@
 							<h3>Shift grid</h3>
 						</div>
 						<div class="row-icon">
-							<i class="fas fa-chevron-left icon-back clickable" id="shift-left"></i>
-							<i class="fas fa-chevron-up icon-back clickable" id="shift-up" ></i>
-							<i class="fas fa-chevron-down icon-back clickable" id="shift-down"></i>
-							<i class="fas fa-chevron-right icon-back clickable" id="shift-right"></i>
+							<i class="fas fa-chevron-left button-bg icon-back clickable" id="shift-left"></i>
+							<i class="fas fa-chevron-up button-bg icon-back clickable" id="shift-up" ></i>
+							<i class="fas fa-chevron-down button-bg icon-back clickable" id="shift-down"></i>
+							<i class="fas fa-chevron-right button-bg icon-back clickable" id="shift-right"></i>
 						</div>
 					</div>
 
-					<button class="evaluate-btn clickable" id="evaluate-btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#truth-table-drawer" aria-controls="truth-table-drawer">
+					<button class="button-bg evaluate-btn clickable" id="evaluate-btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#truth-table-drawer" aria-controls="truth-table-drawer">
 						Evaluate
 					</button>
 				</div>
@@ -144,7 +124,7 @@
 	</div>
 
 	<!-- Main-Menu -->
-	<section class="menu scrollable closed d-print-none" id="main-menu">
+	<section class="hidden menu scrollable closed print:hidden" id="main-menu">
 		<button id="close-main-menu-btn" type="button" class="btn-close" aria-label="Close">
 		</button>
 		<div class="menu-content">
@@ -189,7 +169,7 @@
 	</section>
 	<!-- Main-menu-end -->
 
-	<section class="menu scrollable closed d-print-none" id="tutorials">
+	<section class="hidden menu scrollable closed print:hidden" id="tutorials">
 		<button id="close-tutorials-btn" type="button" class="btn-close" aria-label="Close">
 		</button>
 
@@ -200,7 +180,7 @@
 		</div>
 	</section>
 
-	<section class="menu scrollable closed column-flex d-print-none" id="instructions">
+	<section class="hidden menu scrollable closed column-flex print:hidden" id="instructions">
 		<button id="close-instructions-btn" type="button" class="btn-close" aria-label="Close">
 		</button>
 
@@ -266,7 +246,7 @@
 		</section>
 	</section>
 
-	<section class="menu scrollable closed d-print-none" id="about-page">
+	<section class="hidden menu scrollable closed print:hidden" id="about-page">
 		<button id="close-about-page-btn" type="button" class="btn-close" aria-label="Close">
 		</button>
 
@@ -286,7 +266,7 @@
 		</div>
 	</section>
 
-	<section class="menu scrollable closed d-print-none" id="options-menu">
+	<section class="hidden menu scrollable closed print:hidden" id="options-menu">
 		<button id="close-options-menu-btn" type="button" class="btn-close" aria-label="Close">
 		</button>
 
@@ -298,7 +278,7 @@
 		</div>
 	</section>
 
-	<section class="menu scrollable closed d-print-none" id="licenses-menu">
+	<section class="hidden menu scrollable closed print:hidden" id="licenses-menu">
 		<button id="close-licenses-menu-btn" type="button" class="btn-close" aria-label="Close">
 		</button>
 
@@ -311,7 +291,7 @@
 		</div>
 	</section>
 
-	<section class="menu scrollable closed d-print-none" id="qrcode-menu">
+	<section class="hidden menu scrollable closed print:hidden" id="qrcode-menu">
 		<button id="close-qrcode-menu-btn" type="button" class="btn-close" aria-label="Close">
 		</button>
 
@@ -322,7 +302,7 @@
 	</section>
 
 	<!-- offcanvas -->
-	<div id="terminal-menu" class="terminal offcanvas d-print-none" tabindex="-1" data-bs-scroll="true" data-bs-backdrop="false" data-bs-keyboard="true" aria-labelledby="terminal-menu-header">
+	<div id="terminal-menu" class="hidden terminal offcanvas print:hidden" tabindex="-1" data-bs-scroll="true" data-bs-backdrop="false" data-bs-keyboard="true" aria-labelledby="terminal-menu-header">
 		<button id="close-terminal-menu-btn" type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close">
 		</button>
 
@@ -353,7 +333,7 @@
 		</div>
 	</div>
 
-	<div id="truth-table-drawer" class="truth-table-section offcanvas d-print-none" tabindex="-1" data-bs-scroll="true" data-bs-backdrop="false" data-bs-keyboard="true" aria-labelledby="truth-table-header">
+	<div id="truth-table-drawer" class="hidden truth-table-section offcanvas print:hidden" tabindex="-1" data-bs-scroll="true" data-bs-backdrop="false" data-bs-keyboard="true" aria-labelledby="truth-table-header">
 		<button id="close-truth-table-btn" type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close">
 		</button>
 
@@ -366,7 +346,7 @@
 		</div>
 	</div>
 
-	<div class="active-layers d-print-none">
+	<div class="hidden active-layers print:hidden">
 		<div id="CONTACT"></div>
 		<div id="METAL2" class="cmos-layer"></div>
 		<div id="METAL1" class="cmos-layer"></div>
@@ -374,22 +354,60 @@
 		<div id="DIFF"   class="cmos-layer"></div>
 	</div>
 
-	<!-- Toast warning (pullup/pulldown) -->
-	<div class="position-fixed bottom-0 end-0 p-3 d-print-none" style="z-index: 11">
-		<div id="pullWarningToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
-			<div class="toast-header">
-				<i class="fas fa-circle text-danger me-2"></i>
-				<strong class="me-auto">Warning</strong>
-				<button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close">
-				</button>
-			</div>
-			<div id="pullup-pulldown-warning" class="toast-body">
-				N pull-up or P pull-down detected.<br>
-				Simulation may be inaccurate.
+	<div class="hidden fixed inset-0 flex items-center justify-center z-50" id="pull-warning">
+		<div class="bg-zinc-100 text-zinc-950 rounded-lg border-gray-700 border p-3 shadow-lg">
+			<div class="flex flex-row items-center">
+				<div class="px-2">
+					<i class="fas fa-exclamation-circle text-4xl" style="color: #f20d5e;"></i>
+				</div>
+				<div class="ml-2 mr-6">
+					<span class="font-semibold">N pull-up or P pull-down detected.</span>
+					<span class="block">Simulation may be inaccurate.</span>
+				</div>
 			</div>
 		</div>
 	</div>
 
-
+	<!-- START PRINTER-ONLY VIEW -->
+	<div class="print-view">
+		<div class="flex flex-col h-screen">
+			<div class="flex-auto"><!-- FOR PADDING --></div>
+			<div class="flex-auto">
+				<div class="palette">
+					<div class="swatch-group">
+						<span class="swatch-label">PDIFF</span>
+						<i class="fas fa-circle swatch"></i>
+					</div>
+					<div class="swatch-group">
+						<span class="swatch-label">NDIFF</span>
+						<i class="fas fa-circle swatch"></i>
+					</div>
+					<div class="swatch-group">
+						<span class="swatch-label">POLY</span>
+						<i class="fas fa-circle swatch"></i>
+					</div>
+					<div class="swatch-group">
+						<span class="swatch-label">METAL1</span>
+						<i class="fas fa-circle swatch"></i>
+					</div>
+					<div class="swatch-group">
+						<span class="swatch-label">METAL2</span>
+						<i class="fas fa-circle swatch"></i>
+					</div>
+					<div class="swatch-group">
+						<span class="swatch-label">CONTACT</span>
+						<i class="fas fa-circle swatch"></i>
+					</div>
+				</div>
+				<img id="print-canvas" class="canvas-img">
+			</div>
+			<div class="flex-auto"><!-- FOR PADDING --></div>
+		</div>
+		<div class="table-container"><table id="print-table"></table></div>
+		<p class="logo">
+			<span>Made with </span><img src="./images/logo-light.svg">
+		</p>
+	</div>
+	<!-- END PRINTER-ONLY VIEW -->
 </body>
 </html>
