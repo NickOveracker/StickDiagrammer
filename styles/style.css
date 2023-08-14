@@ -49,7 +49,7 @@
       aspect-ratio: var(--num-cols)/var(--num-rows);
     }
     .canvas-wrapper .canvas {
-      @apply h-full w-full;
+      @apply h-full w-full touch-none;
     }
     .swatch-group {
       @apply flex flex-auto items-center;
@@ -176,6 +176,15 @@
     text-align: center;
     -webkit-box-sizing: content-box;
             box-sizing: content-box;
+  }
+  @media only screen and (orientation: portrait) {
+    .terminal-btn {
+      font-size: 2rem;
+      padding: 0;
+      width: 2rem;
+      height: 2rem;
+      margin-top: 0;
+    }
   }
   .select-content {
     -webkit-box-orient: vertical;

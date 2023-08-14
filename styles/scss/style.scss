@@ -75,7 +75,7 @@
       aspect-ratio: var(--num-cols) / var(--num-rows);
 
       .canvas {
-        @apply h-full w-full;
+        @apply h-full w-full touch-none;
       }
     }
 
@@ -199,6 +199,14 @@
     background-color: rgba(255, 255, 255, 0.8);
     text-align: center;
     box-sizing: content-box;
+
+    @media only screen and (orientation: portrait) {
+      font-size: 2rem;
+      padding: 0;
+      width: 2rem;
+      height: 2rem;
+      margin-top: 0;
+    }
   }
 
   .select-content {

@@ -553,6 +553,7 @@ video {
   .canvas-wrapper .canvas{
     height: 100%;
     width: 100%;
+    touch-action: none;
   }
 
   .swatch-group{
@@ -757,6 +758,16 @@ input[type=radio] {
   background-color: rgba(255, 255, 255, 0.8);
   text-align: center;
   box-sizing: content-box;
+}
+
+@media only screen and (orientation: portrait) {
+  .terminal-btn {
+    font-size: 2rem;
+    padding: 0;
+    width: 2rem;
+    height: 2rem;
+    margin-top: 0;
+  }
 }
 
 .select-content {
@@ -1373,12 +1384,20 @@ input[type=radio] {
     right: 0px;
   }
 
+  .portrait\:-order-1{
+    order: -1;
+  }
+
   .portrait\:m-0{
     margin: 0px;
   }
 
   .portrait\:block{
     display: block;
+  }
+
+  .portrait\:flex{
+    display: flex;
   }
 
   .portrait\:hidden{
@@ -1404,6 +1423,10 @@ input[type=radio] {
 
   .portrait\:items-center{
     align-items: center;
+  }
+
+  .portrait\:p-0{
+    padding: 0px;
   }
 
   .portrait\:p-4{

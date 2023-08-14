@@ -600,7 +600,7 @@
           <div class="h-full portrait:hidden"><!-- FOR SPACING --></div>
           <div class="flex h-full flex-col">
             <div
-              class="portrait:m0 portrait:p0 relative mt-6 flex-1 px-4 sm:px-6"
+              class="portrait:m0 relative mt-6 flex-1 px-4 sm:px-6 portrait:p-0"
             >
               <div id="termselect-list" class="terminal-select">
                 <!-- AUTO -->
@@ -609,6 +609,7 @@
                 <div
                   class="flex portrait:w-full portrait:flex-col portrait:items-center"
                 >
+                  <span class="block landscape:hidden">Inputs</span>
                   <div class="flex">
                     <div class="select-content" id="remove-input-btn">
                       <i class="fas fa-minus terminal-btn cursor-pointer"></i
@@ -619,20 +620,20 @@
                       ><span class="portrait:hidden">Add an Input</span>
                     </div>
                   </div>
-                  <span class="block landscape:hidden">Inputs</span>
                 </div>
                 <div
-                  class="select-content portrait:flext portrait:w-full portrait:flex-col portrait:items-center"
+                  class="select-content portrait:flex portrait:w-full portrait:flex-col portrait:items-center"
                   id="place-term-btn"
                 >
                   <i class="fas fa-map-pin terminal-btn cursor-pointer"></i
-                  ><span class="portrait:block"
+                  ><span class="portrait:-order-1 portrait:block"
                     >Place<span class="portrait:hidden"> Terminal</span></span
                   >
                 </div>
                 <div
                   class="flex portrait:w-full portrait:flex-col portrait:items-center"
                 >
+                  <span class="block landscape:hidden">Outputs</span>
                   <div class="flex">
                     <div class="select-content" id="remove-output-btn">
                       <i class="fas fa-minus terminal-btn cursor-pointer"></i
@@ -643,7 +644,6 @@
                       ><span class="portrait:hidden">Add an Output</span>
                     </div>
                   </div>
-                  <span class="block landscape:hidden">Outputs</span>
                 </div>
               </div>
             </div>
