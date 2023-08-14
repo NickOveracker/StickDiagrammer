@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@600&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -5,66 +6,93 @@
   --num-cols: 29;
   --num-rows: 29;
   --min-size: 320px;
+  font-family: "Josefin Sans", sans-serif;
 }
 
 @layer base {
-  @media only screen and (orientation: landscape) and (min-width: 768px) {
+  @media only screen and (orientation: landscape) and (width < 1024px) {
+    .cast-shadow, .swatch-group .swatch-label {
+      text-shadow: 1px 1px 2px #fafafa, 0 0 1em #f4f4f5, 0 0 0.2em #e4e4e7;
+    }
+  }
+  @media only screen and (orientation: landscape) and (width < 1024px) {
+    .dark .cast-shadow, .dark .swatch-group .swatch-label, .swatch-group .dark .swatch-label {
+      text-shadow: 1px 1px 2px #09090b, 0 0 1em #18181b, 0 0 0.2em #27272a;
+    }
+  }
+  @media only screen and (orientation: landscape) {
     .main-container {
-      height: 100svh !important;
+      height: 100svh;
     }
     .canvas-wrapper {
       height: min(100dvw * var(--num-rows) / var(--num-cols), 100svh - 6rem);
       width: min((100svh - 6rem) * var(--num-cols) / var(--num-rows), 100%);
     }
   }
-  @media only screen and (orientation: portrait), only screen and (width < 768px) {
+  @media only screen and (orientation: portrait) {
     .canvas-wrapper {
       height: min(100dvw * var(--num-rows) / var(--num-cols), 100svh - 6rem - 170px);
       width: min((100svh - 6rem - 170px) * var(--num-cols) / var(--num-rows), 100%);
     }
   }
-  body {
-    @apply bg-zinc-100 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50;
-    min-width: var(--min-size);
-    min-height: var(--min-size);
+  @media not print {
+    body {
+      @apply bg-zinc-100 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50 xl:bg-red-950;
+      min-width: var(--min-size);
+      min-height: var(--min-size);
+    }
+    .button-bg {
+      @apply bg-zinc-900 dark:bg-zinc-100 text-zinc-50 dark:text-zinc-950 rounded-full text-4xl p-4 landscape:flex md:landscape:items-center max-lg:landscape:rounded-none max-lg:landscape:py-16 max-lg:landscape:px-2 max-lg:landscape:text-2xl max-lg:landscape:h-36 cursor-pointer;
+    }
+    .canvas-wrapper {
+      @apply mx-auto z-40 lg:landscape:ml-4;
+      aspect-ratio: var(--num-cols)/var(--num-rows);
+    }
+    .canvas-wrapper .canvas {
+      @apply w-full h-full;
+    }
+    .swatch-group {
+      @apply flex-auto flex items-center;
+    }
+    .swatch-group .swatch {
+      @apply w-full inline-block text-3xl max-lg:landscape:rounded-l-full max-lg:landscape:bg-current md:max-lg:landscape:w-24;
+    }
+    .swatch-group .swatch-label {
+      @apply hidden md:max-lg:landscape:inline md:max-lg:landscape:absolute md:max-lg:landscape:right-2 md:max-lg:landscape:z-10 md:max-lg:landscape:text-sm pointer-events-none;
+    }
   }
-  .button-bg {
-    @apply bg-zinc-900 dark:bg-zinc-100 text-zinc-50 dark:text-zinc-950 rounded-full;
+  .main-control-label {
+    @apply hidden landscape:block max-lg:landscape:bg-zinc-900 max-lg:landscape:dark:bg-zinc-100 max-lg:landscape:text-zinc-50 max-lg:landscape:dark:text-zinc-950 max-lg:landscape:flex max-lg:landscape:justify-center max-lg:landscape:px-2 max-lg:landscape:text-2xl max-lg:landscape:h-36 max-lg:landscape:cursor-pointer;
   }
-  .canvas-wrapper {
-    @apply mx-auto;
-    aspect-ratio: var(--num-cols)/var(--num-rows);
+  @media only screen and (orientation: landscape) and (width < 1024px) {
+    .main-control-label {
+      -webkit-writing-mode: vertical-lr;
+          -ms-writing-mode: tb-lr;
+              writing-mode: vertical-lr;
+    }
   }
-  .canvas-wrapper .canvas {
-    @apply w-full h-full;
+  .evaluate-btn {
+    @apply z-40 rounded-none max-lg:landscape:absolute max-lg:landscape:bottom-0 max-lg:landscape:left-0 max-lg:landscape:h-36 max-lg:landscape:inline-block max-lg:landscape:py-0;
   }
-  .palette {
-    @apply flex text-center mt-8 mx-1;
-  }
-  .palette .swatch-group {
-    @apply flex-auto;
-  }
-  .palette .swatch-group .swatch {
-    @apply w-full inline-block text-3xl;
-  }
-  .palette .swatch-group .swatch-label {
-    @apply hidden md:landscape:inline-block;
+  @media only screen and (orientation: landscape) and (width < 1024px) {
+    .evaluate-btn {
+      -webkit-writing-mode: vertical-lr;
+          -ms-writing-mode: tb-lr;
+              writing-mode: vertical-lr;
+    }
   }
   .print-view {
     @apply hidden print:block text-black text-center;
     -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
   }
-  .print-view .palette {
-    @apply w-full flex;
-  }
-  .print-view .palette .swatch-group {
+  .print-view .swatch-group {
     @apply flex-auto;
   }
-  .print-view .palette .swatch-group .swatch {
+  .print-view .swatch-group .swatch {
     @apply mt-2 w-full inline-block;
   }
-  .print-view .palette .swatch-group .swatch-label {
+  .print-view .swatch-group .swatch-label {
     @apply w-full inline-block;
   }
   .print-view .canvas-img {

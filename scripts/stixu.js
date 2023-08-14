@@ -2836,7 +2836,7 @@
                 keyCode:      37,
                 action:       function(e) {
                     if(e.type.includes('up')) {
-                        const coords = this.diagramController.getCellAtCursor();
+                        let coords = this.diagramController.getCellAtCursor();
                         const hasOwn = Object.hasOwn ? Object.hasOwn(coords, "x") : coords.hasOwnProperty("x"); // compatibility
                         coords = hasOwn ? coords : {x: this.diagramGrid.width, };
                         if(hasOwn) {
@@ -2854,7 +2854,7 @@
                 keyCode:       38,
                 action:        function(e) {
                     if(e.type.includes('up')) {
-                        const coords = this.diagramController.getCellAtCursor();
+                        let coords = this.diagramController.getCellAtCursor();
                         const hasOwn = Object.hasOwn ? Object.hasOwn(coords, "y") : coords.hasOwnProperty("y"); // compatibility
                         if(hasOwn) {
                             this.diagramGrid.insertRemoveRowColAt(coords.y, false, true);
@@ -2871,7 +2871,7 @@
                 keyCode:      39,
                 action:       function(e) {
                     if(e.type.includes('up')) {
-                        const coords = this.diagramController.getCellAtCursor();
+                        let coords = this.diagramController.getCellAtCursor();
                         const hasOwn = Object.hasOwn ? Object.hasOwn(coords, "x") : coords.hasOwnProperty("x"); // compatibility
                         if(hasOwn) {
                             this.diagramGrid.insertRemoveRowColAt(coords.x, true, false);
@@ -2888,7 +2888,7 @@
                 keyCode:      40,
                 action:       function(e) {
                     if(e.type.includes('up')) {
-                        const coords = this.diagramController.getCellAtCursor();
+                        let coords = this.diagramController.getCellAtCursor();
                         const hasOwn = Object.hasOwn ? Object.hasOwn(coords, "y") : coords.hasOwnProperty("y"); // compatibility
                         if(hasOwn) {
                             this.diagramGrid.insertRemoveRowColAt(coords.y, true, true);
@@ -3343,7 +3343,8 @@
             document.getElementById("shift-up").onclick      = simpleGridShift(true,  false);
             document.getElementById("shift-down").onclick    = simpleGridShift(true,  true);
 
-            document.getElementById("paint-mode-btn").onclick = function() {
+            //document.getElementById("paint-mode-btn").onclick = function() {
+            document.querySelectorAll("#paint-mode-btn,#paint-mode-btn-label").forEach(item => item.onclick = function() {
                 // No argument -> Toggle
                 this.setEraseMode();
 
@@ -3359,7 +3360,7 @@
                 }
 
                 this.update = true;
-            }.bind(this);
+            }.bind(this));
 
             document.getElementById("dark-mode-btn").onclick = function() {
                 this.toggleDarkMode();
@@ -3664,9 +3665,9 @@
                 let colorIndex = index % (this.diagramGrid.layers - 1);
 
                 // Set up the onclick event if not already set.
-                if(!element.onclick && element.classList.contains('clickable')) {
+                if(!element.onclick) {
                     element.onclick = function() {
-                        let paintModeButton = document.getElementById('paint-mode-btn');
+                        const paintModeButton = document.getElementById('paint-mode-btn');
 
                         this.diagramController.changeLayer(colorIndex);
 
@@ -3732,7 +3733,7 @@
                 if(ii === terminals.length - 1) {
                     termSelectItemLabel.classList.add("last");
                 }
-                termSelectItemLabel.classList.add("clickable");
+                termSelectItemLabel.classList.add("pointer-cursor");
                 termSelectItemLabel.id = "termselect-label-" + ii;
 
                 termSelectItemInput.type = "radio";

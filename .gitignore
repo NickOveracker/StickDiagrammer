@@ -3,3 +3,5 @@ node_modules/
 package-lock.json
 package.json
 tailwind.config.js
+prettier.config.js
+runtailwind.sh

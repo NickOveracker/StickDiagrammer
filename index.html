@@ -15,12 +15,12 @@
 	<script defer src="./scripts/tutorial.js"></script>
 </head>
 
-<body>
+<body class="overflow-x-hidden select-none">
 	<div id="main-container" class="main-container print:hidden w-full h-screen landscape:md:flex landscape:md:flex-col">
-		<header class="w-full h-24 py-4 flex-grow-0 flex-shrink-0">
-			<div aria-label="Stixu logo" class="header-logo bg-center bg-no-repeat bg-contain h-16 bg-[url('../images/logo-light.svg')] dark:bg-[url('../images/logo-dark.svg')] md:landscape:bg-[1rem_center]">
-				<i id="open-main-menu-btn" aria-label="Open menu" class="fas fa-bars float-right p-4 text-[2rem]"></i>
-				<i id="dark-mode-btn" aria-label="Dark mode toggle" class="fas fa-lightbulb portrait:float-left float-right p-4 text-[2rem]"></i>
+		<header class="w-full h-24 py-4 flex-grow-0 flex-shrink-0 z-40">
+			<div aria-label="Stixu logo" class="header-logo bg-center bg-no-repeat bg-contain h-16 bg-[url('../images/logo-light.svg')] dark:bg-[url('../images/logo-dark.svg')] lg:landscape:bg-[1rem_center]">
+				<i id="open-main-menu-btn" aria-label="Open menu" class="fas fa-bars float-right p-4 text-[2rem] lg:landscape:mr-4 cursor-pointer"></i>
+				<i id="dark-mode-btn" aria-label="Dark mode toggle" class="fas fa-lightbulb float-left p-4 text-[2rem] lg:landscape:float-right lg:landscape:mr-4 cursor-pointer"></i>
 			</div>
 		</header>
 
@@ -29,53 +29,56 @@
 				<canvas id="canvas" class="canvas"></canvas>
 			</div>
 			<!-- Right-side -->
-			<div class="portrait:w-full portrait:flex portrait:flex-col gap-8">
-				<div class="palette">
+			<div class="w-full flex flex-col gap-8 z-10 max-lg:landscape:w-auto lg:landscape:items-center">
+				<div class="palette flex text-center mt-8 mx-1 max-lg:landscape:justify-center max-lg:landscape:absolute max-lg:landscape:top-0 max-lg:landscape:py-24 max-lg:landscape:mx-0 max-lg:landscape:right-0 max-lg:landscape:h-screen max-lg:landscape:flex-col max-lg:landscape:-z-10 md:max-lg:landscape:items-end lg:landscape:min-w-[300px] lg:landscape:mt-20">
 					<div class="swatch-group">
 						<span class="swatch-label">PDIFF</span>
-						<i class="fas fa-circle swatch"></i>
+						<i class="fas fa-circle swatch cursor-pointer"></i>
 					</div>
 					<div class="swatch-group">
 						<span class="swatch-label">NDIFF</span>
-						<i class="fas fa-circle swatch"></i>
+						<i class="fas fa-circle swatch cursor-pointer"></i>
 					</div>
 					<div class="swatch-group">
 						<span class="swatch-label">POLY</span>
-						<i class="fas fa-circle swatch"></i>
+						<i class="fas fa-circle swatch cursor-pointer"></i>
 					</div>
 					<div class="swatch-group">
 						<span class="swatch-label">METAL1</span>
-						<i class="fas fa-circle swatch"></i>
+						<i class="fas fa-circle swatch cursor-pointer"></i>
 					</div>
 					<div class="swatch-group">
 						<span class="swatch-label">METAL2</span>
-						<i class="fas fa-circle swatch"></i>
+						<i class="fas fa-circle swatch cursor-pointer"></i>
 					</div>
 					<div class="swatch-group">
 						<span class="swatch-label">CONTACT</span>
-						<i class="fas fa-circle swatch"></i>
+						<i class="fas fa-circle swatch cursor-pointer"></i>
 					</div>
 				</div>
 
 				<!-- Edit-section -->
-				<div class="flex text-center">
+				<div class="flex text-center max-lg:landscape:absolute max-lg:landscape:flex-col-reverse max-lg:landscape:left-0 max-lg:landscape:top-0 max-lg:landscape:w-auto max-lg:landscape:pt-24 max-lg:landscape:pb-36 max-lg:landscape:justify-between max-lg:landscape:h-screen max-lg:landscape:z-10 lg:landscape:min-w-[340px]">
 					<div class="md:hidden landscape:hidden flex-auto">
-						<i id="undo-btn" class="button-bg fas fa-undo text-xl p-2"></i>
+						<i id="undo-btn" class="button-bg cursor-pointer fas fa-undo text-xl p-2"></i>
 					</div>
-					<div class="flex-auto">
-						<i id="paint-mode-btn" class="button-bg fas fa-paint-brush text-4xl p-4"></i>
-						<h5 class="hidden md:landscape:block">Paint/Erase</h5>
+					<div class="flex-auto max-lg:landscape:flex max-lg:landscape:items-start lg:landscape:min-w-[140px]">
+						<i id="paint-mode-btn" class="button-bg cursor-pointer fas fa-paint-brush max-lg:landscape:!hidden"></i>
+						<span id="paint-mode-btn-label" class="main-control-label">Paint/Erase</span>
 					</div>
-					<div class="flex-auto">
-						<i id="open-terminal-menu-btn" class="button-bg fas fa-edit text-4xl p-4"></i>
-						<h5 class="hidden md:landscape:block">Terminals</h5>
+					<div class="flex-auto max-lg:landscape:flex max-lg:landscape:items-start lg:landscape:min-w-[140px]">
+						<i id="open-terminal-menu-btn" class="button-bg cursor-pointer fas fa-edit max-lg:landscape:!hidden"></i>
+						<span id="terminal-menu-btn-label" class="main-control-label">Terminals</span>
 					</div>
 					<div class="md:hidden landscape:hidden flex-auto">
-						<i id="redo-btn" class="button-bg fas fa-redo text-xl p-2"></i>
+						<i id="redo-btn" class="button-bg cursor-pointer fas fa-redo text-xl p-2"></i>
 					</div>
 				</div>
 
 				<!-- Edit-section-END -->
+				<button id="evaluate-btn" class="button-bg evaluate-btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#truth-table-drawer" aria-controls="truth-table-drawer">
+					Evaluate
+				</button>
 
 				<div class="absolute top-[100svh]">
 					<div class="rowBtn-1">
@@ -85,8 +88,8 @@
 								<h3>Rows: <span id="num-rows"><!-- AUTO --></span></h3>
 							</div>
 							<div class="row-icon">
-								<i class="fas fa-plus button-bg icon-back clickable" id="add-row"></i>
-								<i class="fas fa-minus button-bg icon-back clickable" id="remove-row"></i>
+								<i class="fas fa-plus button-bg cursor-pointer" id="add-row"></i>
+								<i class="fas fa-minus button-bg cursor-pointer" id="remove-row"></i>
 							</div>
 						</div>
 						<!-- colum-btn -->
@@ -95,8 +98,8 @@
 								<h3>Cols: <span id="num-cols"><!-- AUTO --></span></h3>
 							</div>
 							<div class="row-icon">
-								<i class="fas fa-plus button-bg icon-back clickable" id="add-column"></i>
-								<i class="fas fa-minus button-bg icon-back clickable" id="remove-column"></i>
+								<i class="fas fa-plus button-bg cursor-pointer" id="add-column"></i>
+								<i class="fas fa-minus button-bg cursor-pointer" id="remove-column"></i>
 							</div>
 						</div>
 					</div>
@@ -107,16 +110,12 @@
 							<h3>Shift grid</h3>
 						</div>
 						<div class="row-icon">
-							<i class="fas fa-chevron-left button-bg icon-back clickable" id="shift-left"></i>
-							<i class="fas fa-chevron-up button-bg icon-back clickable" id="shift-up" ></i>
-							<i class="fas fa-chevron-down button-bg icon-back clickable" id="shift-down"></i>
-							<i class="fas fa-chevron-right button-bg icon-back clickable" id="shift-right"></i>
+							<i class="fas fa-chevron-left button-bg icon-back cursor-pointer" id="shift-left"></i>
+							<i class="fas fa-chevron-up button-bg icon-back cursor-pointer" id="shift-up" ></i>
+							<i class="fas fa-chevron-down button-bg icon-back cursor-pointer" id="shift-down"></i>
+							<i class="fas fa-chevron-right button-bg icon-back cursor-pointer" id="shift-right"></i>
 						</div>
 					</div>
-
-					<button class="button-bg evaluate-btn clickable" id="evaluate-btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#truth-table-drawer" aria-controls="truth-table-drawer">
-						Evaluate
-					</button>
 				</div>
 			</div>
 			<!-- Right-side-END -->
@@ -130,7 +129,7 @@
 		<div class="menu-content">
 			<div class="menu-btn-content">
 				<h1>Support this project!</h1>
-				<div class="box-btn clickable">
+				<div class="box-btn cursor-pointer">
 					<a href="https://patreon.com/twentynine" target="_blank">
 						<i class="fab fa-patreon menu-text">
 							<span>&nbsp;Patreon</span>
@@ -138,28 +137,28 @@
 					</a>
 				</div>
 
-				<div class="box-btn clickable">
+				<div class="box-btn cursor-pointer">
 					<a href="https://ko-fi.com/twentynine" target="_blank">
 						<i class="fas fa-coffee menu-text">
 							<span>&nbsp;Ko-Fi</span>
 						</i>
 					</a>
 				</div>
-				<!--<div class="teacher-btn clickable"><i class="fas fa-glasses menu-text"><span>&nbsp;Teacher Mode</span></i></div>-->
+				<!--<div class="teacher-btn cursor-pointer"><i class="fas fa-glasses menu-text"><span>&nbsp;Teacher Mode</span></i></div>-->
 			</div>
 
 			<ul>
-				<li class="clickable" id="open-tutorials-btn">Tutorials</li>
-				<li class="clickable" id="open-instructions-btn">Instructions</li>
-				<li class="clickable" id="open-about-page-btn">About</li>
-				<li class="clickable"><a href="mailto:nick.overacker@okstate.edu">Bug Report</a></li>
-				<li class="clickable"><a href="mailto:nick.overacker@okstate.edu">Contact</a></li>
-				<li class="clickable" id="open-licenses-menu-btn">Source Licences</span>
-				<li class="clickable" id="open-qrcode-menu-btn">Generate QR Code</span>
+				<li class="cursor-pointer" id="open-tutorials-btn">Tutorials</li>
+				<li class="cursor-pointer" id="open-instructions-btn">Instructions</li>
+				<li class="cursor-pointer" id="open-about-page-btn">About</li>
+				<li class="cursor-pointer"><a href="mailto:nick.overacker@okstate.edu">Bug Report</a></li>
+				<li class="cursor-pointer"><a href="mailto:nick.overacker@okstate.edu">Contact</a></li>
+				<li class="cursor-pointer" id="open-licenses-menu-btn">Source Licences</span>
+				<li class="cursor-pointer" id="open-qrcode-menu-btn">Generate QR Code</span>
 			</ul>
 
 			<div class="menu-btn-content">
-				<div class="box-btn clickable options-btn" id="open-options-menu-btn">
+				<div class="box-btn cursor-pointer options-btn" id="open-options-menu-btn">
 					<i class="fas fa-cogs menu-text">
 						<span>&nbsp;Options</span>
 					</i>
@@ -175,7 +174,7 @@
 
 		<div class="menu-content">
 			<ul>
-				<li class="clickable" id="tutorial-btn-0">The Basics</li>
+				<li class="cursor-pointer" id="tutorial-btn-0">The Basics</li>
 			</ul>
 		</div>
 	</section>
@@ -272,8 +271,8 @@
 
 		<div class="menu-content">
 			<ul>
-				<li class="clickable" id="select-palette-btn">Palette: <span id="palette-setting">Tol</span></li>
-				<li class="clickable" id="toggle-transparency-btn">Layer transparency: <span id="transparency-setting">ON</span></li>
+				<li class="cursor-pointer" id="select-palette-btn">Palette: <span id="palette-setting">Tol</span></li>
+				<li class="cursor-pointer" id="toggle-transparency-btn">Layer transparency: <span id="transparency-setting">ON</span></li>
 			</ul>
 		</div>
 	</section>
@@ -284,9 +283,9 @@
 
 		<div class="menu-content">
 			<ul class="sparse">
-				<li><span class="package-name">Stixu.io</span><a class="package-link clickable" href="https://github.com/NickOveracker/StickDiagrammer/">Source</a> | <a class="package-link clickable" href="./licenses/LICENSE.txt">Polyform Strict License 1.0.0</a></li>
-				<li><span class="package-name">lzutf8.js</span><a class="package-link clickable" href="https://github.com/rotemdan/lzutf8.js/">Source</a> | <a class="package-link clickable" href="./licenses/lzutf8_js_LICENSE.txt">MIT License</a></li>
-				<li><span class="package-name">qrcodejs</span><a class="package-link clickable" href="https://github.com/KeeeX/qrcodejs">Source</a> | <a class="package-link clickable" href="./licenses/qrcodejs_LICENSE.txt">MIT License</a></li>
+				<li><span class="package-name">Stixu.io</span><a class="package-link cursor-pointer" href="https://github.com/NickOveracker/StickDiagrammer/">Source</a> | <a class="package-link cursor-pointer" href="./licenses/LICENSE.txt">Polyform Strict License 1.0.0</a></li>
+				<li><span class="package-name">lzutf8.js</span><a class="package-link cursor-pointer" href="https://github.com/rotemdan/lzutf8.js/">Source</a> | <a class="package-link cursor-pointer" href="./licenses/lzutf8_js_LICENSE.txt">MIT License</a></li>
+				<li><span class="package-name">qrcodejs</span><a class="package-link cursor-pointer" href="https://github.com/KeeeX/qrcodejs">Source</a> | <a class="package-link cursor-pointer" href="./licenses/qrcodejs_LICENSE.txt">MIT License</a></li>
 			</u>
 		</div>
 	</section>
@@ -296,7 +295,7 @@
 		</button>
 
 		<div class="menu-long-text">
-			<h1><a class="clickable" id="share-url">Share this Diagram</a></h1>
+			<h1><a class="cursor-pointer" id="share-url">Share this Diagram</a></h1>
 			<div id="qrcode"></div>
 		</div>
 	</section>
@@ -315,19 +314,19 @@
 			</div>
 			<div class="terminal-select2">
 				<div class="select-content" id="remove-input-btn">
-					<i class="fas fa-minus terminal-btn clickable"></i><span class="small">Delete an Input</span>
+					<i class="fas fa-minus terminal-btn cursor-pointer"></i><span class="small">Delete an Input</span>
 				</div>
 				<div class="select-content" id="add-input-btn">
-					<i class="fas fa-plus terminal-btn clickable"></i><span class="small">Add an Input</span>
+					<i class="fas fa-plus terminal-btn cursor-pointer"></i><span class="small">Add an Input</span>
 				</div>
 				<div class="select-content" id="place-term-btn">
-					<i class="fas fa-map-pin terminal-btn clickable"></i><span class="small">Place Terminal</span>
+					<i class="fas fa-map-pin terminal-btn cursor-pointer"></i><span class="small">Place Terminal</span>
 				</div>
 				<div class="select-content" id="remove-output-btn">
-					<i class="fas fa-minus terminal-btn clickable"></i><span class="small">Delete an Output</span>
+					<i class="fas fa-minus terminal-btn cursor-pointer"></i><span class="small">Delete an Output</span>
 				</div>
 				<div class="select-content" id="add-output-btn">
-					<i class="fas fa-plus terminal-btn clickable"></i><span class="small">Add an Output</span>
+					<i class="fas fa-plus terminal-btn cursor-pointer"></i><span class="small">Add an Output</span>
 				</div>
 			</div>
 		</div>
@@ -373,7 +372,7 @@
 		<div class="flex flex-col h-screen">
 			<div class="flex-auto"><!-- FOR PADDING --></div>
 			<div class="flex-auto">
-				<div class="palette">
+				<div class="palette w-full flex">
 					<div class="swatch-group">
 						<span class="swatch-label">PDIFF</span>
 						<i class="fas fa-circle swatch"></i>
