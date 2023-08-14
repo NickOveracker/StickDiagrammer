@@ -850,6 +850,10 @@ video {
   float: left;
 }
 
+.m-auto{
+  margin: auto;
+}
+
 .mx-1{
   margin-left: 0.25rem;
   margin-right: 0.25rem;
@@ -1246,6 +1250,10 @@ video {
 
     .lg\:landscape\:min-w-\[170px\]{
       min-width: 170px;
+    }
+
+    .lg\:landscape\:max-w-\[340px\]{
+      max-width: 340px;
     }
 
     .lg\:landscape\:items-center{
