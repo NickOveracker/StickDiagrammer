@@ -62,22 +62,25 @@
 					<div class="md:hidden landscape:hidden flex-auto">
 						<i id="undo-btn" class="button-bg cursor-pointer fas fa-undo text-xl p-2"></i>
 					</div>
-					<div class="flex-auto max-lg:landscape:flex max-lg:landscape:items-start lg:landscape:min-w-[140px]">
+					<div class="flex-auto max-lg:landscape:flex max-lg:landscape:items-start lg:landscape:min-w-[170px]">
 						<i id="paint-mode-btn" class="button-bg cursor-pointer fas fa-paint-brush max-lg:landscape:!hidden"></i>
 						<span id="paint-mode-btn-label" class="main-control-label">Paint/Erase</span>
 					</div>
-					<div class="flex-auto max-lg:landscape:flex max-lg:landscape:items-start lg:landscape:min-w-[140px]">
+					<div class="flex-auto max-lg:landscape:flex max-lg:landscape:items-start lg:landscape:min-w-[170px]">
 						<i id="open-terminal-menu-btn" class="button-bg cursor-pointer fas fa-edit max-lg:landscape:!hidden"></i>
 						<span id="terminal-menu-btn-label" class="main-control-label">Terminals</span>
 					</div>
 					<div class="md:hidden landscape:hidden flex-auto">
 						<i id="redo-btn" class="button-bg cursor-pointer fas fa-redo text-xl p-2"></i>
 					</div>
+					<button class="button-bg evaluate-btn hidden max-lg:landscape:absolute max-lg:landscape:bottom-0 max-lg:landscape:left-0 max-lg:landscape:h-36 max-lg:landscape:block max-lg:landscape:py-0 lg:landscape:hidden" type="button" aria-controls="truth-table-drawer">
+						Evaluate
+					</button>
 				</div>
 
 				<!-- Edit-section-END -->
-				<div class="absolute" style="top:105svh">
-					<button id="evaluate-btn" class="button-bg evaluate-btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#truth-table-drawer" aria-controls="truth-table-drawer">
+				<div class="absolute top-[105svh] lg:landscape:static lg:landscape:top-auto">
+					<button class="button-bg evaluate-btn w-full max-lg:landscape:hidden lg:landscape:block" type="button" aria-controls="truth-table-drawer">
 						Evaluate
 					</button>
 

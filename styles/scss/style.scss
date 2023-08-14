@@ -83,7 +83,7 @@
     }
 
     .evaluate-btn {
-        @apply z-40 rounded-none max-lg:landscape:absolute max-lg:landscape:bottom-0 max-lg:landscape:left-0 max-lg:landscape:h-36 max-lg:landscape:inline-block max-lg:landscape:py-0;
+        @apply z-40 rounded-none;
 
         @media only screen and (orientation: landscape) and (width < 1024px) {
             writing-mode: vertical-lr;

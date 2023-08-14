@@ -448,19 +448,19 @@ video {
 
 @media only screen and (orientation: landscape) {
   .main-container {
-    height: 100svh;
+    height: 100lvh;
   }
 
   .canvas-wrapper {
-    height: min(100dvw * var(--num-rows) / var(--num-cols), 100svh - 6rem);
-    width: min((100svh - 6rem) * var(--num-cols) / var(--num-rows), 100%);
+    height: min(100dvw * var(--num-rows) / var(--num-cols), 100lvh - 6rem);
+    width: min((100lvh - 6rem) * var(--num-cols) / var(--num-rows), 100%);
   }
 }
 
 @media only screen and (orientation: portrait) {
   .canvas-wrapper {
-    height: min(100dvw * var(--num-rows) / var(--num-cols), 100svh - 6rem - 170px);
-    width: min((100svh - 6rem - 170px) * var(--num-cols) / var(--num-rows), 100%);
+    height: min(100dvw * var(--num-rows) / var(--num-cols), 100lvh - 6rem - 170px);
+    width: min((100lvh - 6rem - 170px) * var(--num-cols) / var(--num-rows), 100%);
   }
 }
 
@@ -663,20 +663,6 @@ video {
   border-radius: 0px;
 }
 
-@media not all and (min-width: 1024px){
-  @media (orientation: landscape){
-    .evaluate-btn{
-      position: absolute;
-      bottom: 0px;
-      left: 0px;
-      display: inline-block;
-      height: 9rem;
-      padding-top: 0px;
-      padding-bottom: 0px;
-    }
-  }
-}
-
 @media only screen and (orientation: landscape) and (width < 1024px) {
   .evaluate-btn {
     writing-mode: vertical-lr;
@@ -840,8 +826,8 @@ video {
   inset: 0px;
 }
 
-.top-\[100svh\]{
-  top: 100svh;
+.top-\[105svh\]{
+  top: 105svh;
 }
 
 .z-10{
@@ -1097,6 +1083,10 @@ video {
       position: absolute;
     }
 
+    .max-lg\:landscape\:bottom-0{
+      bottom: 0px;
+    }
+
     .max-lg\:landscape\:left-0{
       left: 0px;
     }
@@ -1122,12 +1112,24 @@ video {
       margin-right: 0px;
     }
 
+    .max-lg\:landscape\:block{
+      display: block;
+    }
+
     .max-lg\:landscape\:flex{
       display: flex;
     }
 
     .max-lg\:landscape\:\!hidden{
       display: none !important;
+    }
+
+    .max-lg\:landscape\:hidden{
+      display: none;
+    }
+
+    .max-lg\:landscape\:h-36{
+      height: 9rem;
     }
 
     .max-lg\:landscape\:h-screen{
@@ -1156,6 +1158,11 @@ video {
 
     .max-lg\:landscape\:justify-between{
       justify-content: space-between;
+    }
+
+    .max-lg\:landscape\:py-0{
+      padding-top: 0px;
+      padding-bottom: 0px;
     }
 
     .max-lg\:landscape\:py-24{
@@ -1197,6 +1204,14 @@ video {
 
 @media (min-width: 1024px){
   @media (orientation: landscape){
+    .lg\:landscape\:static{
+      position: static;
+    }
+
+    .lg\:landscape\:top-auto{
+      top: auto;
+    }
+
     .lg\:landscape\:float-right{
       float: right;
     }
@@ -1209,6 +1224,14 @@ video {
       margin-top: 5rem;
     }
 
+    .lg\:landscape\:block{
+      display: block;
+    }
+
+    .lg\:landscape\:hidden{
+      display: none;
+    }
+
     .lg\:landscape\:min-w-\[140px\]{
       min-width: 140px;
     }
@@ -1219,6 +1242,10 @@ video {
 
     .lg\:landscape\:min-w-\[340px\]{
       min-width: 340px;
+    }
+
+    .lg\:landscape\:min-w-\[170px\]{
+      min-width: 170px;
     }
 
     .lg\:landscape\:items-center{

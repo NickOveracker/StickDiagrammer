@@ -3289,10 +3289,11 @@
             });
 
             // Set up the evaluate button.
-            this.button = document.getElementById("evaluate-btn");
-            this.button.onclick = function() {
-                this.refreshTruthTable();
-            }.bind(this);
+            document.querySelectorAll(".evaluate-btn").forEach(button => {
+                button.onclick = function() {
+                    this.refreshTruthTable();
+                }.bind(this)
+            });
         }
 
         // TODO: Continue to improve this function.
