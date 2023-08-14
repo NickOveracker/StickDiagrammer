@@ -1,415 +1,758 @@
-<!DOCTYPE html>
+<!doctype html>
 <!-- LICENSE: https://polyformproject.org/licenses/strict/1.0.0/ -->
 <html lang="en">
-<head>
-	<title>Stixu Stick Diagrammer</title>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta http-equiv="X-UA-Compatible" content="ie=edge">
-	<!--<link href="./styles/styles.css" rel="stylesheet">-->
-	<link href="./styles/stixu_styles.css" rel="stylesheet">
-	<script src="https://kit.fontawesome.com/039fa42282.js" crossorigin="anonymous"></script>
-	<script defer src="./scripts/stixu.js"></script>
-	<script defer src="./scripts/lzutf8.min.js" id="lzutf8"></script>
-	<script defer src="./scripts/qrcode.min.js"></script>
-	<script defer src="./scripts/tutorial.js"></script>
-</head>
+  <head>
+    <title>Stixu Stick Diagrammer</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <!--<link href="./styles/styles.css" rel="stylesheet">-->
+    <link href="./styles/stixu_styles.css" rel="stylesheet" />
+    <script
+      src="https://kit.fontawesome.com/039fa42282.js"
+      crossorigin="anonymous"
+    ></script>
+    <script defer src="./scripts/stixu.js"></script>
+    <script defer src="./scripts/lzutf8.min.js" id="lzutf8"></script>
+    <script defer src="./scripts/qrcode.min.js"></script>
+    <script defer src="./scripts/tutorial.js"></script>
+  </head>
 
-<body class="overflow-x-hidden select-none">
-	<div id="main-container" class="main-container print:hidden w-full h-screen landscape:md:flex landscape:md:flex-col">
-		<header class="w-full h-24 py-4 flex-grow-0 flex-shrink-0 z-40">
-			<div aria-label="Stixu logo" class="header-logo bg-center bg-no-repeat bg-contain h-16 bg-[url('../images/logo-light.svg')] dark:bg-[url('../images/logo-dark.svg')] lg:landscape:bg-[1rem_center]">
-				<i id="open-main-menu-btn" aria-label="Open menu" class="fas fa-bars float-right p-4 text-[2rem] lg:landscape:mr-4 cursor-pointer"></i>
-				<i id="dark-mode-btn" aria-label="Dark mode toggle" class="fas fa-lightbulb float-left p-4 text-[2rem] lg:landscape:float-right lg:landscape:mr-4 cursor-pointer"></i>
-			</div>
-		</header>
+  <body class="select-none overflow-x-hidden">
+    <div
+      id="main-container"
+      class="main-container h-screen w-full print:hidden landscape:md:flex landscape:md:flex-col"
+    >
+      <header class="z-40 h-24 w-full flex-shrink-0 flex-grow-0 py-4">
+        <div
+          aria-label="Stixu logo"
+          class="header-logo h-16 bg-[url('../images/logo-light.svg')] bg-contain bg-center bg-no-repeat dark:bg-[url('../images/logo-dark.svg')] lg:landscape:bg-[1rem_center]"
+        >
+          <i
+            id="open-main-menu-btn"
+            aria-label="Open menu"
+            class="clickable fas fa-bars float-right cursor-pointer p-4 text-[2rem] lg:landscape:mr-4"
+          ></i>
+          <i
+            id="dark-mode-btn"
+            aria-label="Dark mode toggle"
+            class="clickable fas fa-lightbulb float-left cursor-pointer p-4 text-[2rem] lg:landscape:float-right lg:landscape:mr-4"
+          ></i>
+        </div>
+      </header>
 
-		<section class="flex flex-auto portrait:flex-col">
-			<div id="canvas-wrapper" class="canvas-wrapper">
-				<canvas id="canvas" class="canvas"></canvas>
-			</div>
-			<!-- Right-side -->
-			<div class="w-full flex flex-col gap-8 z-10 max-lg:landscape:w-auto lg:landscape:items-center">
-				<div class="palette flex text-center mt-8 mx-1 max-lg:landscape:justify-center max-lg:landscape:absolute max-lg:landscape:top-0 max-lg:landscape:py-24 max-lg:landscape:mx-0 max-lg:landscape:right-0 max-lg:landscape:h-screen max-lg:landscape:flex-col max-lg:landscape:-z-10 md:max-lg:landscape:items-end lg:landscape:min-w-[300px] lg:landscape:mt-20">
-					<div class="swatch-group">
-						<span class="swatch-label">PDIFF</span>
-						<i class="fas fa-circle swatch cursor-pointer"></i>
-					</div>
-					<div class="swatch-group">
-						<span class="swatch-label">NDIFF</span>
-						<i class="fas fa-circle swatch cursor-pointer"></i>
-					</div>
-					<div class="swatch-group">
-						<span class="swatch-label">POLY</span>
-						<i class="fas fa-circle swatch cursor-pointer"></i>
-					</div>
-					<div class="swatch-group">
-						<span class="swatch-label">METAL1</span>
-						<i class="fas fa-circle swatch cursor-pointer"></i>
-					</div>
-					<div class="swatch-group">
-						<span class="swatch-label">METAL2</span>
-						<i class="fas fa-circle swatch cursor-pointer"></i>
-					</div>
-					<div class="swatch-group">
-						<span class="swatch-label">CONTACT</span>
-						<i class="fas fa-circle swatch cursor-pointer"></i>
-					</div>
-				</div>
+      <section class="flex flex-auto portrait:flex-col">
+        <div id="canvas-wrapper" class="canvas-wrapper">
+          <canvas id="canvas" class="canvas"></canvas>
+        </div>
+        <!-- Right-side -->
+        <div
+          class="z-10 flex w-full flex-col gap-8 max-lg:landscape:w-auto lg:landscape:items-center"
+        >
+          <div
+            class="palette mx-1 mt-8 flex text-center max-lg:landscape:absolute max-lg:landscape:right-0 max-lg:landscape:top-0 max-lg:landscape:-z-10 max-lg:landscape:mx-0 max-lg:landscape:h-screen max-lg:landscape:flex-col max-lg:landscape:justify-center max-lg:landscape:py-24 md:max-lg:landscape:items-end lg:landscape:mt-20 lg:landscape:min-w-[300px]"
+          >
+            <div class="swatch-group">
+              <span class="swatch-label">PDIFF</span>
+              <i class="fas fa-circle swatch cursor-pointer"></i>
+            </div>
+            <div class="swatch-group">
+              <span class="swatch-label">NDIFF</span>
+              <i class="fas fa-circle swatch cursor-pointer"></i>
+            </div>
+            <div class="swatch-group">
+              <span class="swatch-label">POLY</span>
+              <i class="fas fa-circle swatch cursor-pointer"></i>
+            </div>
+            <div class="swatch-group">
+              <span class="swatch-label">METAL1</span>
+              <i class="fas fa-circle swatch cursor-pointer"></i>
+            </div>
+            <div class="swatch-group">
+              <span class="swatch-label">METAL2</span>
+              <i class="fas fa-circle swatch cursor-pointer"></i>
+            </div>
+            <div class="swatch-group">
+              <span class="swatch-label">CONTACT</span>
+              <i class="fas fa-circle swatch cursor-pointer"></i>
+            </div>
+          </div>
 
-				<!-- Edit-section -->
-				<div class="flex text-center max-lg:landscape:absolute max-lg:landscape:flex-col-reverse max-lg:landscape:left-0 max-lg:landscape:top-0 max-lg:landscape:w-auto max-lg:landscape:pt-24 max-lg:landscape:pb-36 max-lg:landscape:justify-between max-lg:landscape:h-screen max-lg:landscape:z-10 lg:landscape:min-w-[340px]">
-					<div class="md:hidden landscape:hidden flex-auto">
-						<i id="undo-btn" class="button-bg cursor-pointer fas fa-undo text-xl p-2"></i>
-					</div>
-					<div class="flex-auto max-lg:landscape:flex max-lg:landscape:items-start lg:landscape:min-w-[170px]">
-						<i id="paint-mode-btn" class="button-bg cursor-pointer fas fa-paint-brush max-lg:landscape:!hidden"></i>
-						<span id="paint-mode-btn-label" class="main-control-label">Paint/Erase</span>
-					</div>
-					<div class="flex-auto max-lg:landscape:flex max-lg:landscape:items-start lg:landscape:min-w-[170px]">
-						<i id="open-terminal-menu-btn" class="button-bg cursor-pointer fas fa-edit max-lg:landscape:!hidden"></i>
-						<span id="terminal-menu-btn-label" class="main-control-label">Terminals</span>
-					</div>
-					<div class="md:hidden landscape:hidden flex-auto">
-						<i id="redo-btn" class="button-bg cursor-pointer fas fa-redo text-xl p-2"></i>
-					</div>
-					<button class="button-bg evaluate-btn hidden max-lg:landscape:absolute max-lg:landscape:bottom-0 max-lg:landscape:left-0 max-lg:landscape:h-36 max-lg:landscape:block max-lg:landscape:py-0 lg:landscape:hidden" type="button" aria-controls="truth-table-drawer">
-						Evaluate
-					</button>
-				</div>
+          <!-- Edit-section -->
+          <div
+            class="flex text-center max-lg:landscape:absolute max-lg:landscape:left-0 max-lg:landscape:top-0 max-lg:landscape:z-10 max-lg:landscape:h-screen max-lg:landscape:w-auto max-lg:landscape:flex-col-reverse max-lg:landscape:justify-between max-lg:landscape:pb-36 max-lg:landscape:pt-24 lg:landscape:min-w-[340px]"
+          >
+            <div class="flex-auto md:hidden landscape:hidden">
+              <i
+                id="undo-btn"
+                class="clickable button-bg fas fa-undo cursor-pointer p-2 text-xl"
+              ></i>
+            </div>
+            <div
+              class="flex-auto max-lg:landscape:flex max-lg:landscape:items-start lg:landscape:min-w-[170px]"
+            >
+              <i
+                id="paint-mode-btn"
+                class="clickable button-bg fas fa-paint-brush cursor-pointer max-lg:landscape:!hidden"
+              ></i>
+              <span id="paint-mode-btn-label" class="main-control-label"
+                >Paint/Erase</span
+              >
+            </div>
+            <div
+              class="flex-auto max-lg:landscape:flex max-lg:landscape:items-start lg:landscape:min-w-[170px]"
+            >
+              <i
+                id="open-terminal-menu-btn"
+                class="clickable button-bg fas fa-edit cursor-pointer max-lg:landscape:!hidden"
+              ></i>
+              <span id="terminal-menu-btn-label" class="main-control-label"
+                >Terminals</span
+              >
+            </div>
+            <div class="flex-auto md:hidden landscape:hidden">
+              <i
+                id="redo-btn"
+                class="clickable button-bg fas fa-redo cursor-pointer p-2 text-xl"
+              ></i>
+            </div>
+            <button
+              class="clickable button-bg evaluate-btn hidden max-lg:landscape:absolute max-lg:landscape:bottom-0 max-lg:landscape:left-0 max-lg:landscape:block max-lg:landscape:h-36 max-lg:landscape:py-0 lg:landscape:hidden"
+              type="button"
+              aria-controls="truth-table-drawer"
+            >
+              Evaluate
+            </button>
+          </div>
 
-				<!-- Edit-section-END -->
-				<div class="absolute top-[105svh] w-full lg:landscape:static lg:landscape:top-auto">
-					<button class="button-bg evaluate-btn w-full m-auto max-lg:landscape:hidden lg:landscape:block lg:landscape:max-w-[340px]" type="button" aria-controls="truth-table-drawer">
-						Evaluate
-					</button>
+          <!-- Edit-section-END -->
+          <div
+            class="absolute top-[105svh] w-full lg:landscape:static lg:landscape:top-auto"
+          >
+            <button
+              class="clickable button-bg evaluate-btn m-auto w-full max-lg:landscape:hidden lg:landscape:block lg:landscape:max-w-[340px]"
+              type="button"
+              aria-controls="truth-table-drawer"
+            >
+              Evaluate
+            </button>
 
-					<div class="rowBtn-1">
-						<!-- row-btn -->
-						<div class="rowBtn">
-							<div class="row-content">
-								<h3>Rows: <span id="num-rows"><!-- AUTO --></span></h3>
-							</div>
-							<div class="row-icon">
-								<i class="fas fa-plus button-bg cursor-pointer" id="add-row"></i>
-								<i class="fas fa-minus button-bg cursor-pointer" id="remove-row"></i>
-							</div>
-						</div>
-						<!-- colum-btn -->
-						<div class="rowBtn">
-							<div class="row-content">
-								<h3>Cols: <span id="num-cols"><!-- AUTO --></span></h3>
-							</div>
-							<div class="row-icon">
-								<i class="fas fa-plus button-bg cursor-pointer" id="add-column"></i>
-								<i class="fas fa-minus button-bg cursor-pointer" id="remove-column"></i>
-							</div>
-						</div>
-					</div>
+            <div class="rowBtn-1">
+              <!-- row-btn -->
+              <div class="rowBtn">
+                <div class="row-content">
+                  <h3>
+                    Rows: <span id="num-rows"><!-- AUTO --></span>
+                  </h3>
+                </div>
+                <div class="row-icon">
+                  <i
+                    class="clickable fas fa-plus button-bg cursor-pointer"
+                    id="add-row"
+                  ></i>
+                  <i
+                    class="clickable fas fa-minus button-bg cursor-pointer"
+                    id="remove-row"
+                  ></i>
+                </div>
+              </div>
+              <!-- colum-btn -->
+              <div class="rowBtn">
+                <div class="row-content">
+                  <h3>
+                    Cols: <span id="num-cols"><!-- AUTO --></span>
+                  </h3>
+                </div>
+                <div class="row-icon">
+                  <i
+                    class="clickable fas fa-plus button-bg cursor-pointer"
+                    id="add-column"
+                  ></i>
+                  <i
+                    class="clickable fas fa-minus button-bg cursor-pointer"
+                    id="remove-column"
+                  ></i>
+                </div>
+              </div>
+            </div>
 
-					<!-- Shift grid-btn -->
-					<div class="rowBtn-2">
-						<div class="row-content">
-							<h3>Shift grid</h3>
-						</div>
-						<div class="row-icon">
-							<i class="fas fa-chevron-left button-bg icon-back cursor-pointer" id="shift-left"></i>
-							<i class="fas fa-chevron-up button-bg icon-back cursor-pointer" id="shift-up" ></i>
-							<i class="fas fa-chevron-down button-bg icon-back cursor-pointer" id="shift-down"></i>
-							<i class="fas fa-chevron-right button-bg icon-back cursor-pointer" id="shift-right"></i>
-						</div>
-					</div>
-				</div>
-			</div>
-			<!-- Right-side-END -->
-		</section>
-	</div>
+            <!-- Shift grid-btn -->
+            <div class="rowBtn-2">
+              <div class="row-content">
+                <h3>Shift grid</h3>
+              </div>
+              <div class="row-icon">
+                <i
+                  class="clickable fas fa-chevron-left button-bg icon-back cursor-pointer"
+                  id="shift-left"
+                ></i>
+                <i
+                  class="clickable fas fa-chevron-up button-bg icon-back cursor-pointer"
+                  id="shift-up"
+                ></i>
+                <i
+                  class="clickable fas fa-chevron-down button-bg icon-back cursor-pointer"
+                  id="shift-down"
+                ></i>
+                <i
+                  class="clickable fas fa-chevron-right button-bg icon-back cursor-pointer"
+                  id="shift-right"
+                ></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Right-side-END -->
+      </section>
+    </div>
 
-	<!-- Main-Menu -->
-	<section class="hidden menu scrollable closed print:hidden" id="main-menu">
-		<button id="close-main-menu-btn" type="button" class="btn-close" aria-label="Close">
-		</button>
-		<div class="menu-content">
-			<div class="menu-btn-content">
-				<h1>Support this project!</h1>
-				<div class="box-btn cursor-pointer">
-					<a href="https://patreon.com/twentynine" target="_blank">
-						<i class="fab fa-patreon menu-text">
-							<span>&nbsp;Patreon</span>
-						</i>
-					</a>
-				</div>
+    <!-- Main-Menu -->
+    <section class="menu scrollable closed hidden print:hidden" id="main-menu">
+      <button
+        id="close-main-menu-btn"
+        type="button"
+        class="clickable btn-close"
+        aria-label="Close"
+      ></button>
+      <div class="menu-content">
+        <div class="menu-btn-content">
+          <h1>Support this project!</h1>
+          <div class="box-btn cursor-pointer">
+            <a href="https://patreon.com/twentynine" target="_blank">
+              <i class="clickable fab fa-patreon menu-text">
+                <span>&nbsp;Patreon</span>
+              </i>
+            </a>
+          </div>
 
-				<div class="box-btn cursor-pointer">
-					<a href="https://ko-fi.com/twentynine" target="_blank">
-						<i class="fas fa-coffee menu-text">
-							<span>&nbsp;Ko-Fi</span>
-						</i>
-					</a>
-				</div>
-				<!--<div class="teacher-btn cursor-pointer"><i class="fas fa-glasses menu-text"><span>&nbsp;Teacher Mode</span></i></div>-->
-			</div>
+          <div class="box-btn cursor-pointer">
+            <a href="https://ko-fi.com/twentynine" target="_blank">
+              <i class="clickable fas fa-coffee menu-text">
+                <span>&nbsp;Ko-Fi</span>
+              </i>
+            </a>
+          </div>
+          <!--<div class="teacher-btn cursor-pointer"><i class="fas fa-glasses menu-text"><span>&nbsp;Teacher Mode</span></i></div>-->
+        </div>
 
-			<ul>
-				<li class="cursor-pointer" id="open-tutorials-btn">Tutorials</li>
-				<li class="cursor-pointer" id="open-instructions-btn">Instructions</li>
-				<li class="cursor-pointer" id="open-about-page-btn">About</li>
-				<li class="cursor-pointer"><a href="mailto:nick.overacker@okstate.edu">Bug Report</a></li>
-				<li class="cursor-pointer"><a href="mailto:nick.overacker@okstate.edu">Contact</a></li>
-				<li class="cursor-pointer" id="open-licenses-menu-btn">Source Licences</span>
-				<li class="cursor-pointer" id="open-qrcode-menu-btn">Generate QR Code</span>
-			</ul>
+        <ul>
+          <li class="clickable cursor-pointer" id="open-tutorials-btn">
+            Tutorials
+          </li>
+          <li class="clickable cursor-pointer" id="open-instructions-btn">
+            Instructions
+          </li>
+          <li class="clickable cursor-pointer" id="open-about-page-btn">
+            About
+          </li>
+          <li class="clickable cursor-pointer">
+            <a href="mailto:nick.overacker@okstate.edu">Bug Report</a>
+          </li>
+          <li class="clickable cursor-pointer">
+            <a href="mailto:nick.overacker@okstate.edu">Contact</a>
+          </li>
+          <li class="clickable cursor-pointer" id="open-licenses-menu-btn">
+            Source Licences
+          </li>
+          <li class="clickable cursor-pointer" id="open-qrcode-menu-btn">
+            Generate QR Code
+          </li>
+        </ul>
 
-			<div class="menu-btn-content">
-				<div class="box-btn cursor-pointer options-btn" id="open-options-menu-btn">
-					<i class="fas fa-cogs menu-text">
-						<span>&nbsp;Options</span>
-					</i>
-				</div>
-			</div>
-		</div>
-	</section>
-	<!-- Main-menu-end -->
+        <div class="menu-btn-content">
+          <div
+            class="clickable box-btn options-btn cursor-pointer"
+            id="open-options-menu-btn"
+          >
+            <i class="clickable fas fa-cogs menu-text">
+              <span>&nbsp;Options</span>
+            </i>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Main-menu-end -->
 
-	<section class="hidden menu scrollable closed print:hidden" id="tutorials">
-		<button id="close-tutorials-btn" type="button" class="btn-close" aria-label="Close">
-		</button>
+    <section class="menu scrollable closed hidden print:hidden" id="tutorials">
+      <button
+        id="close-tutorials-btn"
+        type="button"
+        class="clickable btn-close"
+        aria-label="Close"
+      ></button>
 
-		<div class="menu-content">
-			<ul>
-				<li class="cursor-pointer" id="tutorial-btn-0">The Basics</li>
-			</ul>
-		</div>
-	</section>
+      <div class="menu-content">
+        <ul>
+          <li class="clickable cursor-pointer" id="tutorial-btn-0">
+            The Basics
+          </li>
+        </ul>
+      </div>
+    </section>
 
-	<section class="hidden menu scrollable closed column-flex print:hidden" id="instructions">
-		<button id="close-instructions-btn" type="button" class="btn-close" aria-label="Close">
-		</button>
+    <section
+      class="menu scrollable closed column-flex hidden print:hidden"
+      id="instructions"
+    >
+      <button
+        id="close-instructions-btn"
+        type="button"
+        class="clickable btn-close"
+        aria-label="Close"
+      ></button>
 
-		<section class="menu-long-text desktop">
-			<h1>Basic Mouse/Keyboard Controls</h1>
-			<ul>
-				<li>Left-click to paint a cell with the selected layer.
-					<ul><li>Left-click and drag to paint a line.</li></ul>
-				</li>
+      <section class="menu-long-text desktop">
+        <h1>Basic Mouse/Keyboard Controls</h1>
+        <ul>
+          <li>
+            Left-click to paint a cell with the selected layer.
+            <ul>
+              <li>Left-click and drag to paint a line.</li>
+            </ul>
+          </li>
 
-				<li>Right-click to clear all layers on the selected cell.
-					<ul><li>Right-click and drag to clear all cells in the selected area.</li></ul>
-				</li>
+          <li>
+            Right-click to clear all layers on the selected cell.
+            <ul>
+              <li>
+                Right-click and drag to clear all cells in the selected area.
+              </li>
+            </ul>
+          </li>
 
-				<li>Right-click in an unpainted area to change layers.
-					<ul><li>The layer name is displayed at the top of the canvas.</li></ul>
-				</li>
+          <li>
+            Right-click in an unpainted area to change layers.
+            <ul>
+              <li>The layer name is displayed at the top of the canvas.</li>
+            </ul>
+          </li>
 
-				<li>Point at a cell and type SHIFT + V to move the VDD contact to that cell.</li>
-				<li>Point at a cell and type SHIFT + G to move the GND contact to that cell.</li>
-				<li>Point at a cell and type the name of that terminal (A, B, C, ...) to move the chosen contact to that cell.</li>
-				<li>Press Enter or click "Evaluate" to generate a truth table for the painted diagram.
-					<ul><li>Not all paths are evaluated for overdriven (simultaneously high and low) outputs.</li></ul>
-				</li>
-				<!--<li>See additional keyboard shortcuts in the Options menu.</li>-->
-			</ul>
-		</section>
+          <li>
+            Point at a cell and type SHIFT + V to move the VDD contact to that
+            cell.
+          </li>
+          <li>
+            Point at a cell and type SHIFT + G to move the GND contact to that
+            cell.
+          </li>
+          <li>
+            Point at a cell and type the name of that terminal (A, B, C, ...) to
+            move the chosen contact to that cell.
+          </li>
+          <li>
+            Press Enter or click "Evaluate" to generate a truth table for the
+            painted diagram.
+            <ul>
+              <li>
+                Not all paths are evaluated for overdriven (simultaneously high
+                and low) outputs.
+              </li>
+            </ul>
+          </li>
+          <!--<li>See additional keyboard shortcuts in the Options menu.</li>-->
+        </ul>
+      </section>
 
-		<section class="menu-long-text">
-			<h1>Basic Touch-Friendly Controls</h1>
-			<ul>
-				<li>Tap the Paint <i class="fas fa-paint-brush inline"></i>
-					or Erase <i class="fas fa-eraser inline"></i>
-					icon to switch between paint and erase mode.</li>
-				<li>Tap to paint or clear a cell with the selected layer.
-					<ul><li>Touch and drag to paint a line or clear an area.</li></ul>
-				</li>
+      <section class="menu-long-text">
+        <h1>Basic Touch-Friendly Controls</h1>
+        <ul>
+          <li>
+            Tap the Paint <i class="fas fa-paint-brush inline"></i> or Erase
+            <i class="fas fa-eraser inline"></i> icon to switch between paint
+            and erase mode.
+          </li>
+          <li>
+            Tap to paint or clear a cell with the selected layer.
+            <ul>
+              <li>Touch and drag to paint a line or clear an area.</li>
+            </ul>
+          </li>
 
-				<li>Tap one of the colored circles to change paint layers.
-					<ul><li>The layer name is displayed at the top of the canvas.</li></ul>
-				</li>
+          <li>
+            Tap one of the colored circles to change paint layers.
+            <ul>
+              <li>The layer name is displayed at the top of the canvas.</li>
+            </ul>
+          </li>
 
-				<li>Tap the Terminal menu button <i class="fas fa-edit inline"></i> to edit I/O terminals.
-					<ul>
-						<li>Use the <i class="fas fa-minus inline"></i> and <i class="fas fa-plus inline"></i> buttons to remove and add terminals.
-							<ul>
-								<li>The buttons on the left control input terminals.</li>
-								<li>The buttons on the right control output terminals.</li>
-							</ul>
-						</li>
-						<li>Select a terminal from the list and tap the <i class="fas fa-map-pin inline"></i> button to enter terminal placement mode.
-							<ul>
-								<li>Tap any cell in the canvas to place the terminal.</li>
-							</ul>
-						</li>
-					</ul>
-				</li>
-				<li>Scroll down and tap "Evaluate" to generate a truth table for the painted diagram.</li>
-				<li>Tap any output value in the truth table to highlight the evaluated path to the output.
-					<ul><li>Not all paths are evaluated for overdriven (simultaneously high and low) outputs.</li></ul>
-				</li>
-			</ul>
-		</section>
-	</section>
+          <li>
+            Tap the Terminal menu button <i class="fas fa-edit inline"></i> to
+            edit I/O terminals.
+            <ul>
+              <li>
+                Use the <i class="fas fa-minus inline"></i> and
+                <i class="fas fa-plus inline"></i> buttons to remove and add
+                terminals.
+                <ul>
+                  <li>The buttons on the left control input terminals.</li>
+                  <li>The buttons on the right control output terminals.</li>
+                </ul>
+              </li>
+              <li>
+                Select a terminal from the list and tap the
+                <i class="fas fa-map-pin inline"></i> button to enter terminal
+                placement mode.
+                <ul>
+                  <li>Tap any cell in the canvas to place the terminal.</li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li>
+            Scroll down and tap "Evaluate" to generate a truth table for the
+            painted diagram.
+          </li>
+          <li>
+            Tap any output value in the truth table to highlight the evaluated
+            path to the output.
+            <ul>
+              <li>
+                Not all paths are evaluated for overdriven (simultaneously high
+                and low) outputs.
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </section>
+    </section>
 
-	<section class="hidden menu scrollable closed print:hidden" id="about-page">
-		<button id="close-about-page-btn" type="button" class="btn-close" aria-label="Close">
-		</button>
+    <section class="menu scrollable closed hidden print:hidden" id="about-page">
+      <button
+        id="close-about-page-btn"
+        type="button"
+        class="clickable btn-close"
+        aria-label="Close"
+      ></button>
 
-		<div class="menu-long-text">
-			<h1>About Stixu</h1>
-			<span>Stixu is a tool for designing and validating CMOS logic circuits.
-			<br><br>
-			The tool was conceived and developed by Nick Overacker, an Oklahoma State University Computer Engineering graduate currently living in Japan.
-			<br><br>
-			The user interface was designed and implemented with the help of Miho Kobayashi, a Kansai Gaidai University graduate, former OSU exchange student, and freelance web designer.
-			<br><br>
-			The default canvas palette was borrowed from <a href="https://personal.sron.nl/~pault/" target="_blank">Paul Tol's</a> work.
-			<br><br>
-			The alternate "Sorcery" palette was inspired by the <a href="http://opencircuitdesign.com/magic/" target="_blank">Magic</a> VLSI layout tool.
-			</span>
-		
-		</div>
-	</section>
+      <div class="menu-long-text">
+        <h1>About Stixu</h1>
+        <span
+          >Stixu is a tool for designing and validating CMOS logic circuits.
+          <br /><br />
+          The tool was conceived and developed by Nick Overacker, an Oklahoma
+          State University Computer Engineering graduate currently living in
+          Japan.
+          <br /><br />
+          The user interface was designed and implemented with the help of Miho
+          Kobayashi, a Kansai Gaidai University graduate, former OSU exchange
+          student, and freelance web designer.
+          <br /><br />
+          The default canvas palette was borrowed from
+          <a href="https://personal.sron.nl/~pault/" target="_blank"
+            >Paul Tol's</a
+          >
+          work. <br /><br />
+          The alternate "Sorcery" palette was inspired by the
+          <a href="http://opencircuitdesign.com/magic/" target="_blank"
+            >Magic</a
+          >
+          VLSI layout tool.
+        </span>
+      </div>
+    </section>
 
-	<section class="hidden menu scrollable closed print:hidden" id="options-menu">
-		<button id="close-options-menu-btn" type="button" class="btn-close" aria-label="Close">
-		</button>
+    <section
+      class="menu scrollable closed hidden print:hidden"
+      id="options-menu"
+    >
+      <button
+        id="close-options-menu-btn"
+        type="button"
+        class="clickable btn-close"
+        aria-label="Close"
+      ></button>
 
-		<div class="menu-content">
-			<ul>
-				<li class="cursor-pointer" id="select-palette-btn">Palette: <span id="palette-setting">Tol</span></li>
-				<li class="cursor-pointer" id="toggle-transparency-btn">Layer transparency: <span id="transparency-setting">ON</span></li>
-			</ul>
-		</div>
-	</section>
+      <div class="menu-content">
+        <ul>
+          <li class="clickable cursor-pointer" id="select-palette-btn">
+            Palette: <span id="palette-setting">Tol</span>
+          </li>
+          <li class="clickable cursor-pointer" id="toggle-transparency-btn">
+            Layer transparency: <span id="transparency-setting">ON</span>
+          </li>
+        </ul>
+      </div>
+    </section>
 
-	<section class="hidden menu scrollable closed print:hidden" id="licenses-menu">
-		<button id="close-licenses-menu-btn" type="button" class="btn-close" aria-label="Close">
-		</button>
+    <section
+      class="menu scrollable closed hidden print:hidden"
+      id="licenses-menu"
+    >
+      <button
+        id="close-licenses-menu-btn"
+        type="button"
+        class="clickable btn-close"
+        aria-label="Close"
+      ></button>
 
-		<div class="menu-content">
-			<ul class="sparse">
-				<li><span class="package-name">Stixu.io</span><a class="package-link cursor-pointer" href="https://github.com/NickOveracker/StickDiagrammer/">Source</a> | <a class="package-link cursor-pointer" href="./licenses/LICENSE.txt">Polyform Strict License 1.0.0</a></li>
-				<li><span class="package-name">lzutf8.js</span><a class="package-link cursor-pointer" href="https://github.com/rotemdan/lzutf8.js/">Source</a> | <a class="package-link cursor-pointer" href="./licenses/lzutf8_js_LICENSE.txt">MIT License</a></li>
-				<li><span class="package-name">qrcodejs</span><a class="package-link cursor-pointer" href="https://github.com/KeeeX/qrcodejs">Source</a> | <a class="package-link cursor-pointer" href="./licenses/qrcodejs_LICENSE.txt">MIT License</a></li>
-			</u>
-		</div>
-	</section>
+      <div class="menu-content">
+        <ul class="sparse">
+          <li>
+            <span class="package-name">Stixu.io</span
+            ><a
+              class="clickable package-link cursor-pointer"
+              href="https://github.com/NickOveracker/StickDiagrammer/"
+              >Source</a
+            >
+            |
+            <a
+              class="clickable package-link cursor-pointer"
+              href="./licenses/LICENSE.txt"
+              >Polyform Strict License 1.0.0</a
+            >
+          </li>
+          <li>
+            <span class="package-name">lzutf8.js</span
+            ><a
+              class="clickable package-link cursor-pointer"
+              href="https://github.com/rotemdan/lzutf8.js/"
+              >Source</a
+            >
+            |
+            <a
+              class="clickable package-link cursor-pointer"
+              href="./licenses/lzutf8_js_LICENSE.txt"
+              >MIT License</a
+            >
+          </li>
+          <li>
+            <span class="package-name">qrcodejs</span
+            ><a
+              class="clickable package-link cursor-pointer"
+              href="https://github.com/KeeeX/qrcodejs"
+              >Source</a
+            >
+            |
+            <a
+              class="clickable package-link cursor-pointer"
+              href="./licenses/qrcodejs_LICENSE.txt"
+              >MIT License</a
+            >
+          </li>
+        </ul>
+      </div>
+    </section>
 
-	<section class="hidden menu scrollable closed print:hidden" id="qrcode-menu">
-		<button id="close-qrcode-menu-btn" type="button" class="btn-close" aria-label="Close">
-		</button>
+    <section
+      class="menu scrollable closed hidden print:hidden"
+      id="qrcode-menu"
+    >
+      <button
+        id="close-qrcode-menu-btn"
+        type="button"
+        class="clickable btn-close"
+        aria-label="Close"
+      ></button>
 
-		<div class="menu-long-text">
-			<h1><a class="cursor-pointer" id="share-url">Share this Diagram</a></h1>
-			<div id="qrcode"></div>
-		</div>
-	</section>
+      <div class="menu-long-text">
+        <h1>
+          <a class="clickable cursor-pointer" id="share-url"
+            >Share this Diagram</a
+          >
+        </h1>
+        <div id="qrcode"></div>
+      </div>
+    </section>
 
-	<!-- offcanvas -->
-	<div id="terminal-menu" class="hidden terminal offcanvas print:hidden" tabindex="-1" data-bs-scroll="true" data-bs-backdrop="false" data-bs-keyboard="true" aria-labelledby="terminal-menu-header">
-		<button id="close-terminal-menu-btn" type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close">
-		</button>
+    <div
+      id="terminal-menu"
+      class="pointer-events-auto fixed z-40 h-screen w-screen transform overflow-visible opacity-0 transition duration-500 ease-in-out sm:duration-700 portrait:bottom-0 portrait:left-0 portrait:h-[170px] portrait:translate-y-full landscape:right-0 landscape:top-0 landscape:max-w-md landscape:translate-x-full"
+    >
+      <div
+        class="flex h-full items-start overflow-y-scroll bg-zinc-200 shadow-xl dark:bg-zinc-800 landscape:py-6"
+      >
+        <div
+          class="relative order-1 -ml-[4.5rem] bg-zinc-200 p-6 leading-[0] dark:bg-zinc-800 portrait:absolute portrait:bottom-[170px] portrait:right-0 portrait:p-4 landscape:-top-6"
+        >
+          <button
+            id="close-terminal-menu-btn"
+            type="button"
+            class="relative rounded-md hover:text-[#F20D5E] focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
+          >
+            <span class="absolute -inset-2.5"></span>
+            <span class="sr-only">Close panel</span>
+            <svg
+              class="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </div>
 
-		<div class="offcanvas-header">
-			<h3 class="offcanvas-title" id="terminal-menu-header">Manage Terminals</h3>
-		</div>
-		<div class="offcanvas-body">
-			<div id="termselect-list" class="terminal-select">
-				<!-- AUTO -->
-			</div>
-			<div class="terminal-select2">
-				<div class="select-content" id="remove-input-btn">
-					<i class="fas fa-minus terminal-btn cursor-pointer"></i><span class="small">Delete an Input</span>
-				</div>
-				<div class="select-content" id="add-input-btn">
-					<i class="fas fa-plus terminal-btn cursor-pointer"></i><span class="small">Add an Input</span>
-				</div>
-				<div class="select-content" id="place-term-btn">
-					<i class="fas fa-map-pin terminal-btn cursor-pointer"></i><span class="small">Place Terminal</span>
-				</div>
-				<div class="select-content" id="remove-output-btn">
-					<i class="fas fa-minus terminal-btn cursor-pointer"></i><span class="small">Delete an Output</span>
-				</div>
-				<div class="select-content" id="add-output-btn">
-					<i class="fas fa-plus terminal-btn cursor-pointer"></i><span class="small">Add an Output</span>
-				</div>
-			</div>
-		</div>
-	</div>
+        <div class="flex h-full flex-col portrait:w-full">
+          <div class="landscape:px-4 landscape:sm:px-6">
+            <h2
+              class="text-base font-semibold leading-6 portrait:hidden"
+              id="terminal-menu-title"
+            >
+              Manage Terminals
+            </h2>
+          </div>
+          <div class="h-full portrait:hidden"><!-- FOR SPACING --></div>
+          <div class="flex h-full flex-col">
+            <div
+              class="portrait:m0 portrait:p0 relative mt-6 flex-1 px-4 sm:px-6"
+            >
+              <div id="termselect-list" class="terminal-select">
+                <!-- AUTO -->
+              </div>
+              <div class="terminal-select2 portrait:m-0">
+                <div
+                  class="flex portrait:w-full portrait:flex-col portrait:items-center"
+                >
+                  <div class="flex">
+                    <div class="select-content" id="remove-input-btn">
+                      <i class="fas fa-minus terminal-btn cursor-pointer"></i
+                      ><span class="portrait:hidden">Delete an Input</span>
+                    </div>
+                    <div class="select-content" id="add-input-btn">
+                      <i class="fas fa-plus terminal-btn cursor-pointer"></i
+                      ><span class="portrait:hidden">Add an Input</span>
+                    </div>
+                  </div>
+                  <span class="block landscape:hidden">Inputs</span>
+                </div>
+                <div
+                  class="select-content portrait:flext portrait:w-full portrait:flex-col portrait:items-center"
+                  id="place-term-btn"
+                >
+                  <i class="fas fa-map-pin terminal-btn cursor-pointer"></i
+                  ><span class="portrait:block"
+                    >Place<span class="portrait:hidden"> Terminal</span></span
+                  >
+                </div>
+                <div
+                  class="flex portrait:w-full portrait:flex-col portrait:items-center"
+                >
+                  <div class="flex">
+                    <div class="select-content" id="remove-output-btn">
+                      <i class="fas fa-minus terminal-btn cursor-pointer"></i
+                      ><span class="portrait:hidden">Delete an Output</span>
+                    </div>
+                    <div class="select-content" id="add-output-btn">
+                      <i class="fas fa-plus terminal-btn cursor-pointer"></i
+                      ><span class="portrait:hidden">Add an Output</span>
+                    </div>
+                  </div>
+                  <span class="block landscape:hidden">Outputs</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="h-full portrait:hidden"><!-- FOR SPACING --></div>
+        </div>
+      </div>
+    </div>
 
-	<div id="truth-table-drawer" class="hidden truth-table-section offcanvas print:hidden" tabindex="-1" data-bs-scroll="true" data-bs-backdrop="false" data-bs-keyboard="true" aria-labelledby="truth-table-header">
-		<button id="close-truth-table-btn" type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close">
-		</button>
+    <div
+      id="truth-table-drawer"
+      class="truth-table-section offcanvas hidden print:hidden"
+      tabindex="-1"
+      data-bs-scroll="true"
+      data-bs-backdrop="false"
+      data-bs-keyboard="true"
+      aria-labelledby="truth-table-header"
+    >
+      <button
+        id="close-truth-table-btn"
+        type="clickable button"
+        class="btn-close"
+        data-bs-dismiss="offcanvas"
+        aria-label="Close"
+      ></button>
 
-		<div class="offcanvas-header">
-			<h3 class="offcanvas-title" id="terminal-menu-header">Truth Table</h3>
-		</div>
+      <div class="offcanvas-header">
+        <h3 class="offcanvas-title" id="terminal-menu-header">Truth Table</h3>
+      </div>
 
-		<div class="offcanvas-body" id="truth-table-container">
-			<table id="truth-table"></table>
-		</div>
-	</div>
+      <div class="offcanvas-body" id="truth-table-container">
+        <table id="truth-table"></table>
+      </div>
+    </div>
 
-	<div class="hidden active-layers print:hidden">
-		<div id="CONTACT"></div>
-		<div id="METAL2" class="cmos-layer"></div>
-		<div id="METAL1" class="cmos-layer"></div>
-		<div id="POLY"   class="cmos-layer"></div>
-		<div id="DIFF"   class="cmos-layer"></div>
-	</div>
+    <div class="active-layers hidden print:hidden">
+      <div id="CONTACT"></div>
+      <div id="METAL2" class="cmos-layer"></div>
+      <div id="METAL1" class="cmos-layer"></div>
+      <div id="POLY" class="cmos-layer"></div>
+      <div id="DIFF" class="cmos-layer"></div>
+    </div>
 
-	<div class="hidden fixed inset-0 flex items-center justify-center z-50" id="pull-warning">
-		<div class="bg-zinc-100 text-zinc-950 rounded-lg border-gray-700 border p-3 shadow-lg">
-			<div class="flex flex-row items-center">
-				<div class="px-2">
-					<i class="fas fa-exclamation-circle text-4xl" style="color: #f20d5e;"></i>
-				</div>
-				<div class="ml-2 mr-6">
-					<span class="font-semibold">N pull-up or P pull-down detected.</span>
-					<span class="block">Simulation may be inaccurate.</span>
-				</div>
-			</div>
-		</div>
-	</div>
+    <div
+      class="fixed inset-0 z-50 flex hidden items-center justify-center"
+      id="pull-warning"
+    >
+      <div
+        class="rounded-lg border border-gray-700 bg-zinc-100 p-3 text-zinc-950 shadow-lg"
+      >
+        <div class="flex flex-row items-center">
+          <div class="px-2">
+            <i
+              class="fas fa-exclamation-circle text-4xl"
+              style="color: #f20d5e"
+            ></i>
+          </div>
+          <div class="ml-2 mr-6">
+            <span class="font-semibold"
+              >N pull-up or P pull-down detected.</span
+            >
+            <span class="block">Simulation may be inaccurate.</span>
+          </div>
+        </div>
+      </div>
+    </div>
 
-	<!-- START PRINTER-ONLY VIEW -->
-	<div class="print-view">
-		<div class="flex flex-col h-screen">
-			<div class="flex-auto"><!-- FOR PADDING --></div>
-			<div class="flex-auto">
-				<div class="palette w-full flex">
-					<div class="swatch-group">
-						<span class="swatch-label">PDIFF</span>
-						<i class="fas fa-circle swatch"></i>
-					</div>
-					<div class="swatch-group">
-						<span class="swatch-label">NDIFF</span>
-						<i class="fas fa-circle swatch"></i>
-					</div>
-					<div class="swatch-group">
-						<span class="swatch-label">POLY</span>
-						<i class="fas fa-circle swatch"></i>
-					</div>
-					<div class="swatch-group">
-						<span class="swatch-label">METAL1</span>
-						<i class="fas fa-circle swatch"></i>
-					</div>
-					<div class="swatch-group">
-						<span class="swatch-label">METAL2</span>
-						<i class="fas fa-circle swatch"></i>
-					</div>
-					<div class="swatch-group">
-						<span class="swatch-label">CONTACT</span>
-						<i class="fas fa-circle swatch"></i>
-					</div>
-				</div>
-				<img id="print-canvas" class="canvas-img">
-			</div>
-			<div class="flex-auto"><!-- FOR PADDING --></div>
-		</div>
-		<div class="table-container"><table id="print-table"></table></div>
-		<p class="logo">
-			<span>Made with </span><img src="./images/logo-light.svg">
-		</p>
-	</div>
-	<!-- END PRINTER-ONLY VIEW -->
-</body>
+    <!-- START PRINTER-ONLY VIEW -->
+    <div class="print-view">
+      <div class="flex h-screen flex-col">
+        <div class="flex-auto"><!-- FOR PADDING --></div>
+        <div class="flex-auto">
+          <div class="palette flex w-full">
+            <div class="swatch-group">
+              <span class="swatch-label">PDIFF</span>
+              <i class="fas fa-circle swatch"></i>
+            </div>
+            <div class="swatch-group">
+              <span class="swatch-label">NDIFF</span>
+              <i class="fas fa-circle swatch"></i>
+            </div>
+            <div class="swatch-group">
+              <span class="swatch-label">POLY</span>
+              <i class="fas fa-circle swatch"></i>
+            </div>
+            <div class="swatch-group">
+              <span class="swatch-label">METAL1</span>
+              <i class="fas fa-circle swatch"></i>
+            </div>
+            <div class="swatch-group">
+              <span class="swatch-label">METAL2</span>
+              <i class="fas fa-circle swatch"></i>
+            </div>
+            <div class="swatch-group">
+              <span class="swatch-label">CONTACT</span>
+              <i class="fas fa-circle swatch"></i>
+            </div>
+          </div>
+          <img id="print-canvas" class="canvas-img" />
+        </div>
+        <div class="flex-auto"><!-- FOR PADDING --></div>
+      </div>
+      <div class="table-container">
+        <table id="print-table"></table>
+      </div>
+      <p class="logo">
+        <span>Made with </span><img src="./images/logo-light.svg" />
+      </p>
+    </div>
+    <!-- END PRINTER-ONLY VIEW -->
+  </body>
 </html>

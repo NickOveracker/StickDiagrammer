@@ -4,113 +4,244 @@
 @import url("https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@600&display=swap");
 
 :root {
-    --num-cols: 29;
-    --num-rows: 29;
-    --min-size: 320px;
-    font-family: "Josefin Sans", sans-serif;
+  --num-cols: 29;
+  --num-rows: 29;
+  --min-size: 320px;
+  font-family: "Josefin Sans", sans-serif;
 }
 
 @layer base {
-    @media not print {
-        .cast-shadow {
-            @media only screen and (orientation: landscape) and (width < 1024px) {
-                text-shadow: 1px 1px 2px #fafafa, 0 0 1em #f4f4f5, 0 0 0.2em #e4e4e7;
-            }
-        }
-
-        .dark .cast-shadow {
-            @media only screen and (orientation: landscape) and (width < 1024px) {
-                text-shadow: 1px 1px 2px #09090b, 0 0 1em #18181b, 0 0 0.2em #27272a;
-            }
-        }
-
-        @media only screen and (orientation: landscape) {
-            .main-container {
-                height: 100lvh;
-            }
-
-            .canvas-wrapper {
-                height: min(calc(100dvw * var(--num-rows) / var(--num-cols)),calc(100lvh - 6rem));
-                width: min(calc(calc(100lvh - 6rem) * var(--num-cols) / var(--num-rows)), 100%);
-            }
-        }
-
-        @media only screen and (orientation: portrait) {
-            .canvas-wrapper {
-                height: min(calc(100dvw * var(--num-rows) / var(--num-cols)),calc(100lvh - 6rem - 170px));
-                width: min(calc(calc(100lvh - 6rem - 170px) * var(--num-cols) / var(--num-rows)), 100%);
-            }
-        }
-
-        body {
-            @apply bg-zinc-100 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50 xl:bg-red-950;
-            min-width: var(--min-size);
-            min-height: var(--min-size);
-        }
-
-        .button-bg {
-            @apply bg-zinc-900 dark:bg-zinc-100 text-zinc-50 dark:text-zinc-950 rounded-full text-4xl p-4 landscape:flex md:landscape:items-center max-lg:landscape:rounded-none max-lg:landscape:py-16 max-lg:landscape:px-2 max-lg:landscape:text-2xl max-lg:landscape:h-36 cursor-pointer;
-        }
-
-        .canvas-wrapper {
-            @apply mx-auto z-40 lg:landscape:ml-4;
-            aspect-ratio: var(--num-cols) / var(--num-rows);
-
-            .canvas {
-                @apply w-full h-full;
-            }
-        }
-
-        .swatch-group {
-            @apply flex-auto flex items-center;
-
-            .swatch {
-                @apply w-full inline-block text-3xl max-lg:landscape:rounded-l-full max-lg:landscape:bg-current md:max-lg:landscape:w-24;
-            }
-            .swatch-label {
-                @apply hidden md:max-lg:landscape:inline md:max-lg:landscape:absolute md:max-lg:landscape:right-2 md:max-lg:landscape:z-10 md:max-lg:landscape:text-sm pointer-events-none;
-                @extend .cast-shadow;
-            }
-        }
+  @media not print {
+    .cast-shadow {
+      @media only screen and (orientation: landscape) and (width < 1024px) {
+        text-shadow:
+          1px 1px 2px #fafafa,
+          0 0 1em #f4f4f5,
+          0 0 0.2em #e4e4e7;
+      }
     }
 
-    .main-control-label {
-        @apply hidden landscape:block max-lg:landscape:bg-zinc-900 max-lg:landscape:dark:bg-zinc-100 max-lg:landscape:text-zinc-50 max-lg:landscape:dark:text-zinc-950 max-lg:landscape:flex max-lg:landscape:justify-center max-lg:landscape:px-2 max-lg:landscape:text-2xl max-lg:landscape:h-36 max-lg:landscape:cursor-pointer;
-
-        @media only screen and (orientation: landscape) and (width < 1024px) {
-            writing-mode: vertical-lr;
-        }
+    .dark .cast-shadow {
+      @media only screen and (orientation: landscape) and (width < 1024px) {
+        text-shadow:
+          1px 1px 2px #09090b,
+          0 0 1em #18181b,
+          0 0 0.2em #27272a;
+      }
     }
 
-    .evaluate-btn {
-        @apply z-40 rounded-none;
+    @media only screen and (orientation: landscape) {
+      .main-container {
+        height: 100lvh;
+      }
 
-        @media only screen and (orientation: landscape) and (width < 1024px) {
-            writing-mode: vertical-lr;
-        }
+      .canvas-wrapper {
+        height: min(
+          calc(100dvw * var(--num-rows) / var(--num-cols)),
+          calc(100lvh - 6rem)
+        );
+        width: min(
+          calc(calc(100lvh - 6rem) * var(--num-cols) / var(--num-rows)),
+          100%
+        );
+      }
     }
 
-    .print-view {
-        @apply hidden print:block text-black text-center;
-        print-color-adjust: exact;
-
-        .swatch-group {
-            @apply flex-auto;
-
-            .swatch {
-                @apply mt-2 w-full inline-block;
-            }
-            .swatch-label {
-                @apply w-full inline-block;
-            }
-        }
-
-        .canvas-img {
-            @apply break-after-page w-full;
-        }
-
-        .logo {
-            @apply fixed bottom-0 right-0;
-        }
+    @media only screen and (orientation: portrait) {
+      .canvas-wrapper {
+        height: min(
+          calc(100dvw * var(--num-rows) / var(--num-cols)),
+          calc(100lvh - 6rem - 170px)
+        );
+        width: min(
+          calc(calc(100lvh - 6rem - 170px) * var(--num-cols) / var(--num-rows)),
+          100%
+        );
+      }
     }
+
+    body {
+      @apply bg-zinc-100 text-zinc-950 dark:bg-zinc-900 dark:text-zinc-50;
+      min-width: var(--min-size);
+      min-height: var(--min-size);
+    }
+
+    .button-bg {
+      @apply cursor-pointer rounded-full bg-zinc-900 p-4 text-4xl text-zinc-50 dark:bg-zinc-100 dark:text-zinc-950 landscape:flex max-lg:landscape:h-36 max-lg:landscape:rounded-none max-lg:landscape:px-2 max-lg:landscape:py-16 max-lg:landscape:text-2xl md:landscape:items-center;
+    }
+
+    .canvas-wrapper {
+      @apply z-40 mx-auto lg:landscape:ml-4;
+      aspect-ratio: var(--num-cols) / var(--num-rows);
+
+      .canvas {
+        @apply h-full w-full;
+      }
+    }
+
+    .swatch-group {
+      @apply flex flex-auto items-center;
+
+      .swatch {
+        @apply inline-block w-full text-3xl max-lg:landscape:rounded-l-full max-lg:landscape:bg-current md:max-lg:landscape:w-24;
+      }
+      .swatch-label {
+        @apply pointer-events-none hidden md:max-lg:landscape:absolute md:max-lg:landscape:right-2 md:max-lg:landscape:z-10 md:max-lg:landscape:inline md:max-lg:landscape:text-sm;
+        @extend .cast-shadow;
+      }
+    }
+  }
+
+  .main-control-label {
+    @apply hidden landscape:block max-lg:landscape:flex max-lg:landscape:h-36 max-lg:landscape:cursor-pointer max-lg:landscape:justify-center max-lg:landscape:bg-zinc-900 max-lg:landscape:px-2 max-lg:landscape:text-2xl max-lg:landscape:text-zinc-50 max-lg:landscape:dark:bg-zinc-100 max-lg:landscape:dark:text-zinc-950;
+
+    @media only screen and (orientation: landscape) and (width < 1024px) {
+      writing-mode: vertical-lr;
+    }
+  }
+
+  .evaluate-btn {
+    @apply z-40 rounded-none;
+
+    @media only screen and (orientation: landscape) and (width < 1024px) {
+      writing-mode: vertical-lr;
+    }
+  }
+
+  input[type="radio"] {
+    display: none;
+  }
+
+  .active .terminal-btn {
+    color: #f20d5e;
+  }
+
+  .terminal-select label {
+    padding-top: 1.5vh;
+    padding-bottom: 1.5vh;
+    width: 100%;
+    text-align: center;
+    color: #221d1d;
+    cursor: pointer;
+
+    &.first {
+      border-radius: 10px 0 0 10px;
+    }
+
+    &.last {
+      border-radius: 0 10px 10px 0;
+    }
+  }
+
+  @media only screen and (orientation: landscape) {
+    .terminal-select label.last {
+      border-radius: 0 10px 10px 0;
+    }
+  }
+  .terminal-select > input:checked + label {
+    background-color: #221d1d;
+    color: #fff;
+  }
+
+  /*-------Controls-END--------*/
+
+  /*-----------Edit-open-------------*/
+  .terminal-menu {
+    width: 100%;
+    height: 100vh;
+    /*background-color: rgba(76,38,184,98%);
+        position: sticky;
+        top: 0;
+        right: 0;
+        z-index: 1000;*/
+  }
+
+  .terminal {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    align-items: center;
+    font-family: "Josefin Sans", sans-serif;
+  }
+
+  /*.terminal h3{
+        font-size: 25px;
+        color: #FFFFFF;
+        text-transform: uppercase;
+    }*/
+
+  .terminal-select {
+    display: flex;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding-top: 0;
+    padding-bottom: 0;
+
+    @media only screen and (orientation: landscape) {
+      border-radius: 10px;
+    }
+  }
+
+  .terminal-select2 {
+    margin-top: 30px;
+    display: flex;
+  }
+
+  .terminal-btn {
+    font-size: 25px;
+    margin: 10px;
+    padding: 20px;
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    color: #221d1d;
+    box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 12px;
+    background-color: rgba(255, 255, 255, 0.8);
+    text-align: center;
+    box-sizing: content-box;
+  }
+
+  .select-content {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .terminal-select label:hover,
+  .terminal-btn,
+  .evaluate-btn,
+  .clickable {
+    &:hover {
+      color: #f20d5e;
+      transition: 0.5s;
+    }
+  }
+
+  .fa-circle:hover {
+    opacity: 0.7;
+    transition: 0.5;
+  }
+
+  .print-view {
+    @apply hidden text-center text-black print:block;
+    print-color-adjust: exact;
+
+    .swatch-group {
+      @apply flex-auto;
+
+      .swatch {
+        @apply mt-2 inline-block w-full;
+      }
+      .swatch-label {
+        @apply inline-block w-full;
+      }
+    }
+
+    .canvas-img {
+      @apply w-full break-after-page;
+    }
+
+    .logo {
+      @apply fixed bottom-0 right-0;
+    }
+  }
 }

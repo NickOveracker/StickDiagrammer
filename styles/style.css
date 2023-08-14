@@ -37,32 +37,32 @@
   }
   @media not print {
     body {
-      @apply bg-zinc-100 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50 xl:bg-red-950;
+      @apply bg-zinc-100 text-zinc-950 dark:bg-zinc-900 dark:text-zinc-50;
       min-width: var(--min-size);
       min-height: var(--min-size);
     }
     .button-bg {
-      @apply bg-zinc-900 dark:bg-zinc-100 text-zinc-50 dark:text-zinc-950 rounded-full text-4xl p-4 landscape:flex md:landscape:items-center max-lg:landscape:rounded-none max-lg:landscape:py-16 max-lg:landscape:px-2 max-lg:landscape:text-2xl max-lg:landscape:h-36 cursor-pointer;
+      @apply cursor-pointer rounded-full bg-zinc-900 p-4 text-4xl text-zinc-50 dark:bg-zinc-100 dark:text-zinc-950 landscape:flex max-lg:landscape:h-36 max-lg:landscape:rounded-none max-lg:landscape:px-2 max-lg:landscape:py-16 max-lg:landscape:text-2xl md:landscape:items-center;
     }
     .canvas-wrapper {
-      @apply mx-auto z-40 lg:landscape:ml-4;
+      @apply z-40 mx-auto lg:landscape:ml-4;
       aspect-ratio: var(--num-cols)/var(--num-rows);
     }
     .canvas-wrapper .canvas {
-      @apply w-full h-full;
+      @apply h-full w-full;
     }
     .swatch-group {
-      @apply flex-auto flex items-center;
+      @apply flex flex-auto items-center;
     }
     .swatch-group .swatch {
-      @apply w-full inline-block text-3xl max-lg:landscape:rounded-l-full max-lg:landscape:bg-current md:max-lg:landscape:w-24;
+      @apply inline-block w-full text-3xl max-lg:landscape:rounded-l-full max-lg:landscape:bg-current md:max-lg:landscape:w-24;
     }
     .swatch-group .swatch-label {
-      @apply hidden md:max-lg:landscape:inline md:max-lg:landscape:absolute md:max-lg:landscape:right-2 md:max-lg:landscape:z-10 md:max-lg:landscape:text-sm pointer-events-none;
+      @apply pointer-events-none hidden md:max-lg:landscape:absolute md:max-lg:landscape:right-2 md:max-lg:landscape:z-10 md:max-lg:landscape:inline md:max-lg:landscape:text-sm;
     }
   }
   .main-control-label {
-    @apply hidden landscape:block max-lg:landscape:bg-zinc-900 max-lg:landscape:dark:bg-zinc-100 max-lg:landscape:text-zinc-50 max-lg:landscape:dark:text-zinc-950 max-lg:landscape:flex max-lg:landscape:justify-center max-lg:landscape:px-2 max-lg:landscape:text-2xl max-lg:landscape:h-36 max-lg:landscape:cursor-pointer;
+    @apply hidden landscape:block max-lg:landscape:flex max-lg:landscape:h-36 max-lg:landscape:cursor-pointer max-lg:landscape:justify-center max-lg:landscape:bg-zinc-900 max-lg:landscape:px-2 max-lg:landscape:text-2xl max-lg:landscape:text-zinc-50 max-lg:landscape:dark:bg-zinc-100 max-lg:landscape:dark:text-zinc-950;
   }
   @media only screen and (orientation: landscape) and (width < 1024px) {
     .main-control-label {
@@ -81,8 +81,124 @@
               writing-mode: vertical-lr;
     }
   }
+  input[type=radio] {
+    display: none;
+  }
+  .active .terminal-btn {
+    color: #f20d5e;
+  }
+  .terminal-select label {
+    padding-top: 1.5vh;
+    padding-bottom: 1.5vh;
+    width: 100%;
+    text-align: center;
+    color: #221d1d;
+    cursor: pointer;
+  }
+  .terminal-select label.first {
+    border-radius: 10px 0 0 10px;
+  }
+  .terminal-select label.last {
+    border-radius: 0 10px 10px 0;
+  }
+  @media only screen and (orientation: landscape) {
+    .terminal-select label.last {
+      border-radius: 0 10px 10px 0;
+    }
+  }
+  .terminal-select > input:checked + label {
+    background-color: #221d1d;
+    color: #fff;
+  }
+  /*-------Controls-END--------*/
+  /*-----------Edit-open-------------*/
+  .terminal-menu {
+    width: 100%;
+    height: 100vh;
+    /*background-color: rgba(76,38,184,98%);
+        position: sticky;
+        top: 0;
+        right: 0;
+        z-index: 1000;*/
+  }
+  .terminal {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    -webkit-box-pack: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    text-align: center;
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    font-family: "Josefin Sans", sans-serif;
+  }
+  /*.terminal h3{
+        font-size: 25px;
+        color: #FFFFFF;
+        text-transform: uppercase;
+    }*/
+  .terminal-select {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  @media only screen and (orientation: landscape) {
+    .terminal-select {
+      border-radius: 10px;
+    }
+  }
+  .terminal-select2 {
+    margin-top: 30px;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+  }
+  .terminal-btn {
+    font-size: 25px;
+    margin: 10px;
+    padding: 20px;
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    color: #221d1d;
+    -webkit-box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 12px;
+            box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 12px;
+    background-color: rgba(255, 255, 255, 0.8);
+    text-align: center;
+    -webkit-box-sizing: content-box;
+            box-sizing: content-box;
+  }
+  .select-content {
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    text-align: center;
+  }
+  .terminal-select label:hover:hover,
+  .terminal-btn:hover,
+  .evaluate-btn:hover,
+  .clickable:hover {
+    color: #f20d5e;
+    -webkit-transition: 0.5s;
+    transition: 0.5s;
+  }
+  .fa-circle:hover {
+    opacity: 0.7;
+    -webkit-transition: 0.5;
+    transition: 0.5;
+  }
   .print-view {
-    @apply hidden print:block text-black text-center;
+    @apply hidden text-center text-black print:block;
     -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
   }
@@ -90,13 +206,13 @@
     @apply flex-auto;
   }
   .print-view .swatch-group .swatch {
-    @apply mt-2 w-full inline-block;
+    @apply mt-2 inline-block w-full;
   }
   .print-view .swatch-group .swatch-label {
-    @apply w-full inline-block;
+    @apply inline-block w-full;
   }
   .print-view .canvas-img {
-    @apply break-after-page w-full;
+    @apply w-full break-after-page;
   }
   .print-view .logo {
     @apply fixed bottom-0 right-0;
