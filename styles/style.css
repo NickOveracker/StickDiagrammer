@@ -22,17 +22,17 @@
   }
   @media only screen and (orientation: landscape) {
     .main-container {
-      height: 100svh;
+      height: 100lvh;
     }
     .canvas-wrapper {
-      height: min(100dvw * var(--num-rows) / var(--num-cols), 100svh - 6rem);
-      width: min((100svh - 6rem) * var(--num-cols) / var(--num-rows), 100%);
+      height: min(100dvw * var(--num-rows) / var(--num-cols), 100lvh - 6rem);
+      width: min((100lvh - 6rem) * var(--num-cols) / var(--num-rows), 100%);
     }
   }
   @media only screen and (orientation: portrait) {
     .canvas-wrapper {
-      height: min(100dvw * var(--num-rows) / var(--num-cols), 100svh - 6rem - 170px);
-      width: min((100svh - 6rem - 170px) * var(--num-cols) / var(--num-rows), 100%);
+      height: min(100dvw * var(--num-rows) / var(--num-cols), 100lvh - 6rem - 170px);
+      width: min((100lvh - 6rem - 170px) * var(--num-cols) / var(--num-rows), 100%);
     }
   }
   @media not print {
