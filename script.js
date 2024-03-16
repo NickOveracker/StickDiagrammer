@@ -1466,11 +1466,19 @@
             }.bind(this));
         }
 
-        // Check whether it matters if a particular gate conflict exists.
-        // If it does not affect the output, we can safely continue computation.
-        // If it does, then the output value on the truth table should be X.
-        //
-        // Unset this.overdrivenPath if the conflict is resolvable.
+        /**
+         * @method attemptGateConflictResolution
+         * @description
+         * Check whether it matters if a particular gate conflict exists.
+         * If it does not affect the output, we can safely continue computation.
+         * If it does, then the output value on the truth table should be X.
+         * 
+         * Unset this.overdrivenPath if the conflict is resolvable.
+         * 
+         * @param {Node} node The node to find a path from.
+         * @param {Node} targetNode The node to find a path to.
+         * @param {number} inputVals The input values to use (binary encoded).
+         */
         attemptGateConflictResolution(node, targetNode, inputVals) {
             let targetNodeReachable, nodeTerm1, nodeTerm2, od,
                 gndPathExistsActivated, vddPathExistsActivated;
@@ -1558,6 +1566,18 @@
             mapCopy(backupNodeNodeMap, this.nodeNodeMap);
         }
 
+        /**
+         * @method recurseThroughEdges
+         * @description
+         * Recursively searches for a path from node to targetNode
+         * given a particular set of inputs.
+         * 
+         * @param {Node} node - The node to start from.
+         * @param {Node} targetNode - The node to find a path to.
+         * @param {number} inputVals - The input values to use (binary encoded).
+         * @returns {Object} - The mapping between node and targetNode.
+         * @private
+         */
         recurseThroughEdges(node, targetNode, inputVals) {
             let pathFound;
             let hasNullPath = false;
@@ -1613,14 +1633,25 @@
             }
         }
 
-        // Recursively searches for a path from node to targetNode
-        // given a particular set of inputs.
-        //
-        // Assumption: targetNode is NOT a transistor.
-        // This holds true because targetNode is always either
-        // and output node, the GND terminal, or the VDD terminal.
-        // NONE of these can be transistors because all of them
-        // are implemented as contacts, which destroy transistors.
+        /**
+         * @method computeOutputRecursive
+         * @description
+         * Recursively searches for a path from node to targetNode
+         * given a particular set of inputs.
+         *
+         * Assumption: targetNode is NOT a transistor.
+         * This holds true because targetNode is always either
+         * and output node, the GND terminal, or the VDD terminal.
+         * 
+         * NONE of these can be transistors because all of them
+         * are implemented as contacts, which destroy transistors.
+         * 
+         * @param {Node} node - The node to start from.
+         * @param {Node} targetNode - The node to find a path to.
+         * @param {number} inputVals - The input values to use (binary encoded).
+         * @returns {Object} - The mapping between node and targetNode.
+         * @private
+         */
         computeOutputRecursive(node, targetNode, inputVals) {
             let mapping;
 
@@ -2297,12 +2328,12 @@
          * 
          * Side effect: Adds a transistor (if found) to this.nmos or this.pmos.
          * 
-         * @method checkIfTransistor
+         * @method initIfTransistorChannel
          * @param {*} cell
          * @returns {boolean} True if the cell is a transistor.
          * @private
          */
-        checkIfTransistor(cell) {
+        initIfTransistorChannel(cell) {
             // If the layer is NDIFF or PDIFF and there is also a POLY at the same location,
             // add the cell to transistors.
             // (Except when there is also a contact)
@@ -2439,7 +2470,7 @@
 
             // Check the cell for a transistor.
             // If this is in a diffusion layer, do not propogate past a transistor.
-            if (this.checkIfTransistor(cell)) {
+            if (this.initIfTransistorChannel(cell)) {
                 gateNet = this.getNet(this.layeredGrid.get(cell.x,cell.y,LayeredGrid.POLY)); 
 
                 if(gateNet === null) {
@@ -2454,8 +2485,8 @@
 
             // If this is in the poly layer, we don't need to stop at a transistor.
             if (cell.layer === LayeredGrid.POLY) {
-                this.checkIfTransistor(this.layeredGrid.get(cell.x, cell.y, LayeredGrid.NDIFF));
-                this.checkIfTransistor(this.layeredGrid.get(cell.x, cell.y, LayeredGrid.PDIFF));
+                this.initIfTransistorChannel(this.layeredGrid.get(cell.x, cell.y, LayeredGrid.NDIFF));
+                this.initIfTransistorChannel(this.layeredGrid.get(cell.x, cell.y, LayeredGrid.PDIFF));
             }
 
             // Add the cell to the net.
