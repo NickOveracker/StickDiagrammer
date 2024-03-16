@@ -2354,18 +2354,32 @@
          * If the cell at location (cell.x + deltaX, cell.y + deltaY, cell.layer) is set,
          * and it is not already in the net, add it to the net unless it is a contact.
          * 
-         * @param {number} deltaX 
-         * @param {number} deltaY 
-         * @param {Net} net 
-         * @param {*} cell 
+         * IMPORTANT: This function assumes that the `cell` is in `net`.
+         * 
+         * @param {number} deltaX The x offset from `cell`. Must be -1, 0, or 1.
+         * @param {number} deltaY The y offset from `cell`. Must be -1, 0, or 1.
+         * @param {Net} net The net to add the adjacent cell to.
+         * @param {*} cell The cell whose adjacent cell is being set. IMPORTANT: must be in `net`.
          * @returns {undefined}
+         * @throws {Error} If the inputs are invalid.
+         * @private
          */
         setAdjacent(deltaX, deltaY, net, cell) {
+            // Throw an exception if:
+            // 1. deltaX is not -1, 0, or 1.
+            // 2. deltaY is not -1, 0, or 1.
+            // 3. cell is not in net.
+            if (Math.abs(deltaX) > 1 || Math.abs(deltaY) > 1 || !net.containsCell(cell)) {
+                throw new Error("Invalid arguments to setAdjacent.");
+            }
+
             // Don't connect contacts to adjacent contacts.
             if(cell.layer === LayeredGrid.CONTACT) {
                 return;
             }
 
+            // If the cell at (cell.x + deltaX, cell.y + deltaY, cell.layer) is set,
+            // and it is not already in the net, add it and eligible adjacent cells to the net.
             if (this.layeredGrid.get(cell.x + deltaX, cell.y + deltaY, cell.layer).isSet) {
                 if (net.containsCell(this.layeredGrid.get(cell.x + deltaX, cell.y + deltaY, cell.layer)) === false) {
                     this.setRecursively(this.layeredGrid.get(cell.x + deltaX, cell.y + deltaY, cell.layer), net);
@@ -2373,15 +2387,29 @@
             }
         }
 
+        /**
+         * @description
+         * If there is a contact at the cell, add all layers to the net.
+         * 
+         * @method handleContact
+         * @param {*} cell 
+         * @param {Net} net 
+         * @returns {undefined}
+         * @private
+         */
         handleContact(cell, net) {
             if (this.layeredGrid.get(cell.x, cell.y, LayeredGrid.CONTACT).isSet) {
+                // Add all layers to the net.
                 LayeredGrid.layers.forEach(function(_, layer) {
+                    //Ignore the delete layer.
                     if(layer === LayeredGrid.DELETE) {
                         return;
                     }
+                    // Ignore unset layers.
                     if (!this.layeredGrid.get(cell.x, cell.y, layer).isSet) {
                         return;
                     }
+                    // Add the cell to the net if it is not already in it.
                     if (net.containsCell(this.layeredGrid.get(cell.x, cell.y, layer)) === false) {
                         net.addCell(this.layeredGrid.get(cell.x, cell.y, layer), true);
                         this.setRecursively(this.layeredGrid.get(cell.x, cell.y, layer), net);
@@ -2390,6 +2418,16 @@
             }
         }
 
+        /**
+         * @description
+         * Add `cell` to `net`, then recursively add all eligible adjacent cells to `net`.
+         * 
+         * @method setRecursively
+         * @param {*} cell 
+         * @param {Net} net 
+         * @returns {undefined}
+         * @private
+         */
         setRecursively(cell, net) {
             let gateNet;
             net.addNode(this.graph.getNode(cell));
