@@ -2149,13 +2149,31 @@
             }.bind(this));
         }
 
-        // Add a node to a net that does not yet have any nodes.
+        /**
+         * @description
+         * Add a node to a net that does not yet have any nodes.
+         * 
+         * @method assignEmptyNode
+         * @param {Net} net - The net to add the node to.
+         * @returns {Node} The node that was added to the net.
+         * @private
+         */
         assignEmptyNode(net) {
             let node = this.graph.addNode(net.cells.values().next().value, true);
             net.addNode(node);
             return node;
         }
 
+        /**
+         * @description
+         * Check the polarity of the circuit.
+         * If there are any NDIFF cells in vddNet, flag for nmos pullup.
+         * If there are any PDIFF cells in gndNet, flag for pmos pulldown.
+         * 
+         * @method checkPolarity
+         * @returns {undefined}
+         * @private 
+        */
         checkPolarity() {
             this.nmosPullup = this.pmosPulldown = false;
 
@@ -2182,6 +2200,14 @@
             }
         }
 
+        /**
+         * @description
+         * Find all nets that are identical and link them together.
+         * 
+         * @method linkIdenticalNets
+         * @returns {undefined}
+         * @private
+         */
         linkIdenticalNets() {
             let linkNodes = function(net1, net2) {
                 let nodeIterator1 = net1.nodes.values();
@@ -2212,7 +2238,16 @@
             }
         }
 
-        // Function to get the net from the this.netlist that contains a given cell.
+        // NOTE: cell is an object with properties isSet, layer, x, y, term1, term2, and gate.
+        /**
+         * @description
+         * Get the net that contains a cell.
+         * 
+         * @method getNet
+         * @param {*} cell - The cell to find the net for.
+         * @returns {Net} The net that contains the cell.
+         * @private
+         */
         getNet(cell) {
             for (let ii = 0; ii < this.netlist.length; ii++) {
                 if (this.netlist[ii].containsCell(cell)) {
@@ -2222,7 +2257,17 @@
             return null;
         }
        
-        // Helper function to set the terminals of transistors.
+        /**
+         * @description
+         * Set the terminals of a transistor.
+         * 
+         * @method setTerminals
+         * @param {*} transistor 
+         * @param {number} x 
+         * @param {number} y 
+         * @param {number} layer 
+         * @private
+         */
         setTerminals(transistor, x, y, layer) {
             let cell = this.layeredGrid.get(x, y, layer);
             
@@ -2245,15 +2290,22 @@
             }
         }
 
-        // If the cell is NDIFF or PDIFF intersected by POLY, create a transistor.
-        // Exception for LayeredGrid.CONTACT.
-        // Returns true if the cell is a transistor.
-        // Side effect: Adds a transistor (if found) to this.nmos or this.pmos.
+        /**
+         * @description
+         * If the cell is NDIFF or PDIFF intersected by POLY, create a transistor
+         * unless it is already a transistor or there is a CONTACT on the same cell.
+         * 
+         * Side effect: Adds a transistor (if found) to this.nmos or this.pmos.
+         * 
+         * @method checkIfTransistor
+         * @param {*} cell
+         * @returns {boolean} True if the cell is a transistor.
+         * @private
+         */
         checkIfTransistor(cell) {
             // If the layer is NDIFF or PDIFF and there is also a POLY at the same location,
             // add the cell to transistors.
             // (Except when there is also a contact)
-
             let handleCell = function(layer, transistorArray) {
                 if (!transistorArray.has(cell) && cell.layer === layer && cell.isSet) {
                     if (this.layeredGrid.get(cell.x, cell.y, LayeredGrid.POLY).isSet && !this.layeredGrid.get(cell.x, cell.y, LayeredGrid.CONTACT).isSet) {
@@ -2297,15 +2349,24 @@
             return handleCell(LayeredGrid.PDIFF, this.pmos) || handleCell(LayeredGrid.NDIFF, this.nmos);
         }
 
-        // For each layer of the cell in the net, recurse with all adjacent cells in the layer.
-        // Generic function for the above code.
+        /**
+         * @description
+         * If the cell at location (cell.x + deltaX, cell.y + deltaY, cell.layer) is set,
+         * and it is not already in the net, add it to the net unless it is a contact.
+         * 
+         * @param {number} deltaX 
+         * @param {number} deltaY 
+         * @param {Net} net 
+         * @param {*} cell 
+         * @returns {undefined}
+         */
         setAdjacent(deltaX, deltaY, net, cell) {
             // Don't connect contacts to adjacent contacts.
             if(cell.layer === LayeredGrid.CONTACT) {
                 return;
             }
 
-            if (net.containsCell(this.layeredGrid.get(cell.x, cell.y, cell.layer)) && this.layeredGrid.get(cell.x + deltaX, cell.y + deltaY, cell.layer).isSet) {
+            if (this.layeredGrid.get(cell.x + deltaX, cell.y + deltaY, cell.layer).isSet) {
                 if (net.containsCell(this.layeredGrid.get(cell.x + deltaX, cell.y + deltaY, cell.layer)) === false) {
                     this.setRecursively(this.layeredGrid.get(cell.x + deltaX, cell.y + deltaY, cell.layer), net);
                 }
