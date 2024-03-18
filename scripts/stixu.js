@@ -2978,9 +2978,8 @@
                 keyCode:      37,
                 action:       function(e) {
                     if(e.type.includes('up')) {
-                        let coords = this.diagramController.getCellAtCursor();
+                        const coords = this.diagramController.getCellAtCursor();
                         const hasOwn = Object.hasOwn ? Object.hasOwn(coords, "x") : coords.hasOwnProperty("x"); // compatibility
-                        coords = hasOwn ? coords : {x: this.diagramGrid.width, };
                         if(hasOwn) {
                             this.diagramGrid.insertRemoveRowColAt(coords.x, false, false);
                         } else {
