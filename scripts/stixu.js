@@ -9,8 +9,9 @@
  * ## Stipulations for updates
  *    - All builds must pass JSHint with no warnings (https://jshint.com/)
  *      - This following tags may be disabled, but only on a line-by-line basis.
- *      - "jshint bitwise" (bitwise operators)
- *      - "jshint -W093" (returning and assigning in one step)
+ *      - "jshint bitwise"    (bitwise operators)
+ *      - "jshint -W093"      (returning and assigning in one step)
+ *      - "jshint nonew"      (using "new" for side-effects)
  *      - "jshint complexity" (cyclomatic complexity, function-by-function basis)
  *    - All builds must pass testbench
  *      - The testbench may need to be modified for some breaking changes (e.g., new layers)
@@ -41,8 +42,6 @@
 /* jshint varstmt: true */
 /* jshint browser: true */
 /* jshint latedef: true */
-/* globals runTestbench:     false,
-           debugDefinitions: false */
 (() => {
     'use strict';
 
@@ -309,6 +308,7 @@
         // Sign should be a positive or negative integer
         shift(startIndex, byRow, sign) {
             // Cannot be reasonably reduced further than this; make an exception.
+            // TODO: Reduce if at all possible in the future.
             /* jshint maxcomplexity: 12 */ 
 
             let oldGrid, startX, startY, coords, oldCell, isInShiftRange,
@@ -524,6 +524,17 @@
             this.edges = [];
             this.isPmos = !suppressTransistor && pdiffCell.isSet;
             this.isNmos = !suppressTransistor && ndiffCell.isSet;
+            this.gateLocks = [];
+            this.edgeLocks = [];
+        }
+
+        isLocked(targetNode, graph) {
+            let isLocked;
+
+            isLocked = !!this.gateLocks[graph.getIndexByNode(targetNode)];
+            isLocked = isLocked || !!this.edgeLocks[graph.getIndexByNode(targetNode)];
+
+            return isLocked;
         }
 
         // Destructor
@@ -641,6 +652,28 @@
             this.placeTermMode    = false;
             this.selectedTerminal = null;
             this.currentCell      = null;
+        }
+
+        setTerminalCounts(numInputs, numOutputs) {
+            // Delete all
+            const terminals = [
+                { arr: this.diagram.inputs,  num: numInputs,  isOutput: false, },
+                { arr: this.diagram.outputs, num: numOutputs, isOutput: true,  },
+            ];
+
+            // Delete excess terminals first.
+            terminals.forEach(function(ioObj) {
+                while(ioObj.arr.length > ioObj.num) {
+                    this.removeTerminal(ioObj.isOutput);
+                }
+            }.bind(this));
+
+            // Now add up to the correct number.
+            terminals.forEach(function(ioObj) {
+                while(ioObj.arr.length < ioObj.num) {
+                    this.addTerminal(ioObj.isOutput);
+                }
+            }.bind(this));
         }
 
         removeTerminal(isOutput) {
@@ -847,7 +880,9 @@
                 cell = this.getCellAtCursor();
             }
 
-            if (Object.hasOwn(cell, "x") && !event.ctrlKey) {
+            const hasOwn = Object.hasOwn ? Object.hasOwn(cell, "x") : cell.hasOwnProperty("x"); // compatibility
+
+            if (hasOwn && !event.ctrlKey) {
                 // First, note the current coordinates.
                 oldX = terminal.x;
                 oldY = terminal.y;
@@ -1226,6 +1261,111 @@
             this.controller = new DiagramController(this, this.view, mainCanvas);
         }
 
+        encode() {
+            const code = [];
+            let bitNo = 7;
+            let codeByte = 0;
+
+            // Header
+            code.push(this.layeredGrid.width);
+            code.push(this.layeredGrid.height);
+            code.push(this.layeredGrid.layers - 1);
+            code.push(this.inputs.length);
+            code.push(this.outputs.length);
+
+            // Terminal locations
+            [this.vddCell, this.gndCell,].concat(this.inputs.concat(this.outputs)).forEach(function(terminal) {
+                code.push(terminal.x);
+                code.push(terminal.y);
+            });
+            
+            // Cells
+            for(let lyr = 0; lyr < this.layeredGrid.layers - 1; lyr++) {
+                for(let col = 0; col < this.layeredGrid.width; col++) {
+                    for(let row = 0; row < this.layeredGrid.height; row++) {
+                        if(this.layeredGrid.get(col,row,lyr).isSet) {
+                            /*jslint bitwise: true */
+                            codeByte = codeByte | (1 << bitNo);
+                            /*jslint bitwise: false */
+                        }
+                        bitNo--;
+
+                        if(bitNo < 0) {
+                            bitNo = 7;
+                            code.push(codeByte);
+                            codeByte = 0;
+                        }
+                    }
+                }
+            }
+
+            // Leftover bits
+            if(bitNo < 7) {
+                code.push(codeByte);
+            }
+
+            let str = "";
+            code.forEach((char) => {
+                str += String.fromCharCode(char);
+            });
+
+            return window.LZUTF8.compress(btoa(str), {outputEncoding: "Base64",});
+        }
+
+        decode(stringBase64) {
+            const decompress = atob(window.LZUTF8.decompress(stringBase64, {inputEncoding: "Base64",}));
+            const setGrid    = [];
+            let byte, bitShift, cellIndex = 0;
+
+            for(let ii = 0; ii < decompress.length; ii++) {
+                setGrid[ii] = decompress.charCodeAt(ii);
+            }
+
+            const setWidth   = setGrid.splice(0,1)[0];
+            const setHeight  = setGrid.splice(0,1)[0];
+            const setDepth   = setGrid.splice(0,1)[0];
+            const numInputs  = setGrid.splice(0,1)[0];
+            const numOutputs = setGrid.splice(0,1)[0];
+
+            this.vddCell.x   = setGrid.splice(0,1)[0];
+            this.vddCell.y   = setGrid.splice(0,1)[0];
+            this.gndCell.x   = setGrid.splice(0,1)[0];
+            this.gndCell.y   = setGrid.splice(0,1)[0];
+
+            this.controller.setTerminalCounts(numInputs, numOutputs);
+            this.layeredGrid.resize(setWidth, setHeight);
+
+            [ this.inputs, this.outputs, ].forEach(function(arr) {
+                for(let ii = 0; ii < arr.length; ii++) {
+                    arr[ii] = {x: setGrid.splice(0,1)[0], y: setGrid.splice(0,1)[0], };
+                    this.controller.placeTerminal(arr[ii], arr[ii], true);
+                }
+            }.bind(this));
+
+            // Cells
+            for(let lyr = 0; lyr < this.layeredGrid.layers - 1 && lyr < setDepth; lyr++) {
+                for(let col = 0; col < this.layeredGrid.width; col++) {
+                    for(let row = 0; row < this.layeredGrid.height; row++) {
+                        /*jslint bitwise: true */
+                        bitShift = 1 << (7 - cellIndex % 8);
+                        byte = Math.floor(cellIndex/8);
+                        if(setGrid[byte] & bitShift) {
+                            this.layeredGrid.set(col, row, lyr);
+                        } else {
+                            this.layeredGrid.clear(col, row, lyr);
+                        }
+                        /*jslint bitwise: false */
+                        cellIndex++;
+                    }
+                }
+            }
+
+            // Terminals
+            [this.vddCell, this.gndCell,].concat(this.inputs.concat(this.outputs)).forEach(function(cell) {
+                this.controller.placeTerminal(cell, cell, true);
+            }.bind(this));
+        }
+
         initCells() {
             let startWidth  = 29;
             let startHeight = 29;
@@ -1440,9 +1580,14 @@
 
         // Evaluate the value of an input node.
         // Returns the rail node (VDD or GND) that it is virtually mapped to.
+        // If node is not an input, return undefined.
         evaluateInput(node, inputVals) {
             let evalInput;
             let inputNum = this.inputNodes.indexOf(node);
+
+            if(inputNum === -1) {
+                return undefined;
+            }
 
             // This becomes the shift amount
             // Lower number inputs are actually in the
@@ -1466,11 +1611,19 @@
             }.bind(this));
         }
 
-        // Check whether it matters if a particular gate conflict exists.
-        // If it does not affect the output, we can safely continue computation.
-        // If it does, then the output value on the truth table should be X.
-        //
-        // Unset this.overdrivenPath if the conflict is resolvable.
+        /**
+         * @method attemptGateConflictResolution
+         * @description
+         * Check whether it matters if a particular gate conflict exists.
+         * If it does not affect the output, we can safely continue computation.
+         * If it does, then the output value on the truth table should be X.
+         * 
+         * Unset this.overdrivenPath if the conflict is resolvable.
+         * 
+         * @param {Node} node The node to find a path from.
+         * @param {Node} targetNode The node to find a path to.
+         * @param {number} inputVals The input values to use (binary encoded).
+         */
         attemptGateConflictResolution(node, targetNode, inputVals) {
             let targetNodeReachable, nodeTerm1, nodeTerm2, od,
                 gndPathExistsActivated, vddPathExistsActivated;
@@ -1558,13 +1711,41 @@
             mapCopy(backupNodeNodeMap, this.nodeNodeMap);
         }
 
+        /**
+         * @method recurseThroughEdges
+         * @description
+         * Recursively searches for a path from node to targetNode
+         * given a particular set of inputs.
+         * 
+         * @param {Node} node - The node to start from.
+         * @param {Node} targetNode - The node to find a path to.
+         * @param {number} inputVals - The input values to use (binary encoded).
+         * @returns {Object} - The mapping between node and targetNode.
+         * @private
+         */
         recurseThroughEdges(node, targetNode, inputVals) {
             let pathFound;
             let hasNullPath = false;
+            let lockObj = {};
+            let targetIndex = this.graph.getIndexByNode(targetNode);
+
+            node.edges.forEach(function(edge) {
+                let otherNode = edge.getOtherNode(node);
+                let mapping = this.getMapping(otherNode, targetNode);
+
+                if(mapping === this.UNCHECKED && !otherNode.edgeLocks[targetIndex]) {
+                    otherNode.edgeLocks[targetIndex] = lockObj;
+                }
+            }.bind(this));
 
             node.edges.some(function(edge) {
                 let otherNode = edge.getOtherNode(node);
                 let mapping = this.getMapping(otherNode, targetNode);
+                let nodeLock = otherNode.edgeLocks[targetIndex];
+
+                if(nodeLock !== lockObj && mapping.hasPath === this.UNCHECKED) {
+                    return false;
+                }
               
               	if(!mapping.direct && (otherNode === this.vddNode || otherNode === this.gndNode)) {
                   return false;
@@ -1601,6 +1782,13 @@
                 }
             }.bind(this));
 
+            node.edges.forEach(function(edge) {
+                let otherNode = edge.getOtherNode(node);
+                if(otherNode.edgeLocks[targetIndex] === lockObj) {
+                    otherNode.edgeLocks[targetIndex] = null;
+                }
+            });
+
             if(pathFound) {
                 return pathFound;
             } else if(hasNullPath) {
@@ -1613,20 +1801,30 @@
             }
         }
 
-        // Recursively searches for a path from node to targetNode
-        // given a particular set of inputs.
-        //
-        // Assumption: targetNode is NOT a transistor.
-        // This holds true because targetNode is always either
-        // and output node, the GND terminal, or the VDD terminal.
-        // NONE of these can be transistors because all of them
-        // are implemented as contacts, which destroy transistors.
+        /**
+         * @method computeOutputRecursive
+         * @description
+         * Recursively searches for a path from node to targetNode
+         * given a particular set of inputs.
+         *
+         * Assumption: targetNode is NOT a transistor.
+         * This holds true because targetNode is always either
+         * and output node, the GND terminal, or the VDD terminal.
+         * 
+         * NONE of these can be transistors because all of them
+         * are implemented as contacts, which destroy transistors.
+         * 
+         * @param {Node} node - The node to start from.
+         * @param {Node} targetNode - The node to find a path to.
+         * @param {number} inputVals - The input values to use (binary encoded).
+         * @returns {Object} - The mapping between node and targetNode.
+         * @private
+         */
         computeOutputRecursive(node, targetNode, inputVals) {
             let mapping;
 
-            // Is the test node an input?
-            // If so, is it also the same node as the targetNode?
-            if(this.inputNodes.indexOf(node) >= 0 && this.evaluateInput(node, inputVals) === targetNode) {
+            // If the test node is an input, is it the same value the targetNode?
+            if(this.evaluateInput(node, inputVals) === targetNode) {
                 // Test node is an input and is the same value as the target
                 // VDD or GND node.
                 this.mapNodes(node, targetNode, this.VIRTUAL_PATH);
@@ -1676,7 +1874,9 @@
                     //          found on any other path.
                     //
                     // This will be returned to later if it isn't an island.
-                    this.mapNodes(node, targetNode, this.UNCHECKED);
+                    if(!node.isLocked(targetNode, this.graph)) {
+                        this.mapNodes(node, targetNode, this.UNCHECKED);
+                    }
                     return this.COMPUTING_PATH;
                 }
             }
@@ -1734,6 +1934,21 @@
         gateIsActive(node, inputVals) {
             let gateNet = node.cell.gate;
             let connectedNodeIterator, hasNullPath;
+            let lockObj = {};
+
+            const getPath = function(node, targetNode) {
+                let retValue;
+
+                if(node.gateLocks[this.graph.getIndexByNode(targetNode)]) {
+                    retValue = this.getMapping(node, targetNode);
+                } else {
+                    node.gateLocks[this.graph.getIndexByNode(targetNode)] = lockObj;
+                    retValue = this.computeOutputRecursive(node, targetNode, inputVals);
+                    node.gateLocks[this.graph.getIndexByNode(targetNode)] = null;
+                }
+
+                return retValue;
+            }.bind(this);
 
             // If the gate is an input, the gate's state depends on the input value.
             if (gateNet.isInput) {
@@ -1745,6 +1960,8 @@
             hasNullPath = false;
 
             // Iterate through the nodes in the same net as the gate.
+            connectedNodeIterator = gateNet.nodes.values();
+
             for (let connectedNode = connectedNodeIterator.next(); !connectedNode.done; connectedNode = connectedNodeIterator.next()) {
 
                 let relevantPathExists, oppositePathExists, relevantNode, oppositeNode;
@@ -1760,8 +1977,8 @@
                 }
 
                 // Check if there is a path between the current node and the relevant power or ground node.
-                relevantPathExists = this.computeOutputRecursive(connectedNode, relevantNode, inputVals);
-                oppositePathExists = this.computeOutputRecursive(connectedNode, oppositeNode, inputVals);
+                relevantPathExists = getPath(connectedNode, relevantNode);
+                oppositePathExists = getPath(connectedNode, oppositeNode);
 
                 // If the path has not yet been determined, set hasNullPath to true
                 // Set and hold if any null path to the relevant node is found in *any* loop iteration.
@@ -2149,13 +2366,31 @@
             }.bind(this));
         }
 
-        // Add a node to a net that does not yet have any nodes.
+        /**
+         * @description
+         * Add a node to a net that does not yet have any nodes.
+         * 
+         * @method assignEmptyNode
+         * @param {Net} net - The net to add the node to.
+         * @returns {Node} The node that was added to the net.
+         * @private
+         */
         assignEmptyNode(net) {
             let node = this.graph.addNode(net.cells.values().next().value, true);
             net.addNode(node);
             return node;
         }
 
+        /**
+         * @description
+         * Check the polarity of the circuit.
+         * If there are any NDIFF cells in vddNet, flag for nmos pullup.
+         * If there are any PDIFF cells in gndNet, flag for pmos pulldown.
+         * 
+         * @method checkPolarity
+         * @returns {undefined}
+         * @private 
+        */
         checkPolarity() {
             this.nmosPullup = this.pmosPulldown = false;
 
@@ -2182,6 +2417,14 @@
             }
         }
 
+        /**
+         * @description
+         * Find all nets that are identical and link them together.
+         * 
+         * @method linkIdenticalNets
+         * @returns {undefined}
+         * @private
+         */
         linkIdenticalNets() {
             let linkNodes = function(net1, net2) {
                 let nodeIterator1 = net1.nodes.values();
@@ -2212,7 +2455,16 @@
             }
         }
 
-        // Function to get the net from the this.netlist that contains a given cell.
+        // NOTE: cell is an object with properties isSet, layer, x, y, term1, term2, and gate.
+        /**
+         * @description
+         * Get the net that contains a cell.
+         * 
+         * @method getNet
+         * @param {*} cell - The cell to find the net for.
+         * @returns {Net} The net that contains the cell.
+         * @private
+         */
         getNet(cell) {
             for (let ii = 0; ii < this.netlist.length; ii++) {
                 if (this.netlist[ii].containsCell(cell)) {
@@ -2222,7 +2474,17 @@
             return null;
         }
        
-        // Helper function to set the terminals of transistors.
+        /**
+         * @description
+         * Set the terminals of a transistor.
+         * 
+         * @method setTerminals
+         * @param {*} transistor 
+         * @param {number} x 
+         * @param {number} y 
+         * @param {number} layer 
+         * @private
+         */
         setTerminals(transistor, x, y, layer) {
             let cell = this.layeredGrid.get(x, y, layer);
             
@@ -2245,15 +2507,22 @@
             }
         }
 
-        // If the cell is NDIFF or PDIFF intersected by POLY, create a transistor.
-        // Exception for LayeredGrid.CONTACT.
-        // Returns true if the cell is a transistor.
-        // Side effect: Adds a transistor (if found) to this.nmos or this.pmos.
-        checkIfTransistor(cell) {
+        /**
+         * @description
+         * If the cell is NDIFF or PDIFF intersected by POLY, create a transistor
+         * unless it is already a transistor or there is a CONTACT on the same cell.
+         * 
+         * Side effect: Adds a transistor (if found) to this.nmos or this.pmos.
+         * 
+         * @method initIfTransistorChannel
+         * @param {*} cell
+         * @returns {boolean} True if the cell is a transistor.
+         * @private
+         */
+        initIfTransistorChannel(cell) {
             // If the layer is NDIFF or PDIFF and there is also a POLY at the same location,
             // add the cell to transistors.
             // (Except when there is also a contact)
-
             let handleCell = function(layer, transistorArray) {
                 if (!transistorArray.has(cell) && cell.layer === layer && cell.isSet) {
                     if (this.layeredGrid.get(cell.x, cell.y, LayeredGrid.POLY).isSet && !this.layeredGrid.get(cell.x, cell.y, LayeredGrid.CONTACT).isSet) {
@@ -2297,30 +2566,67 @@
             return handleCell(LayeredGrid.PDIFF, this.pmos) || handleCell(LayeredGrid.NDIFF, this.nmos);
         }
 
-        // For each layer of the cell in the net, recurse with all adjacent cells in the layer.
-        // Generic function for the above code.
+        /**
+         * @description
+         * If the cell at location (cell.x + deltaX, cell.y + deltaY, cell.layer) is set,
+         * and it is not already in the net, add it to the net unless it is a contact.
+         * 
+         * IMPORTANT: This function assumes that the `cell` is in `net`.
+         * 
+         * @param {number} deltaX The x offset from `cell`. Must be -1, 0, or 1.
+         * @param {number} deltaY The y offset from `cell`. Must be -1, 0, or 1.
+         * @param {Net} net The net to add the adjacent cell to.
+         * @param {*} cell The cell whose adjacent cell is being set. IMPORTANT: must be in `net`.
+         * @returns {undefined}
+         * @throws {Error} If the inputs are invalid.
+         * @private
+         */
         setAdjacent(deltaX, deltaY, net, cell) {
+            // Throw an exception if:
+            // 1. deltaX is not -1, 0, or 1.
+            // 2. deltaY is not -1, 0, or 1.
+            // 3. cell is not in net.
+            if (Math.abs(deltaX) > 1 || Math.abs(deltaY) > 1 || !net.containsCell(cell)) {
+                throw new Error("Invalid arguments to setAdjacent.");
+            }
+
             // Don't connect contacts to adjacent contacts.
             if(cell.layer === LayeredGrid.CONTACT) {
                 return;
             }
 
-            if (net.containsCell(this.layeredGrid.get(cell.x, cell.y, cell.layer)) && this.layeredGrid.get(cell.x + deltaX, cell.y + deltaY, cell.layer).isSet) {
+            // If the cell at (cell.x + deltaX, cell.y + deltaY, cell.layer) is set,
+            // and it is not already in the net, add it and eligible adjacent cells to the net.
+            if (this.layeredGrid.get(cell.x + deltaX, cell.y + deltaY, cell.layer).isSet) {
                 if (net.containsCell(this.layeredGrid.get(cell.x + deltaX, cell.y + deltaY, cell.layer)) === false) {
                     this.setRecursively(this.layeredGrid.get(cell.x + deltaX, cell.y + deltaY, cell.layer), net);
                 }
             }
         }
 
+        /**
+         * @description
+         * If there is a contact at the cell, add all layers to the net.
+         * 
+         * @method handleContact
+         * @param {*} cell 
+         * @param {Net} net 
+         * @returns {undefined}
+         * @private
+         */
         handleContact(cell, net) {
             if (this.layeredGrid.get(cell.x, cell.y, LayeredGrid.CONTACT).isSet) {
+                // Add all layers to the net.
                 LayeredGrid.layers.forEach(function(_, layer) {
+                    //Ignore the delete layer.
                     if(layer === LayeredGrid.DELETE) {
                         return;
                     }
+                    // Ignore unset layers.
                     if (!this.layeredGrid.get(cell.x, cell.y, layer).isSet) {
                         return;
                     }
+                    // Add the cell to the net if it is not already in it.
                     if (net.containsCell(this.layeredGrid.get(cell.x, cell.y, layer)) === false) {
                         net.addCell(this.layeredGrid.get(cell.x, cell.y, layer), true);
                         this.setRecursively(this.layeredGrid.get(cell.x, cell.y, layer), net);
@@ -2329,6 +2635,16 @@
             }
         }
 
+        /**
+         * @description
+         * Add `cell` to `net`, then recursively add all eligible adjacent cells to `net`.
+         * 
+         * @method setRecursively
+         * @param {*} cell 
+         * @param {Net} net 
+         * @returns {undefined}
+         * @private
+         */
         setRecursively(cell, net) {
             let gateNet;
             net.addNode(this.graph.getNode(cell));
@@ -2340,7 +2656,7 @@
 
             // Check the cell for a transistor.
             // If this is in a diffusion layer, do not propogate past a transistor.
-            if (this.checkIfTransistor(cell)) {
+            if (this.initIfTransistorChannel(cell)) {
                 gateNet = this.getNet(this.layeredGrid.get(cell.x,cell.y,LayeredGrid.POLY)); 
 
                 if(gateNet === null) {
@@ -2355,8 +2671,8 @@
 
             // If this is in the poly layer, we don't need to stop at a transistor.
             if (cell.layer === LayeredGrid.POLY) {
-                this.checkIfTransistor(this.layeredGrid.get(cell.x, cell.y, LayeredGrid.NDIFF));
-                this.checkIfTransistor(this.layeredGrid.get(cell.x, cell.y, LayeredGrid.PDIFF));
+                this.initIfTransistorChannel(this.layeredGrid.get(cell.x, cell.y, LayeredGrid.NDIFF));
+                this.initIfTransistorChannel(this.layeredGrid.get(cell.x, cell.y, LayeredGrid.PDIFF));
             }
 
             // Add the cell to the net.
@@ -2385,6 +2701,8 @@
             // Order matters
             // Lower-indexed menus are displayed at the same level as or over higher-indexed menus.
             this.menus = [
+                "qrcode-menu",
+                "licenses-menu",
                 "tutorials",
                 "instructions",
                 "about-page",
@@ -2661,8 +2979,9 @@
                 action:       function(e) {
                     if(e.type.includes('up')) {
                         let coords = this.diagramController.getCellAtCursor();
-                        coords = Object.hasOwn(coords, "x") ? coords : {x: this.diagramGrid.width, };
-                        if(Object.hasOwn(coords, "x")) {
+                        const hasOwn = Object.hasOwn ? Object.hasOwn(coords, "x") : coords.hasOwnProperty("x"); // compatibility
+                        coords = hasOwn ? coords : {x: this.diagramGrid.width, };
+                        if(hasOwn) {
                             this.diagramGrid.insertRemoveRowColAt(coords.x, false, false);
                         } else {
                             this.diagramGrid.resize(this.diagramGrid.width - 1, this.diagramGrid.height);
@@ -2677,8 +2996,9 @@
                 keyCode:       38,
                 action:        function(e) {
                     if(e.type.includes('up')) {
-                        let coords = this.diagramController.getCellAtCursor();
-                        if(Object.hasOwn(coords, "y")) {
+                        const coords = this.diagramController.getCellAtCursor();
+                        const hasOwn = Object.hasOwn ? Object.hasOwn(coords, "y") : coords.hasOwnProperty("y"); // compatibility
+                        if(hasOwn) {
                             this.diagramGrid.insertRemoveRowColAt(coords.y, false, true);
                         } else {
                             this.diagramGrid.resize(this.diagramGrid.width, this.diagramGrid.height - 1);
@@ -2693,8 +3013,9 @@
                 keyCode:      39,
                 action:       function(e) {
                     if(e.type.includes('up')) {
-                        let coords = this.diagramController.getCellAtCursor();
-                        if(Object.hasOwn(coords, "x")) {
+                        const coords = this.diagramController.getCellAtCursor();
+                        const hasOwn = Object.hasOwn ? Object.hasOwn(coords, "x") : coords.hasOwnProperty("x"); // compatibility
+                        if(hasOwn) {
                             this.diagramGrid.insertRemoveRowColAt(coords.x, true, false);
                         } else {
                             this.diagramGrid.resize(this.diagramGrid.width + 1, this.diagramGrid.height);
@@ -2709,8 +3030,9 @@
                 keyCode:      40,
                 action:       function(e) {
                     if(e.type.includes('up')) {
-                        let coords = this.diagramController.getCellAtCursor();
-                        if(Object.hasOwn(coords, "y")) {
+                        const coords = this.diagramController.getCellAtCursor();
+                        const hasOwn = Object.hasOwn ? Object.hasOwn(coords, "y") : coords.hasOwnProperty("y"); // compatibility
+                        if(hasOwn) {
                             this.diagramGrid.insertRemoveRowColAt(coords.y, true, true);
                         } else {
                             this.diagramGrid.resize(this.diagramGrid.width, this.diagramGrid.height + 1);
@@ -3069,7 +3391,7 @@
             }.bind(this));
             
             window.addEventListener("contextmenu", function(e) {
-                if (e.button === 2) {
+                if (e.button === 2 && this.document.getElementById("main-menu").classList.contains("closed")) {
                     // Don't show a context menu.
                     e.preventDefault();
                 }
@@ -3105,6 +3427,19 @@
                 document.getElementById("open-" + menuName + "-btn").onclick  = this.getOpenMenuFunction(menuName);
                 document.getElementById("close-" + menuName + "-btn").onclick = this.getCloseMenuFunction(menuName);
             }.bind(this));
+
+            let temp = document.getElementById("open-qrcode-menu-btn").onclick;
+            document.getElementById("open-qrcode-menu-btn").onclick = function() {
+                let url = window.location.href.split('?')[0] + "?d=" + this.diagram.encode();
+
+                document.getElementById("qrcode").innerHTML = "";
+                /* jshint nonew: false */
+                new window.QRCode(document.getElementById("qrcode"), url);
+                /* jshint nonew: true */
+
+                document.getElementById("share-url").href = url;
+                temp();
+            }.bind(this);
 
             document.getElementById("add-row").onclick       = resizeGridByOne(true,  true);
             document.getElementById("remove-row").onclick    = resizeGridByOne(true,  false);
@@ -3221,6 +3556,15 @@
                 return document.getElementById("close-" + menuName + "-btn").onclick();
             });
         }
+
+        /*
+        // Not needed now but maybe someday
+        menuIsOpen() {
+            return this.menus.some(function(menuName) {
+                return !document.getElementById(menuName).classList.contains("closed");
+            });
+        }
+        */
 
         closeAllMenus() {
             this.menus.forEach(function(menuName) {
@@ -3503,8 +3847,14 @@
             window.Diagram = Diagram;
             window.LayeredGrid = LayeredGrid;
             window.DiagramController = DiagramController;
-            debugDefinitions();
-            runTestbench();
+            window.debugDefinitions();
+            window.runTestbench();
+        } else {
+            const urlParams = new URLSearchParams(window.location.search);
+            if(urlParams.get("d")) {
+                diagram.decode(urlParams.get("d"));
+                UI.populateTermSelect();
+            }
         }
     };
 })();
