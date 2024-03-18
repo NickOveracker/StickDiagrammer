@@ -528,6 +528,15 @@
             this.edgeLocks = [];
         }
 
+        isLocked(targetNode, graph) {
+            let isLocked;
+
+            isLocked = !!this.gateLocks[graph.getIndexByNode(targetNode)];
+            isLocked = isLocked || !!this.edgeLocks[graph.getIndexByNode(targetNode)];
+
+            return isLocked;
+        }
+
         // Destructor
         destroy() {
             this.edges.forEach((edge) => {edge.destroy();});
@@ -1442,9 +1451,14 @@
 
         // Evaluate the value of an input node.
         // Returns the rail node (VDD or GND) that it is virtually mapped to.
+        // If node is not an input, return undefined.
         evaluateInput(node, inputVals) {
             let evalInput;
             let inputNum = this.inputNodes.indexOf(node);
+
+            if(inputNum === -1) {
+                return undefined;
+            }
 
             // This becomes the shift amount
             // Lower number inputs are actually in the
@@ -1583,7 +1597,7 @@
         recurseThroughEdges(node, targetNode, inputVals) {
             let pathFound;
             let hasNullPath = false;
-            let lockObj = new Object();
+            let lockObj = {};
             let targetIndex = this.graph.getIndexByNode(targetNode);
 
             node.edges.forEach(function(edge) {
@@ -1680,9 +1694,8 @@
         computeOutputRecursive(node, targetNode, inputVals) {
             let mapping;
 
-            // Is the test node an input?
-            // If so, is it also the same node as the targetNode?
-            if(this.inputNodes.indexOf(node) >= 0 && this.evaluateInput(node, inputVals) === targetNode) {
+            // If the test node is an input, is it the same value the targetNode?
+            if(this.evaluateInput(node, inputVals) === targetNode) {
                 // Test node is an input and is the same value as the target
                 // VDD or GND node.
                 this.mapNodes(node, targetNode, this.VIRTUAL_PATH);
@@ -1732,7 +1745,7 @@
                     //          found on any other path.
                     //
                     // This will be returned to later if it isn't an island.
-                    if(!node.gateLocks[this.graph.getIndexByNode(targetNode)] && !node.edgeLocks[this.graph.getIndexByNode(targetNode)]) {
+                    if(!node.isLocked(targetNode, this.graph)) {
                         this.mapNodes(node, targetNode, this.UNCHECKED);
                     }
                     return this.COMPUTING_PATH;
@@ -1792,7 +1805,21 @@
         gateIsActive(node, inputVals) {
             let gateNet = node.cell.gate;
             let connectedNodeIterator, hasNullPath;
-            let lockObj = new Object();
+            let lockObj = {};
+
+            const getPath = function(node, targetNode) {
+                let retValue;
+
+                if(node.gateLocks[this.graph.getIndexByNode(targetNode)]) {
+                    retValue = this.getMapping(node, targetNode);
+                } else {
+                    node.gateLocks[this.graph.getIndexByNode(targetNode)] = lockObj;
+                    retValue = this.computeOutputRecursive(node, targetNode, inputVals);
+                    node.gateLocks[this.graph.getIndexByNode(targetNode)] = null;
+                }
+
+                return retValue;
+            }.bind(this);
 
             // If the gate is an input, the gate's state depends on the input value.
             if (gateNet.isInput) {
@@ -1820,24 +1847,9 @@
                     oppositeNode = this.gndNode;
                 }
 
-                let relevantLock = connectedNode.gateLocks[this.graph.getIndexByNode(relevantNode)];
-                let oppositeLock = connectedNode.gateLocks[this.graph.getIndexByNode(oppositeNode)];
-
                 // Check if there is a path between the current node and the relevant power or ground node.
-                if(!relevantLock) {
-                    connectedNode.gateLocks[this.graph.getIndexByNode(relevantNode)] = lockObj;
-                    relevantPathExists = this.computeOutputRecursive(connectedNode, relevantNode, inputVals);
-                    connectedNode.gateLocks[this.graph.getIndexByNode(relevantNode)] = null;
-                } else {
-                    relevantPathExists = this.getMapping(connectedNode, relevantNode);
-                }
-                if(!oppositeLock) {
-                    connectedNode.gateLocks[this.graph.getIndexByNode(oppositeNode)] = lockObj;
-                    oppositePathExists = this.computeOutputRecursive(connectedNode, oppositeNode, inputVals);
-                    connectedNode.gateLocks[this.graph.getIndexByNode(oppositeNode)] = null;
-                } else {
-                    oppositePathExists = this.getMapping(connectedNode, oppositeNode);
-                }
+                relevantPathExists = getPath(connectedNode, relevantNode);
+                oppositePathExists = getPath(connectedNode, oppositeNode);
 
                 // If the path has not yet been determined, set hasNullPath to true
                 // Set and hold if any null path to the relevant node is found in *any* loop iteration.
