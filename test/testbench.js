@@ -101,8 +101,13 @@ function runTestbench(runTo) {
                        "(Layout 2) Three overdriven transistors in series with input and one output",
                        "Output directly connected to VDD in series with overloaded transistor",
                        "One overdriven transistor in series with input and two outputs",
+                       "Deep recursion",
     ];
     runTo = runTo || testCases.length;
+
+    /** RESIZE **/
+    UI.diagram.layeredGrid.resize(29, 29);
+    UI.diagramView.refreshCanvas();
 
     // Set up the testbench
     while(LayeredGrid.layers[UI.diagramController.cursorIndex].name !== "metal1") {
@@ -2807,6 +2812,14 @@ function runTestbench(runTo) {
 
         2,
         "XXXX",
+
+        1,
+        function() {
+            UI.diagram.decode("T3hzR0FnSUJBUUFaQndZYUJpb1FEQkFJQUVBQkFBZ98JxgnJAd8t2TZBxBLPCd9R3lHfLdc29QCHQ8QMUUFJ3wnGCckB3y3ZNkHEEtAJ31HdUd8t1zb5AIfIAUQvQi/rATzFElAvZ8VLRDTMOWbHZmY1LzjOVGY0xAlCL2nWb8sk2xvQP1QvUC9p/wCH30jSbEQvNOsA6klBVVFKRUNpQklnxAlpaUZJa1VRcMoJcWlGSWzGCVZJRlVDcEFxZ1ZJbFZTcEVxcVLECUpFaXFSSWvFCUtSS2tSU0pVxglRxAlCS0VSQUpRaUnHCUNJQktBUkFKQUNJQknFCUFJQklnVuQAh3FCSWvECWlxRsQJcMoJcXFGSWzGCVZJRlbkAIdv6ACHaVJJbFXEfmlSSWvFCUNSS2tR5ACHxQnkAIdDQktFUeQAh0HHCUNBQktBUeQAh0FCSeUBT2VHUELuAgdBQUFQQUjPFGYrQS/LIHdQOM0fQi8vzhHHF2p3eOoBeFB30B80Zi/GVk1lQVDGFEg0QUFQZ+YDv1BJSOUCkOoET0L/AIf/AIfHNtAf5QCHQ1F4Wk3JFGdBRcUbSUFrxhFD5wCDQ01RR1nKO2lCeOYBKuUAp0FBQUpBRcYR6ANx5AJ+QUFNU0dKyjZHxwlDxh1BQUpD5wO/QmlReMZqRcZS7wCHQsYdQUH/AIf/AIfvAIfIEuUAhw==");
+        },
+
+        2,
+        "ZZ01ZZ01",
    ];
 
     /** SET TO 1 OUTPUT AND 4 INPUTS */
@@ -2814,6 +2827,7 @@ function runTestbench(runTo) {
     while(UI.diagram.outputs.length < 1) { UI.diagramController.addTerminal(true);     }
     while(UI.diagram.inputs.length  > 4) { UI.diagramController.removeTerminal(false); }
     while(UI.diagram.inputs.length  < 4) { UI.diagramController.addTerminal(false);    }
+
     UI.populateTermSelect();
 
     /** RUN TESTBENCH **/
