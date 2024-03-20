@@ -526,13 +526,16 @@
             this.isNmos = !suppressTransistor && ndiffCell.isSet;
             this.gateLocks = [];
             this.edgeLocks = [];
+            this.conflictLocks = [];
         }
 
         isLocked(targetNode, graph) {
             let isLocked;
+            const targetIndex = graph.getIndexByNode(targetNode);
 
-            isLocked = !!this.gateLocks[graph.getIndexByNode(targetNode)];
-            isLocked = isLocked || !!this.edgeLocks[graph.getIndexByNode(targetNode)];
+            isLocked = !!this.gateLocks[targetIndex];
+            isLocked = isLocked || !!this.edgeLocks[targetIndex];
+            isLocked = isLocked || !!this.conflictLocks[targetIndex];
 
             return isLocked;
         }
@@ -588,6 +591,16 @@
             let nodeIterator = this.cell.term2.nodes.values();
             let nodeTerm2 = nodeIterator.next().value;
             return nodeTerm2 === this ? nodeIterator.next().value : nodeTerm2;
+        }
+
+        getOppositeTerminal(referenceNode) {
+            let retNode = this.getTerm1Node();
+
+            if(retNode.isConnected(referenceNode)) {
+                retNode = this.getTerm2Node();
+            }
+
+            return retNode;
         }
     }
 
@@ -1243,12 +1256,13 @@
 
     class Diagram {
         constructor(mainCanvas, gridCanvas) {
-            this.DIRECT_PATH         = { indeterminate: false, hasPath: true,  direct: true,  label: "1", }; // Originally [true]
-            this.VIRTUAL_PATH        = { indeterminate: true,  hasPath: true,  direct: false, label: "v", }; // Originally ["i"]
-            this.VIRTUAL_PATH_ONLY   = { indeterminate: false, hasPath: true,  direct: false, label: "I", }; // Originally ["I"]
-            this.NO_PATH             = { indeterminate: false, hasPath: false, direct: true,  label: "0", }; // Originally [false]
-            this.COMPUTING_PATH      = { indeterminate: true,                                 label: "?", }; // Originally [null]
-            this.UNCHECKED           = { indeterminate: true,                                 label: "_", }; // Originally [undefined]
+            this.DIRECT_PATH         = { indeterminate: false, hasPath: true,  direct: true,  label: "1", };
+            this.VIRTUAL_PATH        = { indeterminate: true,  hasPath: true,  direct: false, label: "v", };
+            this.VIRTUAL_PATH_ONLY   = { indeterminate: false, hasPath: true,  direct: false, label: "I", };
+            this.NO_PATH             = { indeterminate: false, hasPath: false, direct: true,  label: "0", };
+            this.INDETERMINATE_PATH  = { indeterminate: true,                                 label: "F", }; // Via transistor w/ floating gate
+            this.COMPUTING_PATH      = { indeterminate: true,                                 label: "?", };
+            this.UNCHECKED           = { indeterminate: true,                                 label: "_", };
 
             this.initCells();
             this.initNets();
@@ -1453,13 +1467,29 @@
         mapNodes(node1, node2, setPath) {
             let currentMapping = this.getMapping(node1, node2);
 
-            // If there is a mapping, do nothing and return
-            // One exception: If the current mapping is NO_PATH and the new mapping is VIRTUAL_PATH_ONLY,
-            // we can remap.
+            // If there is a determinate mapping, do nothing and return
+            // Two exceptions:
+            //      1) If the current mapping is NO_PATH and the new mapping is VIRTUAL_PATH_ONLY,
+            //         then we can remap.
+            //      2) We can remap from NO_PATH to INDERTERMINATE_PATH.
             if(!currentMapping.indeterminate) {
-                if(!(currentMapping === this.NO_PATH && setPath === this.VIRTUAL_PATH_ONLY)) {
+                if(currentMapping === this.NO_PATH && setPath === this.INDETERMINATE_PATH) {
+                    // Intentionally empty.
+                }
+                else if(currentMapping !== this.NO_PATH || setPath !== this.VIRTUAL_PATH_ONLY) {
                     return;
                 }
+            }
+
+            // If the current mapping is indeterminate,
+            // only allow upgrades to virtual or direct paths.
+            if(currentMapping === this.INDETERMINATE_PATH && !setPath.hasPath) {
+                return;
+            }
+
+            // Similarly, do not allow downgrades to indeterminate.
+            if(currentMapping.hasPath && setPath === this.INDETERMINATE_PATH) {
+                return;
             }
 
             // If the current mapping is VIRTUAL_PATH and the new mapping is false,
@@ -1618,7 +1648,7 @@
          * If it does not affect the output, we can safely continue computation.
          * If it does, then the output value on the truth table should be X.
          * 
-         * Unset this.overdrivenPath if the conflict is resolvable.
+         * Unset this.conflictedPath if the conflict is resolvable.
          * 
          * @param {Node} node The node to find a path from.
          * @param {Node} targetNode The node to find a path to.
@@ -1627,9 +1657,23 @@
         attemptGateConflictResolution(node, targetNode, inputVals) {
             let targetNodeReachable, nodeTerm1, nodeTerm2, od,
                 gndPathExistsActivated, vddPathExistsActivated;
-            // We will need to restore the old map after half of the
-            // operation below, but there is no need to restore it at the
-            // end. We will have determined that either there is a conflict
+
+            const edgeRecurse = function(node, targetNode) {
+                let retValue;
+
+                if(node.conflictLocks[this.graph.getIndexByNode(targetNode)]) {
+                    retValue = this.getMapping(node, targetNode);
+                } else {
+                    node.conflictLocks[this.graph.getIndexByNode(targetNode)] = true;
+                    retValue = this.recurseThroughEdges(node, targetNode, inputVals);
+                    node.conflictLocks[this.graph.getIndexByNode(targetNode)] = null;
+                }
+
+                return retValue;
+            }.bind(this);
+
+            // We will need to restore the old map after the operation below.
+            // We will have determined that either there is a conflict
             // (i.e., the output will be assigned X),
             // or that the gate doesn't matter at all (i.e., the output
             // doesn't change depending on the gate's state).
@@ -1643,8 +1687,19 @@
                 }
             };
 
+            // Next, we need to back up the node locks,
+            // and remove them for the duration of the operation.
+            const lockBackup = {gateLocks: [], edgeLocks: []};
+
+            for(let ii = 0; ii < this.graph.nodes.length; ii++) {
+                lockBackup.gateLocks[ii] = this.graph.nodes[ii].gateLock;
+                lockBackup.edgeLocks[ii] = this.graph.nodes[ii].edgeLocks;
+                this.graph.nodes[ii].gateLocks = [];
+                this.graph.nodes[ii].edgeLocks = [];
+            }
+
             // Source and drain nodes are interchangeable.
-            // They're just named  that way here for readability
+            // They're just named that way here for readability
             const allPathsOk = function(sourceNode, drainNode, testNode, activePathExists) {
                 const path1 = this.getMapping(sourceNode, testNode);
                 const path2 = this.getMapping(drainNode,  testNode);
@@ -1663,7 +1718,7 @@
             mapCopy(this.nodeNodeMap, backupNodeNodeMap);
 
             // Assume the path is resolvable to begin.
-            this.overdrivenPath = false;
+            this.conflictedPath = false;
             
             // First, see if any of the adjacent nodes that are not currently null-mapped
             // (i.e., not under investigation) have a path to targetNode.
@@ -1673,32 +1728,32 @@
             this.mapNodes(node, nodeTerm1, this.DIRECT_PATH);
             this.mapNodes(node, nodeTerm2, this.DIRECT_PATH);
                           
-            targetNodeReachable = this.recurseThroughEdges(node, targetNode, inputVals).hasPath;
+            targetNodeReachable = edgeRecurse(node, targetNode, inputVals).hasPath;
         
-            od = this.overdrivenPath;
-            this.overdrivenPath = false;
+            od = this.conflictedPath;
+            this.conflictedPath = false;
 
             // If it is reachable at all, compare the paths for inactive and active states.
             if(targetNodeReachable && Math.min(node.cell.term1.nodes.size, node.cell.term2.nodes.size) > 1) {
-                gndPathExistsActivated = this.recurseThroughEdges(nodeTerm1, this.gndNode, inputVals);
-                vddPathExistsActivated = this.recurseThroughEdges(nodeTerm1, this.vddNode, inputVals);
+                gndPathExistsActivated = edgeRecurse(nodeTerm1, this.gndNode, inputVals);
+                vddPathExistsActivated = edgeRecurse(nodeTerm1, this.vddNode, inputVals);
 
                 mapCopy(backupNodeNodeMap, this.nodeNodeMap);
-                od = od || this.overdrivenPath;
-                this.overdrivenPath = false;
+                od = od || this.conflictedPath;
+                this.conflictedPath = false;
 
-                // If there is a conflict when activated, then the target node is definitely overdriven.
+                // If there is a conflict when activated, then the target node is definitely conflicted.
                 // As long as there is no conflict, proceed.
-                if(!gndPathExistsActivated.hasPath || !vddPathExistsActivated.haspPath) {
+                if(!gndPathExistsActivated.hasPath || !vddPathExistsActivated.hasPath) {
                     // The active paths are fine.
                     // Now try with the gate inactive.
                     this.deactivateGate(node);
-                    this.recurseThroughEdges(node, this.gndNode, inputVals);
-                    this.recurseThroughEdges(node, this.vddNode, inputVals);
-                    this.recurseThroughEdges(nodeTerm1, targetNode, inputVals);
-                    this.recurseThroughEdges(nodeTerm2, targetNode, inputVals);
+                    edgeRecurse(node, this.gndNode, inputVals);
+                    edgeRecurse(node, this.vddNode, inputVals);
+                    edgeRecurse(nodeTerm1, targetNode, inputVals);
+                    edgeRecurse(nodeTerm2, targetNode, inputVals);
                     
-                    od = od || this.overdrivenPath || 
+                    od = od || this.conflictedPath || 
                          !allPathsOk(nodeTerm1, nodeTerm2, this.gndNode, gndPathExistsActivated) ||
                          !allPathsOk(nodeTerm1, nodeTerm2, this.vddNode, vddPathExistsActivated);
 
@@ -1707,7 +1762,7 @@
             }
 
             // No path to targetNode === No problem
-            this.overdrivenPath = od;
+            this.conflictedPath = od;
             mapCopy(backupNodeNodeMap, this.nodeNodeMap);
         }
 
@@ -1725,25 +1780,44 @@
          */
         recurseThroughEdges(node, targetNode, inputVals) {
             let pathFound;
+            let indeterminatePath;
             let hasNullPath = false;
-            let lockObj = {};
             let targetIndex = this.graph.getIndexByNode(targetNode);
 
-            node.edges.forEach(function(edge) {
-                let otherNode = edge.getOtherNode(node);
-                let mapping = this.getMapping(otherNode, targetNode);
+            const getPath = function(_node) {
+                let retValue;
 
-                if(mapping === this.UNCHECKED && !otherNode.edgeLocks[targetIndex]) {
-                    otherNode.edgeLocks[targetIndex] = lockObj;
+                if(node.edgeLocks[targetIndex]) {
+                    retValue = this.getMapping(_node, targetNode);
+                } else {
+                    node.edgeLocks[targetIndex] = true;
+                    retValue = this.computeOutputRecursive(_node, targetNode, inputVals);
+
+                    if(retValue === this.INDETERMINATE_PATH) {
+                        const oppositeNode = _node.getOppositeTerminal(node);
+                        oppositeNode.edgeLocks[targetIndex] = true;
+                        const oppositeNodeMapping = this.computeOutputRecursive(oppositeNode, targetNode, inputVals);
+                        oppositeNode.edgeLocks[targetIndex] = null;
+
+                        if(oppositeNodeMapping === this.NO_PATH) {
+                            retValue = this.NO_PATH;
+                        }
+                        else {
+                            indeterminatePath = true;
+                        }
+                    }
+                    node.edgeLocks[targetIndex] = null;
                 }
-            }.bind(this));
+
+                return retValue;
+            }.bind(this);
 
             node.edges.some(function(edge) {
                 let otherNode = edge.getOtherNode(node);
                 let mapping = this.getMapping(otherNode, targetNode);
                 let nodeLock = otherNode.edgeLocks[targetIndex];
 
-                if(nodeLock !== lockObj && mapping.hasPath === this.UNCHECKED) {
+                if(nodeLock && mapping.hasPath === this.UNCHECKED) {
                     return false;
                 }
               
@@ -1762,7 +1836,8 @@
                 
                 // Recursive case: We do not yet know if there is a path from otherNode.
                 if(mapping === this.UNCHECKED) {
-                    mapping = this.computeOutputRecursive(otherNode, targetNode, inputVals);
+                    //mapping = this.computeOutputRecursive(otherNode, targetNode, inputVals);
+                    mapping = getPath(otherNode);
                 }
 
                 // Path found from otherNode?
@@ -1782,18 +1857,15 @@
                 }
             }.bind(this));
 
-            node.edges.forEach(function(edge) {
-                let otherNode = edge.getOtherNode(node);
-                if(otherNode.edgeLocks[targetIndex] === lockObj) {
-                    otherNode.edgeLocks[targetIndex] = null;
-                }
-            });
-
             if(pathFound) {
                 return pathFound;
             } else if(hasNullPath) {
                 return this.COMPUTING_PATH;
-            } else {
+            } else if(indeterminatePath) {
+                this.mapNodes(node, targetNode, this.INDETERMINATE_PATH);
+                return this.getMapping(node, targetNode);
+            }
+            else {
                 this.mapNodes(node, targetNode, this.NO_PATH);
                 // Don't return NO_PATH directly, because it may
                 // have been reassigned to VIRTUAL_PATH_ONLY.
@@ -1853,12 +1925,31 @@
             // If the test node is a transistor,
             // only traverse the channel if the gate is active.
             // If it's inactive, exit this recursion.
-            if (node.isTransistor()) {
+            if(node.isTransistor()) {
                 // true for active, false for inactive.
-                // Also, false when setting overdrivenPath.
-                let evalResult = this.gateIsActive(node, inputVals);
+                // Also, false when setting conflictedPath.
+                const evalResult = this.gateIsActive(node, inputVals);
 
-                if(this.overdrivenPath) {
+                if(evalResult === undefined) {
+                    // If the gate is floating, the output is potentially indeterminate.
+                    const gateNode = node.cell.gate.nodes.values().next().value;
+                    const term1Node = node.getTerm1Node();
+                    const term2Node = node.getTerm2Node();
+                    if(!!gateNode) {
+                        this.mapNodes(gateNode, this.vddNode, this.INDETERMINATE_PATH);
+                        this.mapNodes(gateNode, this.gndNode, this.INDETERMINATE_PATH);
+                    }
+                    if(!!term1Node && !!term2Node) {
+                        this.mapNodes(term1Node, term2Node, this.INDETERMINATE_PATH);
+                    }
+                    this.deactivateGate(node);
+                    return this.INDETERMINATE_PATH;
+                }
+
+                if(this.conflictedPath) {
+                    // If the gate is driven both high and low,
+                    // or if the gate is in an unknown state,
+                    // determine whether this will affect the output.
                     this.attemptGateConflictResolution(node, targetNode, inputVals);
                 }
 
@@ -1903,11 +1994,11 @@
                     evalInput = tempEval;
                 } else {
                     // Conflict found.
-                    this.overdrivenPath = true;
+                    this.conflictedPath = true;
                 }
             }.bind(this));
 
-            this.overdrivenPath = this.overdrivenPath ||
+            this.conflictedPath = this.conflictedPath ||
                 gateNet.containsNode(this.vddNode) && evalInput === false ||
                 gateNet.containsNode(this.gndNode) && evalInput === true ||
                 gateNet.containsNode(this.vddNode) && gateNet.containsNode(this.gndNode);
@@ -1917,7 +2008,7 @@
             // Pass-through positive for NMOS.
             // Invert for PMOS.
             /*jslint bitwise: true */
-            return !this.overdrivenPath && !(node.isNmos ^ evalInput);
+            return !this.conflictedPath && !(node.isNmos ^ evalInput);
             /*jslint bitwise: false */
         }
 
@@ -1934,7 +2025,7 @@
         gateIsActive(node, inputVals) {
             let gateNet = node.cell.gate;
             let connectedNodeIterator, hasNullPath;
-            let lockObj = {};
+            let anyPathFound = false;
 
             const getPath = function(node, targetNode) {
                 let retValue;
@@ -1942,7 +2033,7 @@
                 if(node.gateLocks[this.graph.getIndexByNode(targetNode)]) {
                     retValue = this.getMapping(node, targetNode);
                 } else {
-                    node.gateLocks[this.graph.getIndexByNode(targetNode)] = lockObj;
+                    node.gateLocks[this.graph.getIndexByNode(targetNode)] = true;
                     retValue = this.computeOutputRecursive(node, targetNode, inputVals);
                     node.gateLocks[this.graph.getIndexByNode(targetNode)] = null;
                 }
@@ -1980,6 +2071,10 @@
                 relevantPathExists = getPath(connectedNode, relevantNode);
                 oppositePathExists = getPath(connectedNode, oppositeNode);
 
+                // "relevantPathExists" need not be tracked
+                // because that results in a return
+                anyPathFound = anyPathFound || (oppositePathExists.hasPath === true);
+
                 // If the path has not yet been determined, set hasNullPath to true
                 // Set and hold if any null path to the relevant node is found in *any* loop iteration.
                 if (relevantPathExists === this.COMPUTING_PATH) {
@@ -1987,7 +2082,19 @@
                 }
                 // If the path exists, return true.
                 else if(relevantPathExists.hasPath) {
-                    this.overdrivenPath = oppositePathExists === true;
+                    // TODO: The following line is incorrect and does nothing.
+                    //       The "correct" version would be:
+                    //
+                    //       this.conflictedPath = oppositePathExists.hasPath === true;
+                    //
+                    //       Because it does nothing, we need to determine
+                    //       whether it was ever necessary in the first place.
+                    //
+                    //       Correcting it produces incorrect output,
+                    //       so the answer is not trivial.
+                    //
+                    //       Original line:
+                    //this.conflictedPath = oppositePathExists === true;
                     return true;
                 }
             }
@@ -1995,6 +2102,11 @@
             // If any paths have not yet been determined, return null.
             if(hasNullPath) {
                 return null;
+            }
+
+            // If no path found to any logical value, return undefined.
+            if(!anyPathFound) {
+                return undefined;
             }
 
             // Otherwise, return false.
@@ -2008,7 +2120,7 @@
             let outputVal = "Z";             // Assume that the node is floating at the start.
             let highNodes = [this.vddNode,]; // Array for all nodes driven HIGH.
             let lowNodes  = [this.gndNode,]; // Array for all nodes driven LOW.
-            this.overdrivenPath = false;
+            this.conflictedPath = false;
 
             // Add input nodes to the highNodes and lowNodes arrays according
             // to their binary values. (1 = high, 0 = low)
@@ -2047,7 +2159,7 @@
 
             // Test each node for a path to outputNode
             let testPath = function(node) {
-                if(this.overdrivenPath) {
+                if(this.conflictedPath) {
                     return;
                 }
 
@@ -2088,18 +2200,24 @@
             testPath(this.vddNode);
             testPath(this.gndNode);
       
-            // If there are no overdriven paths,
+            // If there are no conflicted paths,
             // proceed to map out every path to the output.
-            // We can ignore overdriven paths here because
+            // We can ignore conflicted paths here because
             // the new nodes we are testing are not inputs.
-            if(!this.overdrivenPath) {
+            if(!this.conflictedPath) {
                 this.graph.nodes.forEach(testPath);
-                this.overdrivenPath = false;
+                this.conflictedPath = false;
             }
 
             // Determine the value of the output.
             highNodes.some(function(node) {
-                if(this.getMapping(node, outputNode).hasPath) {
+                const mapping = this.getMapping(node, outputNode);
+
+                if(mapping === this.INDETERMINATE_PATH) {
+                    // Indeterminate due to floating gate.
+                    outputVal = "X";
+                }
+                else if(mapping.hasPath) {
                     // Path is found from HIGH to outputNode,
                     // so we assign the output value to 1.
                     //
@@ -2111,7 +2229,13 @@
             }.bind(this));
 
             lowNodes.some(function(node) {
-                if(this.getMapping(node, outputNode).hasPath) {
+                const mapping = this.getMapping(node, outputNode);
+
+                if(mapping === this.INDETERMINATE_PATH) {
+                    // Indeterminate due to floating gate.
+                    outputVal = "X";
+                }
+                else if(mapping.hasPath) {
                     // Path is found from LOW to outputNode.
                     // 
                     // If the current outputVal is "Z", that means
@@ -2130,8 +2254,8 @@
             // Save all the results of the analysis for this combination
             // of input values and output node so that we can highlight
             // all connected nodes.
-            // Don't do this for overdriven paths; it screws up multiple outputs
-            if(!this.overdrivenPath) {
+            // Don't do this for conflicted paths; it screws up multiple outputs
+            if(!this.conflictedPath) {
                 this.analyses[inputVals] = [...this.nodeNodeMap,];
             }
 
@@ -2143,7 +2267,7 @@
             // There is still one unchecked case for "X",
             // namely when two or more inputs directly drive
             // a gate with opposite values.
-            return this.overdrivenPath ? "X" : outputVal;
+            return this.conflictedPath ? "X" : outputVal;
         }
 
         // Map a function to every transistor terminal.
@@ -2978,9 +3102,8 @@
                 keyCode:      37,
                 action:       function(e) {
                     if(e.type.includes('up')) {
-                        let coords = this.diagramController.getCellAtCursor();
+                        const coords = this.diagramController.getCellAtCursor();
                         const hasOwn = Object.hasOwn ? Object.hasOwn(coords, "x") : coords.hasOwnProperty("x"); // compatibility
-                        coords = hasOwn ? coords : {x: this.diagramGrid.width, };
                         if(hasOwn) {
                             this.diagramGrid.insertRemoveRowColAt(coords.x, false, false);
                         } else {
@@ -3593,7 +3716,7 @@
                 // Compute each output.
                 for (let jj = 0; jj < this.diagram.outputs.length; jj++) {
                     tableOutputRow[jj] = this.diagram.computeOutput(ii, this.diagram.outputNodes[jj]);
-                    // Don't reuse the analysis in case of overdriven paths.
+                    // Don't reuse the analysis in case of conflicted paths.
                 }
 
                 outputVals[ii] = tableOutputRow;
