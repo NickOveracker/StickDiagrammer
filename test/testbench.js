@@ -77,17 +77,17 @@ function runTestbench(runTo) {
                        "Two inputs driving single PMOS gate",
                        "VDD & GND driving single NMOS gate",
                        "Two inputs driving single NMOS gate",
-                       "Indirectly overdriven output via NMOS",
-                       "Indirectly overdriven output via PMOS",
-                       "Indirectly overdriven gates via PMOS",
-                       "Indirectly overdriven gates via NMOS",
-                       "Overdriven dead-end transistor",
-                       "One overdriven transistor in series with VDD w/ grounded gate",
-                       "Two overdriven dead-end transistors in series",
-                       "Two overdriven transistors in series with VDD",
-                       "Two overdriven transistors in series with VDD w/ grounded gate",
+                       "Indirectly conflicted output via NMOS",
+                       "Indirectly conflicted output via PMOS",
+                       "Indirectly conflicted gates via PMOS",
+                       "Indirectly conflicted gates via NMOS",
+                       "Conflicted dead-end transistor",
+                       "One conflicted transistor in series with VDD w/ grounded gate",
+                       "Two conflicted dead-end transistors in series",
+                       "Two conflicted transistors in series with VDD",
+                       "Two conflicted transistors in series with VDD w/ grounded gate",
                        "One transistor driven by VDD & GND in series w/ singly-driven gate & direct input",
-                       "One transistor driven by VDD & GND in series w/ overdriven gate & direct input",
+                       "One transistor driven by VDD & GND in series w/ conflicted gate & direct input",
                        "Dark mode toggle button test",
                        "Dark mode toggle keyboard test",
                        "Theme change keyboard test",
@@ -96,12 +96,13 @@ function runTestbench(runTo) {
                        "Remove one input keyboard test",
                        "Add two outputs keyboard test",
                        "Remove one output keyboard test",
-                       "Three overdriven transistors in series with input and two outputs",
-                       "(Layout 1) Three overdriven transistors in series with input and one output",
-                       "(Layout 2) Three overdriven transistors in series with input and one output",
+                       "Three conflicted transistors in series with input and two outputs",
+                       "(Layout 1) Three conflicted transistors in series with input and one output",
+                       "(Layout 2) Three conflicted transistors in series with input and one output",
                        "Output directly connected to VDD in series with overloaded transistor",
-                       "One overdriven transistor in series with input and two outputs",
+                       "One conflicted transistor in series with input and two outputs",
                        "Deep recursion",
+                       "Floating-gate transistor",
     ];
     runTo = runTo || testCases.length;
 
@@ -2043,7 +2044,7 @@ function runTestbench(runTo) {
         2,
         "ZZZZXXXXXXXX0000",
 
-        /** Indirectly overdriven output via NMOS **/
+        /** Indirectly conflicted output via NMOS **/
         1,
         function() {
             UI.diagram.inputs[0].x  = 6;
@@ -2086,7 +2087,7 @@ function runTestbench(runTo) {
         2,
         "ZZZZ010100110XX1",
 
-        /** Indirectly overdriven output via PMOS **/
+        /** Indirectly conflicted output via PMOS **/
 
         // Clear the canvas
         ["mousedown", {button:  2, clientX: mapX(1),   clientY: mapY(1)}],
@@ -2115,7 +2116,7 @@ function runTestbench(runTo) {
         2,
         "0XX100110101ZZZZ",
 
-        /* Indirectly overdriven gates via PMOS */
+        /* Indirectly conflicted gates via PMOS */
         1,
         function() {
             UI.diagram.inputs[0].x  = 8;
@@ -2240,9 +2241,9 @@ function runTestbench(runTo) {
         ["mouseup",   {button:  0, clientX: mapX(17), clientY: mapY(28)}],
 
         2,
-        "1XX011001010ZZZZ",
+        "1XX011001010XXXX",
 
-        /* Indirectly overdriven gates via NMOS */
+        /* Indirectly conflicted gates via NMOS */
         1,
         function() {
             UI.diagram.inputs[0].x  = 8;
@@ -2369,9 +2370,9 @@ function runTestbench(runTo) {
         ["mouseup",   {button:  0, clientX: mapX(17), clientY: mapY(28)}],
 
         2,
-        "ZZZZ101011001XX0",
+        "XXXX101011001XX0",
 
-        /* Overdriven dead-end transistor */
+        /* Conflicted dead-end transistor */
          1,
         function() {
             UI.diagram.inputs[0].x  = 7;
@@ -2410,7 +2411,7 @@ function runTestbench(runTo) {
         2,
         "ZZZZZZZZZZZZZZZZ",
                
-        /* One overdriven transistor in series with VDD w/ grounded gate */
+        /* One conflicted transistor in series with VDD w/ grounded gate */
          1,
         function() {
             UI.diagram.inputs[0].x  = 7;
@@ -2432,7 +2433,7 @@ function runTestbench(runTo) {
         2,
         "1XXXXXXXXXXXXXXX",
 
-        /* Two overdriven dead-end transistors in series */
+        /* Two conflicted dead-end transistors in series */
          1,
         function() {
             UI.diagram.inputs[0].x  = 7;
@@ -2468,7 +2469,7 @@ function runTestbench(runTo) {
         2,
         "ZZZZZZZZZZZZZZZZ",
 
-        /* Two overdriven transistors in series with VDD */
+        /* Two conflicted transistors in series with VDD */
          1,
         function() {
             UI.diagram.inputs[0].x  = 7;
@@ -2490,7 +2491,7 @@ function runTestbench(runTo) {
         2,
         "1XXZXXXZXXXZZZZZ",
 
-        /* Two overdriven transistors in series with VDD w/ grounded gate */
+        /* Two conflicted transistors in series with VDD w/ grounded gate */
          1,
         function() {
             UI.diagram.inputs[0].x  = 7;
@@ -2560,7 +2561,7 @@ function runTestbench(runTo) {
         2,
         "XXXXZZZZXXXXZZZZ",
 
-        /* One transistor driven by VDD & GND in series w/ overdriven gate & direct input */
+        /* One transistor driven by VDD & GND in series w/ conflicted gate & direct input */
         1,
         function() {
             UI.diagram.inputs[0].x  = 1;
@@ -2711,7 +2712,7 @@ function runTestbench(runTo) {
             return window.UI.diagram.outputs.length === compareTo - 1;
         },
 
-        /* Three overdriven transistors in series with input and two outputs */
+        /* Three conflicted transistors in series with input and two outputs */
         1,
         function() {
             UI.diagram.inputs[0].x  = 9;
@@ -2744,7 +2745,7 @@ function runTestbench(runTo) {
         2,
         "XXXXXXZZXXXXXXZZXXXXXXZZZZZZZZZZXXXXXXZZXXXXXXZZXXXXXXZZZZZZZZZZ",
 
-        /* (Layout 1) Three overdriven transistors in series with input and one output */
+        /* (Layout 1) Three conflicted transistors in series with input and one output */
         1,
         function() {
            UI.diagramController.removeTerminal(true);
@@ -2754,7 +2755,7 @@ function runTestbench(runTo) {
         2,
         "XXXXXXZZXXXXXXZZXXXXXXZZZZZZZZZZ",
 
-        /* (Layout 2) Three overdriven transistors in series with input and one output */
+        /* (Layout 2) Three conflicted transistors in series with input and one output */
         1,
         function() {
             UI.diagram.inputs[4].x  = 8;
@@ -2813,6 +2814,7 @@ function runTestbench(runTo) {
         2,
         "XXXX",
 
+        // Infinite loop prevention test
         1,
         function() {
             UI.diagram.decode("T3hzR0FnSUJBUUFaQndZYUJpb1FEQkFJQUVBQkFBZ98JxgnJAd8t2TZBxBLPCd9R3lHfLdc29QCHQ8QMUUFJ3wnGCckB3y3ZNkHEEtAJ31HdUd8t1zb5AIfIAUQvQi/rATzFElAvZ8VLRDTMOWbHZmY1LzjOVGY0xAlCL2nWb8sk2xvQP1QvUC9p/wCH30jSbEQvNOsA6klBVVFKRUNpQklnxAlpaUZJa1VRcMoJcWlGSWzGCVZJRlVDcEFxZ1ZJbFZTcEVxcVLECUpFaXFSSWvFCUtSS2tSU0pVxglRxAlCS0VSQUpRaUnHCUNJQktBUkFKQUNJQknFCUFJQklnVuQAh3FCSWvECWlxRsQJcMoJcXFGSWzGCVZJRlbkAIdv6ACHaVJJbFXEfmlSSWvFCUNSS2tR5ACHxQnkAIdDQktFUeQAh0HHCUNBQktBUeQAh0FCSeUBT2VHUELuAgdBQUFQQUjPFGYrQS/LIHdQOM0fQi8vzhHHF2p3eOoBeFB30B80Zi/GVk1lQVDGFEg0QUFQZ+YDv1BJSOUCkOoET0L/AIf/AIfHNtAf5QCHQ1F4Wk3JFGdBRcUbSUFrxhFD5wCDQ01RR1nKO2lCeOYBKuUAp0FBQUpBRcYR6ANx5AJ+QUFNU0dKyjZHxwlDxh1BQUpD5wO/QmlReMZqRcZS7wCHQsYdQUH/AIf/AIfvAIfIEuUAhw==");
@@ -2820,6 +2822,15 @@ function runTestbench(runTo) {
 
         2,
         "ZZ01ZZ01",
+
+        // Floating gate transistor
+        1,
+        function() {
+            UI.diagram.decode("SFIwR0FBRUdCd1lURncwQdgBZ0FBQULECUPEBUXEBUnEBVHfHd8dxB3fAdQB31nfHd4d3wHfAdYBQi8vd98j3wHfAd8B3wHeAUgvON8i3wHfAd8B3wHfAckBQ+YB7d8B3wHNAUJC5QJE1gE=");
+        },
+
+        2,
+        "X",
    ];
 
     /** SET TO 1 OUTPUT AND 4 INPUTS */
@@ -2880,12 +2891,12 @@ function runTestbench(runTo) {
                 }
             }
         
-            results[testVector] = tv === events[ii];
+            results[testVector] = {outcome: tv === events[ii], time: Date.now()};
             testVector++;
 
             assertNext = false;
         } else if(evalBooleanNext) {
-            results[testVector] = events[ii]();
+            results[testVector] = {outcome: events[ii](), time: Date.now()};
             testVector++;
             evalBooleanNext = false;
         } else {
@@ -2917,12 +2928,23 @@ function runTestbench(runTo) {
     resultsDiv.appendChild(p);
     resultsDiv.appendChild(document.createElement("br"));
 
+    // Compute the runtime of each test.
+    for(let index = results.length - 1; index >= 0; index--) {
+        if(index === 0) {
+            results[index].time = results[index].time - startTime;
+        } else {
+            results[index].time = results[index].time - results[index - 1].time;
+        }
+    };
+
     // Add indidual test results to #instructions-text as PASS or FAIL
     // Label with their test case names.
     results.forEach(function(result, index) {
         p = document.createElement("p");
-        p.innerHTML = `<span style="cursor:pointer" onclick="window.scrollTo({top: 0, left: 0, behavior: 'auto'}); setTimeout(runTestbench, 10, ${index + 1});"><b>Test ${index}:</b> ${testCases[index]}</span>`;
-        p.innerHTML += `<b style='float:right;color:${result ? "green'>PASS" : "red'>FAIL"}</b>`;
+        p.innerHTML = `<span style="cursor:pointer" onclick="window.scrollTo({top: 0, left: 0, behavior: 'auto'}); setTimeout(runTestbench, 10, ${index + 1});"><b>Test ${index}:</b> ${result.time}ms`;
+        p.innerHTML += `<br>${testCases[index]}</span>`;
+        p.innerHTML += `<br><b style='color:${result.outcome ? "green'>PASS" : "red'>FAIL"}</b>`;    
         resultsDiv.appendChild(p);
+        resultsDiv.appendChild(document.createElement("br"));
     });
 }
