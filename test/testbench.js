@@ -102,7 +102,10 @@ function runTestbench(runTo) {
                        "Output directly connected to VDD in series with overloaded transistor",
                        "One conflicted transistor in series with input and two outputs",
                        "Deep recursion",
-                       "Floating-gate transistor",
+                       "Floating-gate transistor 1",
+                       "Floating-gate transistor 2",
+                       "Nested floating-gate transistors 1",
+                       "Nested floating-gate transistors 2",
     ];
     runTo = runTo || testCases.length;
 
@@ -2831,6 +2834,33 @@ function runTestbench(runTo) {
 
         2,
         "X",
+
+        // Floating gate transistor 2
+        1,
+        function() {
+            UI.diagram.decode("SFIwR0FBRVRCd1lURncwQdgBZ0FBQULECUPEBUXEBUnEBVHfHd8dxB3fAdQB31nfHd4d3wHfAdYBQi8vd98j3wHfAd8B3wHeAUgvON8i3wHfAd8B3wHfAcsB5QHt3wHZAeUCJc4BQkLlAkTWAQ==");
+        },
+
+        2,
+        "X",
+
+        // Nested floating gate transistors 1
+        1,
+        function() {
+            UI.diagram.decode("SFIwR0FBRUJCQUVURncwSUFBQUFRxAVnQUFBQsQJQ8QFRcQF3R1KxAVT3yzVHdsB3zzfHd8d1x3fAd0BY9cYSDTfOd8B3wHfAd8B3wFBSC843yLfAd8B3wHfAdABZ+YB0N8B1AH/AozRAUJC5QJE1gE=");
+        },
+
+        2,
+        "0",
+
+        // Nested floating gate transistors 2
+        1,
+        function() {
+            UI.diagram.decode("SFIwR0FBRVhCZ01XRncwQd8B3wHfAd8B0gFFxAVJxAVRxAVnQUFBQsQJQ98dQUFrxA7EHUPEHd9IzR3fAdsBZtscRCvfPd8B3wHfAd8B3wEvON8h3wHfAd8B3wHcAeUB398B3wHbAUNC5QJE1gE=");
+        },
+
+        2,
+        "Z",
    ];
 
     /** SET TO 1 OUTPUT AND 4 INPUTS */
@@ -2880,23 +2910,48 @@ function runTestbench(runTo) {
             UI.diagram.layeredGrid.set(UI.diagram.vddCell.x, UI.diagram.vddCell.y, LayeredGrid.CONTACT);
             UI.diagram.layeredGrid.set(UI.diagram.gndCell.x, UI.diagram.gndCell.y, LayeredGrid.CONTACT);
 
-            // Do it.
-            UI.diagram.setNets();
-            UI.diagram.clearAnalyses();
-            tv = "";
+            // Loop through all four rotations of the diagram,
+            // checking the output of each one.
+            let testResults = [];
+            for(let rot = 0; rot < 4; rot++) {
+                UI.diagram.setNets();
+                UI.diagram.clearAnalyses();
+                tv = "";
             
-            for(let ii = 0; ii < UI.diagram.outputs.length; ii++) {
-                for(let jj = 0; jj < Math.pow(2, UI.diagram.inputs.length); jj++) {
-                    tv += UI.diagram.computeOutput(jj, UI.diagram.outputNodes[ii]);
+                for(let oIndex = 0; oIndex < UI.diagram.outputs.length; oIndex++) {
+                    for(let iIndex = 0; iIndex < Math.pow(2, UI.diagram.inputs.length); iIndex++) {
+                        tv += UI.diagram.computeOutput(iIndex, UI.diagram.outputNodes[oIndex]);
+                    }
                 }
+                testResults[rot] = tv === events[ii];
+                UI.diagramController.rotateClockwise();
             }
+
+            // Now mirror and rotate again.
+            UI.diagramController.mirrorHorizontal();
+            for(let rot = 0; rot < 4; rot++) {
+                UI.diagram.setNets();
+                UI.diagram.clearAnalyses();
+                tv = "";
+            
+                for(let oIndex = 0; oIndex < UI.diagram.outputs.length; oIndex++) {
+                    for(let iIndex = 0; iIndex < Math.pow(2, UI.diagram.inputs.length); iIndex++) {
+                        tv += UI.diagram.computeOutput(iIndex, UI.diagram.outputNodes[oIndex]);
+                    }
+                }
+                testResults[rot + 4] = tv === events[ii];
+                UI.diagramController.rotateClockwise();
+            }
+
+            // Now restore the diagram to its original state.
+            UI.diagramController.mirrorHorizontal();
         
-            results[testVector] = {outcome: tv === events[ii], time: Date.now()};
+            results[testVector] = {outcome: testResults, time: Date.now()};
             testVector++;
 
             assertNext = false;
         } else if(evalBooleanNext) {
-            results[testVector] = {outcome: events[ii](), time: Date.now()};
+            results[testVector] = {outcome: [events[ii]()], time: Date.now()};
             testVector++;
             evalBooleanNext = false;
         } else {
@@ -2941,9 +2996,17 @@ function runTestbench(runTo) {
     // Label with their test case names.
     results.forEach(function(result, index) {
         p = document.createElement("p");
-        p.innerHTML = `<span style="cursor:pointer" onclick="window.scrollTo({top: 0, left: 0, behavior: 'auto'}); setTimeout(runTestbench, 10, ${index + 1});"><b>Test ${index}:</b> ${result.time}ms`;
-        p.innerHTML += `<br>${testCases[index]}</span>`;
-        p.innerHTML += `<br><b style='color:${result.outcome ? "green'>PASS" : "red'>FAIL"}</b>`;    
+        p.onclick = (() => function() {
+            window.scrollTo({top: 0, left: 0, behavior: 'auto'});
+            setTimeout(runTestbench, 10, index + 1);
+        })();
+        p.style.cursor = "pointer";
+        p.innerHTML = `<b>Test ${index}:</b> ${result.time}ms`;
+        p.innerHTML += `<br>${testCases[index]}<br>`;
+        // Loop through each rotation of the diagram and display the result.
+        result.outcome.forEach(function(outcome) {
+            p.innerHTML += `<b style='color: ${outcome ? "green'>PASS" : "red'>FAIL"}</b>&nbsp;&nbsp;&nbsp;`;
+        });
         resultsDiv.appendChild(p);
         resultsDiv.appendChild(document.createElement("br"));
     });
