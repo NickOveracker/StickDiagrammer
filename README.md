@@ -57,6 +57,8 @@
 * ~~Knowing that I spelled "accolades" correctly (I don't feel like Googling it)~~ *Resolved 2021/11/20*
 
 ## Known Bugs
+* Gates with VDD/GND shorts are not handled properly depending on orientation. (Testbench cases 40, 49, 50, 51)
+* ~~Some transistors with floating gates are still not handled properly.~~ *Resolved 2024/3/23* (Testbench case 56-58)
 * ~~Transistors with floating gates are not handled properly.~~ *Resolved 2024/3/21* (Testbench case 55)
 * ~~Infinite (or practically infinite) computation time for certain complex topologies.~~ *Resolved 2024/3/18* (Testbench case 54)
 * ~~Incorrect output when overdriven transistors drive multiple outputs.~~ *Resolved 2023/2/6* (Testbench cases 49, 53)

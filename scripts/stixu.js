@@ -159,8 +159,8 @@
 
         // The grid is implemented as a flat array, so this function
         // returns the index of the cell at a given coordinate
-        convertFromCoordinates(x, y, layer) {
-            return x + (y * this.width) + (layer * this.width * this.height);
+        convertFromCoordinates(x, y, layer, width=this.width, height=this.height) {
+            return x + (y * width) + (layer * width * height);
         }
 
         // Convert the index of a cell to its coordinates
@@ -417,6 +417,62 @@
 
             shiftTerminal(this.diagram.vddCell);
             shiftTerminal(this.diagram.gndCell);
+        }
+
+        rotateClockwise() {
+            let newGrid = new Array(this.width * this.height * this.layers);
+            for (let x = 0; x < this.width; x++) {
+                for (let y = 0; y < this.height; y++) {
+                    for (let layer = 0; layer < this.layers; layer++) {
+                        let oldIndex = this.convertFromCoordinates(x, y, layer);
+                        let oldCell = this.grid[oldIndex];
+                        if (oldCell) {
+                            let newX = this.height - y - 1;
+                            let newY = x;
+                            let newIndex = this.convertFromCoordinates(newX, newY, layer, this.height, this.width);
+                            newGrid[newIndex] = {
+                                isSet: true,
+                                x: newX,
+                                y: newY,
+                                layer: layer,
+                                term1: oldCell.term1,
+                                term2: oldCell.term2,
+                                gate: oldCell.gate,
+                            };
+                        }
+                    }
+                }
+            }
+            this.grid = newGrid;
+            let temp = this.width;
+            this.width = this.height;
+            this.height = temp;
+        }
+
+        mirrorHorizontal() {
+            let newGrid = new Array(this.width * this.height * this.layers);
+            for (let x = 0; x < this.width; x++) {
+                for (let y = 0; y < this.height; y++) {
+                    for (let layer = 0; layer < this.layers; layer++) {
+                        let oldIndex = this.convertFromCoordinates(x, y, layer);
+                        let oldCell = this.grid[oldIndex];
+                        if (oldCell) {
+                            let newX = this.width - x - 1;
+                            let newIndex = this.convertFromCoordinates(newX, y, layer);
+                            newGrid[newIndex] = {
+                                isSet: true,
+                                x: newX,
+                                y: y,
+                                layer: layer,
+                                term1: oldCell.term1,
+                                term2: oldCell.term2,
+                                gate: oldCell.gate,
+                            };
+                        }
+                    }
+                }
+            }
+            this.grid = newGrid;
         }
     }
 
@@ -926,6 +982,49 @@
             } else {
                 this.cursorIndex = layerIndex;
             }
+        }
+        
+        rotateClockwise() {
+            // First, rotate the grid.
+            this.diagram.layeredGrid.rotateClockwise();
+
+            // Then, rotate the terminals.
+            this.diagram.inputs.forEach(function(input) {
+                let temp = input.x;
+                input.x = this.diagram.layeredGrid.width - 1 - input.y;
+                input.y = temp;
+            }.bind(this));
+
+            this.diagram.outputs.forEach(function(output) {
+                let temp = output.x;
+                output.x = this.diagram.layeredGrid.width - 1 - output.y;
+                output.y = temp;
+            }.bind(this));
+
+            let temp = this.diagram.vddCell.x;
+            this.diagram.vddCell.x = this.diagram.layeredGrid.width - 1 - this.diagram.vddCell.y;
+            this.diagram.vddCell.y = temp;
+
+            temp = this.diagram.gndCell.x;
+            this.diagram.gndCell.x = this.diagram.layeredGrid.width - 1 - this.diagram.gndCell.y;
+            this.diagram.gndCell.y = temp;
+        }
+
+        mirrorHorizontal() {
+            // First, mirror the grid.
+            this.diagram.layeredGrid.mirrorHorizontal();
+
+            // Then, mirror the terminals.
+            this.diagram.inputs.forEach(function(input) {
+                input.x = this.diagram.layeredGrid.width - 1 - input.x;
+            }.bind(this));
+
+            this.diagram.outputs.forEach(function(output) {
+                output.x = this.diagram.layeredGrid.width - 1 - output.x;
+            }.bind(this));
+
+            this.diagram.vddCell.x = this.diagram.layeredGrid.width - 1 - this.diagram.vddCell.x;
+            this.diagram.gndCell.x = this.diagram.layeredGrid.width - 1 - this.diagram.gndCell.x;
         }
     }
 
@@ -1584,9 +1683,30 @@
             // Get the existing mappings between the remapped nodes and node ii.
             let compareNodeMapping = this.nodeNodeMap[nodeToMap][this.graph.getIndexByNode(compareNode)];
             let remapNodeMapping = this.nodeNodeMap[nodeToMap][this.graph.getIndexByNode(remapNode)];
+
+            if(setPath === this.INDETERMINATE_PATH) {
+                if(compareNodeMapping === this.DIRECT_PATH) {
+                    if(!remapNodeMapping.hasMap && remapNodeMapping !== this.INDETERMINATE_PATH) {
+                        this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.INDETERMINATE_PATH);
+                    }
+                }
+            }
+
+            else if(remapNodeMapping === this.INDETERMINATE_PATH) {
+                if(compareNodeMapping.hasPath && setPath === this.DIRECT_PATH) {
+                    this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), compareNodeMapping);
+                }
+            }
+
+            else if(compareNodeMapping === this.INDETERMINATE_PATH) {
+                if(!remapNodeMapping.hasPath && setPath === this.DIRECT_PATH) {
+                    this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), compareNodeMapping);
+                }
+            }
+
             
             // Case 0: Insufficient information to remap nodes.
-            if(compareNodeMapping.hasPath === undefined || setPath.hasPath === undefined) {
+            else if(compareNodeMapping.hasPath === undefined || setPath.hasPath === undefined) {
                 return;
             }
             // Case 1: Node2 already has a positive mapping to node ii.
@@ -1799,11 +1919,11 @@
                         const oppositeNodeMapping = this.computeOutputRecursive(oppositeNode, targetNode, inputVals);
                         oppositeNode.edgeLocks[targetIndex] = null;
 
-                        if(oppositeNodeMapping === this.NO_PATH) {
-                            retValue = this.NO_PATH;
+                        if(oppositeNodeMapping.hasPath || oppositeNodeMapping === this.INDETERMINATE_PATH) {
+                            indeterminatePath = true;
                         }
                         else {
-                            indeterminatePath = true;
+                            retValue = oppositeNodeMapping;
                         }
                     }
                     node.edgeLocks[targetIndex] = null;
@@ -1936,14 +2056,20 @@
                     const term1Node = node.getTerm1Node();
                     const term2Node = node.getTerm2Node();
                     if(!!gateNode) {
-                        this.mapNodes(gateNode, this.vddNode, this.INDETERMINATE_PATH);
-                        this.mapNodes(gateNode, this.gndNode, this.INDETERMINATE_PATH);
+                        this.mapNodes(gateNode, this.vddNode, this.NO_PATH);
+                        this.mapNodes(gateNode, this.gndNode, this.NO_PATH);
                     }
                     if(!!term1Node && !!term2Node) {
                         this.mapNodes(term1Node, term2Node, this.INDETERMINATE_PATH);
+                        this.mapNodes(term1Node, node, this.INDETERMINATE_PATH);
+                        this.mapNodes(term2Node, node, this.INDETERMINATE_PATH);
                     }
-                    this.deactivateGate(node);
-                    return this.INDETERMINATE_PATH;
+                    //this.deactivateGate(node);
+                    if(this.recurseThroughEdges(term1Node, targetNode, inputVals).hasPath || this.recurseThroughEdges(term2Node, targetNode, inputVals).hasPath) {
+                        return this.INDETERMINATE_PATH;
+                    } else {
+                        return this.NO_PATH;
+                    }
                 }
 
                 if(this.conflictedPath) {
@@ -2026,6 +2152,7 @@
             let gateNet = node.cell.gate;
             let connectedNodeIterator, hasNullPath;
             let anyPathFound = false;
+            let relevantNode, oppositeNode;
 
             const getPath = function(node, targetNode) {
                 let retValue;
@@ -2046,6 +2173,15 @@
                 return this.evalInputDrivenGate(node, inputVals, gateNet);
             }
 
+            // Determine the relevant power or ground node for the current gate type.
+            if(node.isPmos) {
+                relevantNode = this.gndNode;
+                oppositeNode = this.vddNode;
+            } else {
+                relevantNode = this.vddNode;
+                oppositeNode = this.gndNode;
+            }
+
             // Otherwise, recurse and see if this is active.
             connectedNodeIterator = gateNet.nodes.values();
             hasNullPath = false;
@@ -2054,26 +2190,14 @@
             connectedNodeIterator = gateNet.nodes.values();
 
             for (let connectedNode = connectedNodeIterator.next(); !connectedNode.done; connectedNode = connectedNodeIterator.next()) {
-
-                let relevantPathExists, oppositePathExists, relevantNode, oppositeNode;
+                let relevantPathExists, oppositePathExists;
                 connectedNode = connectedNode.value;
-
-                // Determine the relevant power or ground node for the current gate type.
-                if(node.isPmos) {
-                    relevantNode = this.gndNode;
-                    oppositeNode = this.vddNode;
-                } else {
-                    relevantNode = this.vddNode;
-                    oppositeNode = this.gndNode;
-                }
 
                 // Check if there is a path between the current node and the relevant power or ground node.
                 relevantPathExists = getPath(connectedNode, relevantNode);
                 oppositePathExists = getPath(connectedNode, oppositeNode);
 
-                // "relevantPathExists" need not be tracked
-                // because that results in a return
-                anyPathFound = anyPathFound || (oppositePathExists.hasPath === true);
+                anyPathFound = anyPathFound || (relevantPathExists.hasPath === true) || (oppositePathExists.hasPath === true);
 
                 // If the path has not yet been determined, set hasNullPath to true
                 // Set and hold if any null path to the relevant node is found in *any* loop iteration.
