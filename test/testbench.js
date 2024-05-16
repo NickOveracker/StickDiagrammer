@@ -128,12 +128,19 @@ function runTestbench(runTo) {
             UI.diagram.inputs[0].x = 3;
             UI.diagram.inputs[0].y = 14;
 
+            UI.diagram.inputs[1].x = 0;
+            UI.diagram.inputs[1].y = 12;
+
+            UI.diagram.inputs[2].x = 0;
+            UI.diagram.inputs[2].y = 14;
+
+            UI.diagram.inputs[3].x = 0;
+            UI.diagram.inputs[3].y = 16;
+
             UI.diagram.outputs[0].x = 28;
             UI.diagram.outputs[0].y = 14;
 
             for(let ii = 1; ii < UI.diagram.inputs.length; ii++) {
-                UI.diagram.inputs[ii].x = 0;
-                UI.diagram.inputs[ii].y = 0;
             }
 
             UI.diagram.vddCell.x    = 1;
@@ -1517,7 +1524,7 @@ function runTestbench(runTo) {
             UI.diagram.inputs[2].x  = 25;
             UI.diagram.inputs[2].y  = 8;
             UI.diagram.inputs[3].x  = 25;
-            UI.diagram.inputs[3].y  = 8;
+            UI.diagram.inputs[3].y  = 10;
             UI.diagram.outputs[0].x = 11;
             UI.diagram.outputs[0].y = 8;
             UI.diagram.gndCell.x    = 0;
@@ -1578,7 +1585,7 @@ function runTestbench(runTo) {
             UI.diagram.inputs[0].y  = 6;
             UI.diagram.inputs[1].x  = 7;
             UI.diagram.inputs[1].y  = 6;
-            UI.diagram.inputs[2].x  = 28;
+            UI.diagram.inputs[2].x  = 26;
             UI.diagram.inputs[2].y  = 28;
             UI.diagram.inputs[3].x  = 28;
             UI.diagram.inputs[3].y  = 28;
@@ -1966,9 +1973,9 @@ function runTestbench(runTo) {
             UI.diagram.inputs[0].y  = 12;
             UI.diagram.inputs[1].x  = 14;
             UI.diagram.inputs[1].y  = 14;
-            UI.diagram.inputs[2].x  = 28;
+            UI.diagram.inputs[2].x  = 24;
             UI.diagram.inputs[2].y  = 28;
-            UI.diagram.inputs[3].x  = 28;
+            UI.diagram.inputs[3].x  = 26;
             UI.diagram.inputs[3].y  = 28;
             UI.diagram.outputs[0].x = 21;
             UI.diagram.outputs[0].y = 6;
@@ -2033,9 +2040,9 @@ function runTestbench(runTo) {
             UI.diagram.inputs[1].x  = 14;
             UI.diagram.inputs[1].y  = 14;
             UI.diagram.inputs[2].x  = 28;
-            UI.diagram.inputs[2].y  = 28;
+            UI.diagram.inputs[2].y  = 24;
             UI.diagram.inputs[3].x  = 28;
-            UI.diagram.inputs[3].y  = 28;
+            UI.diagram.inputs[3].y  = 26;
             UI.diagram.outputs[0].x = 21;
             UI.diagram.outputs[0].y = 6;
             UI.diagram.vddCell.x    = 28;
@@ -2390,7 +2397,7 @@ function runTestbench(runTo) {
             UI.diagram.outputs[0].y = 13;
             UI.diagram.vddCell.x    = 0;
             UI.diagram.vddCell.y    = 0;
-            UI.diagram.gndCell.x    = 0;
+            UI.diagram.gndCell.x    = 2;
             UI.diagram.gndCell.y    = 0;
         },
 
@@ -2452,7 +2459,7 @@ function runTestbench(runTo) {
             UI.diagram.vddCell.x    = 0;
             UI.diagram.vddCell.y    = 0;
             UI.diagram.gndCell.x    = 0;
-            UI.diagram.gndCell.y    = 0;
+            UI.diagram.gndCell.y    = 2;
         },
 
         // Clear some of the poly to remove old contacts
@@ -2524,9 +2531,9 @@ function runTestbench(runTo) {
             UI.diagram.inputs[1].x  = 5;
             UI.diagram.inputs[1].y  = 5;
             UI.diagram.inputs[2].x  = 0;
-            UI.diagram.inputs[2].y  = 0;
+            UI.diagram.inputs[2].y  = 2;
             UI.diagram.inputs[3].x  = 0;
-            UI.diagram.inputs[3].y  = 0;
+            UI.diagram.inputs[3].y  = 4;
             UI.diagram.outputs[0].x = 19;
             UI.diagram.outputs[0].y = 13;
             UI.diagram.vddCell.x    = 7;
@@ -2920,7 +2927,7 @@ function runTestbench(runTo) {
             
                 for(let oIndex = 0; oIndex < UI.diagram.outputs.length; oIndex++) {
                     for(let iIndex = 0; iIndex < Math.pow(2, UI.diagram.inputs.length); iIndex++) {
-                        tv += UI.diagram.computeOutput(iIndex, UI.diagram.outputNodes[oIndex]);
+                        tv += UI.diagram.computeOutput(iIndex, oIndex);
                     }
                 }
                 testResults[rot] = tv === events[ii];
@@ -2936,7 +2943,7 @@ function runTestbench(runTo) {
             
                 for(let oIndex = 0; oIndex < UI.diagram.outputs.length; oIndex++) {
                     for(let iIndex = 0; iIndex < Math.pow(2, UI.diagram.inputs.length); iIndex++) {
-                        tv += UI.diagram.computeOutput(iIndex, UI.diagram.outputNodes[oIndex]);
+                        tv += UI.diagram.computeOutput(iIndex, oIndex);
                     }
                 }
                 testResults[rot + 4] = tv === events[ii];

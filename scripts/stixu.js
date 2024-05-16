@@ -481,7 +481,7 @@
         constructor(name, isInput) {
             this.name = name;
             this.cells = new Set();
-            this.nodes = new Set();
+            this.vertices = new Set();
             this.isInput = isInput;
             this.hasPoly = false;
             this.hasDiff = false;
@@ -495,30 +495,30 @@
             return net.cells.has(cell);
         }
 
-        addNode(node) {
-            if(node !== null && !this.containsNode(node)) {
-                let nodeIterator = this.nodes.values();
+        addVertex(vertex) {
+            if(!!vertex && !this.containsVertex(vertex)) {
+                let vertexIterator = this.vertices.values();
 
-                // Loop through net's nodes.
-                for (let node2 = nodeIterator.next(); !node2.done; node2 = nodeIterator.next()) {
-                    node.addEdge(node2.value);
+                // Loop through net's vertices.
+                for (let vertex2 = vertexIterator.next(); !vertex2.done; vertex2 = vertexIterator.next()) {
+                    vertex.hypergraph.connectVertices(vertex, vertex2.value);
                 }
 
-                this.nodes.add(node);
+                this.vertices.add(vertex);
             }
         }
 
-        removeNode(node) {
-            this.nodes.delete(node);
+        removeVertex(vertex) {
+            this.vertices.delete(vertex);
         }
 
-        containsNode(node) {
-            return this.nodes.has(node);
+        containsVertex(vertex) {
+            return this.vertices.has(vertex);
         }
 
         clear() {
             this.cells.clear();
-            this.nodes.clear();
+            this.vertices.clear();
             this.hasPoly = false;
             this.hasDiff = false;
         }
@@ -537,169 +537,330 @@
         }
 
         size() {
-            return this.nodes.size;
+            return this.vertices.size;
         }
     }
 
-    // Each edge is a connection between two graph nodes.
-    class Edge {
-        constructor(node1, node2) {
-            this.node1 = node1;
-            this.node2 = node2;
+    class Transistor {
+        static get STATES () {
+            return {
+                INACTIVE:  0,
+                ACTIVE:    1,
+                UNDEFINED: 2,
+                FLOATING: 3,
+            }
+        }
+        constructor(gate, source, drain, vdd, gnd) {
+            this.isPmos = source.cell.layer === LayeredGrid.PDIFF;
+            this.isNmos = !this.isPmos;
+            this.gate = gate;
+            this.source = source;
+            this.drain = drain;
+            this.state = Transistor.STATES.FLOATING;
+            this.vdd = vdd;
+            this.gnd = gnd;
         }
 
-        // Destructor
-        destroy() {
-            this.node1 = undefined;
-            this.node2 = undefined;
-        }
+        getState() {
+            const active   = (this.isNmos && this.gate.hasPathTo(this.vdd)) || (this.isPmos && this.gate.hasPathTo(this.gnd));
+            const inactive = (this.isNmos && this.gate.hasPathTo(this.gnd)) || (this.isPmos && this.gate.hasPathTo(this.vdd));
 
-        getNode1() {
-            return this.node1;
-        }
-
-        getNode2() {
-            return this.node2;
-        }
-
-        getOtherNode(node) {
-            if (this.node1 === node) {
-                return this.node2;
-            } else if (this.node2 === node) {
-                return this.node1;
+            if(active && inactive) {
+                return this.state = Transistor.STATES.UNDEFINED;
+            } else if(active) {
+                return this.state = Transistor.STATES.ACTIVE;
+            } else if(inactive) {
+                return this.state = Transistor.STATES.INACTIVE;
             } else {
-                return null;
+                return this.state = Transistor.STATES.FLOATING;
             }
         }
     }
 
-    // Each diagram.graph node is a transistor, VDD, GND, or an output.
-    class Node {
-        constructor(cell, suppressTransistor, pdiffCell, ndiffCell) {
+    class Vertex {
+        constructor(cell, hypergraph, logical=false, tentative=false) {
             this.cell = cell;
-            this.edges = [];
-            this.isPmos = !suppressTransistor && pdiffCell.isSet;
-            this.isNmos = !suppressTransistor && ndiffCell.isSet;
-            this.gateLocks = [];
-            this.edgeLocks = [];
-            this.conflictLocks = [];
+            this.edges = new Set();
+            this.logical = logical;
+            this.tentative = tentative;
+            this.hypergraph = hypergraph;
         }
 
-        isLocked(targetNode, graph) {
-            let isLocked;
-            const targetIndex = graph.getIndexByNode(targetNode);
-
-            isLocked = !!this.gateLocks[targetIndex];
-            isLocked = isLocked || !!this.edgeLocks[targetIndex];
-            isLocked = isLocked || !!this.conflictLocks[targetIndex];
-
-            return isLocked;
+        getEdges() {
+            return Array.from(this.edges);
         }
 
-        // Destructor
-        destroy() {
-            this.edges.forEach((edge) => {edge.destroy();});
-            this.cell = undefined;
-            this.edges.length = 0;
+        addEdge(edge) {
+            this.edges.add(edge);
         }
 
-        // Check if two nodes are connected.
-        isConnected(otherNode) {
-            for (let ii = 0; ii < this.edges.length; ii++) {
-                if (this.edges[ii].getNode1() === otherNode || this.edges[ii].getNode2() === otherNode) {
+        removeEdge(edge) {
+            this.edges.delete(edge);
+        }
+
+        hasPathTo(vertex, traverseTentative=false, independentInputs=true, visitedVertices=new Set(), visitedEdges=new Set()) {
+            if (this === vertex) {
+                return true;
+            } else if (this.tentative && !traverseTentative) {
+                return false;
+            } else if (independentInputs && this.logical) {
+                // This is a logic value vertex,
+                // and all edges to it are being treated as directed.
+                return false;
+            }
+
+            // If visitedVertices is empty, check the lookup table.
+            if(visitedVertices.size === 0) { // Checking after the first iteration is empirically slower.
+                if(this.hypergraph.lookupPath(this, vertex) === true) {
                     return true;
                 }
             }
 
-            // There are no edges from this to otherNode,
-            // then either they are the same node or they
-            // are disconnected.
-            return this === otherNode;
-        }
-     
-        isTransistor() {
-            return this.isPmos || this.isNmos;
-        }
+            visitedVertices.add(this);
 
-        addEdge(node) {
-            let edge = new Edge(this, node);
+            for (let edge of this.edges) {
+                // Because this is a hypergraph, we need to check all vertices in the edge.
+                if(visitedEdges.has(edge)) {
+                    continue;
+                }
 
-            if(!this.isConnected(node)) {
-                this.edges.push(edge);
-                node.edges.push(edge);
-            }
-        }
+                // Believe it or not the below block makes it run slower.
+                // Even if the memoization step is removed.
+                /*if(edge.hasVertex(vertex)) {
+                    this.hypergraph.memoize(this, vertex);
+                    return true;
+                }*/
 
-        removeEdge(edge) {
-            let index = this.edges.indexOf(edge);
-            if (index > -1) {
-                this.edges.splice(index, 1);
-            }
-        }
+                visitedEdges.add(edge);
 
-        getTerm1Node() {
-            let nodeIterator = this.cell.term1.nodes.values();
-            let nodeTerm1 = nodeIterator.next().value;
-            return nodeTerm1 === this ? nodeIterator.next().value : nodeTerm1;
-        }
-
-        getTerm2Node() {
-            let nodeIterator = this.cell.term2.nodes.values();
-            let nodeTerm2 = nodeIterator.next().value;
-            return nodeTerm2 === this ? nodeIterator.next().value : nodeTerm2;
-        }
-
-        getOppositeTerminal(referenceNode) {
-            let retNode = this.getTerm1Node();
-
-            if(retNode.isConnected(referenceNode)) {
-                retNode = this.getTerm2Node();
+                for (let vertex2 of edge.vertices) {
+                    if(!visitedVertices.has(vertex2)) {
+                        //this.hypergraph.memoize(this, vertex2); // Memoizing here is empirically slower.
+                        if(vertex2.hasPathTo(vertex, traverseTentative, independentInputs, visitedVertices, visitedEdges)) {
+                            this.hypergraph.memoize(this, vertex);
+                            return true;
+                        }
+                    }
+                }
             }
 
-            return retNode;
+            return false;
         }
     }
 
-    // Graph class to represent CMOS circuitry.
-    class Graph {
+    class Hyperedge {
+        constructor(mergeable=true) {
+            this.vertices = new Set();
+            this.dependencies = new Set();
+            this.mergeable=mergeable;
+        }
+
+        addVertex(vertex) {
+            this.vertices.add(vertex);
+            vertex.addEdge(this);
+        }
+
+        removeVertex(vertex) {
+            this.vertices.delete(vertex);
+            vertex.removeEdge(this);
+        }
+
+        merge(hyperedge) {
+            for(let vertex of hyperedge.vertices) {
+                this.addVertex(vertex);
+                vertex.removeEdge(hyperedge);
+            }
+        }
+
+        hasVertex(vertex) {
+            return this.vertices.has(vertex);
+        }
+
+        overlaps(hyperedge) {
+            for(let vertex of hyperedge.vertices) {
+                if(this.hasVertex(vertex)) {
+                    return true;
+                }
+            }
+        }
+
+        clearVertices() {
+            for(let vertex of this.vertices) {
+                vertex.removeEdge(this);
+            }
+            this.vertices.clear();
+        }
+    }
+
+    class Hypergraph {
         constructor() {
-            this.nodes = [];
+            this.vertices = [];
+            this.hyperedges = [];
+            this.pathLUT = [];
         }
 
-        // Clear the diagram.graph.
+        clearLUT() {
+            this.pathLUT = [];
+        }
+
+        backupLUT() {
+            this.backupPathLUT = structuredClone(this.pathLUT);
+        }
+
+        restoreLUT() {
+            this.pathLUT = this.backupPathLUT;
+        }
+
+        memoize(vertex1, vertex2) {
+            const index1 = vertex1.index;
+            const index2 = vertex2.index;
+            const alreadySet = !!this.pathLUT[index1] && this.pathLUT[index1][index2]
+
+            if(!alreadySet) {
+                this.pathLUT[index1] = this.pathLUT[index1] || [];
+                this.pathLUT[index2] = this.pathLUT[index2] || [];
+
+                if(!vertex1.logical) {
+                    this.pathLUT[index1].forEach(function(val, index3) {
+                        if(val === true) {
+                            this.pathLUT[index3][index2] = true;
+                        }
+                    }.bind(this));
+                }
+                // This block makes it slower.
+                /*if(!vertex2.logical) {
+                    this.pathLUT[index2].forEach(function(val, index3) {
+                        if(val === true) {
+                            this.pathLUT[index3][index1] = true;
+                        }
+                    }.bind(this));
+                }*/
+
+                this.pathLUT[index1][index2] = true;
+                this.pathLUT[index2][index1] = true;
+            }
+        }
+
+        lookupPath(vertex1, vertex2) {
+            const index1 = vertex1.index;
+            const index2 = vertex2.index;
+            return this.pathLUT[index1] ? this.pathLUT[index1][index2] : false;
+        }
+
+        getVertex(cell) {
+            this.vertices.some(vertex => {
+                return vertex.cell === cell ? vertex : false;
+            });
+        }
+
         clear() {
-            // Destroy all nodes.
-            for (let ii = 0; ii < this.nodes.length; ii++) {
-                this.nodes[ii].destroy();
+            this.vertices.length = 0;
+            this.hyperedges.length = 0;
+        }
+
+        addVertex(cell, isLogic, tentative) {
+            const vertex = new Vertex(cell, this, isLogic, tentative);
+            vertex.index = this.vertices.push(vertex) - 1;
+            this.addHyperedge(vertex);
+            return vertex;
+        }
+
+        addExistingVertex(vertex) {
+            this.vertices.push(vertex);
+            if(!!vertex.cell && !vertex.isTransistor()) {
+                this.addHyperedge(vertex);
+            }
+            return vertex;
+        }
+
+        addHyperedge(vertex, mergeable=true) {
+            const hyperedge = new Hyperedge(mergeable);
+            hyperedge.addVertex(vertex);
+            this.hyperedges.push(hyperedge);
+            return hyperedge;
+        }
+
+        connectVertices(vertex1, vertex2, noMerge=false) {
+            if(noMerge) {
+                if(!vertex1.hasPathTo(vertex2)) {
+                    const retEdge = this.addHyperedge(vertex1, false);
+                    retEdge.addVertex(vertex2);
+                    return retEdge;
+                }
+                return;
             }
 
-            this.nodes.length = 0;
-        }
+            let hyperedge1 = null;
+            let hyperedge2 = null;
+            let returnEdge = null;
 
-       // Add a node to the diagram.graph.
-        addNode(cell, suppressTransistor, pdiffCell, ndiffCell) {
-            let node = new Node(cell, suppressTransistor, pdiffCell, ndiffCell);
-            this.nodes.push(node);
-            return node;
-        }
-
-        // Return the node with the given cell.
-        getNode(cell) {
-            for (let node of this.nodes) {
-                if (node.cell === cell) {
-                    return node;
+            for (let ii = 0; ii < this.hyperedges.length; ii++) {
+                if (this.hyperedges[ii].hasVertex(vertex1)) {
+                    hyperedge1 = this.hyperedges[ii];
+                }
+                if (this.hyperedges[ii].hasVertex(vertex2)) {
+                    hyperedge2 = this.hyperedges[ii];
                 }
             }
-            return null;
+
+            if (hyperedge1 === null && hyperedge2 === null) {
+                const hyperedge = this.addHyperedge(vertex1);
+                hyperedge.addVertex(vertex2);
+                returnEdge = hyperedge;
+            } else if (hyperedge1 === null) {
+                hyperedge2.addVertex(vertex1);
+                returnEdge = hyperedge2;
+            } else if (hyperedge2 === null) {
+                hyperedge1.addVertex(vertex2);
+                returnEdge = hyperedge1;
+            } else if (hyperedge1 !== hyperedge2) {
+                hyperedge1.merge(hyperedge2);
+                this.hyperedges.splice(this.hyperedges.indexOf(hyperedge2), 1);
+                returnEdge = hyperedge1;
+            }
+
+            return returnEdge;
         }
 
-        getIndexByNode(node) {
-            for (let ii = 0; ii < this.nodes.length; ii++) {
-                if (this.nodes[ii] === node) {
-                    return ii;
+        getHyperedge(vertex) {
+            for (let ii = 0; ii < this.hyperedges.length; ii++) {
+                if (this.hyperedges[ii].hasVertex(vertex)) {
+                    return this.hyperedges[ii];
                 }
             }
-            return -1;
+        }
+
+        removeHyperedge(hyperedge) {
+            // Remove all vertices from the hyperedge.
+            hyperedge.clearVertices();
+            this.hyperedges.splice(this.hyperedges.indexOf(hyperedge), 1);
+        }
+
+        removeVertex(vertex) {
+            for (let ii = 0; ii < this.hyperedges.length; ii++) {
+                if (this.hyperedges[ii].hasVertex(vertex)) {
+                    this.removeHyperedge(this.hyperedges[ii]);
+                    break;
+                }
+            }
+            this.vertices.splice(this.vertices.indexOf(vertex), 1);
+        }
+
+        getAdjacentVertices(vertex) {
+            let adjacentVertices = new Set();
+            for (let hyperedge of this.hyperedges) {
+                if (hyperedge.hasVertex(vertex)) {
+                    for (let vertex2 of hyperedge.vertices) {
+                        adjacentVertices.add(vertex2);
+                    }
+                }
+            }
+
+            // Finally, remove logic vertices from the set.
+            // These are at indices 0 and 1.
+            adjacentVertices.delete(this.vertices[0]);
+            adjacentVertices.delete(this.vertices[1]);
+            return adjacentVertices;
         }
     }
 
@@ -1255,7 +1416,7 @@
             }
         }
 
-        // Mark the cells connected to the output node for a given set of inputs
+        // Mark the cells connected to the output vertex for a given set of inputs
         // so they can be highlighted in the canvas.
         //
         // path: The row of the relevant nodeNodeMap corresponding to the chosen output node.
@@ -1268,11 +1429,11 @@
 
             for(let ii = 0; ii < path.length; ii++) {
                 // Only highlight nets directly connected to the output.
-                if(path[ii] !== this.diagram.DIRECT_PATH) {
+                if(!path[ii]) {
                     continue;
                 }
                 for(let jj = 0; jj < this.diagram.netlist.length; jj++) {
-                    if(this.diagram.netlist[jj].containsNode(this.diagram.graph.nodes[ii])) {
+                    if(this.diagram.netlist[jj].containsVertex(this.diagram.hypergraph.vertices[ii])) {
                         let cellIter = this.diagram.netlist[jj].cells.values();
                         for(let cell = cellIter.next(); !cell.done; cell = cellIter.next()) {
                             this.netHighlightGrid[cell.value.x][cell.value.y] = true;
@@ -1517,12 +1678,8 @@
         }
 
         initNodes() {
-            this.graph = new Graph();
-            this.inputNodes  = [];
-            this.outputNodes = [];
             this.nmos = new Set();
             this.pmos = new Set();
-            this.nodeNodeMap = [];
         }
 
         // Clear previous anaysis.
@@ -1553,870 +1710,417 @@
             }
         }
 
-        getMapping(node1, node2) {
-            return this.nodeNodeMap[this.graph.getIndexByNode(node1)][this.graph.getIndexByNode(node2)];
-        }
+        // Clean up the state from the previous input vector.
+        cleanup() {
+            this.hypergraph.clearLUT();
 
-        // This function updates the mappings between nodes in the graph to reflect whether a path exists between them.
-        // Paths are broken down into direct (same net) and virtual (input set to 1 or 0 rather than actual VDD or GND on net).
-        //
-        // Virtual paths are unidirectional.
-        // If an input is set to 0, then everything on the same net as that input will be virtually mapped to GND.
-        // However, the net will *not* be mapped to everything on the same net as the actual GND node.
-        mapNodes(node1, node2, setPath) {
-            let currentMapping = this.getMapping(node1, node2);
+            // Remove edges that only apply to the previous input vector.
+            for(let ii = this.hypergraph.hyperedges.length - 1; ii >= 0; ii--) {
+                const hyperedge = this.hypergraph.hyperedges[ii];
 
-            // If there is a determinate mapping, do nothing and return
-            // Two exceptions:
-            //      1) If the current mapping is NO_PATH and the new mapping is VIRTUAL_PATH_ONLY,
-            //         then we can remap.
-            //      2) We can remap from NO_PATH to INDERTERMINATE_PATH.
-            if(!currentMapping.indeterminate) {
-                if(currentMapping === this.NO_PATH && setPath === this.INDETERMINATE_PATH) {
-                    // Intentionally empty.
-                }
-                else if(currentMapping !== this.NO_PATH || setPath !== this.VIRTUAL_PATH_ONLY) {
-                    return;
-                }
-            }
-
-            // If the current mapping is indeterminate,
-            // only allow upgrades to virtual or direct paths.
-            if(currentMapping === this.INDETERMINATE_PATH && !setPath.hasPath) {
-                return;
-            }
-
-            // Similarly, do not allow downgrades to indeterminate.
-            if(currentMapping.hasPath && setPath === this.INDETERMINATE_PATH) {
-                return;
-            }
-
-            // If the current mapping is VIRTUAL_PATH and the new mapping is false,
-            // upgrade to VIRTUAL_PATH_ONLY (confirmed input only with no direct connection)
-            if(currentMapping === this.VIRTUAL_PATH && setPath === this.NO_PATH) {
-                setPath = this.VIRTUAL_PATH_ONLY;
-            }
-
-            // Set the mappings (both directions) between node1 and node2 to setPath.
-            this.nodeNodeMap[this.graph.getIndexByNode(node1)][this.graph.getIndexByNode(node2)] = setPath;
-            this.nodeNodeMap[this.graph.getIndexByNode(node2)][this.graph.getIndexByNode(node1)] = setPath;
-
-            // If the path is currently being computed, return.
-            // This just means that the current mapping is under investigation,
-            // and a path has neither been found nor ruled out.
-            if (setPath === this.COMPUTING_PATH) { return; }
-
-            // Map the path to node2 appropriately for all nodes mapped to node1.
-            for (let ii = 0; ii < this.nodeNodeMap.length; ii++) {
-                this.syncEdges(ii, node1, node2, setPath);
-                // Now do the reverse direction.
-                this.syncEdges(this.nodeNodeMap.length - ii - 1, node2, node1, setPath);
-            }
-        }
-        
-        isRailNode(node) {
-            return node === this.gndNode || node === this.vddNode;
-        }
-
-        remap(mapNode1Index, mapNode2Index, mapping) {
-            this.nodeNodeMap[mapNode1Index][mapNode2Index] = mapping;
-            this.nodeNodeMap[mapNode2Index][mapNode1Index] = mapping;
-        }
-        
-        updateVirtualPath(compareNodeMapping, nodeToMap, remapNode, setPath) {
-            if(compareNodeMapping === this.DIRECT_PATH) {
-                if(setPath === this.DIRECT_PATH) {
-                    this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.DIRECT_PATH);
-                }
-                else if(setPath === this.NO_PATH) {
-                    this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.VIRTUAL_PATH_ONLY);
-                }
-                else if(setPath === this.VIRTUAL_PATH_ONLY) {
-                    this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.VIRTUAL_PATH_ONLY);
-                }
-            }
-            else if(compareNodeMapping === this.NO_PATH && setPath === this.DIRECT_PATH) {
-                this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.VIRTUAL_PATH_ONLY);
-            }
-        }
-        
-        updateNoPath(compareNode, nodeToMap, remapNode, setPath) {
-            let compareNodeMapping = this.nodeNodeMap[nodeToMap][this.graph.getIndexByNode(compareNode)];
-            let mapFromRail = this.isRailNode(compareNode);
-            
-            if(!mapFromRail && setPath === this.DIRECT_PATH && compareNodeMapping.direct === false) {
-                this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.VIRTUAL_PATH_ONLY);
-            }
-        }
-        
-        updateUndefinedPath(compareNode, nodeToMap, remapNode, setPath) {
-            let compareNodeMapping = this.nodeNodeMap[nodeToMap][this.graph.getIndexByNode(compareNode)];
-            let mapFromRail = this.isRailNode(compareNode);
-            
-            if(setPath === this.DIRECT_PATH) {
-                if(compareNodeMapping.direct) {
-                    this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), compareNodeMapping);
-                }
-                else if(compareNodeMapping.direct === false && !mapFromRail) {
-                    this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), compareNodeMapping);
-                }
-            }
-            else if(compareNodeMapping === this.DIRECT_PATH) {
-                if(setPath === this.NO_PATH) {
-                    this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.NO_PATH);
-                }
-                else if(setPath === this.VIRTUAL_PATH_ONLY) {
-                    if(mapFromRail) {
-                        this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.NO_PATH);
-                    }
-                    else {
-                        this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.VIRTUAL_PATH_ONLY);
-                    }
-                }
-                else if(!mapFromRail) {
-                    this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.VIRTUAL_PATH);
+                if(hyperedge.mergeable === false) {
+                    // Remove the hyperedge from the hypergraph.
+                    this.hypergraph.removeHyperedge(hyperedge);
                 }
             }
         }
 
-        syncEdges(nodeToMap, compareNode, remapNode, setPath) {
-            // Get the existing mappings between the remapped nodes and node ii.
-            let compareNodeMapping = this.nodeNodeMap[nodeToMap][this.graph.getIndexByNode(compareNode)];
-            let remapNodeMapping = this.nodeNodeMap[nodeToMap][this.graph.getIndexByNode(remapNode)];
-
-            if(setPath === this.INDETERMINATE_PATH) {
-                if(compareNodeMapping === this.DIRECT_PATH) {
-                    if(!remapNodeMapping.hasMap && remapNodeMapping !== this.INDETERMINATE_PATH) {
-                        this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), this.INDETERMINATE_PATH);
-                    }
-                }
-            }
-
-            else if(remapNodeMapping === this.INDETERMINATE_PATH) {
-                if(compareNodeMapping.hasPath && setPath === this.DIRECT_PATH) {
-                    this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), compareNodeMapping);
-                }
-            }
-
-            else if(compareNodeMapping === this.INDETERMINATE_PATH) {
-                if(!remapNodeMapping.hasPath && setPath === this.DIRECT_PATH) {
-                    this.remap(nodeToMap, this.graph.getIndexByNode(remapNode), compareNodeMapping);
-                }
-            }
-
-            
-            // Case 0: Insufficient information to remap nodes.
-            else if(compareNodeMapping.hasPath === undefined || setPath.hasPath === undefined) {
-                return;
-            }
-            // Case 1: Node2 already has a positive mapping to node ii.
-            //         In this case, only override to turn it from VIRTUAL_PATH to VIRTUAL_PATH_ONLY or DIRECT_PATH.
-            else if(remapNodeMapping === this.VIRTUAL_PATH) {
-                this.updateVirtualPath(compareNodeMapping, nodeToMap, remapNode, setPath);
-            }
-            // Case 2: Node2 has a NO_PATH mapping to node ii.
-            //         In this case, allow it to change to VIRTUAL_PATH_ONLY.
-            //         DO NOT do this to propagate virtual paths from VDD and GND.
-            else if(remapNodeMapping === this.NO_PATH) {
-                this.updateNoPath(compareNode, nodeToMap, remapNode, setPath);
-            }
-            // Case 3: Node2 is UNCHECKED or COMPUTING_PATH.
-            //         In this case, copy any of the other mappings from node 1.
-            //         Exception: Do not copy virtual paths from VDD and GND.
-            else if(remapNodeMapping.hasPath === undefined) {
-                this.updateUndefinedPath(compareNode, nodeToMap, remapNode, setPath);
-            }
-        }
-
-        // Evaluate the value of an input node.
-        // Returns the rail node (VDD or GND) that it is virtually mapped to.
-        // If node is not an input, return undefined.
-        evaluateInput(node, inputVals) {
-            let evalInput;
-            let inputNum = this.inputNodes.indexOf(node);
-
-            if(inputNum === -1) {
-                return undefined;
-            }
-
-            // This becomes the shift amount
-            // Lower number inputs are actually in the
-            // most significant bits.
-            inputNum = this.inputNodes.length - 1 - inputNum;
-
-            /*jslint bitwise: true */
-            evalInput = !!((inputVals >> inputNum) & 1);
-            /*jslint bitwise: false */
-            
-            return evalInput ? this.vddNode : this.gndNode;
-        }
-
-        deactivateGate(node) {
-            this.graph.nodes.forEach(function(otherNode) {
-                if(node === otherNode) {
-                    return;
-                }
-                this.nodeNodeMap[this.graph.getIndexByNode(node)][this.graph.getIndexByNode(otherNode)] = this.NO_PATH;
-                this.nodeNodeMap[this.graph.getIndexByNode(otherNode)][this.graph.getIndexByNode(node)] = this.NO_PATH;
-            }.bind(this));
-        }
-
-        /**
-         * @method attemptGateConflictResolution
-         * @description
-         * Check whether it matters if a particular gate conflict exists.
-         * If it does not affect the output, we can safely continue computation.
-         * If it does, then the output value on the truth table should be X.
-         * 
-         * Unset this.conflictedPath if the conflict is resolvable.
-         * 
-         * @param {Node} node The node to find a path from.
-         * @param {Node} targetNode The node to find a path to.
-         * @param {number} inputVals The input values to use (binary encoded).
-         */
-        attemptGateConflictResolution(node, targetNode, inputVals) {
-            let targetNodeReachable, nodeTerm1, nodeTerm2, od,
-                gndPathExistsActivated, vddPathExistsActivated;
-
-            const edgeRecurse = function(node, targetNode) {
-                let retValue;
-
-                if(node.conflictLocks[this.graph.getIndexByNode(targetNode)]) {
-                    retValue = this.getMapping(node, targetNode);
-                } else {
-                    node.conflictLocks[this.graph.getIndexByNode(targetNode)] = true;
-                    retValue = this.recurseThroughEdges(node, targetNode, inputVals);
-                    node.conflictLocks[this.graph.getIndexByNode(targetNode)] = null;
-                }
-
-                return retValue;
-            }.bind(this);
-
-            // We will need to restore the old map after the operation below.
-            // We will have determined that either there is a conflict
-            // (i.e., the output will be assigned X),
-            // or that the gate doesn't matter at all (i.e., the output
-            // doesn't change depending on the gate's state).
-            // There is no case in which we need to consider the gate
-            // to be specifically open or closed after returning.
-            const backupNodeNodeMap = [];
-
-            const mapCopy = function(from, to) {
-                for(let ii = 0; ii < from.length; ii++) {
-                    to[ii] = [...from[ii],];
-                }
-            };
-
-            // Next, we need to back up the node locks,
-            // and remove them for the duration of the operation.
-            const lockBackup = {gateLocks: [], edgeLocks: []};
-
-            for(let ii = 0; ii < this.graph.nodes.length; ii++) {
-                lockBackup.gateLocks[ii] = this.graph.nodes[ii].gateLock;
-                lockBackup.edgeLocks[ii] = this.graph.nodes[ii].edgeLocks;
-                this.graph.nodes[ii].gateLocks = [];
-                this.graph.nodes[ii].edgeLocks = [];
-            }
-
-            // Source and drain nodes are interchangeable.
-            // They're just named that way here for readability
-            const allPathsOk = function(sourceNode, drainNode, testNode, activePathExists) {
-                const path1 = this.getMapping(sourceNode, testNode);
-                const path2 = this.getMapping(drainNode,  testNode);
-                const pathToTarget1 = this.getMapping(sourceNode, targetNode);
-                const pathToTarget2 = this.getMapping(drainNode, targetNode);
-                const directPath    = this.getMapping(testNode, targetNode);
-
-                // Note: Can be undefined.
-                return Boolean(directPath.hasPath) ||
-                       Boolean(pathToTarget1.hasPath) && Boolean(path1.hasPath) || 
-                       Boolean(pathToTarget2.hasPath) && Boolean(path2.hasPath) ||
-                       Boolean(path1.hasPath) === Boolean(path2.hasPath) &&
-                       Boolean(path1.hasPath) === Boolean(activePathExists.hasPath);
-            }.bind(this);
-
-            mapCopy(this.nodeNodeMap, backupNodeNodeMap);
-
-            // Assume the path is resolvable to begin.
-            this.conflictedPath = false;
-            
-            // First, see if any of the adjacent nodes that are not currently null-mapped
-            // (i.e., not under investigation) have a path to targetNode.
-            nodeTerm1 = node.getTerm1Node();
-            nodeTerm2 = node.getTerm2Node();
-
-            this.mapNodes(node, nodeTerm1, this.DIRECT_PATH);
-            this.mapNodes(node, nodeTerm2, this.DIRECT_PATH);
-                          
-            targetNodeReachable = edgeRecurse(node, targetNode, inputVals).hasPath;
-        
-            od = this.conflictedPath;
-            this.conflictedPath = false;
-
-            // If it is reachable at all, compare the paths for inactive and active states.
-            if(targetNodeReachable && Math.min(node.cell.term1.nodes.size, node.cell.term2.nodes.size) > 1) {
-                gndPathExistsActivated = edgeRecurse(nodeTerm1, this.gndNode, inputVals);
-                vddPathExistsActivated = edgeRecurse(nodeTerm1, this.vddNode, inputVals);
-
-                mapCopy(backupNodeNodeMap, this.nodeNodeMap);
-                od = od || this.conflictedPath;
-                this.conflictedPath = false;
-
-                // If there is a conflict when activated, then the target node is definitely conflicted.
-                // As long as there is no conflict, proceed.
-                if(!gndPathExistsActivated.hasPath || !vddPathExistsActivated.hasPath) {
-                    // The active paths are fine.
-                    // Now try with the gate inactive.
-                    this.deactivateGate(node);
-                    edgeRecurse(node, this.gndNode, inputVals);
-                    edgeRecurse(node, this.vddNode, inputVals);
-                    edgeRecurse(nodeTerm1, targetNode, inputVals);
-                    edgeRecurse(nodeTerm2, targetNode, inputVals);
-                    
-                    od = od || this.conflictedPath || 
-                         !allPathsOk(nodeTerm1, nodeTerm2, this.gndNode, gndPathExistsActivated) ||
-                         !allPathsOk(nodeTerm1, nodeTerm2, this.vddNode, vddPathExistsActivated);
-
-                    mapCopy(backupNodeNodeMap, this.nodeNodeMap);
-                }
-            }
-
-            // No path to targetNode === No problem
-            this.conflictedPath = od;
-            mapCopy(backupNodeNodeMap, this.nodeNodeMap);
-        }
-
-        /**
-         * @method recurseThroughEdges
-         * @description
-         * Recursively searches for a path from node to targetNode
-         * given a particular set of inputs.
-         * 
-         * @param {Node} node - The node to start from.
-         * @param {Node} targetNode - The node to find a path to.
-         * @param {number} inputVals - The input values to use (binary encoded).
-         * @returns {Object} - The mapping between node and targetNode.
-         * @private
-         */
-        recurseThroughEdges(node, targetNode, inputVals) {
-            let pathFound;
-            let indeterminatePath;
-            let hasNullPath = false;
-            let targetIndex = this.graph.getIndexByNode(targetNode);
-
-            const getPath = function(_node) {
-                let retValue;
-
-                if(node.edgeLocks[targetIndex]) {
-                    retValue = this.getMapping(_node, targetNode);
-                } else {
-                    node.edgeLocks[targetIndex] = true;
-                    retValue = this.computeOutputRecursive(_node, targetNode, inputVals);
-
-                    if(retValue === this.INDETERMINATE_PATH) {
-                        const oppositeNode = _node.getOppositeTerminal(node);
-                        oppositeNode.edgeLocks[targetIndex] = true;
-                        const oppositeNodeMapping = this.computeOutputRecursive(oppositeNode, targetNode, inputVals);
-                        oppositeNode.edgeLocks[targetIndex] = null;
-
-                        if(oppositeNodeMapping.hasPath || oppositeNodeMapping === this.INDETERMINATE_PATH) {
-                            indeterminatePath = true;
-                        }
-                        else {
-                            retValue = oppositeNodeMapping;
-                        }
-                    }
-                    node.edgeLocks[targetIndex] = null;
-                }
-
-                return retValue;
-            }.bind(this);
-
-            node.edges.some(function(edge) {
-                let otherNode = edge.getOtherNode(node);
-                let mapping = this.getMapping(otherNode, targetNode);
-                let nodeLock = otherNode.edgeLocks[targetIndex];
-
-                if(nodeLock && mapping.hasPath === this.UNCHECKED) {
-                    return false;
-                }
-              
-              	if(!mapping.direct && (otherNode === this.vddNode || otherNode === this.gndNode)) {
-                  return false;
-                }
-
-                // Easy case: We have already found a path from this otherNode.
-                if (mapping.hasPath) {
-                    this.mapNodes(node, targetNode, mapping);
-                    this.mapNodes(node, edge.getOtherNode(node), mapping);
-                    /*jshint -W093 */
-                    return pathFound = mapping;
-                    /*jshint +W093 */
-                }
-                
-                // Recursive case: We do not yet know if there is a path from otherNode.
-                if(mapping === this.UNCHECKED) {
-                    //mapping = this.computeOutputRecursive(otherNode, targetNode, inputVals);
-                    mapping = getPath(otherNode);
-                }
-
-                // Path found from otherNode?
-                if (mapping.hasPath) {
-                    this.mapNodes(node, targetNode, mapping);
-                    this.mapNodes(node, edge.getOtherNode(node), mapping);
-                    /*jshint -W093 */
-                    return pathFound = mapping;
-                    /*jshint +W093 */
-                }
-
-                // Null outcome means that we ran into a node that is
-                // already being investigated and had to abort.
-                // It will be returned to later.
-                if(mapping === this.COMPUTING_PATH) {
-                    hasNullPath = true;
-                }
-            }.bind(this));
-
-            if(pathFound) {
-                return pathFound;
-            } else if(hasNullPath) {
-                return this.COMPUTING_PATH;
-            } else if(indeterminatePath) {
-                this.mapNodes(node, targetNode, this.INDETERMINATE_PATH);
-                return this.getMapping(node, targetNode);
-            }
-            else {
-                this.mapNodes(node, targetNode, this.NO_PATH);
-                // Don't return NO_PATH directly, because it may
-                // have been reassigned to VIRTUAL_PATH_ONLY.
-                return this.getMapping(node, targetNode);
-            }
-        }
-
-        /**
-         * @method computeOutputRecursive
-         * @description
-         * Recursively searches for a path from node to targetNode
-         * given a particular set of inputs.
-         *
-         * Assumption: targetNode is NOT a transistor.
-         * This holds true because targetNode is always either
-         * and output node, the GND terminal, or the VDD terminal.
-         * 
-         * NONE of these can be transistors because all of them
-         * are implemented as contacts, which destroy transistors.
-         * 
-         * @param {Node} node - The node to start from.
-         * @param {Node} targetNode - The node to find a path to.
-         * @param {number} inputVals - The input values to use (binary encoded).
-         * @returns {Object} - The mapping between node and targetNode.
-         * @private
-         */
-        computeOutputRecursive(node, targetNode, inputVals) {
-            let mapping;
-
-            // If the test node is an input, is it the same value the targetNode?
-            if(this.evaluateInput(node, inputVals) === targetNode) {
-                // Test node is an input and is the same value as the target
-                // VDD or GND node.
-                this.mapNodes(node, targetNode, this.VIRTUAL_PATH);
-            }
-
-            // Have we already found a path?
-            // (Could have been found in above input node test
-            // or in a previous recursion.)
-            mapping = this.getMapping(node, targetNode);
-
-            // Avoid infinite loops.
-            // Return if this is currently being checked
-            // or if a definitive answer has already been found.
-            if (mapping === this.COMPUTING_PATH || mapping.indeterminate === false) {
-                return mapping;
-            }
-
-            // Initialize to null.
-            // This marks the node as currently being checked
-            // so that we won't recurse back into it.
-            // (VIRTUAL_PATH is analogous to null - leave VIRTUAL_PATH as-is)
-            if(mapping !== this.VIRTUAL_PATH) {
-                this.mapNodes(node, targetNode, this.COMPUTING_PATH);
-            }
-
-            // If the test node is a transistor,
-            // only traverse the channel if the gate is active.
-            // If it's inactive, exit this recursion.
-            if(node.isTransistor()) {
-                // true for active, false for inactive.
-                // Also, false when setting conflictedPath.
-                const evalResult = this.gateIsActive(node, inputVals);
-
-                if(evalResult === undefined) {
-                    // If the gate is floating, the output is potentially indeterminate.
-                    const gateNode = node.cell.gate.nodes.values().next().value;
-                    const term1Node = node.getTerm1Node();
-                    const term2Node = node.getTerm2Node();
-                    if(!!gateNode) {
-                        this.mapNodes(gateNode, this.vddNode, this.NO_PATH);
-                        this.mapNodes(gateNode, this.gndNode, this.NO_PATH);
-                    }
-                    if(!!term1Node && !!term2Node) {
-                        this.mapNodes(term1Node, term2Node, this.INDETERMINATE_PATH);
-                        this.mapNodes(term1Node, node, this.INDETERMINATE_PATH);
-                        this.mapNodes(term2Node, node, this.INDETERMINATE_PATH);
-                    }
-                    //this.deactivateGate(node);
-                    if(this.recurseThroughEdges(term1Node, targetNode, inputVals).hasPath || this.recurseThroughEdges(term2Node, targetNode, inputVals).hasPath) {
-                        return this.INDETERMINATE_PATH;
-                    } else {
-                        return this.NO_PATH;
-                    }
-                }
-
-                if(this.conflictedPath) {
-                    // If the gate is driven both high and low,
-                    // or if the gate is in an unknown state,
-                    // determine whether this will affect the output.
-                    this.attemptGateConflictResolution(node, targetNode, inputVals);
-                }
-
-                if (evalResult === false) {
-                    // Inactive: Mark this transistor node as disconnected
-                    //           from all nodes except for itself.
-                    this.deactivateGate(node);
-                    return this.NO_PATH;
-                } else if (evalResult === null) {
-                    // Unknown: This occurs when at least one tested path
-                    //          was aborted due to a node already being
-                    //          under investigation, and no connection was
-                    //          found on any other path.
-                    //
-                    // This will be returned to later if it isn't an island.
-                    if(!node.isLocked(targetNode, this.graph)) {
-                        this.mapNodes(node, targetNode, this.UNCHECKED);
-                    }
-                    return this.COMPUTING_PATH;
-                }
-            }
-
-            // Recurse on all node edges (or until a path is found).
-            return this.recurseThroughEdges(node, targetNode, inputVals);
-        }
-
-        evalInputDrivenGate(node, inputVals, gateNet) {
-            let tempEval, evalInput;
-            let gateNode = gateNet.nodes.entries().next().value[1];
-
-            this.inputNodes.forEach(function(node, index) {
-                if(!gateNode.isConnected(node)) {
-                    return;
-                }
-
-                // Evaluate the relevant input bit as a boolean.
-                /*jslint bitwise: true */
-                tempEval = !!((inputVals >> (this.inputs.length - index - 1)) & 1);
-                /*jslint bitwise: false */
-
-                if(evalInput === undefined || evalInput === tempEval) {
-                    evalInput = tempEval;
-                } else {
-                    // Conflict found.
-                    this.conflictedPath = true;
-                }
-            }.bind(this));
-
-            this.conflictedPath = this.conflictedPath ||
-                gateNet.containsNode(this.vddNode) && evalInput === false ||
-                gateNet.containsNode(this.gndNode) && evalInput === true ||
-                gateNet.containsNode(this.vddNode) && gateNet.containsNode(this.gndNode);
-
-            evalInput = (evalInput || gateNet.containsNode(this.vddNode)) && !gateNet.containsNode(this.gndNode);
-            
-            // Pass-through positive for NMOS.
-            // Invert for PMOS.
-            /*jslint bitwise: true */
-            return !this.conflictedPath && !(node.isNmos ^ evalInput);
-            /*jslint bitwise: false */
-        }
-
-        // This function determines whether a transistor gate is active by evaluating 
-        // the paths between the gate's nodes and either the ground node or the power node.
-        //
-        // If any of the paths are still under investigation (marked as null) at the end
-        // of the evaluation, the function returns null.
-        //
-        // Otherwise, if any path between a gate node and the relevant power or ground node exists,
-        // the function returns true.
-        //
-        // Otherwise, it returns false.
-        gateIsActive(node, inputVals) {
-            let gateNet = node.cell.gate;
-            let connectedNodeIterator, hasNullPath;
-            let anyPathFound = false;
-            let relevantNode, oppositeNode;
-
-            const getPath = function(node, targetNode) {
-                let retValue;
-
-                if(node.gateLocks[this.graph.getIndexByNode(targetNode)]) {
-                    retValue = this.getMapping(node, targetNode);
-                } else {
-                    node.gateLocks[this.graph.getIndexByNode(targetNode)] = true;
-                    retValue = this.computeOutputRecursive(node, targetNode, inputVals);
-                    node.gateLocks[this.graph.getIndexByNode(targetNode)] = null;
-                }
-
-                return retValue;
-            }.bind(this);
-
-            // If the gate is an input, the gate's state depends on the input value.
-            if (gateNet.isInput) {
-                return this.evalInputDrivenGate(node, inputVals, gateNet);
-            }
-
-            // Determine the relevant power or ground node for the current gate type.
-            if(node.isPmos) {
-                relevantNode = this.gndNode;
-                oppositeNode = this.vddNode;
-            } else {
-                relevantNode = this.vddNode;
-                oppositeNode = this.gndNode;
-            }
-
-            // Otherwise, recurse and see if this is active.
-            connectedNodeIterator = gateNet.nodes.values();
-            hasNullPath = false;
-
-            // Iterate through the nodes in the same net as the gate.
-            connectedNodeIterator = gateNet.nodes.values();
-
-            for (let connectedNode = connectedNodeIterator.next(); !connectedNode.done; connectedNode = connectedNodeIterator.next()) {
-                let relevantPathExists, oppositePathExists;
-                connectedNode = connectedNode.value;
-
-                // Check if there is a path between the current node and the relevant power or ground node.
-                relevantPathExists = getPath(connectedNode, relevantNode);
-                oppositePathExists = getPath(connectedNode, oppositeNode);
-
-                anyPathFound = anyPathFound || (relevantPathExists.hasPath === true) || (oppositePathExists.hasPath === true);
-
-                // If the path has not yet been determined, set hasNullPath to true
-                // Set and hold if any null path to the relevant node is found in *any* loop iteration.
-                if (relevantPathExists === this.COMPUTING_PATH) {
-                    hasNullPath = true;
-                }
-                // If the path exists, return true.
-                else if(relevantPathExists.hasPath) {
-                    // TODO: The following line is incorrect and does nothing.
-                    //       The "correct" version would be:
-                    //
-                    //       this.conflictedPath = oppositePathExists.hasPath === true;
-                    //
-                    //       Because it does nothing, we need to determine
-                    //       whether it was ever necessary in the first place.
-                    //
-                    //       Correcting it produces incorrect output,
-                    //       so the answer is not trivial.
-                    //
-                    //       Original line:
-                    //this.conflictedPath = oppositePathExists === true;
-                    return true;
-                }
-            }
-
-            // If any paths have not yet been determined, return null.
-            if(hasNullPath) {
-                return null;
-            }
-
-            // If no path found to any logical value, return undefined.
-            if(!anyPathFound) {
-                return undefined;
-            }
-
-            // Otherwise, return false.
-            return false;
-        }
-
-        // Computes the value of a particular output node for a given set of inputs.
-        // Each bit of inputVals is the value (1 or 0) of a single input node (A, B, C, etc).
-        // outputNode is the specific output node (Y, Z, etc) that we want to test.
-        computeOutput(inputVals, outputNode) {
-            let outputVal = "Z";             // Assume that the node is floating at the start.
-            let highNodes = [this.vddNode,]; // Array for all nodes driven HIGH.
-            let lowNodes  = [this.gndNode,]; // Array for all nodes driven LOW.
-            this.conflictedPath = false;
-
-            // Add input nodes to the highNodes and lowNodes arrays according
-            // to their binary values. (1 = high, 0 = low)
-            this.inputNodes.forEach(function(node, index) {
-                let inputNum = this.inputNodes.length - 1 - index;
+        // Connect all supply and input terminals to their respective logic levels.
+        connectTerminals(inputVals) {
+            this.hypergraph.connectVertices(this.strongLogicOneVertex, this.vddVertex, true);
+            this.hypergraph.connectVertices(this.strongLogicZeroVertex, this.gndVertex, true);
+
+            this.inputVertices.forEach(function(vertex, index) {
+                const inputNum = this.inputVertices.length - 1 - index;
 
                 /*jslint bitwise: true */
-                let evalInput = !!((inputVals >> inputNum) & 1);
+                const evalInput = !!((inputVals >> inputNum) & 1);
                 /*jslint bitwise: false */
 
                 if(evalInput) {
-                    highNodes.push(node);
+                    this.hypergraph.connectVertices(vertex, this.strongLogicOneVertex, true);
                 } else {
-                    lowNodes.push(node);
+                    this.hypergraph.connectVertices(vertex, this.strongLogicZeroVertex, true);
                 }
             }.bind(this));
-
-            //  Initialize the map of connections between nodes.
-            if(!!this.analyses[inputVals] && !!this.analyses[inputVals].length) {
-                // This condition occurs when this function is called
-                // more than once with the same arguments without calling clearAnalyses().
-                // I.e., this is for the case of multiple outputs.
-                this.nodeNodeMap = [... this.analyses[inputVals],];
-            } else {
-                // Expected case:
-                // No nodal analysis has been done for outputNode for this set of inputVals.
-                // Mark each node as connected to itself.
-                this.graph.nodes.forEach(function(_, ii) {
-                    this.nodeNodeMap[ii] = [];
-
-                    this.graph.nodes.forEach(function(_, jj) {
-                        this.nodeNodeMap[ii][jj] = ii === jj ? this.DIRECT_PATH : this.UNCHECKED;
-                    }.bind(this));
-                }.bind(this));
-            }
-
-            // Test each node for a path to outputNode
-            let testPath = function(node) {
-                if(this.conflictedPath) {
-                    return;
-                }
-
-                // Recursive over every possible path from the test node to outputNode.
-                this.computeOutputRecursive(node, outputNode, inputVals);
-
-                // null paths are inconclusive; they mean that the recursion
-                // concluded before these paths were proven or disproven.
-                // Revert them to undefined for the next loop iteration.
-                // VIRTUAL_PATH_ONLY results can be treated as "true" at this stage.
-                this.graph.nodes.forEach(function(_, ii) {
-                    this.graph.nodes.forEach(function(_, jj) {
-                        if(this.nodeNodeMap[ii][jj] === this.COMPUTING_PATH) {
-                            this.nodeNodeMap[ii][jj] = this.UNCHECKED;
-                        }
-                    }.bind(this));
-                }.bind(this));
-
-                // Finally, if we have not found a connection between
-                // the test node and outputNode, there *is* no connection.
-                if(this.getMapping(node, outputNode) === this.UNCHECKED) {
-                    this.mapNodes(node, outputNode, this.NO_PATH);
-                }
-            }.bind(this);
-
-            for(let ii = 0; ii < this.inputNodes.length; ii++) {
-                /*jslint bitwise: true */
-                if(inputVals >> (this.inputNodes.length - 1 - ii) & 1) {
-                    this.mapNodes(this.inputNodes[ii], this.vddNode, this.VIRTUAL_PATH);
-                } else {
-                    this.mapNodes(this.inputNodes[ii], this.gndNode, this.VIRTUAL_PATH);
-                }
-                /*jslint bitwise: false */
-            }
-      
-            // Compute output
-            this.inputNodes.forEach(testPath);
-            testPath(this.vddNode);
-            testPath(this.gndNode);
-      
-            // If there are no conflicted paths,
-            // proceed to map out every path to the output.
-            // We can ignore conflicted paths here because
-            // the new nodes we are testing are not inputs.
-            if(!this.conflictedPath) {
-                this.graph.nodes.forEach(testPath);
-                this.conflictedPath = false;
-            }
-
-            // Determine the value of the output.
-            highNodes.some(function(node) {
-                const mapping = this.getMapping(node, outputNode);
-
-                if(mapping === this.INDETERMINATE_PATH) {
-                    // Indeterminate due to floating gate.
-                    outputVal = "X";
-                }
-                else if(mapping.hasPath) {
-                    // Path is found from HIGH to outputNode,
-                    // so we assign the output value to 1.
-                    //
-                    // This may not be the final value;
-                    // see the lowNodes loop below.
-                    outputVal = "1";
-                    return true;
-                }
-            }.bind(this));
-
-            lowNodes.some(function(node) {
-                const mapping = this.getMapping(node, outputNode);
-
-                if(mapping === this.INDETERMINATE_PATH) {
-                    // Indeterminate due to floating gate.
-                    outputVal = "X";
-                }
-                else if(mapping.hasPath) {
-                    // Path is found from LOW to outputNode.
-                    // 
-                    // If the current outputVal is "Z", that means
-                    // no path was found from HIGH to outputNode,
-                    // so there is no short from HIGH to LOW in this node.
-                    // In this case, assign the output value to 0.
-                    //
-                    // If there IS a path from high to outputNode,
-                    // then the node is being driven both HIGH and LOW.
-                    // In this case, assign the output value to "X".
-                    outputVal = outputVal === "Z" ? "0" : "X";
-                    return true;
-                }
-            }.bind(this));
-
-            // Save all the results of the analysis for this combination
-            // of input values and output node so that we can highlight
-            // all connected nodes.
-            // Don't do this for conflicted paths; it screws up multiple outputs
-            if(!this.conflictedPath) {
-                this.analyses[inputVals] = [...this.nodeNodeMap,];
-            }
-
-            // Reset the node-node map so that it will be ready for
-            // the next time this function is called.
-            this.nodeNodeMap.length = 0;
-
-            // Return 1, 0, "Z", or "X".
-            // There is still one unchecked case for "X",
-            // namely when two or more inputs directly drive
-            // a gate with opposite values.
-            return this.conflictedPath ? "X" : outputVal;
         }
 
-        // Map a function to every transistor terminal.
-        forEachTransistor(funct) {
-            let terms = ["term1", "term2", "gate", ];
-            let transistorLists = [this.nmos, this.pmos, ];
+        // Connect source and drain of active transistors, and propagate.
+        initTransistorStates() {
+            let changed;
+            do {
+                changed = false;
 
-            transistorLists.forEach(function (transistorList) {
-                let iterator = transistorList.values();
+                this.transistors.forEach(function(transistor) {
+                    const state = transistor.getState();
+                    const sourceDrainPathExists = transistor.source.hasPathTo(transistor.drain);
 
-                for (let transistor = iterator.next(); !transistor.done; transistor = iterator.next()) {
-                    let transistorCell = transistor.value;
-                    let transistorNode = this.graph.getNode(transistorCell);
+                    if(state === Transistor.STATES.ACTIVE && !sourceDrainPathExists) {
+                        this.hypergraph.connectVertices(transistor.source, transistor.drain, true);
+                        changed = true;
+                    }
+                }.bind(this));
+            } while(changed);
+        }
 
-                    for(let ii = 0; ii < terms.length; ii++) {
-                        funct(transistorCell, transistorNode, terms[ii]);
+        updateTransistorStates(gateEdge, weakDriveVal, addedEdgesArr, addedSourceDrainEdges) {
+            this.transistors.forEach(function(transistor, index) {
+                const state = transistor.getState();
+                const joinableState = state === Transistor.STATES.FLOATING || state === Transistor.STATES.ACTIVE;
+                if(transistor.gate.getEdges().includes(gateEdge) && joinableState) {
+                    if(state === Transistor.STATES.ACTIVE || transistor.isNmos && weakDriveVal || transistor.isPmos && !weakDriveVal) {
+                        const newEdge = this.hypergraph.connectVertices(transistor.source, transistor.drain, true);
+                        if(!!newEdge) {
+                            addedEdgesArr.push(newEdge);
+                            addedSourceDrainEdges[index] = newEdge;
+                        }
+                    }
+                    if(state === Transistor.STATES.INACTIVE) {
+                        const removeEdge = addedSourceDrainEdges[index];
+                        // Remove vertices from the hyperedge.
+                        if(!!removeEdge) {
+                            removeEdge.removeVertex(transistor.source);
+                            removeEdge.removeVertex(transistor.drain);
+                            addedSourceDrainEdges[index] = null;
+                        }
                     }
                 }
             }.bind(this));
+        }
+
+        addTentativeEdges(tentativeEdges, tentativeVertices) {
+            this.transistors.forEach(function(transistor) {
+                const state = transistor.getState();
+                const sourceDrainPathExists = transistor.source.hasPathTo(transistor.drain);
+
+                if(state === Transistor.STATES.UNDEFINED && !sourceDrainPathExists) {
+                    const tentativePathExists = transistor.source.hasPathTo(transistor.drain, true);
+                    if(!tentativePathExists) {
+                        const tentativeVertex = this.hypergraph.addVertex(null, false, true);
+                        const newEdge1 = this.hypergraph.connectVertices(transistor.source, tentativeVertex, true);
+                        const newEdge2 = this.hypergraph.connectVertices(transistor.drain, tentativeVertex, true);
+                        if(!!newEdge1) tentativeEdges.push(newEdge1);
+                        if(!!newEdge2) tentativeEdges.push(newEdge2);
+                        tentativeVertices.push(tentativeVertex);
+                    }
+                }
+            }.bind(this));
+        }
+
+        updateOutputVal(currentOutputVal, outputVertex, traverseTentative=false) {
+            if(currentOutputVal === "X") {
+                return currentOutputVal;
+            }
+            let retVal = currentOutputVal;
+
+            if(this.strongLogicOneVertex.hasPathTo(this.strongLogicZeroVertex, traverseTentative)) {
+                return retVal = "X";
+            }
+
+            const onePath = this.strongLogicOneVertex.hasPathTo(outputVertex, traverseTentative);
+            if(onePath) {
+                switch(currentOutputVal) {
+                    case "Z":
+                        retVal = "H";
+                        break;
+                    case "L": 
+                        retVal = "U";
+                        break;
+                    case "0":
+                        return retVal = "X";
+                }
+            }
+
+            const zeroPath = this.strongLogicZeroVertex.hasPathTo(outputVertex, traverseTentative);
+            if(zeroPath) {
+                switch(currentOutputVal) {
+                    case "Z":
+                        retVal = retVal === "H" ? "U" : "L";
+                        break;
+                    case "H": 
+                        retVal = "U";
+                        break;
+                    case "1":
+                        return retVal = "X";
+                }
+            }
+
+            if(currentOutputVal === "1" && zeroPath) {
+                return retVal = "X";
+            } else if(currentOutputVal === "0" && onePath) {
+                return retVal = "X";
+            }
+
+            return retVal;
+        }
+
+        testFloatingGates(currentOutputVal, addedEdgesArr, addedSourceDrainEdges, outputVertex) {
+            let outputVal = currentOutputVal;
+            const floatingTransistorGateEdges = new Set();
+
+            this.transistors.forEach(function(transistor) {
+                if(transistor.getState() === Transistor.STATES.FLOATING) {
+                    floatingTransistorGateEdges.add(transistor.gate.getEdges()[0]);
+                }
+            });
+
+            const floatingTransistorGateEdgesArr = Array.from(floatingTransistorGateEdges);
+
+            for(let ii = 0; ii < Math.pow(2, floatingTransistorGateEdgesArr.length); ii++) {
+                const tentativeVertices = [];
+                const tentativeEdges = [];
+
+                this.hypergraph.backupLUT();
+
+                if(outputVal === "X") {
+                    break;
+                }
+
+                for(let jj = 0; jj < floatingTransistorGateEdgesArr.length; jj++) {
+                    if(outputVal === "X") {
+                        break;
+                    }
+
+                    if(floatingTransistorGateEdgesArr[jj].hasVertex(this.strongLogicOneVertex)
+                        || floatingTransistorGateEdgesArr[jj].hasVertex(this.strongLogicZeroVertex)) {
+                        continue;
+                    }
+
+                    // Weakly drive the gate to 1 or 0.
+                    const evalInput = !!((ii >> jj) & 1);
+                    while(this.updateTransistorStates(floatingTransistorGateEdgesArr[jj], evalInput, addedEdgesArr, addedSourceDrainEdges)) { /* EMPTY */ }
+                }
+
+                this.addTentativeEdges(tentativeEdges, tentativeVertices);
+
+                outputVal = this.updateOutputVal(outputVal, outputVertex, true);
+
+                if(outputVal !== "X") {
+                    // Check whether the output changes depending on whether "tentative" paths are considered.
+                    // Iterate through UNDEFINED transistors.
+                    this.transistors.some(function(transistor) {
+                        if(transistor.getState() === Transistor.STATES.UNDEFINED || transistor.getState() === Transistor.STATES.FLOATING) {
+                            const sourcePathToOutput = transistor.source.hasPathTo(outputVertex);
+                            const drainPathToOutput = transistor.drain.hasPathTo(outputVertex);
+                            const pathToZero = transistor.source.hasPathTo(this.strongLogicZeroVertex, true);
+                            const pathToOne  = transistor.source.hasPathTo(this.strongLogicOneVertex, true);
+                            if(!(sourcePathToOutput ^ drainPathToOutput)) {
+                                // No effect.
+                                return false;
+                            } else if(outputVal !== "0" && outputVal !== "L" && pathToZero) {
+                                return outputVal = "X";
+                            } else if(outputVal !== "1" && outputVal !== "H" && pathToOne) {
+                                return outputVal = "X";
+                            }
+                        }
+                    }.bind(this));
+                }
+
+                tentativeVertices.forEach(function(vertex) {
+                    this.hypergraph.removeVertex(vertex);
+                }.bind(this));
+
+                tentativeEdges.forEach(function(edge) {
+                    this.hypergraph.removeHyperedge(edge);
+                }.bind(this));
+
+                addedEdgesArr.forEach(function(edge) {
+                    this.hypergraph.removeHyperedge(edge);
+                }.bind(this));
+
+                addedEdgesArr.length = 0;
+                this.hypergraph.restoreLUT();
+            }
+
+            floatingTransistorGateEdgesArr.forEach(function(edge) {
+                edge.removeVertex(this.strongLogicOneVertex);
+                edge.removeVertex(this.strongLogicZeroVertex);
+            }.bind(this));
+
+            return outputVal;
+        }
+
+        // Attempt to re-implement the computeOutput function using the hypergraph
+        // and a greatly simplified version of the path-finding algorithm.
+        computeOutput(inputVals, outputIndex) {
+            const outputVertex = this.outputVertices[outputIndex];
+            const addedEdgesArr = [];
+            const addedSourceDrainEdges = [];
+
+            this.cleanup();
+            this.connectTerminals(inputVals);
+            this.initTransistorStates();
+
+            // See if we already have a path from the output to a logic vertex.
+            let outputVal = "Z";
+            if(outputVertex.hasPathTo(this.strongLogicOneVertex)) {
+                outputVal = "1";
+            }
+            if(outputVertex.hasPathTo(this.strongLogicZeroVertex)) {
+                outputVal = outputVal === "1" ? "X" : "0";
+            }
+
+            outputVal = this.testFloatingGates(outputVal, addedEdgesArr, addedSourceDrainEdges, outputVertex);
+
+            this.analyses[inputVals] = [];
+            this.analyses[inputVals][0] = [];
+            this.hypergraph.vertices.forEach(function(vertex, ii) {
+                for(let jj = ii + 1; jj < this.hypergraph.vertices.length; jj++) {
+                    const vertex2 = this.hypergraph.vertices[jj];
+                    if(!this.analyses[inputVals][jj]) {
+                        this.analyses[inputVals][jj] = [];
+                    }
+                    this.analyses[inputVals][ii][jj] = vertex.hasPathTo(vertex2);
+                    this.analyses[inputVals][jj][ii] = this.analyses[inputVals][ii][jj];
+                }
+            }.bind(this));
+
+            return outputVal;
+        }
+
+        // Generate Verilog from the current circuit.
+        // Use this.transistors to generate the Verilog.
+        generateVerilog() {
+            let verilog = "module circuit(";
+            let inputs = [];
+            let outputs = [];
+            let wires = [];
+            let nmos = [];
+            let pmos = [];
+
+            this.cleanup();
+
+            for(let ii = 0; ii < this.inputs.length; ii++) {
+                inputs.push(String.fromCharCode(65 + ii));
+            }
+            for(let ii = 0; ii < this.outputs.length; ii++) {
+                outputs.push(String.fromCharCode(89 - ii));
+            }
+
+            // Create a wire for each hyperedge.
+            this.hypergraph.hyperedges.forEach(function(hyperedge, index) {
+                if(hyperedge.mergeable) wires.push("  wire wire_" + index + ";");
+            });
+
+            this.transistors.forEach(function(transistor) {
+                let source = transistor.source;
+                let drain = transistor.drain;
+                let gate = transistor.gate;
+                let sourceIsVDD = false;
+                let sourceIsGND = false;
+                let drainIsVDD = false;
+                let drainIsGND = false;
+
+                let sourceName = "wire_" + this.hypergraph.hyperedges.indexOf(source.getEdges()[0]);
+                let drainName = "wire_" + this.hypergraph.hyperedges.indexOf(drain.getEdges()[0]);
+                let gateName = "wire_" + this.hypergraph.hyperedges.indexOf(gate.getEdges()[0]);
+
+                // Check if the source and/or drain are connected to VDD or GND.
+                if(source.hasPathTo(this.vddVertex)) {
+                    sourceIsVDD = true;
+                    sourceName = "vdd";
+                }
+                if(source.hasPathTo(this.gndVertex)) {
+                    sourceIsGND = true;
+                    sourceName = "gnd";
+                }
+                if(drain.hasPathTo(this.vddVertex)) {
+                    drainIsVDD = true;
+                    drainName = "vdd";
+                }
+                if(drain.hasPathTo(this.gndVertex)) {
+                    drainIsGND = true;
+                    drainName = "gnd";
+                }
+
+                if(sourceIsVDD && sourceIsGND || drainIsVDD && drainIsGND) {
+                    wires.push("  assign gnd = vdd;");
+                }
+
+                // First, connect all edges incident to each vertex to the first one.
+                if(!sourceIsVDD && !sourceIsGND) {
+                    source.getEdges().forEach(function(edge, index) {
+                        if(index !== 0 && edge.mergeable) {
+                            wires.push("  assign wire_" + this.hypergraph.hyperedges.indexOf(edge) + " = " + sourceName + ";");
+                        }
+                    }.bind(this));
+                }
+
+                if(!drainIsVDD && !drainIsGND) {
+                    drain.getEdges().forEach(function(edge, index) {
+                        if(index !== 0 && edge.mergeable) {
+                            wires.push("  assign wire_" + this.hypergraph.hyperedges.indexOf(edge) + " = " + drainName + ";");
+                        }
+                    }.bind(this));
+                }
+
+                gate.getEdges().forEach(function(edge, index) {
+                    if(index !== 0 && edge.mergeable) {
+                        wires.push("  assign wire_" + this.hypergraph.hyperedges.indexOf(edge) + " = " + gateName + ";");
+                    }
+                }.bind(this));
+
+                // Now, create the transistor.
+                if(transistor.isNmos) {
+                    nmos.push("  tranif1 nmos_" + nmos.length + "(" + sourceName + ", " + drainName + ", " + gateName + ");");
+                } else {
+                    pmos.push("  tranif0 pmos_" + pmos.length + "(" + sourceName + ", " + drainName + ", " + gateName + ");");
+                }
+            }.bind(this));
+
+            // Assign EACH of the wires connected to the inputs and outputs to the appropriate values.
+            this.inputVertices.forEach(function(vertex, index) {
+                let inputName = String.fromCharCode(65 + index);
+
+                vertex.getEdges().forEach(function(edge) {
+                    if(edge.mergeable) wires.push("  assign wire_" + this.hypergraph.hyperedges.indexOf(edge) + " = " + inputName + ";");
+                }.bind(this));
+            }.bind(this));
+
+            this.outputVertices.forEach(function(vertex, index) {
+                let outputName = String.fromCharCode(89 - index);
+
+                vertex.getEdges().forEach(function(edge) {
+                    if(edge.mergeable) wires.push("  assign " + outputName + " = wire_" + this.hypergraph.hyperedges.indexOf(edge) + ";");
+                }.bind(this));
+            }.bind(this));
+
+            // Same for GND and VDD.
+            this.vddVertex.getEdges().forEach(function(edge) {
+                if(edge.mergeable) wires.push("  assign wire_" + this.hypergraph.hyperedges.indexOf(edge) + " = vdd;");
+            }.bind(this));
+
+            this.gndVertex.getEdges().forEach(function(edge) {
+                if(edge.mergeable) wires.push("  assign wire_" + this.hypergraph.hyperedges.indexOf(edge) + " = gnd;");
+            }.bind(this));
+
+            verilog += inputs.join(", ") + ", ";
+            verilog += outputs.join(", ") + ");\n";
+
+            inputs.forEach(function(input) {
+                verilog += "  input " + input + ";\n";
+            });
+
+            outputs.forEach(function(output) {
+                verilog += "  output " + output + ";\n";
+            });
+
+            verilog += "  supply1 vdd;\n";
+            verilog += "  supply0 gnd;\n";
+            verilog += wires.join("\n") + "\n\n";
+            verilog += nmos.join("\n") + "\n\n";
+            verilog += pmos.join("\n") + "\n\n";
+
+            verilog += "endmodule\n";
+
+            return verilog;
         }
 
         // Clear necessary data structures in preparation for recomputation.
         clearCircuit() {
             // Create a this.graph object.
-            this.graph.clear();
+            // TODO
+            //this.hypergraph.clear();
 
             // Clear the net sets.
             this.vddNet.clear();
@@ -2467,16 +2171,31 @@
         setNets() {
             this.clearCircuit();
             this.resetNetlist();
+            this.hypergraph = new Hypergraph();
+            this.transistors = [];
+            this.strongLogicOneVertex = this.hypergraph.addVertex(null, true);
+            this.strongLogicZeroVertex = this.hypergraph.addVertex(null, true);
+            this.inputVertices = [];
+            this.outputVertices = [];
+
+            // Local VDD and GND vertices.
+            this.vddVertex = this.hypergraph.addVertex(this.layeredGrid.get(this.vddCell.x, this.vddCell.y, LayeredGrid.CONTACT));
+            this.gndVertex = this.hypergraph.addVertex(this.layeredGrid.get(this.gndCell.x, this.gndCell.y, LayeredGrid.CONTACT));
+
+            this.inputs.forEach(function(input) {
+                let inputCell = this.layeredGrid.get(input.x, input.y, LayeredGrid.CONTACT);
+                this.inputVertices.push(this.hypergraph.addVertex(inputCell));
+            }.bind(this));
+            this.outputs.forEach(function(output) {
+                let outputCell = this.layeredGrid.get(output.x, output.y, LayeredGrid.CONTACT);
+                this.outputVertices.push(this.hypergraph.addVertex(outputCell));
+            }.bind(this));
 
             this.inputNets.forEach(function (net) { net.clear(); });
             this.outputNets.forEach(function (net) { net.clear(); });
 
-            // Add rail nodes to the this.graph.
-            this.vddNode = this.graph.addNode(this.layeredGrid.get(this.vddCell.x, this.vddCell.y, LayeredGrid.CONTACT), true);
-            this.gndNode = this.graph.addNode(this.layeredGrid.get(this.gndCell.x, this.gndCell.y, LayeredGrid.CONTACT), true);
-
-            this.vddNet.addNode(this.vddNode);
-            this.gndNet.addNode(this.gndNode);
+            this.vddNet.addVertex(this.vddVertex);
+            this.gndNet.addVertex(this.gndVertex);
 
             // Add the VDD and GND nets.
             // Loop through every VDD cell and add to the VDD net.
@@ -2494,23 +2213,43 @@
                 this.setRecursively(this.layeredGrid.get(output.x, output.y, LayeredGrid.CONTACT), this.outputNets[index]);
             }.bind(this));
 
-            // Add input nodes to the graph.
-            this.inputNodes.length = 0;
+            // Add input vertices to the graph.
             this.inputs.forEach(function(input, index) {
-                this.inputNodes[index] = this.graph.addNode(this.layeredGrid.get(input.x, input.y, LayeredGrid.CONTACT), true);
-                this.inputNets[index].addNode(this.inputNodes[index]);
+                this.inputNets[index].addVertex(this.inputVertices[index]);
             }.bind(this));
 
-            // Add output nodes to the graph.
-            this.outputNodes.length = 0;
+            // Add output vertices to the graph.
             this.outputs.forEach(function(output, index) {
-                this.outputNodes[index] = this.graph.addNode(this.layeredGrid.get(output.x, output.y, LayeredGrid.CONTACT), true);
-                this.outputNets[index].addNode(this.outputNodes[index]);
+                this.outputNets[index].addVertex(this.outputVertices[index]);
             }.bind(this));
 
             this.processTransistors();
             this.linkIdenticalNets();
             this.checkPolarity();
+
+            let vertices = this.hypergraph.vertices;
+            
+            // Loop through the vertices, and check which nets they are in.
+            // When a net is found, loop through the remaining vertices and
+            // add hyperedges between the vertices that share the same net.
+            for(let ii = 2; ii < vertices.length; ii++) { // skip the global VDD and GND vertices
+                let vertex = vertices[ii];
+
+                for(let jj = 0; jj < this.netlist.length; jj++) {
+                    let net = this.netlist[jj];
+
+                    if(net.containsCell(vertex.cell)) {
+                        for(let kk = ii + 1; kk < vertices.length; kk++) {
+                            let vertex2 = vertices[kk];
+
+                            if(net.containsCell(vertex2.cell)) {
+                                this.hypergraph.connectVertices(vertex, vertex2);
+                            }
+                        }
+                    }
+                }
+            }
+
         } // end function setNets
 
         processTransistors() {
@@ -2519,114 +2258,64 @@
             // then create a new net and add term1 to it.
             // Loop through nmos first.
             // Loop only through "term1" and "term2" for both transistor types.
-            this.forEachTransistor(function (transistor, _, term) {
-                // Skip for the gate terminal.
-                if (term === "gate") { return; }
+            this.transistors.forEach(function(transistor) {
+                let sourceNet = new Net("?", false);
+                let drainNet = new Net("?", false);
 
-                let net = new Net("?", false);
-
-                // If the transistor's term1/term2 is not in any of the nets,
+                // If the transistor's source/drain is not in any of the nets,
                 // then create a new net and add term1/term2 to it.
-                if (transistor[term] !== undefined) {
-                    if (this.getNet(transistor[term])) {
-                        net.clear();
-                        net = this.getNet(transistor[term]);
-                    }
-                    net.addCell(transistor[term], this.layeredGrid.get(transistor[term].x, transistor[term].y, LayeredGrid.CONTACT).isSet);
+                if (this.getNet(transistor.source.cell)) {
+                    sourceNet.clear();
+                    sourceNet = this.getNet(transistor.source.cell);
                 }
+                if (this.getNet(transistor.drain.cell)) {
+                    drainNet.clear();
+                    drainNet = this.getNet(transistor.drain.cell);
+                }
+                sourceNet.addCell(transistor.source.cell, this.layeredGrid.get(transistor.source.cell.x, transistor.source.cell.y, LayeredGrid.CONTACT).isSet);
+                drainNet.addCell(transistor.drain.cell, this.layeredGrid.get(transistor.drain.cell.x, transistor.drain.cell.y, LayeredGrid.CONTACT).isSet);
 
                 // Add the net if it is not empty.
-                if (net.size > 0 && !this.getNet(transistor[term])) {
-                    this.setRecursively(transistor[term], net);
-                    this.netlist.push(net);
-                    net.addNode(this.graph.getNode(transistor));
+                if (sourceNet.size > 0 && !this.getNet(transistor.source.cell)) {
+                    this.setRecursively(transistor.source.cell, net);
+                    this.netlist.push(sourceNet);
+                    sourceNet.addVertex(transistor.source);
+                }
+                // Add the net if it is not empty.
+                if (drainNet.size > 0 && !this.getNet(transistor.drain.cell)) {
+                    this.setRecursively(transistor.drain.cell, net);
+                    this.netlist.push(drainNet);
+                    drainNet.addVertex(transistor.drain);
                 }
             }.bind(this));
 
             // Now, loop through nmos and pmos again and change each transistors terminal values from cells to nets.
             // This must be done after the above loop rather than as a part of it, because the loop above will overwrite the nets.
-            this.forEachTransistor(function (transistor, _, term) {
-                let net = this.getNet(transistor[term]);
+            this.transistors.forEach(function(transistor) {
+                let net = this.getNet(transistor.source.cell);
 
                 if (net === null) {
                     net = new Net("?", false);
-                    this.setRecursively(transistor[term], net);
+                    this.setRecursively(transistor.source.cell, net);
                     this.netlist.push(net);
                 }
 
                 if (net !== undefined) {
-                    transistor[term] = net;
-                    // Gates aren't nodes.
-                    // The transistors themselves are the nodes, as are VDD, GND, and all outputs.
-                    if (term !== "gate") { net.addNode(this.graph.getNode(transistor)); }
+                    net.addVertex(transistor.source);
+                }
+
+                net = this.getNet(transistor.drain.cell);
+
+                if (net === null) {
+                    net = new Net("?", false);
+                    this.setRecursively(transistor.drain.cell, net);
+                    this.netlist.push(net);
+                }
+
+                if (net !== undefined) {
+                    net.addVertex(transistor.drain);
                 }
             }.bind(this));
-
-            // Loop through pmos/nmos and find every pmos/nmos that shares a net (on term1 or term2).
-            this.forEachTransistor(function (_, transistor, termA) {
-                // Skip for the gate terminal.
-                if (termA === "gate") { return; }
-
-                let net = transistor.cell[termA];
-
-                // If net is vddNet, add an edge to vddNode.
-                if (net === this.vddNet) {
-                    transistor.addEdge(this.vddNode);
-                }
-
-                // If net is gndNet, add an edge to gndNode.
-                if (net === this.gndNet) {
-                    transistor.addEdge(this.gndNode);
-                }
-
-                // Same for input.
-                this.inputNets.forEach(function (inputNet, index) {
-                    if (net === inputNet) {
-                        transistor.addEdge(this.inputNodes[index]);
-                    }
-                }.bind(this));
-
-                // Same for output.
-                this.outputNets.forEach(function (outputNet, index) {
-                    if (net === outputNet) {
-                        transistor.addEdge(this.outputNodes[index]);
-                    }
-                }.bind(this));
-
-                // Loop through iterator2 to find all other transistors that share a net.
-                this.forEachTransistor(function (_, transistor2, termB) {
-                    // Skip for the gate terminal or self-comparison.
-                    if (termB === "gate" || transistor === transistor2) { return; }
-
-                    if (transistor2.cell[termB] !== undefined) {
-                        if (transistor.cell[termA] === transistor2.cell[termB]) {
-                            transistor.addEdge(transistor2);
-                        }
-                    }
-                });
-
-                // Add a blank node and edge if there are no other nodes on this net
-                // (besides the transistor itself).
-                if(net.nodes.size === 1) {
-                    let node = this.assignEmptyNode(net);
-                    transistor.addEdge(node);
-                }
-            }.bind(this));
-        }
-
-        /**
-         * @description
-         * Add a node to a net that does not yet have any nodes.
-         * 
-         * @method assignEmptyNode
-         * @param {Net} net - The net to add the node to.
-         * @returns {Node} The node that was added to the net.
-         * @private
-         */
-        assignEmptyNode(net) {
-            let node = this.graph.addNode(net.cells.values().next().value, true);
-            net.addNode(node);
-            return node;
         }
 
         /**
@@ -2674,19 +2363,19 @@
          * @private
          */
         linkIdenticalNets() {
-            let linkNodes = function(net1, net2) {
-                let nodeIterator1 = net1.nodes.values();
-                let nodeIterator2 = net2.nodes.values();
+            let linkVertices = function(net1, net2) {
+                let vertexIterator1 = net1.vertices.values();
+                let vertexIterator2 = net2.vertices.values();
 
-                // Loop through net1's nodes.
+                // Loop through net1's vertices..
                 // Outer loop - this is why it had to be swapped with net2 if it was an input.
-                for (let node1 = nodeIterator1.next(); !node1.done; node1 = nodeIterator1.next()) {
-                    net2.addNode(node1.value);
+                for (let vertex1 = vertexIterator1.next(); !vertex1.done; vertex1 = vertexIterator1.next()) {
+                    net2.addVertex(vertex1.value);
 
-                    // Loop through net2's nodes.
-                    for (let node2 = nodeIterator2.next(); !node2.done; node2 = nodeIterator2.next()) {
-                        node1.value.addEdge(node2.value);
-                        net1.addNode(node2.value);
+                    // Loop through net2's vertices..
+                    for (let vertex2 = vertexIterator2.next(); !vertex2.done; vertex2 = vertexIterator2.next()) {
+                        this.hypergraph.connectVertices(vertex1.value, vertex2.value);
+                        net1.addVertex(vertex2.value);
                     }
                 }
             }.bind(this);
@@ -2697,7 +2386,7 @@
                 for (let jj = ii + 1; jj < this.netlist.length; jj++) {
                     // If the nets are identical, add an edge between them.
                     if (this.netlist[ii].isIdentical(this.netlist[jj])) {
-                        linkNodes(this.netlist[ii], this.netlist[jj]);
+                        linkVertices(this.netlist[ii], this.netlist[jj]);
                     }
                 }
             }
@@ -2761,7 +2450,7 @@
          * unless it is already a transistor or there is a CONTACT on the same cell.
          * 
          * Side effect: Adds a transistor (if found) to this.nmos or this.pmos.
-         * 
+         *.cell 
          * @method initIfTransistorChannel
          * @param {*} cell
          * @returns {boolean} True if the cell is a transistor.
@@ -2797,13 +2486,11 @@
                             cell.term1 = undefined;
                             cell.gate = undefined;
                         } else {
+                            const gateVertex   = this.hypergraph.addVertex(cell.gate);
+                            const sourceVertex = this.hypergraph.addVertex(cell.term1);
+                            const drainVertex  = this.hypergraph.addVertex(cell.term2);
+                            this.transistors.push(new Transistor(gateVertex, sourceVertex, drainVertex, this.strongLogicOneVertex, this.strongLogicZeroVertex));
                             transistorArray.add(cell);
-                            this.graph.addNode(
-                                cell,
-                                false,
-                                this.layeredGrid.get(cell.x, cell.y, LayeredGrid.PDIFF),
-                                this.layeredGrid.get(cell.x, cell.y, LayeredGrid.NDIFF)
-                            );
                             return true;
                         }
                     }
@@ -2895,7 +2582,7 @@
          */
         setRecursively(cell, net) {
             let gateNet;
-            net.addNode(this.graph.getNode(cell));
+            net.addVertex(this.hypergraph.getVertex(cell));
 
             // Return if this cell is in this.pmos or this.nmos already.
             if (this.nmos.has(cell) || this.pmos.has(cell)) {
@@ -3839,7 +3526,7 @@
 
                 // Compute each output.
                 for (let jj = 0; jj < this.diagram.outputs.length; jj++) {
-                    tableOutputRow[jj] = this.diagram.computeOutput(ii, this.diagram.outputNodes[jj]);
+                    tableOutputRow[jj] = this.diagram.computeOutput(ii, jj);
                     // Don't reuse the analysis in case of conflicted paths.
                 }
 
@@ -3916,10 +3603,10 @@
                         tCell.className = "output";
                         tCell.onclick   = (function (rowIndex, colIndex) {
                             return (function() {
-                                let path, outputNum, outputNodeIndex;
+                                let path, outputNum, outputVertexIndex;
                                 outputNum = colIndex - this.diagram.inputs.length;
-                                outputNodeIndex = this.diagram.graph.getIndexByNode(this.diagram.outputNodes[outputNum]);
-                                path = this.diagram.analyses[rowIndex - 1][outputNodeIndex];
+                                outputVertexIndex = this.diagram.outputVertices[outputNum].index;
+                                path = this.diagram.analyses[rowIndex - 1][outputVertexIndex];
                                 this.diagramView.setPathHighlight(path);
                                 window.scrollTo({behavior: "smooth", top: Math.ceil(document.body.getBoundingClientRect().top), left: 0,});
                             }.bind(this));
@@ -4090,10 +3777,10 @@
 
         if(window.runTestbench) {
             window.UI = UI;
-            window.Graph = Graph;
             window.Diagram = Diagram;
             window.LayeredGrid = LayeredGrid;
             window.DiagramController = DiagramController;
+            window.Hypergraph = Hypergraph;
             window.debugDefinitions();
             window.runTestbench();
         } else {
