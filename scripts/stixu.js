@@ -548,7 +548,7 @@
                 ACTIVE:    1,
                 UNDEFINED: 2,
                 FLOATING: 3,
-            }
+            };
         }
         constructor(gate, source, drain, vdd, gnd) {
             this.isPmos = source.cell.layer === LayeredGrid.PDIFF;
@@ -566,14 +566,16 @@
             const inactive = (this.isNmos && this.gate.hasPathTo(this.gnd)) || (this.isPmos && this.gate.hasPathTo(this.vdd));
 
             if(active && inactive) {
-                return this.state = Transistor.STATES.UNDEFINED;
+                this.state = Transistor.STATES.UNDEFINED;
             } else if(active) {
-                return this.state = Transistor.STATES.ACTIVE;
+                this.state = Transistor.STATES.ACTIVE;
             } else if(inactive) {
-                return this.state = Transistor.STATES.INACTIVE;
+                this.state = Transistor.STATES.INACTIVE;
             } else {
-                return this.state = Transistor.STATES.FLOATING;
+                this.state = Transistor.STATES.FLOATING;
             }
+
+            return this.state;
         }
     }
 
@@ -714,7 +716,7 @@
         memoize(vertex1, vertex2) {
             const index1 = vertex1.index;
             const index2 = vertex2.index;
-            const alreadySet = !!this.pathLUT[index1] && this.pathLUT[index1][index2]
+            const alreadySet = !!this.pathLUT[index1] && this.pathLUT[index1][index2];
 
             if(!alreadySet) {
                 this.pathLUT[index1] = this.pathLUT[index1] || [];
@@ -1799,8 +1801,8 @@
                         const tentativeVertex = this.hypergraph.addVertex(null, false, true);
                         const newEdge1 = this.hypergraph.connectVertices(transistor.source, tentativeVertex, true);
                         const newEdge2 = this.hypergraph.connectVertices(transistor.drain, tentativeVertex, true);
-                        if(!!newEdge1) tentativeEdges.push(newEdge1);
-                        if(!!newEdge2) tentativeEdges.push(newEdge2);
+                        if(!!newEdge1) { tentativeEdges.push(newEdge1); }
+                        if(!!newEdge2) { tentativeEdges.push(newEdge2); }
                         tentativeVertices.push(tentativeVertex);
                     }
                 }
@@ -1814,7 +1816,7 @@
             let retVal = currentOutputVal;
 
             if(this.strongLogicOneVertex.hasPathTo(this.strongLogicZeroVertex, traverseTentative)) {
-                return retVal = "X";
+                return "X";
             }
 
             const onePath = this.strongLogicOneVertex.hasPathTo(outputVertex, traverseTentative);
@@ -1827,7 +1829,7 @@
                         retVal = "U";
                         break;
                     case "0":
-                        return retVal = "X";
+                        return "X";
                 }
             }
 
@@ -1841,14 +1843,14 @@
                         retVal = "U";
                         break;
                     case "1":
-                        return retVal = "X";
+                        return "X";
                 }
             }
 
             if(currentOutputVal === "1" && zeroPath) {
-                return retVal = "X";
+                return "X";
             } else if(currentOutputVal === "0" && onePath) {
-                return retVal = "X";
+                return "X";
             }
 
             return retVal;
@@ -1881,13 +1883,15 @@
                         break;
                     }
 
-                    if(floatingTransistorGateEdgesArr[jj].hasVertex(this.strongLogicOneVertex)
-                        || floatingTransistorGateEdgesArr[jj].hasVertex(this.strongLogicZeroVertex)) {
+                    if(floatingTransistorGateEdgesArr[jj].hasVertex(this.strongLogicOneVertex) ||
+                         floatingTransistorGateEdgesArr[jj].hasVertex(this.strongLogicZeroVertex)) {
                         continue;
                     }
 
                     // Weakly drive the gate to 1 or 0.
+                    /*jslint bitwise: true */
                     const evalInput = !!((ii >> jj) & 1);
+                    /*jslint bitwise: false */
                     while(this.updateTransistorStates(floatingTransistorGateEdgesArr[jj], evalInput, addedEdgesArr, addedSourceDrainEdges)) { /* EMPTY */ }
                 }
 
@@ -1904,14 +1908,18 @@
                             const drainPathToOutput = transistor.drain.hasPathTo(outputVertex);
                             const pathToZero = transistor.source.hasPathTo(this.strongLogicZeroVertex, true);
                             const pathToOne  = transistor.source.hasPathTo(this.strongLogicOneVertex, true);
+                            /* jslint bitwise: true */
                             if(!(sourcePathToOutput ^ drainPathToOutput)) {
                                 // No effect.
                                 return false;
                             } else if(outputVal !== "0" && outputVal !== "L" && pathToZero) {
-                                return outputVal = "X";
+                                outputVal = "X";
+                                return outputVal;
                             } else if(outputVal !== "1" && outputVal !== "H" && pathToOne) {
-                                return outputVal = "X";
+                                outputVal = "X";
+                                return outputVal;
                             }
+                            /* jslint bitwise: false */
                         }
                     }.bind(this));
                 }
@@ -1999,7 +2007,9 @@
 
             // Create a wire for each hyperedge.
             this.hypergraph.hyperedges.forEach(function(hyperedge, index) {
-                if(hyperedge.mergeable) wires.push("  wire wire_" + index + ";");
+                if(hyperedge.mergeable) {
+                    wires.push("  wire wire_" + index + ";");
+                }
             });
 
             this.transistors.forEach(function(transistor) {
@@ -2073,7 +2083,9 @@
                 let inputName = String.fromCharCode(65 + index);
 
                 vertex.getEdges().forEach(function(edge) {
-                    if(edge.mergeable) wires.push("  assign wire_" + this.hypergraph.hyperedges.indexOf(edge) + " = " + inputName + ";");
+                    if(edge.mergeable) {
+                        wires.push("  assign wire_" + this.hypergraph.hyperedges.indexOf(edge) + " = " + inputName + ";");
+                    }
                 }.bind(this));
             }.bind(this));
 
@@ -2081,17 +2093,23 @@
                 let outputName = String.fromCharCode(89 - index);
 
                 vertex.getEdges().forEach(function(edge) {
-                    if(edge.mergeable) wires.push("  assign " + outputName + " = wire_" + this.hypergraph.hyperedges.indexOf(edge) + ";");
+                    if(edge.mergeable) {
+                        wires.push("  assign " + outputName + " = wire_" + this.hypergraph.hyperedges.indexOf(edge) + ";");
+                    }
                 }.bind(this));
             }.bind(this));
 
             // Same for GND and VDD.
             this.vddVertex.getEdges().forEach(function(edge) {
-                if(edge.mergeable) wires.push("  assign wire_" + this.hypergraph.hyperedges.indexOf(edge) + " = vdd;");
+                if(edge.mergeable) {
+                    wires.push("  assign wire_" + this.hypergraph.hyperedges.indexOf(edge) + " = vdd;");
+                }
             }.bind(this));
 
             this.gndVertex.getEdges().forEach(function(edge) {
-                if(edge.mergeable) wires.push("  assign wire_" + this.hypergraph.hyperedges.indexOf(edge) + " = gnd;");
+                if(edge.mergeable) {
+                    wires.push("  assign wire_" + this.hypergraph.hyperedges.indexOf(edge) + " = gnd;");
+                }
             }.bind(this));
 
             verilog += inputs.join(", ") + ", ";
@@ -2277,13 +2295,13 @@
 
                 // Add the net if it is not empty.
                 if (sourceNet.size > 0 && !this.getNet(transistor.source.cell)) {
-                    this.setRecursively(transistor.source.cell, net);
+                    this.setRecursively(transistor.source.cell, sourceNet);
                     this.netlist.push(sourceNet);
                     sourceNet.addVertex(transistor.source);
                 }
                 // Add the net if it is not empty.
                 if (drainNet.size > 0 && !this.getNet(transistor.drain.cell)) {
-                    this.setRecursively(transistor.drain.cell, net);
+                    this.setRecursively(transistor.drain.cell, drainNet);
                     this.netlist.push(drainNet);
                     drainNet.addVertex(transistor.drain);
                 }
