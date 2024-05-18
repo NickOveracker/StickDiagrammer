@@ -34,34 +34,12 @@
 /* globals DiagramController: false,
            UI:                false,
            Diagram:           false,
-           Graph:             false,
            LayeredGrid:       false,
 */
 
 function debugDefinitions() {
     'use strict';
     window.PRINT_MOUSE_POS = false;
-
-    // Represent the graph visually as a graph in the console.
-    Graph.prototype.print = function() {
-        let edgeSet = new Set();
-        console.log('graph G {');
-        for (let node of this.nodes) {
-            console.log(node.getName() + ';');
-            // Add all edges to the set.
-            for (let edge of node.edges) {
-                edgeSet.add(edge);
-            }
-        }
-        // Loop through edgeSet and print each edge.
-        let edgeIterator = edgeSet.values();
-        let edge = edgeIterator.next();
-        while (!edge.done) {
-            console.log(edge.value.getNode1().getName() + ' <-> ' + edge.value.getNode2().getName() + ';');
-            edge = edgeIterator.next();
-        }
-        console.log('}');
-    };
 
     // Print a grid with in all cells that are in a given net.
     Diagram.prototype.printGrid = function(netNum) {
