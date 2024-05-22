@@ -1218,6 +1218,7 @@
             this.darkMode = false;
             this.darkModeGridColor  = '#cccccc';
             this.lightModeGridColor = '#999999';
+            this.showGrid = true;
         }
 
         getCellHoverColor() {
@@ -1227,6 +1228,9 @@
         // Draw a faint grid on the canvas.
         // Add an extra 2 units to the width and height for a border.
         drawGrid() {
+            if(!this.showGrid) {
+                return;
+            }
             // Place the grid canvas behind the main canvas.
             // Same size as the canvas.
             this.gridCanvas.width = this.canvasWidth;
@@ -3038,9 +3042,24 @@
                 }.bind(this),
             };
 
+            // SHIFT + L
+            this.themeCommand = {
+                shiftModifier: true,
+                keyCode: 76,
+                action:  function(e) {
+                    if(e.type.includes('up')) {
+                        this.toggleGrid();
+                    }
+                }.bind(this),
+            };
+
             this.allCommands.push(this.darkModeCommand);
             this.allCommands.push(this.transparencyCommand);
             this.allCommands.push(this.themeCommand);
+        }
+
+        toggleGrid() {
+            this.diagramView.showGrid = !this.diagramView.showGrid;
         }
 
         changeTheme() {
