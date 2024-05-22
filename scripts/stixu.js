@@ -1228,6 +1228,9 @@
         // Draw a faint grid on the canvas.
         // Add an extra 2 units to the width and height for a border.
         drawGrid() {
+            // Clear the grid canvas.
+            this.gridCtx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+
             if(!this.showGrid) {
                 return;
             }
@@ -1245,9 +1248,6 @@
             // Set the gridCanvas context.
             this.cellWidth = this.canvasWidth / (this.diagram.layeredGrid.width + 2);
             this.cellHeight = this.canvasHeight / (this.diagram.layeredGrid.height + 2);
-
-            // Clear the grid canvas.
-            this.gridCtx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
 
             // Set stroke color depending on whether the dark mode is on or off.
             // Should be faintly visible in both modes.
