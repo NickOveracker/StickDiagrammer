@@ -1560,7 +1560,7 @@ function runTestbench(runTo) {
         ["mouseup",   {button:  0, clientX: mapX(12), clientY: mapY(10)}],
 
         2,
-        "111111110000ZZZZ",
+        UI.diagram.independentInputs ? "111111110000ZZZZ" : "111111110000UUUU",
 
         /** SR Latch Q' **/
         1,
@@ -1570,7 +1570,7 @@ function runTestbench(runTo) {
         },
 
         2,
-        "111100001111ZZZZ",
+        UI.diagram.independentInputs ? "111100001111ZZZZ" : "111100001111UUUU",
 
         /** D FLIP FLOP **/
         // Automatically captured input
@@ -1920,7 +1920,7 @@ function runTestbench(runTo) {
         ["mouseup",{"button":0,"clientX":mapX(25),"clientY":mapY(9)}],
 
         2,
-        "ZZZZ0000ZZZZ1111",
+        UI.diagram.independentInputs ? "ZZZZ0000ZZZZ1111" : "UUUU0000UUUU1111",
 
         /** GND and VDD on single PMOS gate **/
         1,
@@ -2419,7 +2419,7 @@ function runTestbench(runTo) {
         ["mouseup",   {button:  1, clientX: mapX(8), clientY: mapY(29)}],
         
         2,
-        "ZZZZZZZZZZZZZZZZ",
+        UI.diagram.independentInputs ? "ZZZZZZZZZZZZZZZZ" : "ZXXXXXXXXXXXXXXZ",
                
         /* One conflicted transistor in series with VDD w/ grounded gate */
          1,
@@ -2477,7 +2477,7 @@ function runTestbench(runTo) {
         ["mouseup",   {button:  1, clientX: mapX(8), clientY: mapY(29)}],
 
         2,
-        "ZZZZZZZZZZZZZZZZ",
+        UI.diagram.independentInputs ? "ZZZZZZZZZZZZZZZZ" : "ZXXZXXXXXXXXZXXZ",
 
         /* Two conflicted transistors in series with VDD */
          1,
@@ -2499,7 +2499,7 @@ function runTestbench(runTo) {
         },
 
         2,
-        "1XXZXXXZXXXZZZZZ",
+        UI.diagram.independentInputs ? "1XXZXXXZXXXZZZZZ" : "1XXZXXXXXXXXZXXZ",
 
         /* Two conflicted transistors in series with VDD w/ grounded gate */
          1,
@@ -2521,7 +2521,7 @@ function runTestbench(runTo) {
         },
 
         2,
-        "1XXZXXXZXXXZXXXZ",
+        UI.diagram.independentInputs ? "1XXZXXXZXXXZXXXZ" : "1XXZXXXXXXXXXXXX",
 
         /* One transistor driven by VDD & GND in series w/ singly-driven gate & direct input */
         1,
@@ -2569,7 +2569,7 @@ function runTestbench(runTo) {
         ["mouseup",   {button:  1, clientX: mapX(8), clientY: mapY(29)}],
 
         2,
-        "XXXXZZZZXXXXZZZZ",
+        UI.diagram.independentInputs ? "XXXXZZZZXXXXZZZZ" : "XXXXXXXXXXXXXXXX",
 
         /* One transistor driven by VDD & GND in series w/ conflicted gate & direct input */
         1,
@@ -2591,7 +2591,7 @@ function runTestbench(runTo) {
         },
 
         2,
-        "XXXXXXZZXXXXXXZZ",
+        UI.diagram.independentInputs ? "XXXXXXZZXXXXXXZZ" : "XXXXXXXXXXXXXXXX",
 
         /* Toggle dark mode via simulated button click */
         3,
@@ -2753,7 +2753,7 @@ function runTestbench(runTo) {
         ["mouseup",   {button:  1, clientX: mapX(10), clientY: mapY(29)}],
 
         2,
-        "XXXXXXZZXXXXXXZZXXXXXXZZZZZZZZZZXXXXXXZZXXXXXXZZXXXXXXZZZZZZZZZZ",
+        UI.diagram.independentInputs ? "XXXXXXZZXXXXXXZZXXXXXXZZZZZZZZZZXXXXXXZZXXXXXXZZXXXXXXZZZZZZZZZZ" : "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
 
         /* (Layout 1) Three conflicted transistors in series with input and one output */
         1,
@@ -2763,7 +2763,7 @@ function runTestbench(runTo) {
         },
 
         2,
-        "XXXXXXZZXXXXXXZZXXXXXXZZZZZZZZZZ",
+        UI.diagram.independentInputs ? "XXXXXXZZXXXXXXZZXXXXXXZZZZZZZZZZ" : "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
 
         /* (Layout 2) Three conflicted transistors in series with input and one output */
         1,
@@ -2773,9 +2773,9 @@ function runTestbench(runTo) {
         },
 
         2,
-        "01010101XXXXXXXXXXXXXXXXZZZZZZZZ",
+        UI.diagram.independentInputs ? "01010101XXXXXXXXXXXXXXXXZZZZZZZZ" : "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
 
-        /* Output directly connected to VDD in series with overloaded transistor (known bug) */
+        /* Output directly connected to VDD in series with overloaded transistor */
         1,
         function() {
             UI.diagramController.removeTerminal(false); // Remove E
@@ -2796,9 +2796,9 @@ function runTestbench(runTo) {
         ["mouseup",   {button:  2, clientX: mapX(8),   clientY: mapY(29)}],
 
         2,
-        "1111",
+        UI.diagram.independentInputs ? "1111" : "1XX1",
 
-        /* Output directly connected to VDD in series with overloaded transistor (known bug) */
+        /* Output directly connected to VDD in series with overloaded transistor */
         1,
         function() {
             UI.diagramController.removeTerminal(false); // Remove B
