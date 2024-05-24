@@ -3044,7 +3044,7 @@
             };
 
             // SHIFT + L
-            this.themeCommand = {
+            this.gridCommand = {
                 shiftModifier: true,
                 keyCode: 76,
                 action:  function(e) {
@@ -3057,6 +3057,7 @@
             this.allCommands.push(this.darkModeCommand);
             this.allCommands.push(this.transparencyCommand);
             this.allCommands.push(this.themeCommand);
+            this.allCommands.push(this.gridCommand);
         }
 
         toggleGrid() {
