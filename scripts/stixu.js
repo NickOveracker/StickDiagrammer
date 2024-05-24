@@ -600,7 +600,7 @@
             this.edges.delete(edge);
         }
 
-        hasPathTo(vertex, traverseTentative=false, independentInputs=true, visitedVertices=new Set(), visitedEdges=new Set()) {
+        hasPathTo(vertex, traverseTentative=false, independentInputs=false, visitedVertices=new Set(), visitedEdges=new Set()) {
             if (this === vertex) {
                 return true;
             } else if (this.tentative && !traverseTentative) {
@@ -1535,6 +1535,7 @@
             
             this.view = new DiagramView(this, mainCanvas, gridCanvas);
             this.controller = new DiagramController(this, this.view, mainCanvas);
+            this.independentInputs = false;
         }
 
         encode() {
