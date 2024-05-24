@@ -1218,6 +1218,7 @@
             this.darkMode = false;
             this.darkModeGridColor  = '#cccccc';
             this.lightModeGridColor = '#999999';
+            this.showGrid = true;
         }
 
         getCellHoverColor() {
@@ -1227,6 +1228,12 @@
         // Draw a faint grid on the canvas.
         // Add an extra 2 units to the width and height for a border.
         drawGrid() {
+            // Clear the grid canvas.
+            this.gridCtx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+
+            if(!this.showGrid) {
+                return;
+            }
             // Place the grid canvas behind the main canvas.
             // Same size as the canvas.
             this.gridCanvas.width = this.canvasWidth;
@@ -1241,9 +1248,6 @@
             // Set the gridCanvas context.
             this.cellWidth = this.canvasWidth / (this.diagram.layeredGrid.width + 2);
             this.cellHeight = this.canvasHeight / (this.diagram.layeredGrid.height + 2);
-
-            // Clear the grid canvas.
-            this.gridCtx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
 
             // Set stroke color depending on whether the dark mode is on or off.
             // Should be faintly visible in both modes.
@@ -3039,9 +3043,24 @@
                 }.bind(this),
             };
 
+            // SHIFT + L
+            this.themeCommand = {
+                shiftModifier: true,
+                keyCode: 76,
+                action:  function(e) {
+                    if(e.type.includes('up')) {
+                        this.toggleGrid();
+                    }
+                }.bind(this),
+            };
+
             this.allCommands.push(this.darkModeCommand);
             this.allCommands.push(this.transparencyCommand);
             this.allCommands.push(this.themeCommand);
+        }
+
+        toggleGrid() {
+            this.diagramView.showGrid = !this.diagramView.showGrid;
         }
 
         changeTheme() {
