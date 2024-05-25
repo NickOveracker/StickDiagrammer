@@ -2272,7 +2272,6 @@
                     }
                 }
             }
-
         } // end function setNets
 
         processTransistors() {
@@ -2586,7 +2585,6 @@
                     }
                     // Add the cell to the net if it is not already in it.
                     if (net.containsCell(this.layeredGrid.get(cell.x, cell.y, layer)) === false) {
-                        net.addCell(this.layeredGrid.get(cell.x, cell.y, layer), true);
                         this.setRecursively(this.layeredGrid.get(cell.x, cell.y, layer), net);
                     }
                 }.bind(this));
@@ -2604,6 +2602,9 @@
          * @private
          */
         setRecursively(cell, net) {
+            if(net.cells.has(cell)) {
+                return;
+            }
             let gateNet;
             net.addVertex(this.hypergraph.getVertex(cell));
 
@@ -2614,23 +2615,18 @@
 
             // Check the cell for a transistor.
             // If this is in a diffusion layer, do not propogate past a transistor.
-            if (this.initIfTransistorChannel(cell)) {
-                gateNet = this.getNet(this.layeredGrid.get(cell.x,cell.y,LayeredGrid.POLY)); 
-
-                if(gateNet === null) {
-                    gateNet = new Net("gate", false);
-                }
+            // If this is in the poly layer, we don't need to stop at a transistor.
+            if (cell.layer === LayeredGrid.POLY) {
+                this.initIfTransistorChannel(this.layeredGrid.get(cell.x, cell.y, LayeredGrid.NDIFF));
+                this.initIfTransistorChannel(this.layeredGrid.get(cell.x, cell.y, LayeredGrid.PDIFF));
+            }
+            else if (this.initIfTransistorChannel(cell)) {
+                gateNet = new Net("gate", false);
 
                 this.setRecursively(this.layeredGrid.get(cell.x, cell.y, LayeredGrid.POLY), gateNet);
                 this.netlist.push(gateNet);
 
                 return;
-            }
-
-            // If this is in the poly layer, we don't need to stop at a transistor.
-            if (cell.layer === LayeredGrid.POLY) {
-                this.initIfTransistorChannel(this.layeredGrid.get(cell.x, cell.y, LayeredGrid.NDIFF));
-                this.initIfTransistorChannel(this.layeredGrid.get(cell.x, cell.y, LayeredGrid.PDIFF));
             }
 
             // Add the cell to the net.
