@@ -57,6 +57,7 @@
 * ~~Knowing that I spelled "accolades" correctly (I don't feel like Googling it)~~ *Resolved 2021/11/20*
 
 ## Known Bugs
+* ~~L and H outputs are not handled properly depending on orientation.~~ *Resolved 2024/5/26* (Testbench case 59)
 * ~~Gates with VDD/GND shorts are not handled properly depending on orientation.~~ *Resolved 2024/5/17* (Testbench cases 40, 49, 50, 51)
 * ~~Some transistors with floating gates are still not handled properly.~~ *Resolved 2024/3/23* (Testbench case 56-58)
 * ~~Transistors with floating gates are not handled properly.~~ *Resolved 2024/3/21* (Testbench case 55)
