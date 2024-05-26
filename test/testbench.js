@@ -106,6 +106,7 @@ function runTestbench(runTo) {
                        "Floating-gate transistor 2",
                        "Nested floating-gate transistors 1",
                        "Nested floating-gate transistors 2",
+                       "Unstable low and high outputs",
     ];
     runTo = runTo || testCases.length;
 
@@ -2251,7 +2252,7 @@ function runTestbench(runTo) {
         ["mouseup",   {button:  0, clientX: mapX(17), clientY: mapY(28)}],
 
         2,
-        "1XX011001010XXXX",
+        "1XX011001010UUUU",
 
         /* Indirectly conflicted gates via NMOS */
         1,
@@ -2380,7 +2381,7 @@ function runTestbench(runTo) {
         ["mouseup",   {button:  0, clientX: mapX(17), clientY: mapY(28)}],
 
         2,
-        "XXXX101011001XX0",
+        "UUUU101011001XX0",
 
         /* Conflicted dead-end transistor */
          1,
@@ -2840,7 +2841,7 @@ function runTestbench(runTo) {
         },
 
         2,
-        "X",
+        "U",
 
         // Floating gate transistor 2
         1,
@@ -2868,6 +2869,15 @@ function runTestbench(runTo) {
 
         2,
         "Z",
+
+        // Unstable low and high outputs
+        1,
+        function() {
+            UI.diagram.decode("SFIwR0FBSVFEaEVGQ2dVYURnQd8B3wHLAVHEBcRQQsQJQ8QFRcQFSd8d3wHWAd9kzR3fAd8B3wHfAUFENNweSC933B/fAd8B3wHfAd8B3wHfAd8B3wHfAdoB/gJu5AI35QJE3wHJAc0tPQ==");
+        },
+
+        2,
+        "LH",
    ];
 
     /** SET TO 1 OUTPUT AND 4 INPUTS */
