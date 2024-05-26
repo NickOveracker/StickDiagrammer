@@ -1917,10 +1917,10 @@
                             if(!(sourcePathToOutput ^ drainPathToOutput)) {
                                 // No effect.
                                 return false;
-                            } else if(outputVal !== "0" && outputVal !== "L" && pathToZero) {
+                            } else if(outputVal === "1" && pathToZero) {
                                 outputVal = "X";
                                 return outputVal;
-                            } else if(outputVal !== "1" && outputVal !== "H" && pathToOne) {
+                            } else if(outputVal === "0" && pathToOne) {
                                 outputVal = "X";
                                 return outputVal;
                             }
