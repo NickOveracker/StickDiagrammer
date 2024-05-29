@@ -1873,11 +1873,11 @@
 
             const floatingTransistorGateEdgesArr = Array.from(floatingTransistorGateEdges);
 
+            this.hypergraph.backupLUT();
+
             for(let ii = 0; ii < Math.pow(2, floatingTransistorGateEdgesArr.length); ii++) {
                 const tentativeVertices = [];
                 const tentativeEdges = [];
-
-                this.hypergraph.backupLUT();
 
                 if(outputVal === "X") {
                     break;
@@ -1983,7 +1983,7 @@
                     if(!this.analyses[inputVals][jj]) {
                         this.analyses[inputVals][jj] = [];
                     }
-                    this.analyses[inputVals][ii][jj] = vertex.hasPathTo(vertex2);
+                    this.analyses[inputVals][ii][jj] = vertex.hasPathTo(vertex2, false, true);
                     this.analyses[inputVals][jj][ii] = this.analyses[inputVals][ii][jj];
                 }
             }.bind(this));
@@ -2275,16 +2275,13 @@
         } // end function setNets
 
         processTransistors() {
-            // Each nmos and pmos represents a relation between term1 and term2.
-            // If term1 is not in any of the nets,
-            // then create a new net and add term1 to it.
-            // Loop through nmos first.
-            // Loop only through "term1" and "term2" for both transistor types.
+            // Each nmos and pmos represents a relation between the source and drain.
             this.transistors.forEach(function(transistor) {
                 let sourceNet = new Net("?", false);
                 let drainNet = new Net("?", false);
+                let gateNet = new Net("?", false);
 
-                // If the transistor's source/drain is not in any of the nets,
+                // If the transistor's source/drain/gate is not in any of the nets,
                 // then create a new net and add term1/term2 to it.
                 if (this.getNet(transistor.source.cell)) {
                     sourceNet.clear();
@@ -2294,8 +2291,10 @@
                     drainNet.clear();
                     drainNet = this.getNet(transistor.drain.cell);
                 }
-                sourceNet.addCell(transistor.source.cell, this.layeredGrid.get(transistor.source.cell.x, transistor.source.cell.y, LayeredGrid.CONTACT).isSet);
-                drainNet.addCell(transistor.drain.cell, this.layeredGrid.get(transistor.drain.cell.x, transistor.drain.cell.y, LayeredGrid.CONTACT).isSet);
+                if (this.getNet(transistor.gate.cell)) {
+                    gateNet.clear();
+                    gateNet = this.getNet(transistor.gate.cell);
+                }
 
                 // Add the net if it is not empty.
                 if (sourceNet.size > 0 && !this.getNet(transistor.source.cell)) {
@@ -2308,6 +2307,12 @@
                     this.setRecursively(transistor.drain.cell, drainNet);
                     this.netlist.push(drainNet);
                     drainNet.addVertex(transistor.drain);
+                }
+                // Add the net if it is not empty.
+                if (gateNet.size > 0 && !this.getNet(transistor.gate.cell)) {
+                    this.setRecursively(transistor.gate.cell, gateNet);
+                    this.netlist.push(gateNet);
+                    gateNet.addVertex(transistor.gate);
                 }
             }.bind(this));
 
@@ -2336,6 +2341,18 @@
 
                 if (net !== undefined) {
                     net.addVertex(transistor.drain);
+                }
+
+                net = this.getNet(transistor.gate.cell);
+
+                if (net === null) {
+                    net = new Net("?", false);
+                    this.setRecursively(transistor.gate.cell, net);
+                    this.netlist.push(net);
+                }
+
+                if (net !== undefined) {
+                    net.addVertex(transistor.gate);
                 }
             }.bind(this));
         }
