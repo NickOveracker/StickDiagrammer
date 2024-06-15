@@ -1879,6 +1879,8 @@
                 const tentativeVertices = [];
                 const tentativeEdges = [];
 
+                this.hypergraph.backupLUT();
+
                 if(outputVal === "X") {
                     break;
                 }
@@ -2275,14 +2277,14 @@
         } // end function setNets
 
         processTransistors() {
-            // Each nmos and pmos represents a relation between the source and drain.
+            // Each nmos and pmos represents a relation between source and drain.
             this.transistors.forEach(function(transistor) {
                 let sourceNet = new Net("?", false);
-                let drainNet = new Net("?", false);
-                let gateNet = new Net("?", false);
+                let drainNet  = new Net("?", false);
+                let gateNet   = new Net("?", false);
 
-                // If the transistor's source/drain/gate is not in any of the nets,
-                // then create a new net and add term1/term2 to it.
+                // If the transistor's source/drain is not in any of the nets,
+                // then create a new net and add source/drain to it.
                 if (this.getNet(transistor.source.cell)) {
                     sourceNet.clear();
                     sourceNet = this.getNet(transistor.source.cell);
@@ -2291,6 +2293,9 @@
                     drainNet.clear();
                     drainNet = this.getNet(transistor.drain.cell);
                 }
+                sourceNet.addCell(transistor.source.cell, this.layeredGrid.get(transistor.source.cell.x, transistor.source.cell.y, LayeredGrid.CONTACT).isSet);
+                drainNet.addCell(transistor.drain.cell, this.layeredGrid.get(transistor.drain.cell.x, transistor.drain.cell.y, LayeredGrid.CONTACT).isSet);
+
                 if (this.getNet(transistor.gate.cell)) {
                     gateNet.clear();
                     gateNet = this.getNet(transistor.gate.cell);
@@ -2308,6 +2313,7 @@
                     this.netlist.push(drainNet);
                     drainNet.addVertex(transistor.drain);
                 }
+
                 // Add the net if it is not empty.
                 if (gateNet.size > 0 && !this.getNet(transistor.gate.cell)) {
                     this.setRecursively(transistor.gate.cell, gateNet);
@@ -2341,18 +2347,6 @@
 
                 if (net !== undefined) {
                     net.addVertex(transistor.drain);
-                }
-
-                net = this.getNet(transistor.gate.cell);
-
-                if (net === null) {
-                    net = new Net("?", false);
-                    this.setRecursively(transistor.gate.cell, net);
-                    this.netlist.push(net);
-                }
-
-                if (net !== undefined) {
-                    net.addVertex(transistor.gate);
                 }
             }.bind(this));
         }
