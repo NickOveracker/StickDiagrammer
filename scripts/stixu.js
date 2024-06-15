@@ -1873,8 +1873,6 @@
 
             const floatingTransistorGateEdgesArr = Array.from(floatingTransistorGateEdges);
 
-            this.hypergraph.backupLUT();
-
             for(let ii = 0; ii < Math.pow(2, floatingTransistorGateEdgesArr.length); ii++) {
                 const tentativeVertices = [];
                 const tentativeEdges = [];
@@ -2347,6 +2345,18 @@
 
                 if (net !== undefined) {
                     net.addVertex(transistor.drain);
+                }
+
+                net = this.getNet(transistor.gate.cell);
+
+                if (net === null) {
+                    net = new Net("?", false);
+                    this.setRecursively(transistor.gate.cell, net);
+                    this.netlist.push(net);
+                }
+
+                if (net !== undefined) {
+                    net.addVertex(transistor.gate);
                 }
             }.bind(this));
         }
