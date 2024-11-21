@@ -107,6 +107,7 @@ function runTestbench(runTo) {
                        "Nested floating-gate transistors 1",
                        "Nested floating-gate transistors 2",
                        "Unstable low and high outputs",
+                       "PMOS pull-down, NMOS pull-up",
     ];
     runTo = runTo || testCases.length;
 
@@ -2878,6 +2879,15 @@ function runTestbench(runTo) {
 
         2,
         "LH",
+
+        // PMOS pull-down, NMOS pull-up
+        1,
+        function() {
+            UI.diagram.decode("SFIwR0FnRUJBUUVZQ3c0UERoRU9DQUFBQUXEBUnEBVHEBWdBQUFCxAnfHd8d3x3SHd8q3x3fHd8d1B3fAdMBLy8vOM8TUC8vL9823wH/AK/OHWXTHS8vLzTPOlAvLyvfV9Yd3wHfAd8B3wHVAeQAruUArd8B6wC95QDSxgjIOsoISf8A59kBPT0=");
+        },
+
+        2,
+        "1XX0", // Consider whether this is a good output
    ];
 
     /** SET TO 1 OUTPUT AND 4 INPUTS */
