@@ -1590,7 +1590,7 @@
                 str += String.fromCharCode(char);
             });
 
-            return window.LZUTF8.compress(btoa(str), {outputEncoding: "Base64",});
+            return encodeURIComponent(window.LZUTF8.compress(btoa(str), {outputEncoding: "Base64",}));
         }
 
         decode(stringBase64) {
