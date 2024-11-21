@@ -1590,11 +1590,11 @@
                 str += String.fromCharCode(char);
             });
 
-            return window.LZUTF8.compress(btoa(str), {outputEncoding: "Base64",});
+            return encodeURIComponent(window.LZUTF8.compress(btoa(str), {outputEncoding: "Base64",}));
         }
 
         decode(stringBase64) {
-            const decompress = atob(window.LZUTF8.decompress(stringBase64, {inputEncoding: "Base64",}));
+            const decompress = atob(window.LZUTF8.decompress(decodeURIComponent(stringBase64), {inputEncoding: "Base64",}));
             const setGrid    = [];
             let byte, bitShift, cellIndex = 0;
 
