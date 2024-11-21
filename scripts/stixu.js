@@ -1594,7 +1594,7 @@
         }
 
         decode(stringBase64) {
-            const decompress = atob(window.LZUTF8.decompress(stringBase64, {inputEncoding: "Base64",}));
+            const decompress = atob(window.LZUTF8.decompress(decodeURIComponent(stringBase64), {inputEncoding: "Base64",}));
             const setGrid    = [];
             let byte, bitShift, cellIndex = 0;
 
