@@ -57,7 +57,7 @@
 * ~~Knowing that I spelled "accolades" correctly (I don't feel like Googling it)~~ *Resolved 2021/11/20*
 
 ## Known Bugs
-* Base64 encoding problems. Test by moving GND down to a METAL1 rail in testbench case 60.
+* Base64 decoding problems. Diagrams such as testbench case 60 can't properly decode as URL arguments. Improperly escaped characters?
 * Unable to detect many cases up invalid pull-up/pull-down (Testbench case 60)
 * ~~L and H outputs are not handled properly depending on orientation.~~ *Resolved 2024/5/26* (Testbench case 59)
 * ~~Gates with VDD/GND shorts are not handled properly depending on orientation.~~ *Resolved 2024/5/17* (Testbench cases 40, 49, 50, 51)
