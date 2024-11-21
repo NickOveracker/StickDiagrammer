@@ -2883,7 +2883,7 @@ function runTestbench(runTo) {
         // PMOS pull-down, NMOS pull-up
         1,
         function() {
-            UI.diagram.decode("SFIwR0FnRUJBUUVZQ3c0UERoRU9DQUFBQUXEBUnEBVHEBWdBQUFCxAnfHd8d3x3SHd8q3x3fHd8d1B3fAdMBLy8vOM8TUC8vL9823wH/AK/OHWXTHS8vLzTPOlAvLyvfV9Yd3wHfAd8B3wHVAeQAruUArd8B6wC95QDSxgjIOsoISf8A59kBPT0=");
+            UI.diagram.decode("SFIwR0FnRUJBUUViQ3c0UERoRU9DQUFBQUXEBUnEBVHEBWdBQUFCxAnfHd8d3x3SHd8q3x3fHd8d1B3fAdMBLy8vK88TUC8vL+gA3d8B2AHlAJJr5ACg5ACvQ+QAr0XEU0rEGFPOHWVBQUE4zx0vLy81zzpQLy8rzzrdV8kdxA7fAd8B3wHfAdEB5QG05QHC3gFn6gC8ywjlAVvoAWPFCEnpAovfAdABPT0=");
         },
 
         2,
