@@ -547,7 +547,7 @@
                 INACTIVE:  0,
                 ACTIVE:    1,
                 UNDEFINED: 2,
-                FLOATING: 3,
+                FLOATING:  3,
             };
         }
         constructor(gate, source, drain, vdd, gnd) {
@@ -1819,6 +1819,7 @@
         }
 
         addTentativeEdges(tentativeEdges, tentativeVertices) {
+            // Branch out from floating transistors in search of stable values
             this.transistors.forEach(function(transistor) {
                 const state = transistor.getState();
                 const sourceDrainPathExists = transistor.source.hasPathTo(transistor.drain);
@@ -1826,13 +1827,38 @@
                 if(state === Transistor.STATES.UNDEFINED && !sourceDrainPathExists) {
                     const tentativePathExists = transistor.source.hasPathTo(transistor.drain, true);
                     if(!tentativePathExists) {
+                        // Dear Future Me,
+                        //    Tentative vertices exist only to prevent duplication and accidental
+                        //    pruning of pre-existing edges between source and drain.
+                        // With love,
+                        // Past Me
                         const tentativeVertex = this.hypergraph.addVertex(null, false, true);
                         const newEdge1 = this.hypergraph.connectVertices(transistor.source, tentativeVertex, true);
                         const newEdge2 = this.hypergraph.connectVertices(transistor.drain, tentativeVertex, true);
+                        tentativeVertex.isPmos = transistor.isPmos; // This makes pruning easier.
+                        tentativeVertex.isNmos = transistor.isNmos;
                         if(!!newEdge1) { tentativeEdges.push(newEdge1); }
                         if(!!newEdge2) { tentativeEdges.push(newEdge2); }
                         tentativeVertices.push(tentativeVertex);
                     }
+                }
+            }.bind(this));
+
+            // Prune tentative edges and vertices that are not energized with the
+            // logic level corresponding to the transistor's channel.
+            const prune = function(vtx) {
+                vtx.getEdges().forEach(function(edge) {
+                    this.hypergraph.removeHyperEdge(edge);
+                }.bind(this));
+
+                this.hypergraph.removeHyperedge(vtx);
+            }.bind(this);
+            
+            tentativeVertices.forEach(function(tentativeVertex) {
+                if(tentativeVertex.isPmos && !tentativeVertex.hasPathTo(this.strongLogicOneVertex, true)) {
+                    prune(tentativeVertex);
+                } else if(tentativeVertex.isNmos && !tentativeVertex.hasPathTo(this.strongLogicZeroVertex, true)) {
+                    prune(tentativeVertex);
                 }
             }.bind(this));
         }
