@@ -561,20 +561,43 @@
             this.gnd = gnd;
         }
 
-        getState() {
-            const active   = (this.isNmos && this.gate.hasPathTo(this.vdd)) || (this.isPmos && this.gate.hasPathTo(this.gnd));
-            const inactive = (this.isNmos && this.gate.hasPathTo(this.gnd)) || (this.isPmos && this.gate.hasPathTo(this.vdd));
+        // MOSFETs are symmetrical, and we don't know which sides
+        // are source/drain until we know what's connected to them.
+        swapTerminals() {
+            const temp  = this.source;
+            this.source = this.drain;
+            this.drain  = temp;
+        }
 
-            if(active && inactive) {
-                this.state = Transistor.STATES.UNDEFINED;
-            } else if(active) {
-                this.state = Transistor.STATES.ACTIVE;
-            } else if(inactive) {
-                this.state = Transistor.STATES.INACTIVE;
+        getState() {
+            const gateActive   = (this.isNmos && this.gate.hasPathTo(this.vdd)) || (this.isPmos && this.gate.hasPathTo(this.gnd));
+            const gateInactive = (this.isNmos && this.gate.hasPathTo(this.gnd)) || (this.isPmos && this.gate.hasPathTo(this.vdd));
+            let tempState;
+
+            // First pass - only consider the gate voltage (original algorithm)
+            if(gateActive && gateInactive) {
+                tempState = Transistor.STATES.UNDEFINED;
+            } else if(gateActive) {
+                tempState = Transistor.STATES.ACTIVE;
+            } else if(gateInactive) {
+                tempState = Transistor.STATES.INACTIVE;
             } else {
-                this.state = Transistor.STATES.FLOATING;
+                tempState = Transistor.STATES.FLOATING;
             }
 
+            // Second pass - make sure the source is energized (bug patch)
+            if(tempState === Transistor.STATES.ACTIVE) {
+                const sourceActive = (this.isNmos && this.source.hasPathTo(this.gnd)) || (this.isPmos && this.source.hasPathTo(this.vdd));
+                const drainActive  = (this.isNmos && this.drain.hasPathTo(this.gnd))  || (this.isPmos && this.drain.hasPathTo(this.vdd));
+
+                if(!sourceActive && !drainActive) {
+                    tempState = Transistor.STATES.INACTIVE;
+                } else if(drainActive) {
+                    this.swapTerminals(); // The terminals are mislabeled
+                }
+            }
+            
+            this.state = tempState
             return this.state;
         }
     }
