@@ -856,19 +856,34 @@
         }
 
         removeHyperedge(hyperedge) {
+            const hyperedgeIndex = this.hyperedges.indexOf(hyperedge);
+            
             // Remove all vertices from the hyperedge.
             hyperedge.clearVertices();
-            this.hyperedges.splice(this.hyperedges.indexOf(hyperedge), 1);
+
+            if(hyperedgeIndex >= 0) {
+                this.hyperedges.splice(this.hyperedges.indexOf(hyperedge), 1);
+            } else {
+                console.error('Attempted to remove hyperedge from hypergraph, but the hyperedge was not found.');
+            }
         }
 
         removeVertex(vertex) {
+            const vertexIndex = this.vertices.indexOf(vertex);
+
+            // Remove the vertex from all hyperedges.
             for (let ii = 0; ii < this.hyperedges.length; ii++) {
                 if (this.hyperedges[ii].hasVertex(vertex)) {
                     this.removeHyperedge(this.hyperedges[ii]);
                     break;
                 }
             }
-            this.vertices.splice(this.vertices.indexOf(vertex), 1);
+
+            if(vertexIndex >= 0) {
+                this.vertices.splice(this.vertices.indexOf(vertex), 1);
+            } else {
+                console.error('Attempted to remove vertex from hypergraph, but the vertex was not found.');
+            }
         }
 
         getAdjacentVertices(vertex) {
@@ -1848,10 +1863,17 @@
             // logic level corresponding to the transistor's channel.
             const prune = function(vtx) {
                 vtx.getEdges().forEach(function(edge) {
+                    const tentativeEdgeIndex = tentativeEdges.indexOf(edge);
+                    
                     this.hypergraph.removeHyperedge(edge);
+
+                    if(tentativeEdgeIndex >= 0) {
+                        tentativeEdges.splice(tentativeEdgeIndex, 1);
+                    }
                 }.bind(this));
 
                 this.hypergraph.removeVertex(vtx);
+                tentativeVertices.splice(tentativeVertices.indexOf(vtx), 1);
             }.bind(this);
             
             tentativeVertices.forEach(function(tentativeVertex) {
