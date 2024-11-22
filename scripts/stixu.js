@@ -1848,10 +1848,10 @@
             // logic level corresponding to the transistor's channel.
             const prune = function(vtx) {
                 vtx.getEdges().forEach(function(edge) {
-                    this.hypergraph.removeHyperEdge(edge);
+                    this.hypergraph.removeHyperedge(edge);
                 }.bind(this));
 
-                this.hypergraph.removeHyperedge(vtx);
+                this.hypergraph.removeVertex(vtx);
             }.bind(this);
             
             tentativeVertices.forEach(function(tentativeVertex) {
