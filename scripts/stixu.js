@@ -1839,7 +1839,7 @@
                 const state = transistor.getState();
                 const sourceDrainPathExists = transistor.source.hasPathTo(transistor.drain);
 
-                if(state === Transistor.STATES.UNDEFINED && !sourceDrainPathExists) {
+                if(state === Transistor.STATES.FLOATING && !sourceDrainPathExists) {
                     const tentativePathExists = transistor.source.hasPathTo(transistor.drain, true);
                     if(!tentativePathExists) {
                         // Dear Future Me,
