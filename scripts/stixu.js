@@ -1834,6 +1834,7 @@
         }
 
         addTentativeEdges(tentativeEdges, tentativeVertices) {
+            // BUG: Some of the logic here is confused with testFloatingGates.
             // Branch out from floating transistors in search of stable values
             this.transistors.forEach(function(transistor) {
                 const state = transistor.getState();
@@ -1959,6 +1960,7 @@
                         break;
                     }
 
+                    // BUG: These conditions will never be fulfilled.
                     if(floatingTransistorGateEdgesArr[jj].hasVertex(this.strongLogicOneVertex) ||
                          floatingTransistorGateEdgesArr[jj].hasVertex(this.strongLogicZeroVertex)) {
                         continue;
