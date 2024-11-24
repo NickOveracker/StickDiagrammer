@@ -2887,7 +2887,7 @@ function runTestbench(runTo) {
         },
 
         2,
-        "1ZZ0", // Consider whether this is a good output
+        "1ZZ0",
    ];
 
     /** SET TO 1 OUTPUT AND 4 INPUTS */
