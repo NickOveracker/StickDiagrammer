@@ -2253,7 +2253,7 @@ function runTestbench(runTo) {
         ["mouseup",   {button:  0, clientX: mapX(17), clientY: mapY(28)}],
 
         2,
-        "ZXX0ZZ00Z0Z0UUUU",
+        "UXX0UU00U0U0UUUU",
 
         /* Indirectly conflicted gates via NMOS */
         1,
@@ -2382,7 +2382,7 @@ function runTestbench(runTo) {
         ["mouseup",   {button:  0, clientX: mapX(17), clientY: mapY(28)}],
 
         2,
-        "UUUU1Z1Z11ZZ1XXZ",
+        "UUUU1U1U11UU1XXU",
 
         /* Conflicted dead-end transistor */
          1,
