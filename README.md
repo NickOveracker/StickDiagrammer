@@ -35,7 +35,7 @@
 * ~~Show which layers are set in highlighted cell.~~ *Resolved 2023/1/29*
 * ~~Show at least one path from rail voltage to output for each input.~~ *Resolved 2021/12/11*
 * ~~Warn user when pulling up with NMOS or pulling down with PMOS.~~ *Resolved 2021/12/10*
-* ~~Arbitrary number of I/O.~~ *Resolved 20201/12/10*
+* ~~Arbitrary number of I/O.~~ *Resolved 2020/12/10*
 * ~~Colorblind-friendly mode.~~ *Resolved 2021/12/8*
 * ~~Mobile interface.~~ *Resolved 2021/12/6*
 * ~~Record user input sequence in debug mode for the testbench.~~ *Resolved 2021/12/4*
@@ -57,7 +57,7 @@
 * ~~Knowing that I spelled "accolades" correctly (I don't feel like Googling it)~~ *Resolved 2021/11/20*
 
 ## Known Bugs
-* Unable to detect many cases up invalid pull-up/pull-down (Testbench case 60)
+* ~~Unable to detect many cases up invalid pull-up/pull-down (Testbench case 60)~~ *Resolved 2024/11/25*
 * ~~Base64 decoding problems. Diagrams such as testbench case 60 can't properly decode as URL arguments.~~ *Resolved 2024/11/21*
 * ~~L and H outputs are not handled properly depending on orientation.~~ *Resolved 2024/5/26* (Testbench case 59)
 * ~~Gates with VDD/GND shorts are not handled properly depending on orientation.~~ *Resolved 2024/5/17* (Testbench cases 40, 49, 50, 51)

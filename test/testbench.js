@@ -1516,7 +1516,7 @@ function runTestbench(runTo) {
         },
 
         2,
-        "000100010001000Z",
+        "000Z000Z000Z000Z",
 
         /** SR Latch **/
         1,
@@ -2097,7 +2097,7 @@ function runTestbench(runTo) {
         ["mouseup",   {button:  0, clientX: mapX(23), clientY: mapY(29)}],
 
         2,
-        "ZZZZ010100110XX1",
+        "ZZZZ0Z0Z00ZZ0XXZ",
 
         /** Indirectly conflicted output via PMOS **/
 
@@ -2126,7 +2126,7 @@ function runTestbench(runTo) {
         ["mouseup",   {button:  0, clientX: mapX(29), clientY: mapY(7)}],
 
         2,
-        "0XX100110101ZZZZ",
+        "ZXX1ZZ11Z1Z1ZZZZ",
 
         /* Indirectly conflicted gates via PMOS */
         1,
@@ -2253,7 +2253,7 @@ function runTestbench(runTo) {
         ["mouseup",   {button:  0, clientX: mapX(17), clientY: mapY(28)}],
 
         2,
-        "1XX011001010UUUU",
+        "ZXX0ZZ00Z0Z0UUUU",
 
         /* Indirectly conflicted gates via NMOS */
         1,
@@ -2382,7 +2382,7 @@ function runTestbench(runTo) {
         ["mouseup",   {button:  0, clientX: mapX(17), clientY: mapY(28)}],
 
         2,
-        "UUUU101011001XX0",
+        "UUUU1Z1Z11ZZ1XXZ",
 
         /* Conflicted dead-end transistor */
          1,
@@ -2887,7 +2887,7 @@ function runTestbench(runTo) {
         },
 
         2,
-        "1XX0", // Consider whether this is a good output
+        "1ZZ0",
    ];
 
     /** SET TO 1 OUTPUT AND 4 INPUTS */
