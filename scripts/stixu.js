@@ -1809,15 +1809,32 @@
         }
 
         updateTransistorStates(gateEdge, weakDriveVal, addedEdgesArr, addedSourceDrainEdges) {
+            let changed = false;
+            let newGateEdge, newSourceDrainEdge;
+            
             this.transistors.forEach(function(transistor, index) {
-                const state = transistor.getState();
-                const joinableState = state === Transistor.STATES.FLOATING || state === Transistor.STATES.ACTIVE;
-                if(transistor.gate.getEdges().includes(gateEdge) && joinableState) {
-                    if(state === Transistor.STATES.ACTIVE || transistor.isNmos && weakDriveVal || transistor.isPmos && !weakDriveVal) {
-                        const newEdge = this.hypergraph.connectVertices(transistor.source, transistor.drain, true);
-                        if(!!newEdge) {
-                            addedEdgesArr.push(newEdge);
-                            addedSourceDrainEdges[index] = newEdge;
+                const state = transistor.getState() ;
+                
+                if(transistor.gate.getEdges().includes(gateEdge)) {
+                    if(state === Transistor.STATES.FLOATING) {
+                        if(weakDriveVal) {
+                            newGateEdge = this.hypergraph.connectVertices(transistor.gate, this.strongLogicOneVertex, true);
+                        } else {
+                            newGateEdge = this.hypergraph.connectVertices(transistor.gate, this.strongLogicZeroVertex, true)
+                        }
+
+                        if(!!newGateEdge) {
+                            addedEdgesArr.push(newGateEdge);
+                            changed = true;
+                        }
+                        
+                    }
+                    if(transistor.getState() === Transistor.STATES.ACTIVE) {
+                        newSourceDrainEdge = this.hypergraph.connectVertices(transistor.source, transistor.drain, true);
+                        if(!!newSourceDrainEdge) {
+                            addedEdgesArr.push(newSourceDrainEdge);
+                            addedSourceDrainEdges[index] = newSourceDrainEdge;
+                            changed = true;
                         }
                     }
                     if(state === Transistor.STATES.INACTIVE) {
@@ -1827,63 +1844,13 @@
                             removeEdge.removeVertex(transistor.source);
                             removeEdge.removeVertex(transistor.drain);
                             addedSourceDrainEdges[index] = null;
+                            changed = true;
                         }
                     }
                 }
             }.bind(this));
-        }
-
-        addTentativeEdges(tentativeEdges, tentativeVertices) {
-            // BUG: Some of the logic here is confused with testFloatingGates.
-            // Branch out from floating transistors in search of stable values
-            this.transistors.forEach(function(transistor) {
-                const state = transistor.getState();
-                const sourceDrainPathExists = transistor.source.hasPathTo(transistor.drain);
-
-                if(state === Transistor.STATES.FLOATING && !sourceDrainPathExists) {
-                    const tentativePathExists = transistor.source.hasPathTo(transistor.drain, true);
-                    if(!tentativePathExists) {
-                        // Dear Future Me,
-                        //    Tentative vertices exist only to prevent duplication and accidental
-                        //    pruning of pre-existing edges between source and drain.
-                        // With love,
-                        // Past Me
-                        const tentativeVertex = this.hypergraph.addVertex(null, false, true);
-                        const newEdge1 = this.hypergraph.connectVertices(transistor.source, tentativeVertex, true);
-                        const newEdge2 = this.hypergraph.connectVertices(transistor.drain, tentativeVertex, true);
-                        tentativeVertex.isPmos = transistor.isPmos; // This makes pruning easier.
-                        tentativeVertex.isNmos = transistor.isNmos;
-                        if(!!newEdge1) { tentativeEdges.push(newEdge1); }
-                        if(!!newEdge2) { tentativeEdges.push(newEdge2); }
-                        tentativeVertices.push(tentativeVertex);
-                    }
-                }
-            }.bind(this));
-
-            // Prune tentative edges and vertices that are not energized with the
-            // logic level corresponding to the transistor's channel.
-            const prune = function(vtx) {
-                vtx.getEdges().forEach(function(edge) {
-                    const tentativeEdgeIndex = tentativeEdges.indexOf(edge);
-                    
-                    this.hypergraph.removeHyperedge(edge);
-
-                    if(tentativeEdgeIndex >= 0) {
-                        tentativeEdges.splice(tentativeEdgeIndex, 1);
-                    }
-                }.bind(this));
-
-                this.hypergraph.removeVertex(vtx);
-                tentativeVertices.splice(tentativeVertices.indexOf(vtx), 1);
-            }.bind(this);
             
-            tentativeVertices.forEach(function(tentativeVertex) {
-                if(tentativeVertex.isPmos && !tentativeVertex.hasPathTo(this.strongLogicOneVertex, true)) {
-                    prune(tentativeVertex);
-                } else if(tentativeVertex.isNmos && !tentativeVertex.hasPathTo(this.strongLogicZeroVertex, true)) {
-                    prune(tentativeVertex);
-                }
-            }.bind(this));
+            return changed;
         }
 
         updateOutputVal(currentOutputVal, outputVertex, traverseTentative=false) {
@@ -1946,9 +1913,6 @@
             const floatingTransistorGateEdgesArr = Array.from(floatingTransistorGateEdges);
 
             for(let ii = 0; ii < Math.pow(2, floatingTransistorGateEdgesArr.length); ii++) {
-                const tentativeVertices = [];
-                const tentativeEdges = [];
-
                 this.hypergraph.backupLUT();
 
                 if(outputVal === "X") {
@@ -1960,20 +1924,12 @@
                         break;
                     }
 
-                    // BUG: These conditions will never be fulfilled.
-                    if(floatingTransistorGateEdgesArr[jj].hasVertex(this.strongLogicOneVertex) ||
-                         floatingTransistorGateEdgesArr[jj].hasVertex(this.strongLogicZeroVertex)) {
-                        continue;
-                    }
-
                     // Weakly drive the gate to 1 or 0.
                     /*jslint bitwise: true */
                     const evalInput = !!((ii >> jj) & 1);
                     /*jslint bitwise: false */
                     while(this.updateTransistorStates(floatingTransistorGateEdgesArr[jj], evalInput, addedEdgesArr, addedSourceDrainEdges)) { /* EMPTY */ }
                 }
-
-                this.addTentativeEdges(tentativeEdges, tentativeVertices);
 
                 outputVal = this.updateOutputVal(outputVal, outputVertex, true);
 
@@ -2001,14 +1957,6 @@
                         }
                     }.bind(this));
                 }
-
-                tentativeVertices.forEach(function(vertex) {
-                    this.hypergraph.removeVertex(vertex);
-                }.bind(this));
-
-                tentativeEdges.forEach(function(edge) {
-                    this.hypergraph.removeHyperedge(edge);
-                }.bind(this));
 
                 addedEdgesArr.forEach(function(edge) {
                     this.hypergraph.removeHyperedge(edge);
