@@ -37,6 +37,14 @@ html {
     -ms-user-select: none; /* Internet Explorer/Edge */
 }
 
+.light .logo {
+    content:url("../images/Stixu-Logo.svg");
+}
+
+.dark .logo {
+    content:url("../images/Stixu-Logo-darkmode.svg");
+}
+
 #qrcode-menu img {
     max-width: min(100vw, 70vh);
     max-height: min(100vw, 70vh);
@@ -469,6 +477,8 @@ body.light {
 .header-center {
     width: 50%;
     text-align: center;
+    margin-top: auto;
+    margin-bottom: auto;
 }
 
 .header-right {
@@ -507,11 +517,6 @@ body.light {
     margin-top: 10px;
     font-size: 30px;
     color: #4C26B8;
-}
-
-.logo{
-    font-family: 'Josefin Sans', sans-serif;
-    font-size: 20px;
 }
 
 /*--------Header-end----------*/
@@ -722,8 +727,8 @@ body.light {
     }
 
     .logo {
-        font-size: min(5vh,4vw);
-        padding: 4vh;
+        max-width: 100%;
+        height:50px;
     }
 
     .fa-times{
@@ -901,7 +906,9 @@ body.light {
     }
 
     .logo{
-        font-size: 4vh;
+        /*font-size: 4vh;*/
+        height: 54.58px;
+        max-width: 100%;
     }
 
     .controls{

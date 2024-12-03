@@ -493,7 +493,7 @@
             UI.diagram.clearAnalyses();
             
             let done = UI.diagram.nmos.size === 1 && UI.diagram.pmos.size === 1;
-            done = done && UI.diagram.nmos.values().next().value.gate.isIdentical(UI.diagram.pmos.values().next().value.gate);
+            done = done && UI.diagram.getNet(UI.diagram.nmos.values().next().value.gate).isIdentical(UI.diagram.getNet(UI.diagram.pmos.values().next().value.gate));
             done = done && !UI.diagram.vddNet.isIdentical(UI.diagram.gndNet);
             
             if(done) {
