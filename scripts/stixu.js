@@ -3849,7 +3849,6 @@
         // Clear local storage
         localStorage.clear();
         let diagram = new Diagram(document.getElementById("canvas"), document.getElementById("grid-canvas"));
-        window.memoize = true;
         
         // Set up the UI object.
         let UI = new UserInterface(diagram);
