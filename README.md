@@ -58,8 +58,9 @@
 
 ## Known Bugs
 * UI bug: horizontal overflow on mobile after adding the logo.
-* Incorrect output for input 0 for [this circuit](https://stixu.io/?d=SFIwR0FRRUJBUUViQXdZYUJnQUFBQULEBUPEBUXEBUnEBVHEBcQe3x3fHdUd03TfAd8B3wHfAd8BxAFENN8d3wHfAdABQivSE8QF%2FwFq3x3fHcodxBloxB3EGUPEGe8BpDjOD98B3wHdAUJ3yArYdFPpAJ%2FlAMffAd8B3gFvyAnEdOYBO8oBPQ%3D%3D).
-* ~~Unable to detect many cases up invalid pull-up/pull-down (Testbench case 60)~~ *Resolved 2024/11/25*
+* Warning message displays when it shouldn't. (Testbench case 62).
+* ~~Incorrect output for testbench case 61.~~ *Resolved 2025/1/6* (Testbench cases 61, 62)
+* ~~Unable to detect many cases up invalid pull-up/pull-down~~ *Resolved 2024/11/25* (Testbench case 60)
 * ~~Base64 decoding problems. Diagrams such as testbench case 60 can't properly decode as URL arguments.~~ *Resolved 2024/11/21*
 * ~~L and H outputs are not handled properly depending on orientation.~~ *Resolved 2024/5/26* (Testbench case 59)
 * ~~Gates with VDD/GND shorts are not handled properly depending on orientation.~~ *Resolved 2024/5/17* (Testbench cases 40, 49, 50, 51)

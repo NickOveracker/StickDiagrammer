@@ -722,6 +722,7 @@
             this.vertices = [];
             this.hyperedges = [];
             this.pathLUT = [];
+            this.memoization = true;
         }
 
         clearLUT() {
@@ -737,6 +738,10 @@
         }
 
         memoize(vertex1, vertex2) {
+            if(!this.memoization) {
+                return;
+            }
+
             const index1 = vertex1.index;
             const index2 = vertex2.index;
             const alreadySet = !!this.pathLUT[index1] && this.pathLUT[index1][index2];
@@ -1791,8 +1796,8 @@
         }
 
         // Connect source and drain of active transistors, and propagate.
-        initTransistorStates() {
-            let changed;
+        initTransistorStates(addedSourceDrainEdges = null) {
+            let changed, edge;
             do {
                 changed = false;
 
@@ -1801,8 +1806,11 @@
                     const sourceDrainPathExists = transistor.source.hasPathTo(transistor.drain);
 
                     if(state === Transistor.STATES.ACTIVE && !sourceDrainPathExists) {
-                        this.hypergraph.connectVertices(transistor.source, transistor.drain, true);
+                        edge = this.hypergraph.connectVertices(transistor.source, transistor.drain, true);
                         changed = true;
+                        if(!!addedSourceDrainEdges) {
+                            addedSourceDrainEdges.push(edge);
+                        }
                     }
                 }.bind(this));
             } while(changed);
@@ -1901,6 +1909,7 @@
         }
 
         testFloatingGates(currentOutputVal, addedEdgesArr, addedSourceDrainEdges, outputVertex) {
+            this.hypergraph.memoization = false;
             let outputVal = currentOutputVal;
             const floatingTransistorGateEdges = new Set();
 
@@ -1913,8 +1922,6 @@
             const floatingTransistorGateEdgesArr = Array.from(floatingTransistorGateEdges);
 
             for(let ii = 0; ii < Math.pow(2, floatingTransistorGateEdgesArr.length); ii++) {
-                this.hypergraph.backupLUT();
-
                 if(outputVal === "X") {
                     break;
                 }
@@ -1931,6 +1938,15 @@
                     while(this.updateTransistorStates(floatingTransistorGateEdgesArr[jj], evalInput, addedEdgesArr, addedSourceDrainEdges)) { /* EMPTY */ }
                 }
 
+                // Remove all edges that are in addedEdgesArr but not addedSourceDrainEdges.
+                addedEdgesArr.forEach(function(edge) {
+                    if(!addedSourceDrainEdges.includes(edge)) {
+                        edge.removeVertex(this.strongLogicOneVertex);
+                        edge.removeVertex(this.strongLogicZeroVertex);
+                    }
+                }.bind(this));
+
+                this.initTransistorStates(addedSourceDrainEdges);
                 outputVal = this.updateOutputVal(outputVal, outputVertex, true);
 
                 if(outputVal !== "X") {
@@ -1963,7 +1979,6 @@
                 }.bind(this));
 
                 addedEdgesArr.length = 0;
-                this.hypergraph.restoreLUT();
             }
 
             floatingTransistorGateEdgesArr.forEach(function(edge) {
@@ -1971,6 +1986,7 @@
                 edge.removeVertex(this.strongLogicZeroVertex);
             }.bind(this));
 
+            this.hypergraph.memoization = true;
             return outputVal;
         }
 
@@ -3833,6 +3849,7 @@
         // Clear local storage
         localStorage.clear();
         let diagram = new Diagram(document.getElementById("canvas"), document.getElementById("grid-canvas"));
+        window.memoize = true;
         
         // Set up the UI object.
         let UI = new UserInterface(diagram);
