@@ -108,6 +108,8 @@ function runTestbench(runTo) {
                        "Nested floating-gate transistors 2",
                        "Unstable low and high outputs",
                        "PMOS pull-down, NMOS pull-up",
+                        "Floating intermediate gate outputs to output gate (PMOS)",
+                        "Floating intermediate gate outputs to output gate (NMOS)",
     ];
     runTo = runTo || testCases.length;
 
@@ -2888,6 +2890,24 @@ function runTestbench(runTo) {
 
         2,
         "1ZZ0",
+        
+        // Floating intermediate gate outputs to output gate (PMOS).
+        1,
+        function() {
+            UI.diagram.decode("SFIwR0FRRUJBUUViQXdZYUJnQUFBQULEBUPEBUXEBUnEBVHEBcQe3x3fHdUd03TfAd8B3wHfAd8BxAFENN8d3wHfAdABQivSE8QF%2FwFq3x3fHcodxBloxB3EGUPEGe8BpDjOD98B3wHdAUJ3yArYdFPpAJ%2FlAMffAd8B3gFvyAnEdOYBO8oBPQ%3D%3D");
+        },
+
+        2,
+        "HZ",
+
+        // Floating intermediate gate outputs to output gate (NMOS).
+        1,
+        function() {
+            UI.diagram.decode("SFIwR0FRRUJGUUVCQXdZYUJnQUFBQUnEBd8B3wHfAd8BzAHkAJJCxAlDxAVFxAXlAKBR3x3fHdgd2HTOAUQ00hTfHd8B3QFCK9ITxAX%2FANnfHd8dyh3EGWjEHcQZQ8QZ7wETOM4P3wHfAd0BQnfICth0U%2BkAnuUAx98B3wHeAW%2FICVPEBeUBO8oBPQ%3D%3D");
+        },
+
+        2,
+        "ZL",
    ];
 
     /** SET TO 1 OUTPUT AND 4 INPUTS */
