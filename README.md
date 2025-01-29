@@ -1,7 +1,7 @@
 # Stixu: VLSI Stick Diagrammer
 
 ## Live Site
-* [Stixu.io](https://stixu.io) (Hosted provided by Github.io)
+* [Stixu.io](https://stixu.io) (Hosting provided by Github.io)
 
 ## Legal Stuff
 * Copyright Nick Overacker & Miho Kobayashi.
