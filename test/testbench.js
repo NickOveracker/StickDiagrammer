@@ -110,8 +110,8 @@ function runTestbench(runTo) {
                        "PMOS pull-down, NMOS pull-up",
                         "Floating intermediate gate outputs to output gate (PMOS)",
                         "Floating intermediate gate outputs to output gate (NMOS)",
-                        "Generalized C-element (static)",
                         "Generalized C-element (dynamic/pseudostatic)",
+                        "Generalized C-element (static)",
                         "Asymmetric C-element",
                         "MUTEX (Mutual Exclusion) element",
     ];
