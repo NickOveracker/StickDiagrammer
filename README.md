@@ -59,7 +59,7 @@
 ## Known Bugs
 * UI bug: horizontal overflow on mobile after adding the logo.
 * Warning message displays when it shouldn't. (Testbench case 62)
-* ~~Incorrect output for asymmetric C-element.~~ *Resolved 2025/1/29* (Testbench case 63)
+* ~~Incorrect output for asymmetric C-element.~~ *Resolved 2025/1/29* (Testbench case 65)
 * ~~Incorrect output for testbench case 61.~~ *Resolved 2025/1/6* (Testbench cases 61, 62)
 * ~~Unable to detect many cases up invalid pull-up/pull-down~~ *Resolved 2024/11/25* (Testbench case 60)
 * ~~Base64 decoding problems. Diagrams such as testbench case 60 can't properly decode as URL arguments.~~ *Resolved 2024/11/21*
