@@ -1,13 +1,13 @@
 # Stixu: VLSI Stick Diagrammer
 
-## Live Pages
-* Stable site: [Stixu.io](https://stixu.io)
-* Development: [Github.io](https://nickoveracker.github.io/StickDiagrammer)
+## Live Site
+* [Stixu.io](https://stixu.io) (Hosted provided by Github.io)
 
 ## Legal Stuff
 * Copyright Nick Overacker & Miho Kobayashi.
 * This code is offered under the [PolyForm Strict License 1.0.0](https://polyformproject.org/licenses/strict/1.0.0/), which permits users to use this code for noncommercial purposes but reserves most right for the copyright holders.
-* For uses not permitted under the license, please contact: [nick.overacker@okstate.edu](mailto:nick.overacker@okstate.edu)
+* We will migrate to a more permissive FOSS license in the future; we do not know which one we will choose at this time. At the very least, derivative works will also be required to be open source after the transition.
+* For uses not permitted under the license, please contact: [nick.overacker@okstate.edu](mailto:nick.overacker@okstate.edu) (or just wait for the new license, but email will be faster).
 
 ## Dogma of Development
 * [Everything we do will be excellent.](https://www.researchgate.net/profile/Mark-Rockley-2)
@@ -19,6 +19,9 @@
 * Software entropy must not increase.
 
 ## Feature Wishlist
+* Allow users to save designs, and use their outputs as inputs to other designs to produce complex, modular circuitry.
+* Generate Magic files (todo: check legality) from design for a given technology.
+* Sequenced output for state-dependent circuits like DFFs.
 * Allow user to define custom color scheme.
 * Allow user to selectively hide layers (to verify connections).
 * Allow custom command mappings.
@@ -28,37 +31,35 @@
 * Draw CMOS circuit schematic corresponding to the painted topology.
 * Logical effort calculations (allow user to set constants)
 * Export netlist for use in electronics design software.
-* ~~Share small diagrams by URL arguments and QR codes.~~ *Resolved 2023/2/8*
-* ~~Interactive tutorial.~~ *Resolved 2023/2/4*
-* ~~Replace pullup/pulldown alert popups with less obtrusive warnings.~~ *Resolved 2023/1/29*
-* ~~Allow users to select where to insert rows and columns.~~ *Resolved 2023/1/29*
-* ~~Show which layers are set in highlighted cell.~~ *Resolved 2023/1/29*
-* ~~Show at least one path from rail voltage to output for each input.~~ *Resolved 2021/12/11*
-* ~~Warn user when pulling up with NMOS or pulling down with PMOS.~~ *Resolved 2021/12/10*
-* ~~Arbitrary number of I/O.~~ *Resolved 2020/12/10*
-* ~~Colorblind-friendly mode.~~ *Resolved 2021/12/8*
-* ~~Mobile interface.~~ *Resolved 2021/12/6*
-* ~~Record user input sequence in debug mode for the testbench.~~ *Resolved 2021/12/4*
-* ~~HTML button interface for those who prefer not to use a keyboard.~~ *Resolved 2021/12/2*
-* ~~Arbitrary width/height.~~ *Resolved 2021/11/28*
-* ~~More efficient data structure for the grid.~~ *Resolved 2021/11/25*
-* ~~Foolproof usage instructions.~~ *Resolved 2021/11/21*
-* ~~More metal layers.~~ *Resolved 2021/11/21*
-* ~~Moveable VDD/GND terminals.~~ *Resolved 2021/11/21*
-* ~~Show every layer in a cell, not just the top.~~ *Resolved 2021/11/21*
+* ~~Share small diagrams by URL arguments and QR codes.~~ *Implemented 2023/2/8*
+* ~~Interactive tutorial.~~ *Implemented 2023/2/4*
+* ~~Replace pullup/pulldown alert popups with less obtrusive warnings.~~ *Implemented 2023/1/29*
+* ~~Allow users to select where to insert rows and columns.~~ *Implemented 2023/1/29*
+* ~~Show which layers are set in highlighted cell.~~ *Implemented 2023/1/29*
+* ~~Show at least one path from rail voltage to output for each input.~~ *Implemented 2021/12/11*
+* ~~Warn user when pulling up with NMOS or pulling down with PMOS.~~ *Implemented 2021/12/10*
+* ~~Arbitrary number of I/O.~~ *Implemented 2020/12/10*
+* ~~Colorblind-friendly mode.~~ *Implemented 2021/12/8*
+* ~~Mobile interface.~~ *Implemented 2021/12/6*
+* ~~Record user input sequence in debug mode for the testbench.~~ *Implemented 2021/12/4*
+* ~~HTML button interface for those who prefer not to use a keyboard.~~ *Implemented 2021/12/2*
+* ~~Arbitrary width/height.~~ *Implemented 2021/11/28*
+* ~~More efficient data structure for the grid.~~ *Implemented 2021/11/25*
+* ~~Foolproof usage instructions.~~ *Implemented 2021/11/21*
+* ~~More metal layers.~~ *Implemented 2021/11/21*
+* ~~Moveable VDD/GND terminals.~~ *Implemented 2021/11/21*
+* ~~Show every layer in a cell, not just the top.~~ *Implemented 2021/11/21*
 
 ## Absolute Pie in the Sky
-* Sequenced output for state-dependent circuits like DFFs.
-* Alternate braille display???
-* Allow users to save designs, and use their outputs as inputs to other designs to produce complex, modular circuitry.
-* Generate Magic files (todo: check legality) from design for a given technology.
+* Accommodate blind users somehow? Engineering isn't just for the sighted.
 * Nobel Peace Prize
 * Various accolades
 * ~~Knowing that I spelled "accolades" correctly (I don't feel like Googling it)~~ *Resolved 2021/11/20*
 
 ## Known Bugs
 * UI bug: horizontal overflow on mobile after adding the logo.
-* Warning message displays when it shouldn't. (Testbench case 62).
+* Warning message displays when it shouldn't. (Testbench case 62)
+* ~~Incorrect output for asymmetric C-element.~~ *Resolved 2025/1/29* (Testbench case 63)
 * ~~Incorrect output for testbench case 61.~~ *Resolved 2025/1/6* (Testbench cases 61, 62)
 * ~~Unable to detect many cases up invalid pull-up/pull-down~~ *Resolved 2024/11/25* (Testbench case 60)
 * ~~Base64 decoding problems. Diagrams such as testbench case 60 can't properly decode as URL arguments.~~ *Resolved 2024/11/21*

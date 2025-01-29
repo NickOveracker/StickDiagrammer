@@ -110,6 +110,8 @@ function runTestbench(runTo) {
                        "PMOS pull-down, NMOS pull-up",
                         "Floating intermediate gate outputs to output gate (PMOS)",
                         "Floating intermediate gate outputs to output gate (NMOS)",
+                        "Asymmetric C-Element",
+                        "MUTEX (Mutual Exclusion) element",
     ];
     runTo = runTo || testCases.length;
 
@@ -2908,6 +2910,24 @@ function runTestbench(runTo) {
 
         2,
         "ZL",
+
+        // Asymmetric C-element
+        1,
+        function() {
+            UI.diagram.decode("SFNFR0FnRWFBUm9mRXdvVkdRc0tB2wFnxAVF1QvfId8h3wvMC98BQsUGSdUL3yHfId8LywvfAcQtLy8vLzjfId8hzSFI3CzLAUPFBVHEBlPdC0XFC2fFC2fEC2vKC0XKC8YhyyzfWN8L5QCf1wFE5AIFT9EX5AEINNEL1jfVIdcs3wHSAVXkAZblAMvsAqxFQUFn5wJdRUNF6gJoRegDFcs3RUHKIe4BCsdXzWPIJc0qPT0%3D");
+        },
+
+        2,
+        "00U1",
+
+        // MUTEX (Mutual Exclusion) element
+        1,
+        function() {
+            UI.diagram.decode("SHgwR0FnSUpBUWtiQWdrUUNSZ0pIZ2tRQUFBQWdBQUFCxAlDxAVFxAVJxAXOHcUB2B3UOsQB3x3aHdQX2G7FAdgd0zrFAd8d2x1BUC8vLzTKD8QBRC8vLyvOE94dLy8vL8Rc1QHfHcwdSWdBQUNS5ADyaUFBQUrkAPhT5AC%2B5AHaQklnRcQdScQdVUFKQUFvQVNJQlFBa1FDZ0JJZ0bEHUvHHUXSHVHEHWfJOkHEHUHEHUHPHWfEHUFBa%2BQBLMR9Q0hBQUFj7gC3xBPQAWYvLy%2FFCUIvLy84zhxCd9IwyldmL2fQIUgvLy%2FGE2YvNNUdS0HkAMjFAegBQcQTyAHoAntvQVFD5AFIQkNnRekCYcQR5ADayDnrAhHKV2dCySHoAzNJSchtZ0FRyB3HTccdPQ%3D%3D");
+        },
+
+        2,
+        "001U010U",
    ];
 
     /** SET TO 1 OUTPUT AND 4 INPUTS */

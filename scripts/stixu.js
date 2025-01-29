@@ -1796,7 +1796,7 @@
         }
 
         // Connect source and drain of active transistors, and propagate.
-        initTransistorStates(addedSourceDrainEdges = null) {
+        initTransistorStates(addedEdges = null) {
             let changed, edge;
             do {
                 changed = false;
@@ -1808,8 +1808,8 @@
                     if(state === Transistor.STATES.ACTIVE && !sourceDrainPathExists) {
                         edge = this.hypergraph.connectVertices(transistor.source, transistor.drain, true);
                         changed = true;
-                        if(!!addedSourceDrainEdges) {
-                            addedSourceDrainEdges.push(edge);
+                        if(!!addedEdges) {
+                            addedEdges.push(edge);
                         }
                     }
                 }.bind(this));
@@ -1936,17 +1936,17 @@
                     const evalInput = !!((ii >> jj) & 1);
                     /*jslint bitwise: false */
                     while(this.updateTransistorStates(floatingTransistorGateEdgesArr[jj], evalInput, addedEdgesArr, addedSourceDrainEdges)) { /* EMPTY */ }
+                    // Remove all edges that are in addedEdgesArr but not addedSourceDrainEdges.
+                    addedEdgesArr.forEach(function(edge) {
+                        if(!addedSourceDrainEdges.includes(edge)) {
+                            edge.removeVertex(this.strongLogicOneVertex);
+                            edge.removeVertex(this.strongLogicZeroVertex);
+                        }
+                    }.bind(this));
+
+                    this.initTransistorStates(addedEdgesArr);
                 }
 
-                // Remove all edges that are in addedEdgesArr but not addedSourceDrainEdges.
-                addedEdgesArr.forEach(function(edge) {
-                    if(!addedSourceDrainEdges.includes(edge)) {
-                        edge.removeVertex(this.strongLogicOneVertex);
-                        edge.removeVertex(this.strongLogicZeroVertex);
-                    }
-                }.bind(this));
-
-                this.initTransistorStates(addedSourceDrainEdges);
                 outputVal = this.updateOutputVal(outputVal, outputVertex, true);
 
                 if(outputVal !== "X") {
