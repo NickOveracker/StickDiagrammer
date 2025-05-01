@@ -678,7 +678,7 @@ body.light {
 
     .fa-circle:hover{
         opacity: .7;
-        transition: .5;
+        transition: .5s;
     }
 
     .evaluate-btn:hover{
