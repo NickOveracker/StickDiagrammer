@@ -509,7 +509,9 @@
         }
 
         removeVertex(vertex) {
-            this.vertices.delete(vertex);
+            if(this.containsVertex(vertex)) {
+                this.vertices.delete(vertex);
+            }
         }
 
         containsVertex(vertex) {
@@ -2029,7 +2031,6 @@
         }
 
         // Generate Verilog from the current circuit.
-        // Use this.transistors to generate the Verilog.
         generateVerilog() {
             let verilog = "module circuit(";
             let inputs = [];
@@ -2044,7 +2045,7 @@
                 inputs.push(String.fromCharCode(65 + ii));
             }
             for(let ii = 0; ii < this.outputs.length; ii++) {
-                outputs.push(String.fromCharCode(89 - ii));
+                outputs.unshift(String.fromCharCode(89 - ii));
             }
 
             // Create a wire for each hyperedge.
@@ -2114,9 +2115,9 @@
 
                 // Now, create the transistor.
                 if(transistor.isNmos) {
-                    nmos.push("  tranif1 nmos_" + nmos.length + "(" + sourceName + ", " + drainName + ", " + gateName + ");");
+                    nmos.push("  ideal_nmos nmos_" + nmos.length + "(" + drainName + ", " + sourceName + ", " + gateName + ");");
                 } else {
-                    pmos.push("  tranif0 pmos_" + pmos.length + "(" + sourceName + ", " + drainName + ", " + gateName + ");");
+                    pmos.push("  ideal_pmos pmos_" + pmos.length + "(" + drainName + ", " + sourceName + ", " + gateName + ");");
                 }
             }.bind(this));
 
@@ -2132,7 +2133,7 @@
             }.bind(this));
 
             this.outputVertices.forEach(function(vertex, index) {
-                let outputName = String.fromCharCode(89 - index);
+                let outputName = String.fromCharCode(89 - this.outputVertices.length + index + 1);
 
                 vertex.getEdges().forEach(function(edge) {
                     if(edge.mergeable) {
@@ -2172,6 +2173,30 @@
             verilog += pmos.join("\n") + "\n\n";
 
             verilog += "endmodule\n";
+
+            verilog += `
+module ideal_nmos(
+    inout wire t1,
+    inout wire t2,
+    input wire gate
+);
+    wire gate_active;
+    assign gate_active = (gate === 1'b1) ? 1'b1 : 1'b0;
+    assign t1 = (gate_active && (t2 === 1'b0)) ? 1'b0 : 1'bz;
+    assign t2 = (gate_active && (t1 === 1'b0)) ? 1'b0 : 1'bz;
+endmodule
+
+module ideal_pmos(
+    inout wire t1,
+    inout wire t2,
+    input wire gate
+);
+    wire gate_active;
+    assign gate_active = (gate === 1'b0) ? 1'b1 : 1'b0;
+    assign t1 = (gate_active && (t2 === 1'b1)) ? 1'b1 : 1'bz;
+    assign t2 = (gate_active && (t1 === 1'b1)) ? 1'b1 : 1'bz;
+endmodule
+`;
 
             return verilog;
         }
