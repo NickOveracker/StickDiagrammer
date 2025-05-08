@@ -3458,19 +3458,19 @@ endmodule
 
         // TODO: Continue to improve this function.
         setUpControls() {
-            let resizeGridByOne = function(byRow, positive) {
+            const resizeGridByOne = function(byRow, positive) {
                 return function() {
-                    let offset = positive ? 1 : -1;
-                    let newWidth = byRow ? this.diagramGrid.width            : this.diagramGrid.width + offset;
-                    let newHeight = byRow ? this.diagramGrid.height + offset : this.diagramGrid.height;
+                    const offset = positive ? 1 : -1;
+                    const newWidth = byRow ? this.diagramGrid.width            : this.diagramGrid.width + offset;
+                    const newHeight = byRow ? this.diagramGrid.height + offset : this.diagramGrid.height;
                     this.diagramGrid.resize(newWidth, newHeight);
                     this.diagramView.drawGrid();
                 }.bind(this);
             }.bind(this);
 
-            let simpleGridShift = function(byRow, positive) {
+            const simpleGridShift = function(byRow, positive) {
                 return function() {
-                    let offset = positive ? 1 : -1;
+                    const offset = positive ? 1 : -1;
                     this.diagramGrid.shift(0, byRow, offset);
                 }.bind(this);
             }.bind(this);
@@ -3480,9 +3480,9 @@ endmodule
                 document.getElementById("close-" + menuName + "-btn").onclick = this.getCloseMenuFunction(menuName);
             }.bind(this));
 
-            let temp = document.getElementById("open-qrcode-menu-btn").onclick;
+            const qrcodeBtnOnClick = document.getElementById("open-qrcode-menu-btn").onclick;
             document.getElementById("open-qrcode-menu-btn").onclick = function() {
-                let url = window.location.href.split('?')[0] + "?d=" + this.diagram.encode();
+                const url = window.location.href.split('?')[0] + "?d=" + this.diagram.encode();
 
                 document.getElementById("qrcode").innerHTML = "";
                 /* jshint nonew: false */
@@ -3490,8 +3490,28 @@ endmodule
                 /* jshint nonew: true */
 
                 document.getElementById("share-url").href = url;
-                temp();
+                qrcodeBtnOnClick();
             }.bind(this);
+
+            const verliogBtnOnClick = document.getElementById("download-verilog-btn").onlick;
+            document.getElementById("download-verilog-btn").onclick = function() {
+                this.refreshTruthTable();
+                const verilog = this.diagram.generateVerilog();
+                const blob = new Blob([verilog], {type: "text/plain"});
+                const url = window.URL.createObjectURL(blob);
+                // Download the file immediately.
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "diagram.v";
+                a.click();
+                // Revoke the URL after a short delay to allow the download to complete.
+                setTimeout(function() {
+                    window.URL.revokeObjectURL(url);
+                }, 100);
+                // Call the original onclick function.
+                verliogBtnOnClick();
+            }.bind(this);
+
 
             document.getElementById("add-row").onclick       = resizeGridByOne(true,  true);
             document.getElementById("remove-row").onclick    = resizeGridByOne(true,  false);
@@ -3908,5 +3928,7 @@ endmodule
                 UI.populateTermSelect();
             }
         }
+
+        UI.diagram.decode("R3hzR0F3RURBUU1aQWhJRURRSUlHZzBRQUFBQ0FBQUHWCcUB3yTfP9sbZ0FBQUXaCd8k3wncP8YBLzREK8YJLy%2FGCdIBL1DQG9It3D%2FMG0lBQUFKQUFBQklCQVFKQUlDQklCSVFKQUrECUvECVNCSXBLU0pGSlFSSXBLQ0pFQlFSSWfNCUHECUNDSkFBUUJJQUtBSkFC2wlBQklBSUFKd0FBSPcAomYvLzjFCWQvK2PNGkLSNmPFA9Q%2F0y3EG0tBQUFvxQ5GQVFCxCjmAQflAgpD5gGMQ29BU8UJ5QEdxAHKNsktZ8QDzRLIP8st5QJdxAdJQWc%3D");
     };
 })();
