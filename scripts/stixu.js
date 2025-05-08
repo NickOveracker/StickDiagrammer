@@ -2030,6 +2030,84 @@
             return outputVal;
         }
 
+        // Generate IRSIM from the current circuit.
+        // Hello, ASYNC 2025 attendees!
+        generateIRSIM() {
+            // Simulate with 100nm scmos technology.
+            // We are only interested in topology,
+            // so dated technology is not a problem.
+            const HEADER   = "| units: 100 tech: scmos\n"              +
+                             "| type gate source drain length width\n" +
+                             "| ---- ---- ------ ----- ------ -----\n" ;
+
+
+            // Return a list of all identical hyperedges (same vertices)
+            // for a given transistor terminal.
+            const getNodeAliases = function(terminal) {
+                let aliasList = [];
+                terminal.getEdges().forEach(function(edge, index) {
+                    // Index 0 is already accounted for,
+                    // and we are not interested in directed (non-mergeable) edges.
+                    if(index != 0 && edge.mergeable) {
+                        aliasList.push(this.hypergraph.hyperedges.indexOf(edge));
+                    }
+                }.bind(this));
+                return aliasList;
+            }.bind(this)
+
+            let circuit  = "";
+            let commands = "";
+            this.transistors.forEach(function(transistor) {
+                const type = transistor.isNmos ? "n" : "p";
+
+                // Name the edges for gate, source, and drain.
+                const g = "e" + this.hypergraph.hyperedges.indexOf(transistor.gate.getEdges()[0]);
+                const s = "e" + this.hypergraph.hyperedges.indexOf(transistor.source.getEdges()[0]);
+                const d = "e" + this.hypergraph.hyperedges.indexOf(transistor.drain.getEdges()[0]);
+
+                // Add the transistor to the circuit.
+                circuit += `\n|| ${type}mos at: (${transistor.gate.cell.x}, ${transistor.gate.cell.y})\n`
+                circuit += `${type} ${g} ${s} ${d} 2 4\n`
+
+                // Link identical hyperedges together.
+                getNodeAliases(transistor.gate).forEach((al)   => { commands += `alias ${g} e${al} \n`; });
+                getNodeAliases(transistor.source).forEach((al) => { commands += `alias ${s} e${al} \n`; });
+                getNodeAliases(transistor.drain).forEach((al)  => { commands += `alias ${d} e${al} \n`; });
+            }.bind(this));
+
+            // Name the outputs (..., W, X, Y)
+            let watchnodes = "";
+            this.outputVertices.forEach(function(vtx, ii) {
+                const IDX  = this.hypergraph.hyperedges.indexOf(vtx.getEdges()[0]);
+                const NAME = String.fromCharCode(89 - this.outputVertices.length + ii + 1);
+                circuit    = circuit.replaceAll(` e${IDX} `, ` ${NAME} `);
+                commands   = commands.replaceAll(` e${IDX} `, ` ${NAME} `);
+                commands  += `alias ${NAME} e${IDX} \n`;
+                watchnodes = watchnodes + NAME + " ";
+            }.bind(this));
+
+            // Name the inputs (A, B, C, ...)
+            this.inputVertices.forEach(function(vtx, ii) {
+                const IDX  = this.hypergraph.hyperedges.indexOf(vtx.getEdges()[0]);
+                const NAME = String.fromCharCode(65 + ii);
+                circuit    = circuit.replaceAll(` e${IDX} `, ` ${NAME} `);
+                commands   = commands.replaceAll(` e${IDX} `, ` ${NAME} `);
+                commands  += `alias ${NAME} e${IDX} \n`;
+                watchnodes = watchnodes + NAME + " ";
+            }.bind(this));
+
+            // Set up the supplies.
+            commands += `alias e${this.hypergraph.hyperedges.indexOf(this.vddVertex.getEdges()[0])} vdd\n`;
+            commands += `alias e${this.hypergraph.hyperedges.indexOf(this.gndVertex.getEdges()[0])} gnd\n`;
+            commands += `h vdd\nl gnd\nstepsize 50\nwatchnode ${watchnodes}\n`;
+
+            // And we're done!
+            return {
+                sim: HEADER + circuit,
+                cmd: commands,
+            }
+        }
+
         // Generate Verilog from the current circuit.
         generateVerilog() {
             let verilog = "module circuit(";
@@ -3508,6 +3586,27 @@ endmodule
                     window.URL.revokeObjectURL(url);
                     a.remove();
                 }, 100);
+            }.bind(this);
+
+            document.getElementById("download-irsim-btn").onclick = function() {
+                const download = function(data, name) {
+                    const blob = new Blob([data], {type: "text/plain"});
+                    const url = window.URL.createObjectURL(blob);
+                    // Download the file immediately.
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = name;
+                    a.click();
+                    // Revoke the URL after a short delay to allow the download to complete.
+                    setTimeout(function() {
+                        window.URL.revokeObjectURL(url);
+                        a.remove();
+                    }, 100);
+                }
+                this.refreshTruthTable();
+                const irsim = this.diagram.generateIRSIM();
+                download(irsim.sim, "diagram.sim");
+                download(irsim.cmd, "diagram.cmd");
             }.bind(this);
 
             document.getElementById("add-row").onclick       = resizeGridByOne(true,  true);
