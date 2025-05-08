@@ -3493,7 +3493,6 @@ endmodule
                 qrcodeBtnOnClick();
             }.bind(this);
 
-            const verilogBtnOnClick = document.getElementById("download-verilog-btn").onlick;
             document.getElementById("download-verilog-btn").onclick = function() {
                 this.refreshTruthTable();
                 const verilog = this.diagram.generateVerilog();
@@ -3507,9 +3506,8 @@ endmodule
                 // Revoke the URL after a short delay to allow the download to complete.
                 setTimeout(function() {
                     window.URL.revokeObjectURL(url);
+                    a.remove();
                 }, 100);
-                // Call the original onclick function.
-                verilogBtnOnClick();
             }.bind(this);
 
             document.getElementById("add-row").onclick       = resizeGridByOne(true,  true);
