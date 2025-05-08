@@ -72,7 +72,7 @@ function runTestbench(runTo) {
                        "Between transistors",
                        "SR latch Q",
                        "SR latch Q'",
-                       "D flip-flop",
+                       "D latch",
                        "VDD & GND driving single PMOS gate",
                        "Two inputs driving single PMOS gate",
                        "VDD & GND driving single NMOS gate",
@@ -114,6 +114,7 @@ function runTestbench(runTo) {
                         "Generalized C-element (static)",
                         "Asymmetric C-element",
                         "MUTEX (Mutual Exclusion) element",
+                        "D Flip-Flop (DFF)",
     ];
     runTo = runTo || testCases.length;
 
@@ -1580,7 +1581,7 @@ function runTestbench(runTo) {
         2,
         UI.diagram.independentInputs ? "111100001111ZZZZ" : "111100001111UUUU",
 
-        /** D FLIP FLOP **/
+        /** D LATCH **/
         // Automatically captured input
         // Clear the canvas
         ["mousedown", {button:  2, clientX: mapX(1),   clientY: mapY(1)}],
@@ -2949,6 +2950,15 @@ function runTestbench(runTo) {
 
         2,
         "001U010U",
+
+        // D Flip-Flop (DFF) element
+        1,
+        function() {
+            UI.diagram.decode("UFQwR0FnRWRDUjRoSHc0Q0R6UWRBQWdByAFRyQpJyQpFyQpDyQpByjVnyTVRyTVJyTVFyTVDQULHCkLfPcty0gHfPd963z3feskB%2FwExyQrqATHfPdQB%2FwC3%2FwD03z3JPdQB3z3fet49%2FwE89wE8%2FwCFyT3%2FAIXcPdQB3z3fet8933rJAf8BMckK%2FwJt%2FwJt%2FwC3%2FwD03z3%2FAm3fPccK33rTPdR3LyvICv8BTskKyGJBQUFuK0Qv3z3GPWY1LzjIPekAl0h3xwrWPegAmesA1FA46ACv%2FwIFL8hbQ1FBUMd6yh9ryQpTyQpKyj3JXEPJXELHRd96z3rIPd96yj3Mesdy33rKW0gvei80yHLJFlDKNdMBQslc6gHg6QGr3wFCL2fpAOzUAf8CO%2BgAmEPpAM1CQUtDxyFpRkLHIVJDZ2fGIUlsUVFvxlpTb0lVxj1KVkVLxj1FcWlGxz1WUkPHPUtvaMg9VVPHPUNxQsc9QlZBcck9Vsk9Sck9a8c9a1VT5gFoRVNLSuYA2ENKRUVpxz1pQ1LHPVJCyD1JZ8k9Ucg9Q0lCxz1CRUHHPUFpQcc9Z0JBxz1RQWdFxz1BUUPHPUHJPUHKPUPLPecBMVFJ6APvSUXoBCxFQ%2BgELOQAt%2BYBj%2BQAt%2BgBbv4At%2BsA9EbpAPRxacd67QExbMc9RlVD8QFuSlZF6gFu8gGrSekBq2tV5wHoQVNJ5wHoQUpF5wHoQUVD6AC3Q0LoAiVE6QTE3gFC6AMg5AMZREjHPd81yz3%2FAxjIAS9BZvsDdkg0%2FwCvxwFEL%2BkDz98BygF4NFn7AKRI31DIAUR3L%2BoGFskBSPIAj0L%2BAMlNZUdQ3SHRAf8A9MoBQitBL%2FsBZFB3%2FwDsxwFIZ0T8BMPKAURIaGrGKkL0AjDtDAnHAeoF60FFaGnmAtxC9AC0QvMHmWvrBiDMKdEBWWdN%2BwDCREVCatIW8gCFQknsAK%2FUAfIA4llrTfMApMgBU03MDucA4PMIgEJJU%2FMA2OQE5NAB8wDJywFHSkTqBz7MSdkB9gD01DF4QVn7AWRHSUTtAOzFAfMBq0NR6wgIyQFR0nJCaVF4xio9PQ%3D%3D");
+        },
+
+        2,
+        "UUUU",
    ];
 
     /** SET TO 1 OUTPUT AND 4 INPUTS */
