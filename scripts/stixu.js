@@ -3493,7 +3493,7 @@ endmodule
                 qrcodeBtnOnClick();
             }.bind(this);
 
-            const verliogBtnOnClick = document.getElementById("download-verilog-btn").onlick;
+            const verilogBtnOnClick = document.getElementById("download-verilog-btn").onlick;
             document.getElementById("download-verilog-btn").onclick = function() {
                 this.refreshTruthTable();
                 const verilog = this.diagram.generateVerilog();
@@ -3509,9 +3509,8 @@ endmodule
                     window.URL.revokeObjectURL(url);
                 }, 100);
                 // Call the original onclick function.
-                verliogBtnOnClick();
+                verilogBtnOnClick();
             }.bind(this);
-
 
             document.getElementById("add-row").onclick       = resizeGridByOne(true,  true);
             document.getElementById("remove-row").onclick    = resizeGridByOne(true,  false);
@@ -3926,9 +3925,9 @@ endmodule
             if(urlParams.get("d")) {
                 diagram.decode(urlParams.get("d"));
                 UI.populateTermSelect();
+            } else {
+                UI.diagram.decode("R3hzR0F3RURBUU1aQWhJRURRSUlHZzBRQUFBQ0FBQUHWCcUB3yTfP9sbZ0FBQUXaCd8k3wncP8YBLzREK8YJLy%2FGCdIBL1DQG9It3D%2FMG0lBQUFKQUFBQklCQVFKQUlDQklCSVFKQUrECUvECVNCSXBLU0pGSlFSSXBLQ0pFQlFSSWfNCUHECUNDSkFBUUJJQUtBSkFC2wlBQklBSUFKd0FBSPcAomYvLzjFCWQvK2PNGkLSNmPFA9Q%2F0y3EG0tBQUFvxQ5GQVFCxCjmAQflAgpD5gGMQ29BU8UJ5QEdxAHKNsktZ8QDzRLIP8st5QJdxAdJQWc%3D");
             }
         }
-
-        UI.diagram.decode("R3hzR0F3RURBUU1aQWhJRURRSUlHZzBRQUFBQ0FBQUHWCcUB3yTfP9sbZ0FBQUXaCd8k3wncP8YBLzREK8YJLy%2FGCdIBL1DQG9It3D%2FMG0lBQUFKQUFBQklCQVFKQUlDQklCSVFKQUrECUvECVNCSXBLU0pGSlFSSXBLQ0pFQlFSSWfNCUHECUNDSkFBUUJJQUtBSkFC2wlBQklBSUFKd0FBSPcAomYvLzjFCWQvK2PNGkLSNmPFA9Q%2F0y3EG0tBQUFvxQ5GQVFCxCjmAQflAgpD5gGMQ29BU8UJ5QEdxAHKNsktZ8QDzRLIP8st5QJdxAdJQWc%3D");
     };
 })();
