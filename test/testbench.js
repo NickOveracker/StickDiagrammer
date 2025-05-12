@@ -35,7 +35,7 @@
            KeyboardEvent: false,
 */
 
-function runTestbench(runTo) {
+function runTestbench(runTo, suppressResults) {
     'use strict';
     let endTime;
     let evt;
@@ -2975,8 +2975,7 @@ function runTestbench(runTo) {
         endTime = Date.now();
         UI.refreshTruthTable(/*true*/);
 
-        // Only overwrite the results if all tests were run.
-        if(runTo < testCases.length) {
+        if(suppressResults) {
             return;
         }
 
@@ -3006,7 +3005,7 @@ function runTestbench(runTo) {
             p = document.createElement("p");
             p.onclick = (() => function() {
                 window.scrollTo({top: 0, left: 0, behavior: 'auto'});
-                setTimeout(runTestbench, 10, index + 1);
+                setTimeout(runTestbench, 10, index + 1, true);
             })();
             p.style.cursor = "pointer";
             p.innerHTML = `<b>Test ${index}:</b> ${result.time}ms`;
@@ -3110,7 +3109,7 @@ function runTestbench(runTo) {
                 });
                 document.getElementById('canvas-wrapper').dispatchEvent(evt);
             }
-            setTimeout(((ii) => { runStep(ii + 1); })(ii), 1);
+            setTimeout(runStep, 1, ii + 1);
         } else setTimeout(summarize, 1);
     }
 
