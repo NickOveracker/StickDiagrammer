@@ -2034,12 +2034,9 @@
         // Hello, ASYNC 2025 attendees!
         generateIRSIM() {
             // Simulate with 100nm scmos technology.
-            // We are only interested in topology,
-            // so dated technology is not a problem.
             const HEADER   = "| units: 100 tech: scmos\n"              +
                              "| type gate source drain length width\n" +
                              "| ---- ---- ------ ----- ------ -----\n" ;
-
 
             // Return a list of all identical hyperedges (same vertices)
             // for a given transistor terminal.
@@ -4024,6 +4021,7 @@ endmodule
                 UI.populateTermSelect();
             } else {
                 UI.diagram.decode("R3hzR0F3RURBUU1aQWhJRURRSUlHZzBRQUFBQ0FBQUHWCcUB3yTfP9sbZ0FBQUXaCd8k3wncP8YBLzREK8YJLy%2FGCdIBL1DQG9It3D%2FMG0lBQUFKQUFBQklCQVFKQUlDQklCSVFKQUrECUvECVNCSXBLU0pGSlFSSXBLQ0pFQlFSSWfNCUHECUNDSkFBUUJJQUtBSkFC2wlBQklBSUFKd0FBSPcAomYvLzjFCWQvK2PNGkLSNmPFA9Q%2F0y3EG0tBQUFvxQ5GQVFCxCjmAQflAgpD5gGMQ29BU8UJ5QEdxAHKNsktZ8QDzRLIP8st5QJdxAdJQWc%3D");
+                UI.populateTermSelect();
             }
         }
     };
