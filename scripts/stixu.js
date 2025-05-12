@@ -4015,13 +4015,13 @@ endmodule
             window.DiagramController = DiagramController;
             window.Hypergraph = Hypergraph;
             window.debugDefinitions();
-            window.runTestbench(runTo);
+            window.runTestbench();
         } else {
             const urlParams = new URLSearchParams(window.location.search);
             if(urlParams.get("d")) {
                 diagram.decode(urlParams.get("d"));
                 UI.populateTermSelect();
-            } else {
+            } else if(urlParams.get("demo")) {
                 UI.diagram.decode("R3hzR0F3RURBUU1aQWhJRURRSUlHZzBRQUFBQ0FBQUHWCcUB3yTfP9sbZ0FBQUXaCd8k3wncP8YBLzREK8YJLy%2FGCdIBL1DQG9It3D%2FMG0lBQUFKQUFBQklCQVFKQUlDQklCSVFKQUrECUvECVNCSXBLU0pGSlFSSXBLQ0pFQlFSSWfNCUHECUNDSkFBUUJJQUtBSkFC2wlBQklBSUFKd0FBSPcAomYvLzjFCWQvK2PNGkLSNmPFA9Q%2F0y3EG0tBQUFvxQ5GQVFCxCjmAQflAgpD5gGMQ29BU8UJ5QEdxAHKNsktZ8QDzRLIP8st5QJdxAdJQWc%3D");
                 UI.populateTermSelect();
             }
