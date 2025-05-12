@@ -2971,141 +2971,148 @@ function runTestbench(runTo) {
 
     /** RUN TESTBENCH **/
     startTime = Date.now();
-    for(let ii = 0; ii < events.length && testVector < runTo; ii++) {
-        if(events[ii] === 0) {
-            UI.diagramController.changeLayer();
-            continue;
+    const summarize = function() {
+        endTime = Date.now();
+        UI.refreshTruthTable(/*true*/);
+
+        // Only overwrite the results if all tests were run.
+        if(runTo < testCases.length) {
+            return;
         }
 
-        if(events[ii] === 1) {
-            executeNext = true;
-            continue;
-        }
+        // Clear #instructions-text and replace its contents with the elapsed time
+        // Make a new div.
+        let resultsDiv = document.getElementById("results");
+        resultsDiv.innerHTML = "";
 
-        if(events[ii] === 2) {
-            assertNext = true;
-            continue;
-        }
-
-        if(events[ii] === 3) {
-            evalBooleanNext = true;
-            continue;
-        }
-
-        if(executeNext) {
-            events[ii]();
-            executeNext = false;
-        } else if(assertNext) {
-            // Set CONTACT at the coordinates of each input and output.
-            UI.diagram.inputs.forEach(function(input) {
-                UI.diagram.layeredGrid.set(input.x, input.y, LayeredGrid.CONTACT);
-            });
-            UI.diagram.outputs.forEach(function(output) {
-                UI.diagram.layeredGrid.set(output.x, output.y, LayeredGrid.CONTACT);
-            });
-
-            // Set the CONTACT layer on the VDD and GND cells.
-            UI.diagram.layeredGrid.set(UI.diagram.vddCell.x, UI.diagram.vddCell.y, LayeredGrid.CONTACT);
-            UI.diagram.layeredGrid.set(UI.diagram.gndCell.x, UI.diagram.gndCell.y, LayeredGrid.CONTACT);
-
-            // Loop through all four rotations of the diagram,
-            // checking the output of each one.
-            let testResults = [];
-            for(let rot = 0; rot < 4; rot++) {
-                UI.diagram.setNets();
-                UI.diagram.clearAnalyses();
-                tv = "";
-            
-                for(let oIndex = 0; oIndex < UI.diagram.outputs.length; oIndex++) {
-                    for(let iIndex = 0; iIndex < Math.pow(2, UI.diagram.inputs.length); iIndex++) {
-                        tv += UI.diagram.computeOutput(iIndex, oIndex);
-                    }
-                }
-                testResults[rot] = tv === events[ii];
-                UI.diagramController.rotateClockwise();
-            }
-
-            // Now mirror and rotate again.
-            UI.diagramController.mirrorHorizontal();
-            for(let rot = 0; rot < 4; rot++) {
-                UI.diagram.setNets();
-                UI.diagram.clearAnalyses();
-                tv = "";
-            
-                for(let oIndex = 0; oIndex < UI.diagram.outputs.length; oIndex++) {
-                    for(let iIndex = 0; iIndex < Math.pow(2, UI.diagram.inputs.length); iIndex++) {
-                        tv += UI.diagram.computeOutput(iIndex, oIndex);
-                    }
-                }
-                testResults[rot + 4] = tv === events[ii];
-                UI.diagramController.rotateClockwise();
-            }
-
-            // Now restore the diagram to its original state.
-            UI.diagramController.mirrorHorizontal();
-        
-            results[testVector] = {outcome: testResults, time: Date.now()};
-            testVector++;
-
-            assertNext = false;
-        } else if(evalBooleanNext) {
-            results[testVector] = {outcome: [events[ii]()], time: Date.now()};
-            testVector++;
-            evalBooleanNext = false;
-        } else {
-            evt = new MouseEvent(events[ii][0], {
-                view: window,
-                bubbles: true,
-                cancelable: true,
-                ...events[ii][1]
-            });
-            document.getElementById('canvas-wrapper').dispatchEvent(evt);
-        }
-    }
-    endTime = Date.now();
-    UI.refreshTruthTable(/*true*/);
-
-    // Only overwrite the results if all tests were run.
-    if(runTo < testCases.length) {
-        return;
-    }
-
-    // Clear #instructions-text and replace its contents with the elapsed time
-    // Make a new div.
-    let resultsDiv = document.getElementById("results");
-    resultsDiv.innerHTML = "";
-
-    p = document.createElement("p");
-    p.innerHTML = `<b>Elapsed time:</b> ${endTime - startTime}ms`;
-
-    resultsDiv.appendChild(p);
-    resultsDiv.appendChild(document.createElement("br"));
-
-    // Compute the runtime of each test.
-    for(let index = results.length - 1; index >= 0; index--) {
-        if(index === 0) {
-            results[index].time = results[index].time - startTime;
-        } else {
-            results[index].time = results[index].time - results[index - 1].time;
-        }
-    };
-
-    // Add indidual test results to #instructions-text as PASS or FAIL
-    // Label with their test case names.
-    results.forEach(function(result, index) {
         p = document.createElement("p");
-        p.onclick = (() => function() {
-            window.scrollTo({top: 0, left: 0, behavior: 'auto'});
-            setTimeout(runTestbench, 10, index + 1);
-        })();
-        p.style.cursor = "pointer";
-        p.innerHTML = `<b>Test ${index}:</b> ${result.time}ms`;
-        p.innerHTML += `<br>${testCases[index]}<br>`;
-        // Loop through each rotation of the diagram and display the result.
-        result.outcome.forEach(function(outcome) {
-            p.innerHTML += `<b style='color: ${outcome ? "green'>PASS" : "red'>FAIL"}</b>&nbsp;&nbsp;&nbsp;`;
-        });
+        p.innerHTML = `<b>Elapsed time:</b> ${endTime - startTime}ms`;
+
         resultsDiv.appendChild(p);
         resultsDiv.appendChild(document.createElement("br"));
-    });
+
+        // Compute the runtime of each test.
+        for(let index = results.length - 1; index >= 0; index--) {
+            if(index === 0) {
+                results[index].time = results[index].time - startTime;
+            } else {
+                results[index].time = results[index].time - results[index - 1].time;
+            }
+        };
+
+        // Add indidual test results to #instructions-text as PASS or FAIL
+        // Label with their test case names.
+        results.forEach(function(result, index) {
+            p = document.createElement("p");
+            p.onclick = (() => function() {
+                window.scrollTo({top: 0, left: 0, behavior: 'auto'});
+                setTimeout(runTestbench, 10, index + 1);
+            })();
+            p.style.cursor = "pointer";
+            p.innerHTML = `<b>Test ${index}:</b> ${result.time}ms`;
+            p.innerHTML += `<br>${testCases[index]}<br>`;
+            // Loop through each rotation of the diagram and display the result.
+            result.outcome.forEach(function(outcome) {
+                p.innerHTML += `<b style='color: ${outcome ? "green'>PASS" : "red'>FAIL"}</b>&nbsp;&nbsp;&nbsp;`;
+            });
+            resultsDiv.appendChild(p);
+            resultsDiv.appendChild(document.createElement("br"));
+        });
+    };
+    const runStep = function(ii) {
+        if(ii < events.length && testVector < runTo) {
+            if(events[ii] === 0) {
+                UI.diagramController.changeLayer();
+                return runStep(ii + 1);
+            }
+
+            if(events[ii] === 1) {
+                executeNext = true;
+                return runStep(ii + 1);
+            }
+
+            if(events[ii] === 2) {
+                assertNext = true;
+                return runStep(ii + 1);
+            }
+
+            if(events[ii] === 3) {
+                evalBooleanNext = true;
+                return runStep(ii + 1);
+            }
+
+            if(executeNext) {
+                events[ii]();
+                executeNext = false;
+            } else if(assertNext) {
+                // Set CONTACT at the coordinates of each input and output.
+                UI.diagram.inputs.forEach(function(input) {
+                    UI.diagram.layeredGrid.set(input.x, input.y, LayeredGrid.CONTACT);
+                });
+                UI.diagram.outputs.forEach(function(output) {
+                    UI.diagram.layeredGrid.set(output.x, output.y, LayeredGrid.CONTACT);
+                });
+
+                // Set the CONTACT layer on the VDD and GND cells.
+                UI.diagram.layeredGrid.set(UI.diagram.vddCell.x, UI.diagram.vddCell.y, LayeredGrid.CONTACT);
+                UI.diagram.layeredGrid.set(UI.diagram.gndCell.x, UI.diagram.gndCell.y, LayeredGrid.CONTACT);
+
+                // Loop through all four rotations of the diagram,
+                // checking the output of each one.
+                let testResults = [];
+                for(let rot = 0; rot < 4; rot++) {
+                    UI.diagram.setNets();
+                    UI.diagram.clearAnalyses();
+                    tv = "";
+                
+                    for(let oIndex = 0; oIndex < UI.diagram.outputs.length; oIndex++) {
+                        for(let iIndex = 0; iIndex < Math.pow(2, UI.diagram.inputs.length); iIndex++) {
+                            tv += UI.diagram.computeOutput(iIndex, oIndex);
+                        }
+                    }
+                    testResults[rot] = tv === events[ii];
+                    UI.diagramController.rotateClockwise();
+                }
+
+                // Now mirror and rotate again.
+                UI.diagramController.mirrorHorizontal();
+                for(let rot = 0; rot < 4; rot++) {
+                    UI.diagram.setNets();
+                    UI.diagram.clearAnalyses();
+                    tv = "";
+                
+                    for(let oIndex = 0; oIndex < UI.diagram.outputs.length; oIndex++) {
+                        for(let iIndex = 0; iIndex < Math.pow(2, UI.diagram.inputs.length); iIndex++) {
+                            tv += UI.diagram.computeOutput(iIndex, oIndex);
+                        }
+                    }
+                    testResults[rot + 4] = tv === events[ii];
+                    UI.diagramController.rotateClockwise();
+                }
+
+                // Now restore the diagram to its original state.
+                UI.diagramController.mirrorHorizontal();
+            
+                results[testVector] = {outcome: testResults, time: Date.now()};
+                testVector++;
+
+                assertNext = false;
+            } else if(evalBooleanNext) {
+                results[testVector] = {outcome: [events[ii]()], time: Date.now()};
+                testVector++;
+                evalBooleanNext = false;
+            } else {
+                evt = new MouseEvent(events[ii][0], {
+                    view: window,
+                    bubbles: true,
+                    cancelable: true,
+                    ...events[ii][1]
+                });
+                document.getElementById('canvas-wrapper').dispatchEvent(evt);
+            }
+            setTimeout(((ii) => { runStep(ii + 1); })(ii), 1);
+        } else setTimeout(summarize, 1);
+    }
+
+    runStep(0);
 }
