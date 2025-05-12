@@ -4007,13 +4007,15 @@ endmodule
         window.requestAnimationFrame(UI.refreshScreen.bind(UI));
 
         if(window.runTestbench) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const runTo = urlParams.get("runto") || null;
             window.UI = UI;
             window.Diagram = Diagram;
             window.LayeredGrid = LayeredGrid;
             window.DiagramController = DiagramController;
             window.Hypergraph = Hypergraph;
             window.debugDefinitions();
-            window.runTestbench();
+            window.runTestbench(runTo);
         } else {
             const urlParams = new URLSearchParams(window.location.search);
             if(urlParams.get("d")) {
