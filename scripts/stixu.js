@@ -2813,7 +2813,7 @@ endmodule
             // Order matters
             // Lower-indexed menus are displayed at the same level as or over higher-indexed menus.
             this.menus = [
-                "qrcode-menu",
+                //"qrcode-menu",
                 "licenses-menu",
                 "tutorials",
                 "instructions",
@@ -3555,17 +3555,13 @@ endmodule
                 document.getElementById("close-" + menuName + "-btn").onclick = this.getCloseMenuFunction(menuName);
             }.bind(this));
 
-            const qrcodeBtnOnClick = document.getElementById("open-qrcode-menu-btn").onclick;
-            document.getElementById("open-qrcode-menu-btn").onclick = function() {
+            const copyLinkBtn = document.getElementById("copy-link-btn");
+            copyLinkBtn.onclick = function() {
                 const url = window.location.href.split('?')[0] + "?d=" + this.diagram.encode();
-
-                document.getElementById("qrcode").innerHTML = "";
-                /* jshint nonew: false */
-                new window.QRCode(document.getElementById("qrcode"), url);
-                /* jshint nonew: true */
-
-                document.getElementById("share-url").href = url;
-                qrcodeBtnOnClick();
+                const oldText = copyLinkBtn.innerText;
+                navigator.clipboard.writeText(url);
+                copyLinkBtn.innerText = "Copied to clipboard!";
+                setTimeout(() => { copyLinkBtn.innerText = oldText; }, 1000);
             }.bind(this);
 
             document.getElementById("download-verilog-btn").onclick = function() {
@@ -4022,7 +4018,7 @@ endmodule
                 diagram.decode(urlParams.get("d"));
                 UI.populateTermSelect();
             } else if(urlParams.get("demo")) {
-                UI.diagram.decode("R3hzR0F3RURBUU1aQWhJRURRSUlHZzBRQUFBQ0FBQUHWCcUB3yTfP9sbZ0FBQUXaCd8k3wncP8YBLzREK8YJLy%2FGCdIBL1DQG9It3D%2FMG0lBQUFKQUFBQklCQVFKQUlDQklCSVFKQUrECUvECVNCSXBLU0pGSlFSSXBLQ0pFQlFSSWfNCUHECUNDSkFBUUJJQUtBSkFC2wlBQklBSUFKd0FBSPcAomYvLzjFCWQvK2PNGkLSNmPFA9Q%2F0y3EG0tBQUFvxQ5GQVFCxCjmAQflAgpD5gGMQ29BU8UJ5QEdxAHKNsktZ8QDzRLIP8st5QJdxAdJQWc%3D");
+                UI.diagram.decode("RnhzR0F3RUJBUUVaQVJVQkN3RUZGUXdBzAFDxAVRxglJQVFBQt8JyAlINMU%2FUM5O3QFFxAVnQsQJSd8JyQkrxjbEAS%2FfX9cBSDhBZu4ApUgvLy%2FLEklJQUFCQsQISUlCZi85xHlJQi8v03BCRUVBUklnZ0NKRUbECW9DSkVWRVJJaW9pSkVWa1JJQ2tnSkFVa0JJQ2fECUVCSUNBZ0pBUUVCSUFBQUrkANJJQUVBSkFDxAlVyAlRxAlBQtJxUC83LzTlAaBPZTTuAa1BUDPmAYPKAU9BxhJELy8vZ9JN0QHlAM%2FFCVFCQUbGE1HGCOQBd8RpQUFCQWjHL%2BgBiskkUUNnxRRCQ0PJJch45QCrQUFB");
                 UI.populateTermSelect();
             }
         }
