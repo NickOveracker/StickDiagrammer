@@ -20,17 +20,17 @@
 
 ## Feature Wishlist
 * Allow users to save designs, and use their outputs as inputs to other designs to produce complex, modular circuitry.
-* Generate Magic files (todo: check legality) from design for a given technology.
-* Sequenced output for state-dependent circuits like DFFs.
+* Generate Magic files from design for a given technology.
+* Sequenced output for state-dependent circuits like DFFs. UPDATE: Instead, produce test vectors for external tools.
 * Allow user to define custom color scheme.
 * Allow user to selectively hide layers (to verify connections).
 * Allow custom command mappings.
 * Allow custom terminal labels.
-* HDL generation.
 * Student/Teacher modes with generating/grading homework, practice problems, etc.
 * Draw CMOS circuit schematic corresponding to the painted topology.
 * Logical effort calculations (allow user to set constants)
 * Export netlist for use in electronics design software.
+* ~~HDL generation.~~ *Implemented 2025/5/7*
 * ~~Share small diagrams by URL arguments and QR codes.~~ *Implemented 2023/2/8*
 * ~~Interactive tutorial.~~ *Implemented 2023/2/4*
 * ~~Replace pullup/pulldown alert popups with less obtrusive warnings.~~ *Implemented 2023/1/29*
