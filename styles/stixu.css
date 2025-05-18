@@ -728,7 +728,7 @@ body.light {
 
     .logo {
         max-width: 100%;
-        height:50px;
+        max-height:50px;
     }
 
     .fa-times{
@@ -901,13 +901,13 @@ body.light {
         height: 4vh;
     }
 
-    #menu-bar{
+    #menu-bar {
         left: 90%;
     }
 
-    .logo{
+    .logo {
         /*font-size: 4vh;*/
-        height: 54.58px;
+        max-height: 50px;
         max-width: 100%;
     }
 
