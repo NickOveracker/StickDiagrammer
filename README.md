@@ -5,8 +5,9 @@
 
 ## Legal Stuff
 * Copyright Nick Overacker & Miho Kobayashi.
-* This code is offered under the [PolyForm Strict License 1.0.0](https://polyformproject.org/licenses/strict/1.0.0/), which permits users to use this code for noncommercial purposes but reserves most right for the copyright holders.
+* This code is offered under the [PolyForm Strict License 1.0.0](https://polyformproject.org/licenses/strict/1.0.0/), which permits users to use this code for noncommercial purposes but reserves most rights for the copyright holders.
 * We will migrate to a more permissive FOSS license in the future; we do not know which one we will choose at this time. At the very least, derivative works will also be required to be open source after the transition.
+    * Most likely GPL3. Stay tuned - I'm going to update the license soon!
 * For uses not permitted under the license, please contact: [nick.overacker@okstate.edu](mailto:nick.overacker@okstate.edu) (or just wait for the new license, but email will be faster).
 
 ## Dogma of Development
@@ -17,6 +18,19 @@
 * Live code must always clear JSHint with no errors or warnings.
 * Live code must always pass the testbench with no errors.
 * Software entropy must not increase.
+
+## Feature Requests (High Priority!!)
+### Most Feasible
+* Cell library support
+* Resistive pull-up support
+* Euler graph verification (suggest fixes for mismatches)
+* Export production rules
+* Allow users to configure layers
+* Real-time collaboration ("multiplayer")
+* Support for multiple drive strengths
+    * Although resistive pull-up might be easy to implement by using directed edges, going beyond that might require substantial changes to the underlying hypergraph model. I will see what I can do.
+* "Game mode"
+    * This has been at the back of my mind for a long time. It's going to happen someday.
 
 ## Feature Wishlist
 * Allow users to save designs, and use their outputs as inputs to other designs to produce complex, modular circuitry.
@@ -59,6 +73,7 @@
 ## Known Bugs
 * UI bug: horizontal overflow on mobile after adding the logo.
 * Warning message displays when it shouldn't. (Testbench case 62)
+* ~~Logo display bug on Chromium-based browsers.~~ *Resolved 2025/5/17*
 * ~~Incorrect output for asymmetric C-element.~~ *Resolved 2025/1/29* (Testbench case 65)
 * ~~Incorrect output for testbench case 61.~~ *Resolved 2025/1/6* (Testbench cases 61, 62)
 * ~~Unable to detect many cases up invalid pull-up/pull-down~~ *Resolved 2024/11/25* (Testbench case 60)
