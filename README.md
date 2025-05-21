@@ -4,12 +4,12 @@
 * [Stixu.io](https://stixu.io) (Hosting provided by Github.io)
 
 ## Legal Stuff
-* This project is dual-licensed. The public release is under GPLv3. Commercial licenses are available upon request.
-    * Copyright for commercially licensed code is held by Nicholas Overacker & Miho Kobayashi.
-    * No code contributed by third-party developers will be covered by commercially licensed releases.
-        * At present (May 21, 2025), Nicholas and Miho are the sole developers, and all code is commercially licensable.
-        * If third-party developers contribute code, then the commmercial code and public code will diverge. The copyleft code will be _full-featured_, and commercial code may lack future functionality.
-* For a commercial license, please contact: [nick.overacker@okstate.edu](mailto:nick.overacker@okstate.edu).
+* This project is dual-licensed. The public release is under GPLv3. Non-GPLv3 licenses are available upon request.
+    * Copyright 2021-2025: Nicholas Overacker & Miho Kobayashi.
+    * No code contributed by third-party developers will be covered by non-GPLv3 licensed releases.
+        * At present (May 21, 2025), Nicholas and Miho are the sole developers, and all code can be included under non-GPLv3 license.
+        * If third-party developers contribute code, then the non-GPLv3 code and public code will diverge. The GPLv3 code will be _full-featured_, and non-GPLv3 code may lack future functionality.
+* For a non-GPLv3 license, please contact: [nick.overacker@okstate.edu](mailto:nick.overacker@okstate.edu).
 
 ## Dogma of Development
 * [Everything we do will be excellent.](https://www.researchgate.net/profile/Mark-Rockley-2)
