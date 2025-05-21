@@ -4,11 +4,12 @@
 * [Stixu.io](https://stixu.io) (Hosting provided by Github.io)
 
 ## Legal Stuff
-* Copyright Nick Overacker & Miho Kobayashi.
-* This code is offered under the [PolyForm Strict License 1.0.0](https://polyformproject.org/licenses/strict/1.0.0/), which permits users to use this code for noncommercial purposes but reserves most rights for the copyright holders.
-* We will migrate to a more permissive FOSS license in the future; we do not know which one we will choose at this time. At the very least, derivative works will also be required to be open source after the transition.
-    * Most likely GPL3. Stay tuned - I'm going to update the license soon!
-* For uses not permitted under the license, please contact: [nick.overacker@okstate.edu](mailto:nick.overacker@okstate.edu) (or just wait for the new license, but email will be faster).
+* This project is dual-licensed. The public release is under GPL-3.0. Commercial licenses are available upon request.
+    * Copyright for commercially licensed code is held by Nick Overacker & Miho Kobayashi.
+    * No code contributed by third-party developers will be covered by commercially licensed releases.
+        * At present (May 21, 2025), Nick and Miho are the sole developers, and all code is commercially licensable.
+        * If third-party developers contribute code, then the commmercial code and copyleft code will diverge. The copyleft code will be _full-featured_, and commercial code may lack future functionality.
+* For a commercial license, please contact: [nick.overacker@okstate.edu](mailto:nick.overacker@okstate.edu).
 
 ## Dogma of Development
 * [Everything we do will be excellent.](https://www.researchgate.net/profile/Mark-Rockley-2)
