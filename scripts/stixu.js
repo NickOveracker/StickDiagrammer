@@ -2105,173 +2105,207 @@
             }
         }
 
-        // Generate Verilog from the current circuit.
-        generateVerilog() {
-            let verilog = "module circuit(";
-            let inputs = [];
-            let outputs = [];
-            let wires = [];
-            let nmos = [];
-            let pmos = [];
+        //
+        static get verilogTransistorModels()
+        {
+            return [
+                "// NMOS: conducts only low.",
+                "module stixu_nmos(inout wire t1, inout wire t2, input wire gate);",
+                "    tranif1 #1 sw(t1, t2, gate === 1'b1 && (t1 === 1'b0 || t2 === 1'b0 || t1 === 1'bx || t2 === 1'bx));",
+                "endmodule",
+                "",
+                "// PMOS: conducts only high.",
+                "module stixu_pmos(inout wire t1, inout wire t2, input wire gate);",
+                "    tranif1 #1 sw(t1, t2, gate === 1'b0 && (t1 === 1'b1 || t2 === 1'b1 || t1 === 1'bx || t2 === 1'bx));",
+                "endmodule",
+                "",
+            ].join("\n");
+        }
 
+        verilogInputNames() {
+            return this.inputs.map((_, index) => this.getTerminalName(2 + index));
+        }
+
+        verilogOutputNames() {
+            return this.outputs.map((_, index) => this.getTerminalName(2 + this.inputs.length + index));
+        }
+
+        verilogNets() {
+            const names = new Map();
+            const netOf = vertex => vertex.getEdges().at(0);
+            const name = function(vertex, wireName) {
+                if(!names.has(netOf(vertex))) {
+                    names.set(netOf(vertex), wireName);
+                }
+            };
+            const inputs  = this.verilogInputNames();
+            const outputs = this.verilogOutputNames();
+
+            name(this.vddVertex, "vdd");
+            name(this.gndVertex, "gnd");
+            this.inputVertices.forEach( (vertex, index) => name(vertex, `net_${inputs[index]}`));
+            this.outputVertices.forEach((vertex, index) => name(vertex, `net_${outputs[index]}`));
+            this.transistors.forEach(function(transistor) {
+                [
+                    transistor.gate,
+                    transistor.source,
+                    transistor.drain,
+                ].forEach(vertex => name(vertex, "n" + names.size));
+            });
+
+            return {
+                of:  vertex => names.get(netOf(vertex)),
+                all: Array.from(new Set(names.values())),
+            };
+        }
+
+        verilogCircuit(nets) {
+            const  inputs = this.verilogInputNames();
+            const outputs = this.verilogOutputNames();
+            const   lines = [
+                `module circuit(${inputs.concat(outputs).join(", ")});`,
+            ];
+
+            inputs.forEach(  name => lines.push(`    input  ${name};`));
+            outputs.forEach( name => lines.push(`    output ${name};`));
+            lines.push("");
+            nets.all.forEach(name => lines.push(`    wire   ${name};`));
+
+            lines.push(
+                "",
+                "    // Supplies and inputs drive their nets."
+            );
+            lines.push(`    assign ${nets.of(this.vddVertex)} = 1'b1;`);
+            lines.push(`    assign ${nets.of(this.gndVertex)} = 1'b0;`);
+            this.inputVertices.forEach((vertex, index) => {
+                lines.push(`    assign ${nets.of(vertex)} = ${inputs[index]};`);
+            });
+
+            lines.push(
+                "",
+                "    // Transistors: (terminal, terminal, gate), with the channel's grid position."
+            );
+            this.transistors.forEach(function(transistor, index) {
+                const xx = transistor.gate.cell.x;
+                const yy = transistor.gate.cell.y;
+                const type = transistor.isNmos ? "nmos" : "pmos";
+                const ends = [
+                    transistor.source,
+                    transistor.drain,
+                    transistor.gate,
+                ].map(vertex => nets.of(vertex)).join(", ");
+                lines.push(`    stixu_${type} ${type}_${index}(${ends}); // (${xx}, ${yy})`);
+            });
+
+            lines.push(
+                "",
+                "    // Outputs follow their nets."
+            );
+            this.outputVertices.forEach((vertex, index) => {
+                lines.push(`    assign ${outputs[index]} = ${nets.of(vertex)};`);
+            });
+            lines.push(
+                "endmodule",
+                ""
+            );
+
+            return lines.join("\n");
+        }
+
+        verilogTestbenchRow(row, rowIndex, settle) {
+            const inputs   = this.verilogInputNames();
+            const outputs  = this.verilogOutputNames();
+            const expected = row.slice(inputs.length);
+            const shown    = outputs.map(name => name + "=%b").join(" ");
+            const lines    = [];
+ 
+            if(inputs.length > 0) {
+                lines.push(`        in = ${inputs.length}'d${rowIndex}; #${settle};`);
+            } else {
+                lines.push(`        #${settle};`);
+            }
+ 
+            lines.push(
+                `        $display("${inputs.join("") || "-"}=%b: ${shown}  (Stixu: ${expected.join(" ")})", in${outputs.map(name => ", " + name).join("")});`
+            );
+            outputs.forEach(function(name, index) {
+                const value = {"0": "1'b0", "1": "1'b1", "Z": "1'bz",}[expected[index]];
+                if(value) {
+                    lines.push(
+                        `        if (${name} !== ${value}) begin mismatches = mismatches + 1; $display("  ${name} should be ${expected[index]}"); end`
+                    );
+                }
+            });
+ 
+            return lines;
+        }
+
+        // A testbench that applies every input combination in order,
+        // prints the outputs and checks them.
+        //
+        // Rows that Stixu marks X, H, L or U are printed but not checked.
+        // In simulation, a latch holds whatever state the previous rows left it in.
+        verilogTestbench(truthTable) {
+            const inputs  = this.verilogInputNames();
+            const outputs = this.verilogOutputNames();
+            const settle  = 10 * (this.transistors.length + 1);
+            const ports   = inputs.map((name, index) => `.${name}(in[${inputs.length - 1 - index}])`)
+                .concat(outputs.map(name => `.${name}(${name})`));
+            const lines   = [
+                "// Applies every input combination and compares each output with Stixu's truth table.",
+                "module circuit_tb;",
+                `    reg  [${Math.max(inputs.length - 1, 0)}:0] in;`,
+            ];
+ 
+            if(outputs.length > 0) {
+                lines.push(`    wire ${outputs.join(", ")};`);
+            }
+ 
+            lines.push(
+                "    integer mismatches = 0;",
+                "",
+                `    circuit dut(${ports.join(", ")});`,
+                "",
+                "    initial begin"
+            );
+
+            // first truth table row is the header; skip it
+            truthTable.slice(1).forEach(function(row, rowIndex) {
+                this.verilogTestbenchRow(row, rowIndex, settle).forEach(line => lines.push(line));
+             }.bind(this));
+            lines.push(
+                "        $display(\"%0d mismatch(es) with Stixu's truth table\", mismatches);"
+            );
+            lines.push(
+                "        $finish;",
+                "    end",
+                "endmodule",
+                ""
+            );
+ 
+            return lines.join("\n");
+        }
+
+        // Generate Verilog from the current circuit.
+        // The transistors are constructed to approximate Stixu's model,
+        // but the full 7-value logic system obviously can't be implemented.
+        // H, L, U, and X will all behave differently in Verilog.
+        // Remember: Stixu's X means there's a fault ANYWHERE in the diagram.
+        // Verilog's x is not global.
+        generateVerilog(truthTable) {
+            // Remove non-mergeable edges (i.e., edges specific to an input vector)
             this.cleanup();
 
-            for(let ii = 0; ii < this.inputs.length; ii++) {
-                inputs.push(String.fromCharCode(65 + ii));
+            const nets = this.verilogNets();
+            let verilog = "// Generated by Stixu (https://stixu.io).\n";
+            verilog    += "// The Stixu model was tested only against Icarus Verilog.\n";
+            verilog    += "`timescale 1ns / 1ps\n\n";
+            verilog    += Diagram.verilogTransistorModels + "\n";
+            verilog    += this.verilogCircuit(nets);
+
+            if(truthTable) {
+                verilog += `\n${this.verilogTestbench(truthTable)}`;
             }
-            for(let ii = 0; ii < this.outputs.length; ii++) {
-                outputs.unshift(String.fromCharCode(89 - ii));
-            }
-
-            // Create a wire for each hyperedge.
-            this.hypergraph.hyperedges.forEach(function(hyperedge, index) {
-                if(hyperedge.mergeable) {
-                    wires.push("  wire wire_" + index + ";");
-                }
-            });
-
-            this.transistors.forEach(function(transistor) {
-                let source = transistor.source;
-                let drain = transistor.drain;
-                let gate = transistor.gate;
-                let sourceIsVDD = false;
-                let sourceIsGND = false;
-                let drainIsVDD = false;
-                let drainIsGND = false;
-
-                let sourceName = "wire_" + this.hypergraph.hyperedges.indexOf(source.getEdges()[0]);
-                let drainName = "wire_" + this.hypergraph.hyperedges.indexOf(drain.getEdges()[0]);
-                let gateName = "wire_" + this.hypergraph.hyperedges.indexOf(gate.getEdges()[0]);
-
-                // Check if the source and/or drain are connected to VDD or GND.
-                if(source.hasPathTo(this.vddVertex)) {
-                    sourceIsVDD = true;
-                    sourceName = "vdd";
-                }
-                if(source.hasPathTo(this.gndVertex)) {
-                    sourceIsGND = true;
-                    sourceName = "gnd";
-                }
-                if(drain.hasPathTo(this.vddVertex)) {
-                    drainIsVDD = true;
-                    drainName = "vdd";
-                }
-                if(drain.hasPathTo(this.gndVertex)) {
-                    drainIsGND = true;
-                    drainName = "gnd";
-                }
-
-                if(sourceIsVDD && sourceIsGND || drainIsVDD && drainIsGND) {
-                    wires.push("  assign gnd = vdd;");
-                }
-
-                // First, connect all edges incident to each vertex to the first one.
-                if(!sourceIsVDD && !sourceIsGND) {
-                    source.getEdges().forEach(function(edge, index) {
-                        if(index !== 0 && edge.mergeable) {
-                            wires.push("  assign wire_" + this.hypergraph.hyperedges.indexOf(edge) + " = " + sourceName + ";");
-                        }
-                    }.bind(this));
-                }
-
-                if(!drainIsVDD && !drainIsGND) {
-                    drain.getEdges().forEach(function(edge, index) {
-                        if(index !== 0 && edge.mergeable) {
-                            wires.push("  assign wire_" + this.hypergraph.hyperedges.indexOf(edge) + " = " + drainName + ";");
-                        }
-                    }.bind(this));
-                }
-
-                gate.getEdges().forEach(function(edge, index) {
-                    if(index !== 0 && edge.mergeable) {
-                        wires.push("  assign wire_" + this.hypergraph.hyperedges.indexOf(edge) + " = " + gateName + ";");
-                    }
-                }.bind(this));
-
-                // Now, create the transistor.
-                if(transistor.isNmos) {
-                    nmos.push("  ideal_nmos nmos_" + nmos.length + "(" + drainName + ", " + sourceName + ", " + gateName + ");");
-                } else {
-                    pmos.push("  ideal_pmos pmos_" + pmos.length + "(" + drainName + ", " + sourceName + ", " + gateName + ");");
-                }
-            }.bind(this));
-
-            // Assign EACH of the wires connected to the inputs and outputs to the appropriate values.
-            this.inputVertices.forEach(function(vertex, index) {
-                let inputName = String.fromCharCode(65 + index);
-
-                vertex.getEdges().forEach(function(edge) {
-                    if(edge.mergeable) {
-                        wires.push("  assign wire_" + this.hypergraph.hyperedges.indexOf(edge) + " = " + inputName + ";");
-                    }
-                }.bind(this));
-            }.bind(this));
-
-            this.outputVertices.forEach(function(vertex, index) {
-                let outputName = String.fromCharCode(89 - this.outputVertices.length + index + 1);
-
-                vertex.getEdges().forEach(function(edge) {
-                    if(edge.mergeable) {
-                        wires.push("  assign " + outputName + " = wire_" + this.hypergraph.hyperedges.indexOf(edge) + ";");
-                    }
-                }.bind(this));
-            }.bind(this));
-
-            // Same for GND and VDD.
-            this.vddVertex.getEdges().forEach(function(edge) {
-                if(edge.mergeable) {
-                    wires.push("  assign wire_" + this.hypergraph.hyperedges.indexOf(edge) + " = vdd;");
-                }
-            }.bind(this));
-
-            this.gndVertex.getEdges().forEach(function(edge) {
-                if(edge.mergeable) {
-                    wires.push("  assign wire_" + this.hypergraph.hyperedges.indexOf(edge) + " = gnd;");
-                }
-            }.bind(this));
-
-            verilog += inputs.join(", ") + ", ";
-            verilog += outputs.join(", ") + ");\n";
-
-            inputs.forEach(function(input) {
-                verilog += "  input " + input + ";\n";
-            });
-
-            outputs.forEach(function(output) {
-                verilog += "  output " + output + ";\n";
-            });
-
-            verilog += "  supply1 vdd;\n";
-            verilog += "  supply0 gnd;\n";
-            verilog += wires.join("\n") + "\n\n";
-            verilog += nmos.join("\n") + "\n\n";
-            verilog += pmos.join("\n") + "\n\n";
-
-            verilog += "endmodule\n";
-
-            verilog += `
-module ideal_nmos(
-    inout wire t1,
-    inout wire t2,
-    input wire gate
-);
-    wire gate_active;
-    assign gate_active = (gate === 1'b1) ? 1'b1 : 1'b0;
-    assign t1 = (gate_active && (t2 === 1'b0)) ? 1'b0 : 1'bz;
-    assign t2 = (gate_active && (t1 === 1'b0)) ? 1'b0 : 1'bz;
-endmodule
-
-module ideal_pmos(
-    inout wire t1,
-    inout wire t2,
-    input wire gate
-);
-    wire gate_active;
-    assign gate_active = (gate === 1'b0) ? 1'b1 : 1'b0;
-    assign t1 = (gate_active && (t2 === 1'b1)) ? 1'b1 : 1'bz;
-    assign t2 = (gate_active && (t1 === 1'b1)) ? 1'b1 : 1'bz;
-endmodule
-`;
 
             return verilog;
         }
@@ -3566,7 +3600,7 @@ endmodule
 
             document.getElementById("download-verilog-btn").onclick = function() {
                 this.refreshTruthTable();
-                const verilog = this.diagram.generateVerilog();
+                const verilog = this.diagram.generateVerilog(this.truthTable);
                 const blob = new Blob([verilog], {type: "text/plain"});
                 const url = window.URL.createObjectURL(blob);
                 // Download the file immediately.
@@ -3795,6 +3829,7 @@ endmodule
             // Create a table with the correct number of rows and columns.
             // The first row should be a header.
             let table = this.buildTruthTable();
+            this.truthTable = table;
             let tableElement = document.getElementById("truth-table");
 
             tableElement.innerHTML = "";
