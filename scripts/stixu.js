@@ -625,53 +625,14 @@
             this.edges.delete(edge);
         }
 
-        hasPathTo(vertex, traverseTentative=false, independentInputs=false, visitedVertices=new Set(), visitedEdges=new Set()) {
+        hasPathTo(vertex, traverseTentative=false, independentInputs=false) {
             if (this === vertex) {
                 return true;
             } else if (this.tentative && !traverseTentative) {
                 return false;
-            } else if (independentInputs && this.logical) {
-                // This is a logic value vertex,
-                // and all edges to it are being treated as directed.
-                return false;
             }
 
-            // If visitedVertices is empty, check the lookup table.
-            if(visitedVertices.size === 0) { // Checking after the first iteration is empirically slower.
-                if(this.hypergraph.lookupPath(this, vertex) === true) {
-                    return true;
-                }
-            }
-
-            visitedVertices.add(this);
-
-            for (let edge of this.edges) {
-                // Because this is a hypergraph, we need to check all vertices in the edge.
-                if(visitedEdges.has(edge)) {
-                    continue;
-                }
-
-                // Believe it or not the below block makes it run slower.
-                // Even if the memoization step is removed.
-                /*if(edge.hasVertex(vertex)) {
-                    this.hypergraph.memoize(this, vertex);
-                    return true;
-                }*/
-
-                visitedEdges.add(edge);
-
-                for (let vertex2 of edge.vertices) {
-                    if(!visitedVertices.has(vertex2)) {
-                        //this.hypergraph.memoize(this, vertex2); // Memoizing here is empirically slower.
-                        if(vertex2.hasPathTo(vertex, traverseTentative, independentInputs, visitedVertices, visitedEdges)) {
-                            this.hypergraph.memoize(this, vertex);
-                            return true;
-                        }
-                    }
-                }
-            }
-
-            return false;
+            return this.hypergraph.hasPath(this, vertex, independentInputs);
         }
     }
 
@@ -685,11 +646,13 @@
         addVertex(vertex) {
             this.vertices.add(vertex);
             vertex.addEdge(this);
+            vertex.hypergraph.invalidate();
         }
 
         removeVertex(vertex) {
             this.vertices.delete(vertex);
             vertex.removeEdge(this);
+            vertex.hypergraph.invalidate();
         }
 
         merge(hyperedge) {
@@ -714,6 +677,7 @@
         clearVertices() {
             for(let vertex of this.vertices) {
                 vertex.removeEdge(this);
+                vertex.hypergraph.invalidate();
             }
             this.vertices.clear();
         }
@@ -723,60 +687,80 @@
         constructor() {
             this.vertices = [];
             this.hyperedges = [];
-            this.pathLUT = [];
-            this.memoization = true;
+            this.components = null;
+            this.independentComponents = null;
         }
 
-        clearLUT() {
-            this.pathLUT = [];
+        // Any change to the connections invalidates the cached components
+        invalidate() {
+            this.components = null;
+            this.independentComponents = null;
         }
 
-        backupLUT() {
-            this.backupPathLUT = structuredClone(this.pathLUT);
-        }
+        // Map each vertex to a representative of its connected component.
+        // With skipLogical set, paths may not pass through the logic vertices.
+        // (skipLogical is for path highlighting.)
+        labelComponents(skipLogical) {
+            const labels = new Map();
+            const canEnter = vertex => !labels.has(vertex) && !(skipLogical && vertex.logical);
 
-        restoreLUT() {
-            this.pathLUT = this.backupPathLUT;
-        }
-
-        memoize(vertex1, vertex2) {
-            if(!this.memoization) {
-                return;
-            }
-
-            const index1 = vertex1.index;
-            const index2 = vertex2.index;
-            const alreadySet = !!this.pathLUT[index1] && this.pathLUT[index1][index2];
-
-            if(!alreadySet) {
-                this.pathLUT[index1] = this.pathLUT[index1] || [];
-                this.pathLUT[index2] = this.pathLUT[index2] || [];
-
-                if(!vertex1.logical) {
-                    this.pathLUT[index1].forEach(function(val, index3) {
-                        if(val === true) {
-                            this.pathLUT[index3][index2] = true;
-                        }
-                    }.bind(this));
+            this.vertices.forEach(function(start) {
+                if(!canEnter(start)) {
+                    return;
                 }
-                // This block makes it slower.
-                /*if(!vertex2.logical) {
-                    this.pathLUT[index2].forEach(function(val, index3) {
-                        if(val === true) {
-                            this.pathLUT[index3][index1] = true;
-                        }
-                    }.bind(this));
-                }*/
+                const stack = [start,];
+                labels.set(start, start);
 
-                this.pathLUT[index1][index2] = true;
-                this.pathLUT[index2][index1] = true;
-            }
+                // it ain't pretty but it's honest work
+                while(stack.length > 0) {
+                    const vertex = stack.pop();
+
+                    for(let edge of vertex.edges) {
+                        for(let vertex2 of edge.vertices) {
+                            if(canEnter(vertex2)) {
+                                labels.set(vertex2, start);
+                                stack.push(vertex2);
+                            }
+                        }
+                    }
+                }
+            });
+
+            return labels;
         }
 
-        lookupPath(vertex1, vertex2) {
-            const index1 = vertex1.index;
-            const index2 = vertex2.index;
-            return this.pathLUT[index1] ? this.pathLUT[index1][index2] : false;
+        hasPath(vertex1, vertex2, independentInputs) {
+            let pathFound = false;
+
+            if(!independentInputs) {
+                // Not for highlighting; pass through logic vertices.
+                this.components = this.components || this.labelComponents(false);
+                const component = this.components.get(vertex1);
+                pathFound = component !== undefined && component === this.components.get(vertex2);
+            } else if(!vertex1.logical) {
+                // For highlighting; can end on logic nodes, but cannot leave them.
+                this.independentComponents = this.independentComponents || this.labelComponents(true);
+                const component = this.independentComponents.get(vertex1);
+
+                if(vertex2.logical) {
+                    // Ending on the logic high or logic low vertex.
+                    pathFound = vertex2.getEdges().some(
+                        edge => Array.from(edge.vertices).some(
+                            vertex => {
+                                const connected = this.independentComponents.get(vertex) === component;
+                                return !vertex.logical && connected;
+                            }
+                        )
+                    );
+                }
+                else {
+                    // Ending on a physical vertex.
+                    const connected = component === this.independentComponents.get(vertex2);
+                    pathFound = component !== undefined && connected;
+                }
+            }
+
+            return pathFound;
         }
 
         getVertex(cell) {
@@ -2031,6 +2015,7 @@
 
             this.netlist = [];
             this.analyses = [];
+            this.rowCache = [];
         }
 
         initNodes() {
@@ -2046,6 +2031,7 @@
                 });
                 analysis.length = 0;
             });
+            this.rowCache.length = 0;
         }
 
         getTerminals() {
@@ -2068,8 +2054,6 @@
 
         // Clean up the state from the previous input vector.
         cleanup() {
-            this.hypergraph.clearLUT();
-
             // Remove edges that only apply to the previous input vector.
             for(let ii = this.hypergraph.hyperedges.length - 1; ii >= 0; ii--) {
                 const hyperedge = this.hypergraph.hyperedges[ii];
@@ -2214,34 +2198,66 @@
             return retVal;
         }
 
-        testFloatingGates(currentOutputVal, addedEdgesArr, addedSourceDrainEdges, outputVertex) {
-            this.hypergraph.memoization = false;
-            let outputVal = currentOutputVal;
-            const floatingTransistorGateEdges = new Set();
+        // Check one output against the current floating gate assignment
+        checkFloatingOutput(currentOutputVal, outputVertex) {
+            let outputVal = this.updateOutputVal(currentOutputVal, outputVertex, true);
+
+            if(outputVal !== "X") {
+                // Check whether the output changes depending on whether "tentative" paths are considered.
+                // Iterate through UNDEFINED transistors.
+                this.transistors.some(function(transistor) {
+                    if(transistor.getState() === Transistor.STATES.UNDEFINED || transistor.getState() === Transistor.STATES.FLOATING) {
+                        const sourcePathToOutput = transistor.source.hasPathTo(outputVertex);
+                        const drainPathToOutput = transistor.drain.hasPathTo(outputVertex);
+                        const pathToZero = transistor.source.hasPathTo(this.strongLogicZeroVertex, true);
+                        const pathToOne  = transistor.source.hasPathTo(this.strongLogicOneVertex, true);
+                        /* jslint bitwise: true */
+                        if(!(sourcePathToOutput ^ drainPathToOutput)) {
+                            // No effect.
+                            return false;
+                        } else if(outputVal === "1" && pathToZero) {
+                            outputVal = "X";
+                            return outputVal;
+                        } else if(outputVal === "0" && pathToOne) {
+                            outputVal = "X";
+                            return outputVal;
+                        }
+                        /* jslint bitwise: false */
+                    }
+                }.bind(this));
+            }
+            return outputVal;
+        }
+
+        // Check every output against the current floating gate assignment in-place
+        checkFloatingOutputs(outputVals) {
+            this.outputVertices.forEach(function(outputVertex, index) {
+                outputVals[index] = this.checkFloatingOutput(outputVals[index], outputVertex);
+            }.bind(this));
+        }
+
+        // Try every test signal on the flaoting gates, updating every output at once.
+        // Previously this was done anew for every output even though the graph was identical.
+        // Boy, I really hope somebody got fired for that blunder.
+        testFloatingGates(outputVals, addedEdgesArr, addedSourceDrainEdges) {
+            const floatingGateEdges = new Set();
+            const allConflicted = () => outputVals.every(outputVal => outputVal === "X");
 
             this.transistors.forEach(function(transistor) {
                 if(transistor.getState() === Transistor.STATES.FLOATING) {
-                    floatingTransistorGateEdges.add(transistor.gate.getEdges()[0]);
+                    floatingGateEdges.add(transistor.gate.getEdges()[0]);
                 }
             });
 
-            const floatingTransistorGateEdgesArr = Array.from(floatingTransistorGateEdges);
+            const floatingGateEdgesArr = Array.from(floatingGateEdges);
 
-            for(let ii = 0; ii < Math.pow(2, floatingTransistorGateEdgesArr.length); ii++) {
-                if(outputVal === "X") {
-                    break;
-                }
-
-                for(let jj = 0; jj < floatingTransistorGateEdgesArr.length; jj++) {
-                    if(outputVal === "X") {
-                        break;
-                    }
-
+            for(let ii = 0; ii < Math.pow(2, floatingGateEdgesArr.length) && !allConflicted(); ii++) {
+                for(let jj = 0; jj < floatingGateEdgesArr.length; jj++) {
                     // Weakly drive the gate to 1 or 0.
                     /*jslint bitwise: true */
                     const evalInput = !!((ii >> jj) & 1);
                     /*jslint bitwise: false */
-                    while(this.updateTransistorStates(floatingTransistorGateEdgesArr[jj], evalInput, addedEdgesArr, addedSourceDrainEdges)) { /* EMPTY */ }
+                    while(this.updateTransistorStates(floatingGateEdgesArr[jj], evalInput, addedEdgesArr, addedSourceDrainEdges)) { /* EMPTY */ }
                     // Remove all edges that are in addedEdgesArr but not addedSourceDrainEdges.
                     addedEdgesArr.forEach(function(edge) {
                         if(!addedSourceDrainEdges.includes(edge)) {
@@ -2253,32 +2269,8 @@
                     this.initTransistorStates(addedEdgesArr);
                 }
 
-                outputVal = this.updateOutputVal(outputVal, outputVertex, true);
-
-                if(outputVal !== "X") {
-                    // Check whether the output changes depending on whether "tentative" paths are considered.
-                    // Iterate through UNDEFINED transistors.
-                    this.transistors.some(function(transistor) {
-                        if(transistor.getState() === Transistor.STATES.UNDEFINED || transistor.getState() === Transistor.STATES.FLOATING) {
-                            const sourcePathToOutput = transistor.source.hasPathTo(outputVertex);
-                            const drainPathToOutput = transistor.drain.hasPathTo(outputVertex);
-                            const pathToZero = transistor.source.hasPathTo(this.strongLogicZeroVertex, true);
-                            const pathToOne  = transistor.source.hasPathTo(this.strongLogicOneVertex, true);
-                            /* jslint bitwise: true */
-                            if(!(sourcePathToOutput ^ drainPathToOutput)) {
-                                // No effect.
-                                return false;
-                            } else if(outputVal === "1" && pathToZero) {
-                                outputVal = "X";
-                                return outputVal;
-                            } else if(outputVal === "0" && pathToOne) {
-                                outputVal = "X";
-                                return outputVal;
-                            }
-                            /* jslint bitwise: false */
-                        }
-                    }.bind(this));
-                }
+                // Load-bearing line here.
+                this.checkFloatingOutputs(outputVals);
 
                 addedEdgesArr.forEach(function(edge) {
                     this.hypergraph.removeHyperedge(edge);
@@ -2287,27 +2279,15 @@
                 addedEdgesArr.length = 0;
             }
 
-            floatingTransistorGateEdgesArr.forEach(function(edge) {
+            floatingGateEdgesArr.forEach(function(edge) {
                 edge.removeVertex(this.strongLogicOneVertex);
                 edge.removeVertex(this.strongLogicZeroVertex);
             }.bind(this));
-
-            this.hypergraph.memoization = true;
-            return outputVal;
         }
 
-        // Attempt to re-implement the computeOutput function using the hypergraph
-        // and a greatly simplified version of the path-finding algorithm.
-        computeOutput(inputVals, outputIndex) {
-            const outputVertex = this.outputVertices[outputIndex];
-            const addedEdgesArr = [];
-            const addedSourceDrainEdges = [];
-
-            this.cleanup();
-            this.connectTerminals(inputVals);
-            this.initTransistorStates();
-
-            // See if we already have a path from the output to a logic vertex.
+        // Classify an output by its paths to the logic vertices.
+        // Excludes H and L at this stage.
+        initialOutputVal(outputVertex) {
             let outputVal = "Z";
             if(outputVertex.hasPathTo(this.strongLogicOneVertex)) {
                 outputVal = "1";
@@ -2315,9 +2295,43 @@
             if(outputVertex.hasPathTo(this.strongLogicZeroVertex)) {
                 outputVal = outputVal === "1" ? "X" : "0";
             }
+            return outputVal;
+        }
 
-            outputVal = this.testFloatingGates(outputVal, addedEdgesArr, addedSourceDrainEdges, outputVertex);
+        // Cheap upper bound on every floating-gate assignment:
+        // Do the floating gates even have a path to affect the outputs?
+        floatingGatesCanMatter(outputVals) {
+            const tempEdges = [];
 
+            // Decided which transistors to close before doing so,
+            // so that new edges cannot affect the choice.
+            const maybeOn = this.transistors.filter(function(transistor) {
+                const offLevel = transistor.isNmos ? this.strongLogicZeroVertex : this.strongLogicOneVertex;
+                return !transistor.gate.hasPathTo(offLevel);
+            }.bind(this));
+
+            maybeOn.forEach(function(transistor) {
+                const edge = this.hypergraph.connectVertices(transistor.source, transistor.drain, true);
+                if(!!edge) {
+                    tempEdges.push(edge);
+                }
+            }.bind(this));
+
+            const canMatter = this.strongLogicOneVertex.hasPathTo(this.strongLogicZeroVertex) ||
+                this.outputVertices.some(function(outputVertex, index) {
+                    return this.initialOutputVal(outputVertex) !== outputVals[index];
+                }.bind(this));
+
+            tempEdges.forEach(function(edge) {
+                this.hypergraph.removeHyperedge(edge);
+            }.bind(this));
+
+            return canMatter;
+        }
+
+        // Record which vertex pairs are connected for this input vector.
+        // Used for path highlighting.
+        recordAnalysis(inputVals) {
             this.analyses[inputVals] = [];
             this.analyses[inputVals][0] = [];
             this.hypergraph.vertices.forEach(function(vertex, ii) {
@@ -2330,21 +2344,50 @@
                     this.analyses[inputVals][jj][ii] = this.analyses[inputVals][ii][jj];
                 }
             }.bind(this));
+        }
 
-            return outputVal;
+        // Evaluate every output for one input vector.
+        // Previously foolishly did this separately for each output.
+        computeRow(inputVals) {
+            const addedEdgesArr = [];
+            const addedSourceDrainEdges = [];
+
+            this.cleanup();
+            this.connectTerminals(inputVals);
+            this.initTransistorStates();
+
+            // See if we already have a path from each output to a logic vertex.
+            let outputVals = this.outputVertices.map(outputVertex => this.initialOutputVal(outputVertex));
+
+            if(this.strongLogicOneVertex.hasPathTo(this.strongLogicZeroVertex)) {
+                // A short circuit marks every output as conflicted, whatever the floating gates do.
+                outputVals = outputVals.map(() => "X");
+            } else if(this.floatingGatesCanMatter(outputVals)) {
+                this.testFloatingGates(outputVals, addedEdgesArr, addedSourceDrainEdges);
+            }
+
+            this.recordAnalysis(inputVals);
+            return outputVals;
+        }
+
+        // Return one output for one input vector.
+        // All outputs are evaluated and cached together,
+        // but I'm leaving this footprint in place for compatibility with the caller.
+        computeOutput(inputVals, outputIndex) {
+            if(!this.rowCache[inputVals]) {
+                this.rowCache[inputVals] = this.computeRow(inputVals);
+            }
+            return this.rowCache[inputVals][outputIndex];
         }
 
         // Clear necessary data structures in preparation for recomputation.
         clearCircuit() {
-            // Create a this.graph object.
-            // TODO
-            //this.hypergraph.clear();
-
             // Clear the net sets.
             this.vddNet.clear();
             this.gndNet.clear();
             this.nmos.clear();
             this.pmos.clear();
+            this.rowCache = [];
 
             // Unset all transistor terminals
             let bounds = {
