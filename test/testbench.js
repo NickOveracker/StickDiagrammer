@@ -47,74 +47,81 @@ function runTestbench(runTo, suppressResults) {
     let p;
     let results = [];
     let startTime;
-    const testCases = ["Five-stage inverter",
-                       "Four-stage buffer",
-                       "OR-4",
-                       "NOR-4",
-                       "NAND-4",
-                       "AND-4",
-                       "This test always fails",
-                       "Short-circuit #1",
-                       "Short-circuit #2",
-                       "Short-circuit #3",
-                       "Short-circuit #4",
-                       "Short-circuit #5",
-                       "Short-circuit #6",
-                       "Open-circuit #1",
-                       "Open-circuit #2",
-                       "Open-circuit #3",
-                       "Direct input #1",
-                       "Direct input #2",
-                       "Direct input #3",
-                       "Direct input #4",
-                       "A*B*(C+D)",
-                       "AOI4",
-                       "Between transistors",
-                       "SR latch Q",
-                       "SR latch Q'",
-                       "D latch",
-                       "VDD & GND driving single PMOS gate",
-                       "Two inputs driving single PMOS gate",
-                       "VDD & GND driving single NMOS gate",
-                       "Two inputs driving single NMOS gate",
-                       "Indirectly conflicted output via NMOS",
-                       "Indirectly conflicted output via PMOS",
-                       "Indirectly conflicted gates via PMOS",
-                       "Indirectly conflicted gates via NMOS",
-                       "Conflicted dead-end transistor",
-                       "One conflicted transistor in series with VDD w/ grounded gate",
-                       "Two conflicted dead-end transistors in series",
-                       "Two conflicted transistors in series with VDD",
-                       "Two conflicted transistors in series with VDD w/ grounded gate",
-                       "One transistor driven by VDD & GND in series w/ singly-driven gate & direct input",
-                       "One transistor driven by VDD & GND in series w/ conflicted gate & direct input",
-                       "Dark mode toggle button test",
-                       "Dark mode toggle keyboard test",
-                       "Theme change keyboard test",
-                       "Transparency toggle keyboard test",
-                       "Add two inputs keyboard test",
-                       "Remove one input keyboard test",
-                       "Add two outputs keyboard test",
-                       "Remove one output keyboard test",
-                       "Three conflicted transistors in series with input and two outputs",
-                       "(Layout 1) Three conflicted transistors in series with input and one output",
-                       "(Layout 2) Three conflicted transistors in series with input and one output",
-                       "Output directly connected to VDD in series with overloaded transistor",
-                       "One conflicted transistor in series with input and two outputs",
-                       "Deep recursion",
-                       "Floating-gate transistor 1",
-                       "Floating-gate transistor 2",
-                       "Nested floating-gate transistors 1",
-                       "Nested floating-gate transistors 2",
-                       "Unstable low and high outputs",
-                       "PMOS pull-down, NMOS pull-up",
-                        "Floating intermediate gate outputs to output gate (PMOS)",
-                        "Floating intermediate gate outputs to output gate (NMOS)",
-                        "Generalized C-element (dynamic/pseudostatic)",
-                        "Generalized C-element (static)",
-                        "Asymmetric C-element",
-                        "MUTEX (Mutual Exclusion) element",
-                        "D Flip-Flop (DFF)",
+    const testCases = [
+        "Five-stage inverter",
+        "Four-stage buffer",
+        "OR-4",
+        "NOR-4",
+        "NAND-4",
+        "AND-4",
+        "This test always fails",
+        "Short-circuit #1",
+        "Short-circuit #2",
+        "Short-circuit #3",
+        "Short-circuit #4",
+        "Short-circuit #5",
+        "Short-circuit #6",
+        "Open-circuit #1",
+        "Open-circuit #2",
+        "Open-circuit #3",
+        "Direct input #1",
+        "Direct input #2",
+        "Direct input #3",
+        "Direct input #4",
+        "A*B*(C+D)",
+        "AOI4",
+        "Between transistors",
+        "SR latch Q",
+        "SR latch Q'",
+        "D latch",
+        "VDD & GND driving single PMOS gate",
+        "Two inputs driving single PMOS gate",
+        "VDD & GND driving single NMOS gate",
+        "Two inputs driving single NMOS gate",
+        "Indirectly conflicted output via NMOS",
+        "Indirectly conflicted output via PMOS",
+        "Indirectly conflicted gates via PMOS",
+        "Indirectly conflicted gates via NMOS",
+        "Conflicted dead-end transistor",
+        "One conflicted transistor in series with VDD w/ grounded gate",
+        "Two conflicted dead-end transistors in series",
+        "Two conflicted transistors in series with VDD",
+        "Two conflicted transistors in series with VDD w/ grounded gate",
+        "One transistor driven by VDD & GND in series w/ singly-driven gate & direct input",
+        "One transistor driven by VDD & GND in series w/ conflicted gate & direct input",
+        "Dark mode toggle button test",
+        "Dark mode toggle keyboard test",
+        "Theme change keyboard test",
+        "Transparency toggle keyboard test",
+        "Add two inputs keyboard test",
+        "Remove one input keyboard test",
+        "Add two outputs keyboard test",
+        "Remove one output keyboard test",
+        "Three conflicted transistors in series with input and two outputs",
+        "(Layout 1) Three conflicted transistors in series with input and one output",
+        "(Layout 2) Three conflicted transistors in series with input and one output",
+        "Output directly connected to VDD in series with overloaded transistor",
+        "One conflicted transistor in series with input and two outputs",
+        "Deep recursion",
+        "Floating-gate transistor 1",
+        "Floating-gate transistor 2",
+        "Nested floating-gate transistors 1",
+        "Nested floating-gate transistors 2",
+        "Unstable low and high outputs",
+        "PMOS pull-down, NMOS pull-up",
+        "Floating intermediate gate outputs to output gate (PMOS)",
+        "Floating intermediate gate outputs to output gate (NMOS)",
+        "Generalized C-element (dynamic/pseudostatic)",
+        "Generalized C-element (static)",
+        "Asymmetric C-element",
+        "MUTEX (Mutual Exclusion) element",
+        "D Flip-Flop (DFF)",
+        "Floating gate order bug regression test",
+        "Floating gate order bug control test",
+        "Floating gate order bug regression test 2",
+        "Unstable ring of one inverter",
+        "Unstable ring of three inverters",
+        "Stable ring of two inverters",
     ];
     runTo = runTo || testCases.length;
 
@@ -2959,7 +2966,61 @@ function runTestbench(runTo, suppressResults) {
 
         2,
         "UUUU",
-   ];
+
+        // Floating gate order bug regression test
+        1,
+        function() {
+            UI.diagram.decode("SFIwR0FBRU9DZ0ViRGhRQd8B3wHFAVAvK98i3wHfAd8B3wHfAd8B3wHQAUnEBFFnQUFRaEFBQWhDQUFCQ0VBQUPEGUgvd98%2B3wHfAd8B3wHfAd8B3wHfAd8B3wFBQULfINwBQkFF3yLfAccB");
+        },
+
+        2,
+        "H",
+
+        // Floating gate order bug control test
+        1,
+        function() {
+            UI.diagram.decode("SFIwR0FBRU9DZ0ViRGhRQd8B3wHFAVAvK98i3wHfAd8B3wHfAd8B3wHQAUnEBFFnQUFRaEFBQWhDQUFCQ0VBQUPFGd8B3wHfAd8B3wHfAd8B3wHfAd8B3wHEAULfINwBQkFF3yLfAccB");
+        },
+
+        2,
+        "H",
+
+        // Floating gate order bug regression test 2
+        1,
+        function() {
+            UI.diagram.decode("SFIwR0FBRU9CZ3dJRGhRQd8B3wHFAVAvK98i3wHfAd8B3wHfAd8B3wHUAUlRZ0FBUWhBQUFoQ0FBQkNFQUFDRUnfNd8B3wHfAd8B3wHfAd8B3wHfAd8B3wHaAULJClFBRd8s3wHHAQ%3D%3D");
+        },
+
+        2,
+        "H",
+
+        // Unstable ring of one inverter
+        1,
+        function() {
+            UI.diagram.decode("SFIwR0FBRURBZ01WQlF3QdcBZmfYGt8B3wHfAdcBRDjfId8B3wHfAUFBQVAvOEFBUUFJQUFnQVFBQsQH3wHfAd8B1AFnQUnEelFnQ0FRaEFBQWhDQUlCQ0VBUUNFSUFnRcYdQUPEKUXEDEnEDFFBRco63x3fHewA82bkARDNAUQv%2BQJM3wHfAdIBQi%2FNbOUArsUIZ0XGEmhDSVHfRN8B3wHLAeQBIsQB");
+        },
+
+        2,
+        "?",
+
+        // Unstable ring of three inverters
+        1,
+        function() {
+            UI.diagram.decode("SFIwR0FBRURBZ01WQlF3QdcBZmfYGtEBRDjfIcsB31fYAd9jzQHfY8wB31fLAVAvOEFBUUFJQUFnUVFBQkFnZ0FBQsQZQ8QFRcQFScQFUUFBQi8vZ0FDxB5FQ0NBQUlFxB7IHUFB5ACeyTrLV0HEV8Ue2AFnQUnEI1FnQ0FRaEFBQWhDQUFCQ0VBQUNFSUFBRUlRQUFJUWdB3x3fHcUdScQdUcQdZ0XGdOQAruwAnGbkALnNAUQv%2BQJM0QFmK98hygHUV0IvzRVJ5gGFQeQArsYSaEPkANPfAcYBRUlSxj7fAcQB1VfkAZbEAQ%3D%3D");
+        },
+
+        2,
+        "?",
+
+        // Stable ring of two inverters
+        1,
+        function() {
+            UI.diagram.decode("SFIwR0FBRURBZ01WQlF3QdcBZmfYGtEBRDjfId8B3wHEAd9jzQH%2FALrfAdcBUC84QUFRQUlBQWdRUUFCQWdnQUFCxBlDxAVFxAVJxAVRQUFCLy9nQUPEHkXEHknGHt8B3wHFAWdBScRWUWdDQVFoQUFBaENBQUJDRUFBQ0VJQUFFSVFBQUlRZ0HXHULEHcU6RUFo5ACXQ%2BQArkXKV8QRZ0FFxAzYHcoBZuQBEM0BRC%2F5AkzRAWYr3yHeAUIvzWzlAK7FCGfnAWtoQ%2BQBDd8BxgFFSVLGPt8B2QHkASLEAQ%3D%3D");
+        },
+
+        2,
+        "U",
+    ];
 
     /** SET TO 1 OUTPUT AND 4 INPUTS */
     while(UI.diagram.outputs.length > 1) { UI.diagramController.removeTerminal(true);  }

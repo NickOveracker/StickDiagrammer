@@ -572,8 +572,12 @@
         }
 
         getState() {
-            const gateActive   = (this.isNmos && this.gate.hasPathTo(this.vdd)) || (this.isPmos && this.gate.hasPathTo(this.gnd));
-            const gateInactive = (this.isNmos && this.gate.hasPathTo(this.gnd)) || (this.isPmos && this.gate.hasPathTo(this.vdd));
+            // A floating gate net takes the value assumed for it by Diagram.testFloatingGates().
+            const assumed  = this.gate.hypergraph.assumedValues.get(this.gate.getEdges()[0]);
+            const gateHigh = assumed === undefined ? this.gate.hasPathTo(this.vdd) : assumed;
+            const gateLow  = assumed === undefined ? this.gate.hasPathTo(this.gnd) : !assumed;
+            const gateActive   = (this.isNmos && gateHigh) || (this.isPmos && gateLow);
+            const gateInactive = (this.isNmos && gateLow)  || (this.isPmos && gateHigh);
             let tempState;
 
             // First pass - only consider the gate voltage (original algorithm)
@@ -689,6 +693,7 @@
             this.hyperedges = [];
             this.components = null;
             this.independentComponents = null;
+            this.assumedValues = new Map(); // Floating gate net -> value assumed for it.
         }
 
         // Any change to the connections invalidates the cached components
@@ -1784,7 +1789,7 @@
         // A testbench that applies every input combination in order,
         // prints the outputs and checks them.
         //
-        // Rows that Stixu marks X, H, L or U are printed but not checked.
+        // Rows that Stixu marks X, H, L, U or ? are printed but not checked.
         // In simulation, a latch holds whatever state the previous rows left it in.
         static verilogTestbench(truthTable, diagram) {
             const inputs  = HDLExporter.verilogInputNames(diagram);
@@ -2106,51 +2111,6 @@
             } while(changed);
         }
 
-        updateTransistorStates(gateEdge, weakDriveVal, addedEdgesArr, addedSourceDrainEdges) {
-            let changed = false;
-            let newGateEdge, newSourceDrainEdge;
-            
-            this.transistors.forEach(function(transistor, index) {
-                const state = transistor.getState() ;
-                
-                if(transistor.gate.getEdges().includes(gateEdge)) {
-                    if(state === Transistor.STATES.FLOATING) {
-                        if(weakDriveVal) {
-                            newGateEdge = this.hypergraph.connectVertices(transistor.gate, this.strongLogicOneVertex, true);
-                        } else {
-                            newGateEdge = this.hypergraph.connectVertices(transistor.gate, this.strongLogicZeroVertex, true)
-                        }
-
-                        if(!!newGateEdge) {
-                            addedEdgesArr.push(newGateEdge);
-                            changed = true;
-                        }
-                        
-                    }
-                    if(transistor.getState() === Transistor.STATES.ACTIVE) {
-                        newSourceDrainEdge = this.hypergraph.connectVertices(transistor.source, transistor.drain, true);
-                        if(!!newSourceDrainEdge) {
-                            addedEdgesArr.push(newSourceDrainEdge);
-                            addedSourceDrainEdges[index] = newSourceDrainEdge;
-                            changed = true;
-                        }
-                    }
-                    if(state === Transistor.STATES.INACTIVE) {
-                        const removeEdge = addedSourceDrainEdges[index];
-                        // Remove vertices from the hyperedge.
-                        if(!!removeEdge) {
-                            removeEdge.removeVertex(transistor.source);
-                            removeEdge.removeVertex(transistor.drain);
-                            addedSourceDrainEdges[index] = null;
-                            changed = true;
-                        }
-                    }
-                }
-            }.bind(this));
-            
-            return changed;
-        }
-
         updateOutputVal(currentOutputVal, outputVertex, traverseTentative=false) {
             if(currentOutputVal === "X") {
                 return currentOutputVal;
@@ -2239,9 +2199,19 @@
         // Try every test signal on the flaoting gates, updating every output at once.
         // Previously this was done anew for every output even though the graph was identical.
         // Boy, I really hope somebody got fired for that blunder.
-        testFloatingGates(outputVals, addedEdgesArr, addedSourceDrainEdges) {
+        //
+        // Each assignment assumes a value for every floating gate net at once, then closes every transistor
+        // that is on. Only self-consistent assignments (stable states) count: an assignment is discarded if
+        // a net turns out to be driven to the opposite of its assumed value. (Letting the real value win
+        // instead could only lead to another assignment, which is tested on its own.)
+        // If no assignment is stable, an output that is the same in every assignment keeps that value,
+        // and any other output is unstable ("?").
+        testFloatingGates(outputVals, addedEdgesArr) {
             const floatingGateEdges = new Set();
-            const allConflicted = () => outputVals.every(outputVal => outputVal === "X");
+            const unstableVals = outputVals.slice();
+            const unstablePaths = outputVals.map(() => new Set());
+            let anyStable = false;
+            const allConflicted = () => anyStable && outputVals.every(outputVal => outputVal === "X");
 
             this.transistors.forEach(function(transistor) {
                 if(transistor.getState() === Transistor.STATES.FLOATING) {
@@ -2253,35 +2223,54 @@
 
             for(let ii = 0; ii < Math.pow(2, floatingGateEdgesArr.length) && !allConflicted(); ii++) {
                 for(let jj = 0; jj < floatingGateEdgesArr.length; jj++) {
-                    // Weakly drive the gate to 1 or 0.
                     /*jslint bitwise: true */
-                    const evalInput = !!((ii >> jj) & 1);
+                    this.hypergraph.assumedValues.set(floatingGateEdgesArr[jj], !!((ii >> jj) & 1));
                     /*jslint bitwise: false */
-                    while(this.updateTransistorStates(floatingGateEdgesArr[jj], evalInput, addedEdgesArr, addedSourceDrainEdges)) { /* EMPTY */ }
-                    // Remove all edges that are in addedEdgesArr but not addedSourceDrainEdges.
-                    addedEdgesArr.forEach(function(edge) {
-                        if(!addedSourceDrainEdges.includes(edge)) {
-                            edge.removeVertex(this.strongLogicOneVertex);
-                            edge.removeVertex(this.strongLogicZeroVertex);
-                        }
-                    }.bind(this));
-
-                    this.initTransistorStates(addedEdgesArr);
                 }
 
-                // Load-bearing line here.
-                this.checkFloatingOutputs(outputVals);
+                // Transistors are only closed, never opened, so this terminates and the order doesn't matter.
+                this.initTransistorStates(addedEdgesArr);
+
+                if(this.isSelfConsistent(floatingGateEdgesArr)) {
+                    this.checkFloatingOutputs(outputVals);
+                    anyStable = true;
+                } else {
+                    this.checkFloatingOutputs(unstableVals);
+                    this.outputVertices.forEach(function(outputVertex, index) {
+                        unstablePaths[index].add(`${outputVertex.hasPathTo(this.strongLogicOneVertex)} ${outputVertex.hasPathTo(this.strongLogicZeroVertex)}`);
+                    }.bind(this));
+                }
 
                 addedEdgesArr.forEach(function(edge) {
                     this.hypergraph.removeHyperedge(edge);
                 }.bind(this));
 
                 addedEdgesArr.length = 0;
+                this.hypergraph.assumedValues.clear();
             }
 
-            floatingGateEdgesArr.forEach(function(edge) {
-                edge.removeVertex(this.strongLogicOneVertex);
-                edge.removeVertex(this.strongLogicZeroVertex);
+            if(!anyStable) {
+                this.outputVertices.forEach(function(outputVertex, index) {
+                    outputVals[index] = unstablePaths[index].size > 1 ? "?" : unstableVals[index];
+                });
+            }
+        }
+
+        // Whether every floating gate net that is really driven to one level agrees with its assumed value.
+        isSelfConsistent(floatingGateEdgesArr) {
+            return floatingGateEdgesArr.every(function(edge) {
+                const vertex = edge.vertices.values().next().value;
+                const realOne  = vertex.hasPathTo(this.strongLogicOneVertex);
+                const realZero = vertex.hasPathTo(this.strongLogicZeroVertex);
+                // Getting a little clever here.
+                // First condition is XNOR. Checks if floating or conflicted.
+                // Second condition is checked when only one logic path exists.
+                // 
+                // Suppose that the assumed path matches the current hypothesis.
+                // If that path is to 1, then realOne === true === assumed
+                // If that path is to 0, then realOne === false === assumed
+                // Otherwise, the second check returns false (inconsistent)
+                return realOne === realZero || realOne === this.hypergraph.assumedValues.get(edge);
             }.bind(this));
         }
 
@@ -2350,7 +2339,6 @@
         // Previously foolishly did this separately for each output.
         computeRow(inputVals) {
             const addedEdgesArr = [];
-            const addedSourceDrainEdges = [];
 
             this.cleanup();
             this.connectTerminals(inputVals);
@@ -2363,7 +2351,7 @@
                 // A short circuit marks every output as conflicted, whatever the floating gates do.
                 outputVals = outputVals.map(() => "X");
             } else if(this.floatingGatesCanMatter(outputVals)) {
-                this.testFloatingGates(outputVals, addedEdgesArr, addedSourceDrainEdges);
+                this.testFloatingGates(outputVals, addedEdgesArr);
             }
 
             this.recordAnalysis(inputVals);
