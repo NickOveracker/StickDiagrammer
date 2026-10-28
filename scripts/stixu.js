@@ -1565,6 +1565,310 @@
         }
     }
 
+    class HDLExporter {
+        // Generate IRSIM from the current circuit.
+        // Hello, ASYNC 2025 attendees!
+        static generateIRSIM(diagram) {
+            // Simulate with 100nm scmos technology.
+            const HEADER   = "| units: 100 tech: scmos\n"              +
+                             "| type gate source drain length width\n" +
+                             "| ---- ---- ------ ----- ------ -----\n" ;
+
+            // Return a list of all identical hyperedges (same vertices)
+            // for a given transistor terminal.
+            const getNodeAliases = function(terminal) {
+                let aliasList = [];
+                terminal.getEdges().forEach(function(edge, index) {
+                    // Index 0 is already accounted for,
+                    // and we are not interested in directed (non-mergeable) edges.
+                    if(index != 0 && edge.mergeable) {
+                        aliasList.push(diagram.hypergraph.hyperedges.indexOf(edge));
+                    }
+                }.bind(diagram));
+                return aliasList;
+            }.bind(diagram)
+
+            let circuit  = "";
+            let commands = "";
+            diagram.transistors.forEach(function(transistor) {
+                const type = transistor.isNmos ? "n" : "p";
+
+                // Name the edges for gate, source, and drain.
+                const g = "e" + diagram.hypergraph.hyperedges.indexOf(transistor.gate.getEdges()[0]);
+                const s = "e" + diagram.hypergraph.hyperedges.indexOf(transistor.source.getEdges()[0]);
+                const d = "e" + diagram.hypergraph.hyperedges.indexOf(transistor.drain.getEdges()[0]);
+
+                // Add the transistor to the circuit.
+                circuit += `\n|| ${type}mos at: (${transistor.gate.cell.x}, ${transistor.gate.cell.y})\n`
+                circuit += `${type} ${g} ${s} ${d} 2 4\n`
+
+                // Link identical hyperedges together.
+                getNodeAliases(transistor.gate).forEach((al)   => { commands += `alias ${g} e${al} \n`; });
+                getNodeAliases(transistor.source).forEach((al) => { commands += `alias ${s} e${al} \n`; });
+                getNodeAliases(transistor.drain).forEach((al)  => { commands += `alias ${d} e${al} \n`; });
+            }.bind(diagram));
+
+            // Name the outputs (..., W, X, Y)
+            let watchnodes = "";
+            diagram.outputVertices.forEach(function(vtx, ii) {
+                const IDX  = diagram.hypergraph.hyperedges.indexOf(vtx.getEdges()[0]);
+                const NAME = String.fromCharCode(89 - diagram.outputVertices.length + ii + 1);
+                circuit    = circuit.replaceAll(` e${IDX} `, ` ${NAME} `);
+                commands   = commands.replaceAll(` e${IDX} `, ` ${NAME} `);
+                commands  += `alias ${NAME} e${IDX} \n`;
+                watchnodes = watchnodes + NAME + " ";
+            }.bind(diagram));
+
+            // Name the inputs (A, B, C, ...)
+            diagram.inputVertices.forEach(function(vtx, ii) {
+                const IDX  = diagram.hypergraph.hyperedges.indexOf(vtx.getEdges()[0]);
+                const NAME = String.fromCharCode(65 + ii);
+                circuit    = circuit.replaceAll(` e${IDX} `, ` ${NAME} `);
+                commands   = commands.replaceAll(` e${IDX} `, ` ${NAME} `);
+                commands  += `alias ${NAME} e${IDX} \n`;
+                watchnodes = watchnodes + NAME + " ";
+            }.bind(diagram));
+
+            // Set up the supplies.
+            commands += `alias e${diagram.hypergraph.hyperedges.indexOf(diagram.vddVertex.getEdges()[0])} vdd\n`;
+            commands += `alias e${diagram.hypergraph.hyperedges.indexOf(diagram.gndVertex.getEdges()[0])} gnd\n`;
+            commands += `h vdd\nl gnd\nstepsize 50\nwatchnode ${watchnodes}\n`;
+
+            // And we're done!
+            return {
+                sim: HEADER + circuit,
+                cmd: commands,
+            }
+        }
+
+        // Verilog modules designed to emulate the Stixu switch model for transistors.
+        // Transistors conduct only if the source is energized by their rails
+        // (i.e., GND for NMOS and VDD for PMOS) and their gates are energized
+        // by the opposite rail (VDD for NMOS and GND for PMOS)
+        static get verilogTransistorModels()
+        {
+            return [
+                "// NMOS: conducts only low.",
+                "module stixu_nmos(inout wire t1, inout wire t2, input wire gate);",
+                "    tranif1 #1 sw(t1, t2, gate === 1'b1 && (t1 === 1'b0 || t2 === 1'b0 || t1 === 1'bx || t2 === 1'bx));",
+                "endmodule",
+                "",
+                "// PMOS: conducts only high.",
+                "module stixu_pmos(inout wire t1, inout wire t2, input wire gate);",
+                "    tranif1 #1 sw(t1, t2, gate === 1'b0 && (t1 === 1'b1 || t2 === 1'b1 || t1 === 1'bx || t2 === 1'bx));",
+                "endmodule",
+                "",
+            ].join("\n");
+        }
+
+        // Return an array of input terminal names (A, B, C...)
+        static verilogInputNames(diagram) {
+            return diagram.inputs.map((_, index) => diagram.getTerminalName(2 + index));
+        }
+
+        // Return an array of input terminal names (.. W, X, Y)
+        static verilogOutputNames(diagram) {
+            return diagram.outputs.map((_, index) => diagram.getTerminalName(2 + diagram.inputs.length + index));
+        }
+
+        // Output two functions for getting Verilog net (hyperedge) names.
+        // Nets are are named after the first vertex added to them,
+        // and merged when they intersect.
+        // 
+        // Outputs:
+        // {
+        //     function of(vertex) // Gets the name of the net containing `vertex`
+        //     function all()      // Gets an array of all net names (strings)
+        // }
+        static verilogNets(diagram) {
+            const names = new Map();
+            const netOf = vertex => vertex.getEdges().at(0);
+            const name = function(vertex, wireName) {
+                if(!names.has(netOf(vertex))) {
+                    names.set(netOf(vertex), wireName);
+                }
+            };
+            const inputs  = HDLExporter.verilogInputNames(diagram);
+            const outputs = HDLExporter.verilogOutputNames(diagram);
+
+            name(diagram.vddVertex, "vdd");
+            name(diagram.gndVertex, "gnd");
+            diagram.inputVertices.forEach( (vertex, index) => name(vertex, `net_${inputs[index]}`));
+            diagram.outputVertices.forEach((vertex, index) => name(vertex, `net_${outputs[index]}`));
+            diagram.transistors.forEach(function(transistor) {
+                [
+                    transistor.gate,
+                    transistor.source,
+                    transistor.drain,
+                ].forEach(vertex => name(vertex, "n" + names.size));
+            });
+
+            return {
+                of:  vertex => names.get(netOf(vertex)),
+                all: Array.from(new Set(names.values())),
+            };
+        }
+
+        // Build the whole Verilog circuit.
+        // Returns the full module string.
+        static verilogCircuit(nets, diagram) {
+            const  inputs = HDLExporter.verilogInputNames(diagram);
+            const outputs = HDLExporter.verilogOutputNames(diagram);
+            const   lines = [
+                `module circuit(${inputs.concat(outputs).join(", ")});`,
+            ];
+
+            inputs.forEach(  name => lines.push(`    input  ${name};`));
+            outputs.forEach( name => lines.push(`    output ${name};`));
+            lines.push("");
+            nets.all.forEach(name => lines.push(`    wire   ${name};`));
+
+            lines.push(
+                "",
+                "    // Supplies and inputs drive their nets."
+            );
+            lines.push(`    assign ${nets.of(diagram.vddVertex)} = 1'b1;`);
+            lines.push(`    assign ${nets.of(diagram.gndVertex)} = 1'b0;`);
+            diagram.inputVertices.forEach((vertex, index) => {
+                lines.push(`    assign ${nets.of(vertex)} = ${inputs[index]};`);
+            });
+
+            lines.push(
+                "",
+                "    // Transistors: (terminal, terminal, gate), with the channel's grid position."
+            );
+            diagram.transistors.forEach(function(transistor, index) {
+                const xx = transistor.gate.cell.x;
+                const yy = transistor.gate.cell.y;
+                const type = transistor.isNmos ? "nmos" : "pmos";
+                const ends = [
+                    transistor.source,
+                    transistor.drain,
+                    transistor.gate,
+                ].map(vertex => nets.of(vertex)).join(", ");
+                lines.push(`    stixu_${type} ${type}_${index}(${ends}); // (${xx}, ${yy})`);
+            });
+
+            lines.push(
+                "",
+                "    // Outputs follow their nets."
+            );
+            diagram.outputVertices.forEach((vertex, index) => {
+                lines.push(`    assign ${outputs[index]} = ${nets.of(vertex)};`);
+            });
+            lines.push(
+                "endmodule",
+                ""
+            );
+
+            return lines.join("\n");
+        }
+
+        // Build a single row of the test bench.
+        // Tests the output module agains the Stixu truth table.
+        // `row` is the filled-in truth table row,
+        // `rowIndex` is the input vector (input A is the MSB)
+        // `settle` is settling time.
+        static verilogTestbenchRow(row, rowIndex, settle, diagram) {
+            const inputs   = HDLExporter.verilogInputNames(diagram);
+            const outputs  = HDLExporter.verilogOutputNames(diagram);
+            const expected = row.slice(inputs.length);
+            const shown    = outputs.map(name => name + "=%b").join(" ");
+            const lines    = [];
+ 
+            if(inputs.length > 0) {
+                lines.push(`        in = ${inputs.length}'d${rowIndex}; #${settle};`);
+            } else {
+                lines.push(`        #${settle};`);
+            }
+ 
+            lines.push(
+                `        $display("${inputs.join("") || "-"}=%b: ${shown}  (Stixu: ${expected.join(" ")})", in${outputs.map(name => ", " + name).join("")});`
+            );
+            outputs.forEach(function(name, index) {
+                const value = {"0": "1'b0", "1": "1'b1", "Z": "1'bz",}[expected[index]];
+                if(value) {
+                    lines.push(
+                        `        if (${name} !== ${value}) begin mismatches = mismatches + 1; $display("  ${name} should be ${expected[index]}"); end`
+                    );
+                }
+            });
+ 
+            return lines;
+        }
+
+        // A testbench that applies every input combination in order,
+        // prints the outputs and checks them.
+        //
+        // Rows that Stixu marks X, H, L or U are printed but not checked.
+        // In simulation, a latch holds whatever state the previous rows left it in.
+        static verilogTestbench(truthTable, diagram) {
+            const inputs  = HDLExporter.verilogInputNames(diagram);
+            const outputs = HDLExporter.verilogOutputNames(diagram);
+            const settle  = 10 * (diagram.transistors.length + 1);
+            const ports   = inputs.map((name, index) => `.${name}(in[${inputs.length - 1 - index}])`)
+                .concat(outputs.map(name => `.${name}(${name})`));
+            const lines   = [
+                "// Applies every input combination and compares each output with Stixu's truth table.",
+                "module circuit_tb;",
+                `    reg  [${Math.max(inputs.length - 1, 0)}:0] in;`,
+            ];
+ 
+            if(outputs.length > 0) {
+                lines.push(`    wire ${outputs.join(", ")};`);
+            }
+ 
+            lines.push(
+                "    integer mismatches = 0;",
+                "",
+                `    circuit dut(${ports.join(", ")});`,
+                "",
+                "    initial begin"
+            );
+
+            // first truth table row is the header; skip it
+            truthTable.slice(1).forEach(function(row, rowIndex) {
+                HDLExporter.verilogTestbenchRow(row, rowIndex, settle, diagram)
+                    .forEach(line => lines.push(line));
+             }.bind(diagram));
+            lines.push(
+                "        $display(\"%0d mismatch(es) with Stixu's truth table\", mismatches);"
+            );
+            lines.push(
+                "        $finish;",
+                "    end",
+                "endmodule",
+                ""
+            );
+ 
+            return lines.join("\n");
+        }
+
+        // Generate Verilog from the current circuit.
+        // The transistors are constructed to approximate Stixu's model,
+        // but the full 7-value logic system obviously can't be implemented.
+        // H, L, U, and X will all behave differently in Verilog.
+        // Remember: Stixu's X means there's a fault ANYWHERE in the diagram.
+        // Verilog's x is not global.
+        static generateVerilog(truthTable, diagram) {
+            // Remove non-mergeable edges (i.e., edges specific to an input vector)
+            diagram.cleanup();
+
+            const nets = HDLExporter.verilogNets(diagram);
+            let verilog = "// Generated by Stixu (https://stixu.io).\n";
+            verilog    += "// The Stixu model was tested only against Icarus Verilog.\n";
+            verilog    += "`timescale 1ns / 1ps\n\n";
+            verilog    += HDLExporter.verilogTransistorModels + "\n";
+            verilog    += HDLExporter.verilogCircuit(nets, diagram);
+
+            if(truthTable) {
+                verilog += `\n${HDLExporter.verilogTestbench(truthTable, diagram)}`;
+            }
+
+            return verilog;
+        }
+    }
+
     class Diagram {
         constructor(mainCanvas, gridCanvas) {
             this.DIRECT_PATH         = { indeterminate: false, hasPath: true,  direct: true,  label: "1", };
@@ -2028,307 +2332,6 @@
             }.bind(this));
 
             return outputVal;
-        }
-
-        // Generate IRSIM from the current circuit.
-        // Hello, ASYNC 2025 attendees!
-        generateIRSIM() {
-            // Simulate with 100nm scmos technology.
-            const HEADER   = "| units: 100 tech: scmos\n"              +
-                             "| type gate source drain length width\n" +
-                             "| ---- ---- ------ ----- ------ -----\n" ;
-
-            // Return a list of all identical hyperedges (same vertices)
-            // for a given transistor terminal.
-            const getNodeAliases = function(terminal) {
-                let aliasList = [];
-                terminal.getEdges().forEach(function(edge, index) {
-                    // Index 0 is already accounted for,
-                    // and we are not interested in directed (non-mergeable) edges.
-                    if(index != 0 && edge.mergeable) {
-                        aliasList.push(this.hypergraph.hyperedges.indexOf(edge));
-                    }
-                }.bind(this));
-                return aliasList;
-            }.bind(this)
-
-            let circuit  = "";
-            let commands = "";
-            this.transistors.forEach(function(transistor) {
-                const type = transistor.isNmos ? "n" : "p";
-
-                // Name the edges for gate, source, and drain.
-                const g = "e" + this.hypergraph.hyperedges.indexOf(transistor.gate.getEdges()[0]);
-                const s = "e" + this.hypergraph.hyperedges.indexOf(transistor.source.getEdges()[0]);
-                const d = "e" + this.hypergraph.hyperedges.indexOf(transistor.drain.getEdges()[0]);
-
-                // Add the transistor to the circuit.
-                circuit += `\n|| ${type}mos at: (${transistor.gate.cell.x}, ${transistor.gate.cell.y})\n`
-                circuit += `${type} ${g} ${s} ${d} 2 4\n`
-
-                // Link identical hyperedges together.
-                getNodeAliases(transistor.gate).forEach((al)   => { commands += `alias ${g} e${al} \n`; });
-                getNodeAliases(transistor.source).forEach((al) => { commands += `alias ${s} e${al} \n`; });
-                getNodeAliases(transistor.drain).forEach((al)  => { commands += `alias ${d} e${al} \n`; });
-            }.bind(this));
-
-            // Name the outputs (..., W, X, Y)
-            let watchnodes = "";
-            this.outputVertices.forEach(function(vtx, ii) {
-                const IDX  = this.hypergraph.hyperedges.indexOf(vtx.getEdges()[0]);
-                const NAME = String.fromCharCode(89 - this.outputVertices.length + ii + 1);
-                circuit    = circuit.replaceAll(` e${IDX} `, ` ${NAME} `);
-                commands   = commands.replaceAll(` e${IDX} `, ` ${NAME} `);
-                commands  += `alias ${NAME} e${IDX} \n`;
-                watchnodes = watchnodes + NAME + " ";
-            }.bind(this));
-
-            // Name the inputs (A, B, C, ...)
-            this.inputVertices.forEach(function(vtx, ii) {
-                const IDX  = this.hypergraph.hyperedges.indexOf(vtx.getEdges()[0]);
-                const NAME = String.fromCharCode(65 + ii);
-                circuit    = circuit.replaceAll(` e${IDX} `, ` ${NAME} `);
-                commands   = commands.replaceAll(` e${IDX} `, ` ${NAME} `);
-                commands  += `alias ${NAME} e${IDX} \n`;
-                watchnodes = watchnodes + NAME + " ";
-            }.bind(this));
-
-            // Set up the supplies.
-            commands += `alias e${this.hypergraph.hyperedges.indexOf(this.vddVertex.getEdges()[0])} vdd\n`;
-            commands += `alias e${this.hypergraph.hyperedges.indexOf(this.gndVertex.getEdges()[0])} gnd\n`;
-            commands += `h vdd\nl gnd\nstepsize 50\nwatchnode ${watchnodes}\n`;
-
-            // And we're done!
-            return {
-                sim: HEADER + circuit,
-                cmd: commands,
-            }
-        }
-
-        // Verilog modules designed to emulate the Stixu switch model for transistors.
-        // Transistors conduct only if the source is energized by their rails
-        // (i.e., GND for NMOS and VDD for PMOS) and their gates are energized
-        // by the opposite rail (VDD for NMOS and GND for PMOS)
-        static get verilogTransistorModels()
-        {
-            return [
-                "// NMOS: conducts only low.",
-                "module stixu_nmos(inout wire t1, inout wire t2, input wire gate);",
-                "    tranif1 #1 sw(t1, t2, gate === 1'b1 && (t1 === 1'b0 || t2 === 1'b0 || t1 === 1'bx || t2 === 1'bx));",
-                "endmodule",
-                "",
-                "// PMOS: conducts only high.",
-                "module stixu_pmos(inout wire t1, inout wire t2, input wire gate);",
-                "    tranif1 #1 sw(t1, t2, gate === 1'b0 && (t1 === 1'b1 || t2 === 1'b1 || t1 === 1'bx || t2 === 1'bx));",
-                "endmodule",
-                "",
-            ].join("\n");
-        }
-
-        // Return an array of input terminal names (A, B, C...)
-        verilogInputNames() {
-            return this.inputs.map((_, index) => this.getTerminalName(2 + index));
-        }
-
-        // Return an array of input terminal names (.. W, X, Y)
-        verilogOutputNames() {
-            return this.outputs.map((_, index) => this.getTerminalName(2 + this.inputs.length + index));
-        }
-
-        // Output two functions for getting Verilog net (hyperedge) names.
-        // Nets are are named after the first vertex added to them,
-        // and merged when they intersect.
-        // 
-        // Outputs:
-        // {
-        //     function of(vertex) // Gets the name of the net containing `vertex`
-        //     function all()      // Gets an array of all net names (strings)
-        // }
-        verilogNets() {
-            const names = new Map();
-            const netOf = vertex => vertex.getEdges().at(0);
-            const name = function(vertex, wireName) {
-                if(!names.has(netOf(vertex))) {
-                    names.set(netOf(vertex), wireName);
-                }
-            };
-            const inputs  = this.verilogInputNames();
-            const outputs = this.verilogOutputNames();
-
-            name(this.vddVertex, "vdd");
-            name(this.gndVertex, "gnd");
-            this.inputVertices.forEach( (vertex, index) => name(vertex, `net_${inputs[index]}`));
-            this.outputVertices.forEach((vertex, index) => name(vertex, `net_${outputs[index]}`));
-            this.transistors.forEach(function(transistor) {
-                [
-                    transistor.gate,
-                    transistor.source,
-                    transistor.drain,
-                ].forEach(vertex => name(vertex, "n" + names.size));
-            });
-
-            return {
-                of:  vertex => names.get(netOf(vertex)),
-                all: Array.from(new Set(names.values())),
-            };
-        }
-
-        // Build the whole Verilog circuit.
-        // Returns the full module string.
-        verilogCircuit(nets) {
-            const  inputs = this.verilogInputNames();
-            const outputs = this.verilogOutputNames();
-            const   lines = [
-                `module circuit(${inputs.concat(outputs).join(", ")});`,
-            ];
-
-            inputs.forEach(  name => lines.push(`    input  ${name};`));
-            outputs.forEach( name => lines.push(`    output ${name};`));
-            lines.push("");
-            nets.all.forEach(name => lines.push(`    wire   ${name};`));
-
-            lines.push(
-                "",
-                "    // Supplies and inputs drive their nets."
-            );
-            lines.push(`    assign ${nets.of(this.vddVertex)} = 1'b1;`);
-            lines.push(`    assign ${nets.of(this.gndVertex)} = 1'b0;`);
-            this.inputVertices.forEach((vertex, index) => {
-                lines.push(`    assign ${nets.of(vertex)} = ${inputs[index]};`);
-            });
-
-            lines.push(
-                "",
-                "    // Transistors: (terminal, terminal, gate), with the channel's grid position."
-            );
-            this.transistors.forEach(function(transistor, index) {
-                const xx = transistor.gate.cell.x;
-                const yy = transistor.gate.cell.y;
-                const type = transistor.isNmos ? "nmos" : "pmos";
-                const ends = [
-                    transistor.source,
-                    transistor.drain,
-                    transistor.gate,
-                ].map(vertex => nets.of(vertex)).join(", ");
-                lines.push(`    stixu_${type} ${type}_${index}(${ends}); // (${xx}, ${yy})`);
-            });
-
-            lines.push(
-                "",
-                "    // Outputs follow their nets."
-            );
-            this.outputVertices.forEach((vertex, index) => {
-                lines.push(`    assign ${outputs[index]} = ${nets.of(vertex)};`);
-            });
-            lines.push(
-                "endmodule",
-                ""
-            );
-
-            return lines.join("\n");
-        }
-
-        // Build a single row of the test bench.
-        // Tests the output module agains the Stixu truth table.
-        // `row` is the filled-in truth table row,
-        // `rowIndex` is the input vector (input A is the MSB)
-        // `settle` is settling time.
-        verilogTestbenchRow(row, rowIndex, settle) {
-            const inputs   = this.verilogInputNames();
-            const outputs  = this.verilogOutputNames();
-            const expected = row.slice(inputs.length);
-            const shown    = outputs.map(name => name + "=%b").join(" ");
-            const lines    = [];
- 
-            if(inputs.length > 0) {
-                lines.push(`        in = ${inputs.length}'d${rowIndex}; #${settle};`);
-            } else {
-                lines.push(`        #${settle};`);
-            }
- 
-            lines.push(
-                `        $display("${inputs.join("") || "-"}=%b: ${shown}  (Stixu: ${expected.join(" ")})", in${outputs.map(name => ", " + name).join("")});`
-            );
-            outputs.forEach(function(name, index) {
-                const value = {"0": "1'b0", "1": "1'b1", "Z": "1'bz",}[expected[index]];
-                if(value) {
-                    lines.push(
-                        `        if (${name} !== ${value}) begin mismatches = mismatches + 1; $display("  ${name} should be ${expected[index]}"); end`
-                    );
-                }
-            });
- 
-            return lines;
-        }
-
-        // A testbench that applies every input combination in order,
-        // prints the outputs and checks them.
-        //
-        // Rows that Stixu marks X, H, L or U are printed but not checked.
-        // In simulation, a latch holds whatever state the previous rows left it in.
-        verilogTestbench(truthTable) {
-            const inputs  = this.verilogInputNames();
-            const outputs = this.verilogOutputNames();
-            const settle  = 10 * (this.transistors.length + 1);
-            const ports   = inputs.map((name, index) => `.${name}(in[${inputs.length - 1 - index}])`)
-                .concat(outputs.map(name => `.${name}(${name})`));
-            const lines   = [
-                "// Applies every input combination and compares each output with Stixu's truth table.",
-                "module circuit_tb;",
-                `    reg  [${Math.max(inputs.length - 1, 0)}:0] in;`,
-            ];
- 
-            if(outputs.length > 0) {
-                lines.push(`    wire ${outputs.join(", ")};`);
-            }
- 
-            lines.push(
-                "    integer mismatches = 0;",
-                "",
-                `    circuit dut(${ports.join(", ")});`,
-                "",
-                "    initial begin"
-            );
-
-            // first truth table row is the header; skip it
-            truthTable.slice(1).forEach(function(row, rowIndex) {
-                this.verilogTestbenchRow(row, rowIndex, settle).forEach(line => lines.push(line));
-             }.bind(this));
-            lines.push(
-                "        $display(\"%0d mismatch(es) with Stixu's truth table\", mismatches);"
-            );
-            lines.push(
-                "        $finish;",
-                "    end",
-                "endmodule",
-                ""
-            );
- 
-            return lines.join("\n");
-        }
-
-        // Generate Verilog from the current circuit.
-        // The transistors are constructed to approximate Stixu's model,
-        // but the full 7-value logic system obviously can't be implemented.
-        // H, L, U, and X will all behave differently in Verilog.
-        // Remember: Stixu's X means there's a fault ANYWHERE in the diagram.
-        // Verilog's x is not global.
-        generateVerilog(truthTable) {
-            // Remove non-mergeable edges (i.e., edges specific to an input vector)
-            this.cleanup();
-
-            const nets = this.verilogNets();
-            let verilog = "// Generated by Stixu (https://stixu.io).\n";
-            verilog    += "// The Stixu model was tested only against Icarus Verilog.\n";
-            verilog    += "`timescale 1ns / 1ps\n\n";
-            verilog    += Diagram.verilogTransistorModels + "\n";
-            verilog    += this.verilogCircuit(nets);
-
-            if(truthTable) {
-                verilog += `\n${this.verilogTestbench(truthTable)}`;
-            }
-
-            return verilog;
         }
 
         // Clear necessary data structures in preparation for recomputation.
@@ -3621,7 +3624,7 @@
 
             document.getElementById("download-verilog-btn").onclick = function() {
                 this.refreshTruthTable();
-                const verilog = this.diagram.generateVerilog(this.truthTable);
+                const verilog = HDLExporter.generateVerilog(this.truthTable, this.diagram);
                 const blob = new Blob([verilog], {type: "text/plain"});
                 const url = window.URL.createObjectURL(blob);
                 // Download the file immediately.
@@ -3652,7 +3655,7 @@
                     }, 100);
                 }
                 this.refreshTruthTable();
-                const irsim = this.diagram.generateIRSIM();
+                const irsim = HDLExporter.generateIRSIM(this.diagram);
                 download(irsim.sim, "diagram.sim");
                 download(irsim.cmd, "diagram.cmd");
             }.bind(this);
