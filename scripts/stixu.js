@@ -2105,7 +2105,10 @@
             }
         }
 
-        //
+        // Verilog modules designed to emulate the Stixu switch model for transistors.
+        // Transistors conduct only if the source is energized by their rails
+        // (i.e., GND for NMOS and VDD for PMOS) and their gates are energized
+        // by the opposite rail (VDD for NMOS and GND for PMOS)
         static get verilogTransistorModels()
         {
             return [
@@ -2122,14 +2125,25 @@
             ].join("\n");
         }
 
+        // Return an array of input terminal names (A, B, C...)
         verilogInputNames() {
             return this.inputs.map((_, index) => this.getTerminalName(2 + index));
         }
 
+        // Return an array of input terminal names (.. W, X, Y)
         verilogOutputNames() {
             return this.outputs.map((_, index) => this.getTerminalName(2 + this.inputs.length + index));
         }
 
+        // Output two functions for getting Verilog net (hyperedge) names.
+        // Nets are are named after the first vertex added to them,
+        // and merged when they intersect.
+        // 
+        // Outputs:
+        // {
+        //     function of(vertex) // Gets the name of the net containing `vertex`
+        //     function all()      // Gets an array of all net names (strings)
+        // }
         verilogNets() {
             const names = new Map();
             const netOf = vertex => vertex.getEdges().at(0);
@@ -2159,6 +2173,8 @@
             };
         }
 
+        // Build the whole Verilog circuit.
+        // Returns the full module string.
         verilogCircuit(nets) {
             const  inputs = this.verilogInputNames();
             const outputs = this.verilogOutputNames();
@@ -2212,6 +2228,11 @@
             return lines.join("\n");
         }
 
+        // Build a single row of the test bench.
+        // Tests the output module agains the Stixu truth table.
+        // `row` is the filled-in truth table row,
+        // `rowIndex` is the input vector (input A is the MSB)
+        // `settle` is settling time.
         verilogTestbenchRow(row, rowIndex, settle) {
             const inputs   = this.verilogInputNames();
             const outputs  = this.verilogOutputNames();
