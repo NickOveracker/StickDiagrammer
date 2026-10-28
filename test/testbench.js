@@ -119,6 +119,9 @@ function runTestbench(runTo, suppressResults) {
         "Floating gate order bug regression test",
         "Floating gate order bug control test",
         "Floating gate order bug regression test 2",
+        "Unstable ring of one inverter",
+        "Unstable ring of three inverters",
+        "Stable ring of two inverters",
     ];
     runTo = runTo || testCases.length;
 
@@ -2990,6 +2993,33 @@ function runTestbench(runTo, suppressResults) {
 
         2,
         "H",
+
+        // Unstable ring of one inverter
+        1,
+        function() {
+            UI.diagram.decode("SFIwR0FBRURBZ01WQlF3QdcBZmfYGt8B3wHfAdcBRDjfId8B3wHfAUFBQVAvOEFBUUFJQUFnQVFBQsQH3wHfAd8B1AFnQUnEelFnQ0FRaEFBQWhDQUlCQ0VBUUNFSUFnRcYdQUPEKUXEDEnEDFFBRco63x3fHewA82bkARDNAUQv%2BQJM3wHfAdIBQi%2FNbOUArsUIZ0XGEmhDSVHfRN8B3wHLAeQBIsQB");
+        },
+
+        2,
+        "?",
+
+        // Unstable ring of three inverters
+        1,
+        function() {
+            UI.diagram.decode("SFIwR0FBRURBZ01WQlF3QdcBZmfYGtEBRDjfIcsB31fYAd9jzQHfY8wB31fLAVAvOEFBUUFJQUFnUVFBQkFnZ0FBQsQZQ8QFRcQFScQFUUFBQi8vZ0FDxB5FQ0NBQUlFxB7IHUFB5ACeyTrLV0HEV8Ue2AFnQUnEI1FnQ0FRaEFBQWhDQUFCQ0VBQUNFSUFBRUlRQUFJUWdB3x3fHcUdScQdUcQdZ0XGdOQAruwAnGbkALnNAUQv%2BQJM0QFmK98hygHUV0IvzRVJ5gGFQeQArsYSaEPkANPfAcYBRUlSxj7fAcQB1VfkAZbEAQ%3D%3D");
+        },
+
+        2,
+        "?",
+
+        // Stable ring of two inverters
+        1,
+        function() {
+            UI.diagram.decode("SFIwR0FBRURBZ01WQlF3QdcBZmfYGtEBRDjfId8B3wHEAd9jzQH%2FALrfAdcBUC84QUFRQUlBQWdRUUFCQWdnQUFCxBlDxAVFxAVJxAVRQUFCLy9nQUPEHkXEHknGHt8B3wHFAWdBScRWUWdDQVFoQUFBaENBQUJDRUFBQ0VJQUFFSVFBQUlRZ0HXHULEHcU6RUFo5ACXQ%2BQArkXKV8QRZ0FFxAzYHcoBZuQBEM0BRC%2F5AkzRAWYr3yHeAUIvzWzlAK7FCGfnAWtoQ%2BQBDd8BxgFFSVLGPt8B2QHkASLEAQ%3D%3D");
+        },
+
+        2,
+        "U",
     ];
 
     /** SET TO 1 OUTPUT AND 4 INPUTS */
