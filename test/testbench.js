@@ -134,8 +134,8 @@ function runTestbench(runTo, suppressResults) {
         UI.diagramController.changeLayer();
     }
 
-    function mapX(x) {return Math.floor(x*UI.diagramView.cellWidth + UI.diagramView.canvas.getBoundingClientRect().left + UI.diagramView.cellWidth);}
-    function mapY(y) {return Math.floor(y*UI.diagramView.cellHeight + UI.diagramView.canvas.getBoundingClientRect().top + UI.diagramView.cellHeight);}
+    function mapX(x) {return Math.ceil(x*UI.diagramView.cellWidth + UI.diagramView.canvas.getBoundingClientRect().left + UI.diagramView.cellWidth) - 1;}
+    function mapY(y) {return Math.ceil(y*UI.diagramView.cellHeight + UI.diagramView.canvas.getBoundingClientRect().top + UI.diagramView.cellHeight) - 1;}
 
     let events = [
         1,
