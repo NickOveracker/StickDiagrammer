@@ -2892,6 +2892,527 @@
         }
     }
 
+    // A shortcut binding is {keyCode, shiftModifier, ctrlModifier, keyLabel};
+    // keyLabel is the key's display text, if known.
+    const SHORTCUT_STORAGE_KEY = "stixu-shortcuts";
+
+    // Display order, labels and groups for the keyboard shortcuts menu.
+    // Each entry is [property name of the command on UserInterface, label].
+    const SHORTCUT_GROUPS = [
+        {title: "Editing", commands: [
+            ["evaluateCommand",     "Evaluate the circuit",],
+            ["undoCommand",         "Undo",],
+            ["redoCommand",         "Redo",],
+        ],},
+        {title: "Terminals", commands: [
+            ["placeVddCommand",     "Move VDD to the cursor",],
+            ["placeGndCommand",     "Move GND to the cursor",],
+            ["addInputCommand",     "Add an input",],
+            ["removeInputCommand",  "Remove an input",],
+            ["addOutputCommand",    "Add an output",],
+            ["removeOutputCommand", "Remove an output",],
+        ],},
+        {title: "Grid", commands: [
+            ["shiftLeftCommand",    "Shift the grid left",],
+            ["shiftRightCommand",   "Shift the grid right",],
+            ["shiftUpCommand",      "Shift the grid up",],
+            ["shiftDownCommand",    "Shift the grid down",],
+            ["insertColCommand",    "Insert a column at the cursor",],
+            ["deleteColCommand",    "Delete the column at the cursor",],
+            ["insertRowCommand",    "Insert a row at the cursor",],
+            ["deleteRowCommand",    "Delete the row at the cursor",],
+        ],},
+        {title: "Appearance", commands: [
+            ["darkModeCommand",     "Toggle dark mode",],
+            ["themeCommand",        "Next layer palette",],
+            ["transparencyCommand", "Toggle layer transparency",],
+            ["gridCommand",         "Toggle grid lines",],
+        ],},
+    ];
+
+    function bindingOf(command) {
+        return {
+            keyCode:       command.keyCode,
+            shiftModifier: Boolean(command.shiftModifier),
+            ctrlModifier:  Boolean(command.ctrlModifier),
+            keyLabel:      command.keyLabel,
+        };
+    }
+
+    function sameBinding(a, b) {
+        return a.keyCode === b.keyCode &&
+            Boolean(a.shiftModifier) === Boolean(b.shiftModifier) &&
+            Boolean(a.ctrlModifier) === Boolean(b.ctrlModifier);
+    }
+
+    // Slide-in menu that shows one page at a time.
+    // Pages are <section class="menu-page" data-page="..."> elements;
+    // any element with data-goto="page" opens that page.
+    // Back (or Escape) returns to the previous page, and closes the menu from the first page.
+    class MenuPanel {
+        constructor() {
+            this.drawer      = document.getElementById("menu-drawer");
+            this.backdrop    = document.getElementById("menu-backdrop");
+            this.title       = document.getElementById("menu-title");
+            this.backButton  = document.getElementById("menu-back-btn");
+            this.scroller    = this.drawer.querySelector(".menu-pages");
+            this.pages       = {};
+            this.stack       = [];
+            this.pageHandlers = {};
+            this.closeHandlers = [];
+
+            Array.from(this.drawer.querySelectorAll(".menu-page")).forEach(function(page) {
+                this.pages[page.dataset.page] = page;
+                page.hidden = true;
+            }.bind(this));
+
+            this.drawer.addEventListener("click", function(event) {
+                const link = event.target.closest("[data-goto]");
+                if(link) {
+                    this.push(link.dataset.goto, link);
+                }
+            }.bind(this));
+
+            this.backButton.onclick = this.back.bind(this);
+            document.getElementById("menu-close-btn").onclick = this.close.bind(this);
+            this.backdrop.onclick = this.close.bind(this);
+        }
+
+        isOpen() {
+            return this.drawer.classList.contains("open");
+        }
+
+        // Run handler(pageElement) each time the named page is shown.
+        onShow(pageName, handler) {
+            this.pageHandlers[pageName] = handler;
+        }
+
+        // Run handler() each time the menu closes.
+        onClose(handler) {
+            this.closeHandlers.push(handler);
+        }
+
+        open(pageName) {
+            this.stack = [{name: pageName || "main", opener: null, scrollTop: 0,},];
+            this.show("none");
+
+            if(!this.isOpen()) {
+                this.drawer.classList.add("open");
+                this.backdrop.classList.add("open");
+                document.documentElement.classList.add("menu-open");
+                document.getElementById("main-container").inert = true;
+            }
+
+            this.focusFirst();
+        }
+
+        close() {
+            if(!this.isOpen()) {
+                return false;
+            }
+
+            this.drawer.classList.remove("open");
+            this.backdrop.classList.remove("open");
+            document.documentElement.classList.remove("menu-open");
+            document.getElementById("main-container").inert = false;
+
+            if(this.drawer.contains(document.activeElement)) {
+                document.activeElement.blur();
+            }
+
+            this.closeHandlers.forEach(handler => handler());
+            return true;
+        }
+
+        // Open a page on top of the current one. opener is the element to refocus when coming back.
+        push(pageName, opener) {
+            this.stack[this.stack.length - 1].scrollTop = this.scroller.scrollTop;
+            this.stack.push({name: pageName, opener: opener || null, scrollTop: 0,});
+            this.show("forward");
+            this.focusFirst();
+        }
+
+        back() {
+            if(this.stack.length < 2) {
+                return this.close();
+            }
+
+            const leaving = this.stack.pop();
+            this.show("back");
+
+            if(leaving.opener) {
+                leaving.opener.focus({preventScroll: true,});
+            } else {
+                this.focusFirst();
+            }
+
+            return true;
+        }
+
+        show(direction) {
+            const entry = this.stack[this.stack.length - 1];
+            const page  = this.pages[entry.name];
+
+            Object.keys(this.pages).forEach(function(name) {
+                this.pages[name].hidden = name !== entry.name;
+                this.pages[name].classList.remove("enter-forward", "enter-back");
+            }.bind(this));
+
+            if(direction !== "none") {
+                page.classList.add("enter-" + direction);
+            }
+
+            this.title.textContent = page.dataset.title;
+            this.backButton.classList.toggle("invisible", this.stack.length < 2);
+
+            if(this.pageHandlers[entry.name]) {
+                this.pageHandlers[entry.name](page);
+            }
+
+            this.scroller.scrollTop = entry.scrollTop;
+        }
+
+        currentPage() {
+            return this.stack.length > 0 ? this.stack[this.stack.length - 1].name : null;
+        }
+
+        focusableElements() {
+            return Array.from(this.drawer.querySelectorAll("button, a[href]")).filter(function(element) {
+                return !element.disabled && element.offsetParent !== null && getComputedStyle(element).visibility !== "hidden";
+            });
+        }
+
+        focusFirst() {
+            const page  = this.pages[this.currentPage()];
+            const first = this.focusableElements().find(element => page.contains(element));
+            (first || document.getElementById("menu-close-btn")).focus({preventScroll: true,});
+        }
+
+        // Keep Tab and Shift+Tab inside the menu while it is open.
+        trapFocus(event) {
+            const focusable = this.focusableElements();
+            const first     = focusable[0];
+            const last      = focusable[focusable.length - 1];
+            const inside    = this.drawer.contains(document.activeElement);
+
+            if(!inside || (event.shiftKey && document.activeElement === first)) {
+                event.preventDefault();
+                (event.shiftKey ? last : first).focus();
+            } else if(!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+            }
+        }
+
+        keydownHandler(event) {
+            if(event.key === "Tab") {
+                this.trapFocus(event);
+            } else if(event.key === "Escape") {
+                event.preventDefault();
+            }
+        }
+
+        keyupHandler(event) {
+            if(event.key === "Escape") {
+                this.back();
+            }
+        }
+    }
+
+    // The keyboard shortcuts page: lists every shortcut and lets the user change or reset each one.
+    class ShortcutEditor {
+        constructor(ui) {
+            this.ui             = ui;
+            this.list           = document.getElementById("shortcut-list");
+            this.resetAllButton = document.getElementById("reset-shortcuts-btn");
+            this.capturing      = null; // Command waiting for its new key combination.
+            this.message        = null; // {command, text, isInfo, conflict} shown under that command's row.
+
+            this.resetAllButton.onclick = this.resetAll.bind(this);
+        }
+
+        render() {
+            this.list.textContent = "";
+
+            SHORTCUT_GROUPS.forEach(function(group) {
+                this.list.appendChild(this.renderGroup(group.title, group.commands.map(entry => this.ui[entry[0]])));
+            }.bind(this));
+
+            this.list.appendChild(this.renderFixedGroup());
+            this.resetAllButton.disabled = this.ui.editableCommands().every(command => this.ui.isDefaultBinding(command));
+        }
+
+        renderGroup(title, commands) {
+            const fragment = document.createDocumentFragment();
+            const heading  = document.createElement("h3");
+            const list     = document.createElement("ul");
+
+            heading.className = "menu-group-title";
+            heading.textContent = title;
+            list.className = "menu-list";
+            commands.forEach(command => list.appendChild(this.renderRow(command)));
+
+            fragment.appendChild(heading);
+            fragment.appendChild(list);
+            return fragment;
+        }
+
+        renderRow(command) {
+            const row   = document.createElement("li");
+            const label = document.createElement("span");
+
+            row.className = "shortcut-row";
+            label.className = "shortcut-label";
+            label.textContent = command.label;
+
+            row.appendChild(label);
+            row.appendChild(this.renderKeyButton(command));
+            row.appendChild(this.renderResetButton(command));
+
+            if(this.message && this.message.command === command) {
+                row.appendChild(this.renderMessage());
+            }
+
+            return row;
+        }
+
+        renderKeyButton(command) {
+            const button = document.createElement("button");
+            const isDefault = this.ui.isDefaultBinding(command);
+
+            button.type = "button";
+            button.className = "shortcut-key";
+            button.dataset.command = command.id;
+            button.onclick = this.startCapture.bind(this, command);
+
+            if(this.capturing === command) {
+                button.classList.add("capturing");
+                button.textContent = "Press keys…";
+                button.setAttribute("aria-label", `${command.label}: waiting for new shortcut`);
+            } else {
+                this.appendKeys(button, command);
+                button.classList.toggle("modified", !isDefault);
+                button.setAttribute("aria-label", `${command.label}: ${this.ui.describeShortcut(command)}${isDefault ? "" : " (changed)"}. Select to change.`);
+            }
+
+            return button;
+        }
+
+        renderResetButton(command) {
+            const button = document.createElement("button");
+            const defaultText = this.ui.describeShortcut(command.defaultBinding);
+
+            button.type = "button";
+            button.className = "shortcut-reset";
+            button.innerHTML = '<i class="fas fa-rotate-left" aria-hidden="true"></i>';
+            button.title = `Reset to ${defaultText}`;
+            button.setAttribute("aria-label", `Reset ${command.label} to ${defaultText}`);
+            button.onclick = this.resetOne.bind(this, command);
+            button.classList.toggle("invisible", this.ui.isDefaultBinding(command));
+
+            return button;
+        }
+
+        renderMessage() {
+            const box = document.createElement("div");
+            const text = document.createElement("div");
+
+            box.className = "shortcut-message" + (this.message.isInfo ? " info" : "");
+            box.setAttribute("role", this.message.isInfo ? "status" : "alert");
+            text.textContent = this.message.text;
+            box.appendChild(text);
+
+            if(this.message.conflict) {
+                box.appendChild(this.renderMessageButton("Swap them", true, this.confirmSwap.bind(this)));
+                box.appendChild(this.renderMessageButton("Cancel", false, this.cancel.bind(this)));
+            }
+
+            return box;
+        }
+
+        renderMessageButton(text, isPrimary, onclick) {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "menu-button" + (isPrimary ? " primary" : "");
+            button.textContent = text;
+            button.onclick = onclick;
+            return button;
+        }
+
+        // Keys that are not rebindable, listed so users know they are taken.
+        renderFixedGroup() {
+            const ui = this.ui;
+            const inputs  = ui.diagram.inputs.map((_, index) => String.fromCharCode(65 + index));
+            const outputs = ui.diagram.outputs.map((_, index) => String.fromCharCode(89 - index));
+            const rows = [
+                ["Close the menu, or go back a page", ["Esc",],],
+                ["Move an input terminal to the cursor", inputs.length ? inputs : ["A",],],
+                ["Move an output terminal to the cursor", outputs.length ? outputs : ["Y",],],
+            ];
+            const fragment = this.renderGroup("Fixed", []);
+            const list = fragment.lastChild;
+
+            rows.forEach(function(entry) {
+                const row = document.createElement("li");
+                const label = document.createElement("span");
+                const keys = document.createElement("span");
+
+                row.className = "shortcut-row";
+                label.className = "shortcut-label";
+                label.textContent = entry[0];
+                keys.className = "shortcut-fixed";
+                entry[1].forEach(name => keys.appendChild(ShortcutEditor.kbd(name)));
+                row.appendChild(label);
+                row.appendChild(keys);
+                list.appendChild(row);
+            });
+
+            return fragment;
+        }
+
+        static kbd(text) {
+            const element = document.createElement("kbd");
+            element.textContent = text;
+            return element;
+        }
+
+        appendKeys(element, binding) {
+            this.ui.describeShortcutParts(binding).forEach(
+                part => element.appendChild(ShortcutEditor.kbd(part))
+            );
+        }
+
+        // Re-render, then return focus to the given command's key button.
+        refresh(focusCommand) {
+            this.render();
+
+            if(focusCommand) {
+                const button = this.list.querySelector(`[data-command="${focusCommand.id}"]`);
+                if(button) {
+                    button.focus({preventScroll: true,});
+                }
+            }
+        }
+
+        startCapture(command) {
+            this.capturing = command;
+            this.message = {command: command, text: "Press the new key combination. Esc cancels.", isInfo: true,};
+            this.refresh(command);
+        }
+
+        cancel() {
+            const command = this.capturing || (this.message && this.message.command);
+            this.capturing = null;
+            this.message = null;
+
+            if(this.list.isConnected) {
+                this.refresh(command);
+            }
+        }
+
+        // Handle a keydown while the shortcuts page is open. Returns true if the event was used here.
+        keydownHandler(event) {
+            if(this.capturing && this.ui.menuPanel.currentPage() !== "shortcuts") {
+                // The user left the page mid-capture; drop it rather than catching keys elsewhere.
+                this.capturing = null;
+                this.message = null;
+            }
+
+            if(!this.capturing) {
+                return false;
+            }
+
+            event.preventDefault();
+            this.ui.keyupToIgnore = event.keyCode;
+
+            if(event.key === "Escape") {
+                this.cancel();
+            } else if(!ShortcutEditor.isModifierKey(event.keyCode)) {
+                this.tryBinding(this.capturing, {
+                    keyCode:       event.keyCode,
+                    shiftModifier: event.shiftKey,
+                    ctrlModifier:  event.ctrlKey,
+                    keyLabel:      event.key,
+                }, event);
+            }
+
+            return true;
+        }
+
+        static isModifierKey(keyCode) {
+            // Shift, Ctrl, Alt, Caps Lock, and the Meta/OS keys.
+            return [16, 17, 18, 20, 91, 92, 93, 224,].includes(keyCode);
+        }
+
+        tryBinding(command, binding, event) {
+            const problem = this.ui.shortcutProblem(binding, event);
+            const other   = this.ui.commandWithBinding(binding, command);
+
+            if(problem) {
+                this.message = {command: command, text: problem, isInfo: false,};
+                this.refresh(command);
+            } else if(other) {
+                this.capturing = null;
+                this.message = {
+                    command:  command,
+                    text:     `${this.ui.describeShortcut(binding)} is already used by “${other.label}”.`,
+                    isInfo:   false,
+                    conflict: {binding: binding, other: other,},
+                };
+                this.refresh(command);
+                this.list.querySelector(".shortcut-message .menu-button").focus({preventScroll: true,});
+            } else {
+                this.capturing = null;
+                this.message = null;
+                this.ui.setBindings([[command, binding,],]);
+                this.refresh(command);
+            }
+        }
+
+        // Give the conflicting command this command's old shortcut, and this command the new one.
+        confirmSwap() {
+            const command  = this.message.command;
+            const conflict = this.message.conflict;
+
+            this.message = null;
+            this.ui.setBindings([
+                [conflict.other, bindingOf(command),],
+                [command,        conflict.binding,],
+            ]);
+            this.refresh(command);
+        }
+
+        resetOne(command) {
+            const other = this.ui.commandWithBinding(command.defaultBinding, command);
+            const changes = [[command, command.defaultBinding,],];
+
+            this.capturing = null;
+            this.message = null;
+
+            if(other) {
+                // Another command took this default; it gets this command's current shortcut instead.
+                changes.unshift([other, bindingOf(command),]);
+                this.message = {
+                    command: command,
+                    text:    `“${other.label}” now uses ${this.ui.describeShortcut(command)}, because it had this default.`,
+                    isInfo:  true,
+                };
+            }
+
+            this.ui.setBindings(changes);
+            this.refresh(command);
+        }
+
+        resetAll() {
+            this.capturing = null;
+            this.message = null;
+            this.ui.setBindings(this.ui.editableCommands().map(command => [command, command.defaultBinding,]));
+            this.render();
+            // The reset button is now disabled, so move focus to the first shortcut.
+            this.list.querySelector(".shortcut-key").focus({preventScroll: true,});
+        }
+    }
+
     class UserInterface {
         constructor(diagram) {
             this.diagram           = diagram;
@@ -2899,18 +3420,15 @@
             this.diagramView       = diagram.view;
             this.diagramGrid       = diagram.layeredGrid;
 
-            // Order matters
-            // Lower-indexed menus are displayed at the same level as or over higher-indexed menus.
+            // Panels opened and closed by "open-<name>-btn" and "close-<name>-btn".
+            // The slide-in main menu is handled by this.menuPanel instead.
             this.menus = [
-                //"qrcode-menu",
-                "licenses-menu",
-                "tutorials",
-                "instructions",
-                "about-page",
-                "options-menu",
-                "main-menu",
                 "terminal-menu",
             ];
+
+            this.menuPanel      = new MenuPanel();
+            this.shortcutEditor = new ShortcutEditor(this);
+            this.keyupToIgnore  = null;
 
             this.allCommands        = [];
             this.shiftCommands      = [];
@@ -2923,17 +3441,12 @@
             this.initHistoryCommands();
             this.initRowColCommands();
 
-            this.allCommands.forEach(function(command) {
-                if(command.ctrlModifier) {
-                    this.ctrlCommands[command.keyCode] = command.action;
-                }
-                else if(command.shiftModifier) {
-                    this.shiftCommands[command.keyCode] = command.action;
-                }
-                else {
-                    this.noModifierCommands[command.keyCode] = command.action;
-                }
-            }.bind(this));
+            this.labelCommands();
+            if(!window.runTestbench) {
+                // The testbench expects the default shortcuts.
+                this.loadShortcuts();
+            }
+            this.rebuildCommandTables();
 
             this.addListeners();
             this.setUpControls();
@@ -2949,7 +3462,10 @@
         }
 
         keydownHandler(event) {
-            if(!document.getElementById("main-menu").classList.contains("closed")) {
+            if(this.menuPanel.isOpen()) {
+                if(!this.shortcutEditor.keydownHandler(event)) {
+                    this.menuPanel.keydownHandler(event);
+                }
                 return;
             }
             
@@ -2960,17 +3476,12 @@
             let isOutput = function(keyCode) {
                 return (keyCode <= 89) && (keyCode > 89 - this.diagram.outputs.length);
             }.bind(this);
-            // GND and VDD are handled in shiftCommandHandler.
 
-            if (event.shiftKey && this.shiftCommands[event.keyCode]) {
-                event.preventDefault();
-                this.shiftCommands[event.keyCode](event);
+            if(this.dispatchCommand(event)) {
+                return;
             }
-            else if (event.ctrlKey && this.ctrlCommands[event.keyCode])           {
-                event.preventDefault();
-                this.ctrlCommands[event.keyCode](event);
-            }
-            else if (isInput(event.keyCode))  {
+
+            if (isInput(event.keyCode))  {
                 event.preventDefault();
                 this.diagramController.placeTerminal(event, this.diagram.inputs[event.keyCode - 65]);
             }
@@ -2980,23 +3491,225 @@
             }
         }
 
-        // Only change dark/light mode on keyup to avoid seizure-inducing flashes from holding down space.
         keyupHandler(event) {
-            if(document.getElementById("main-menu").classList.contains("closed")) {
-                // Only do the following if ctrl is pressed.
-                if (event.ctrlKey && this.ctrlCommands[event.keyCode]) {
-                    // Run the registered shift command.
-                    this.ctrlCommands[event.keyCode](event);
-                }
-                // Only do the following if shift is pressed.
-                else if (event.shiftKey && this.shiftCommands[event.keyCode]) {
-                    // Run the registered shift command.
-                    this.shiftCommands[event.keyCode](event);
-                }
+            // Ignore the release of a key whose press was already used,
+            // e.g. while setting a new shortcut.
+            if(event.keyCode === this.keyupToIgnore) {
+                this.keyupToIgnore = null;
+                return;
             }
 
-            if (!event.shiftKey && !event.ctrlKey && this.noModifierCommands[event.keyCode]) {
-                this.noModifierCommands[event.keyCode](event);
+            if(this.menuPanel.isOpen()) {
+                this.menuPanel.keyupHandler(event);
+                return;
+            }
+
+            this.dispatchCommand(event);
+        }
+
+        // Run the command bound to this key event, if any.
+        // Each command acts on one phase (keydown or keyup), whichever key it is bound to.
+        // Returns true if a command is bound to the key, even when this phase is not the one it acts on.
+        dispatchCommand(event) {
+            let table = this.noModifierCommands;
+
+            if(event.ctrlKey) {
+                table = this.ctrlCommands;
+            } else if(event.shiftKey) {
+                table = this.shiftCommands;
+            }
+
+            const command = table[event.keyCode];
+
+            if(!command) {
+                return false;
+            }
+
+            if(event.type === "keydown" && (event.ctrlKey || event.shiftKey)) {
+                // Keep the browser from acting on combinations such as Ctrl+Z.
+                event.preventDefault();
+            }
+
+            if(event.type === command.phase) {
+                command.action(event);
+            }
+
+            return true;
+        }
+
+        // Give each editable command its id, label and default binding.
+        labelCommands() {
+            SHORTCUT_GROUPS.forEach(function(group) {
+                group.commands.forEach(function(entry) {
+                    const command = this[entry[0]];
+                    command.id = entry[0];
+                    command.label = entry[1];
+                    command.defaultBinding = bindingOf(command);
+                }.bind(this));
+            }.bind(this));
+        }
+
+        editableCommands() {
+            return this.allCommands.filter(command => !!command.id);
+        }
+
+        isDefaultBinding(command) {
+            return sameBinding(command, command.defaultBinding);
+        }
+
+        commandWithBinding(binding, except) {
+            return this.editableCommands().find(command => command !== except && sameBinding(command, binding));
+        }
+
+        // Rebuild the lookup tables used to dispatch key events.
+        rebuildCommandTables() {
+            this.shiftCommands      = [];
+            this.ctrlCommands       = [];
+            this.noModifierCommands = [];
+
+            this.allCommands.forEach(function(command) {
+                if(command.ctrlModifier) {
+                    this.ctrlCommands[command.keyCode] = command;
+                }
+                else if(command.shiftModifier) {
+                    this.shiftCommands[command.keyCode] = command;
+                }
+                else {
+                    this.noModifierCommands[command.keyCode] = command;
+                }
+            }.bind(this));
+        }
+
+        // Apply [command, binding] pairs together, then save and refresh everything that shows shortcuts.
+        setBindings(changes) {
+            changes.forEach(function(change) {
+                change[0].keyCode       = change[1].keyCode;
+                change[0].shiftModifier = !!change[1].shiftModifier;
+                change[0].ctrlModifier  = !!change[1].ctrlModifier;
+                change[0].keyLabel      = change[1].keyLabel;
+            });
+
+            this.rebuildCommandTables();
+            this.saveShortcuts();
+            this.refreshShortcutLabels();
+        }
+
+        // Explain why a key combination can't be used as a shortcut, or return null if it can.
+        shortcutProblem(binding, event) {
+            const keyCode = binding.keyCode;
+            const isPlain = !binding.shiftModifier && !binding.ctrlModifier;
+            // Plain letters A-H and R-Y place input and output terminals (up to eight in total).
+            const isTerminalLetter = (keyCode >= 65 && keyCode <= 72) || (keyCode >= 82 && keyCode <= 89);
+            const checks = [
+                [
+                    event.altKey || event.metaKey,
+                    "Alt and Meta (⌘ or Windows key) shortcuts aren't supported. Use Shift or Ctrl.",
+                ],
+                [
+                    binding.shiftModifier && binding.ctrlModifier,
+                    "Use Shift or Ctrl, not both.",
+                ],
+                [
+                    keyCode === 9,
+                    "Tab is reserved for moving between controls.",
+                ],
+                [
+                    isPlain && isTerminalLetter,
+                    "On their own, A–H and R–Y move terminals. Add Shift or Ctrl.",
+                ],
+                [
+                    binding.ctrlModifier && [78, 84, 87,].includes(keyCode),
+                    `Browsers reserve Ctrl+${String.fromCharCode(keyCode)}.`,
+                ],
+            ];
+            const problem = checks.find(check => check[0]);
+
+            return problem ? problem[1] : null;
+        }
+
+        static keyName(keyCode, keyLabel) {
+            const names = {
+                8: "Backspace", 9: "Tab", 13: "Enter", 27: "Esc", 32: "Space", 33: "Page Up", 34: "Page Down",
+                35: "End", 36: "Home", 37: "←", 38: "↑", 39: "→", 40: "↓", 45: "Insert", 46: "Delete",
+            };
+            const inRange = (low, high) => keyCode >= low && keyCode <= high;
+
+            if(names[keyCode]) {
+                return names[keyCode];
+            } else if(inRange(48, 57) || inRange(65, 90)) {
+                return String.fromCharCode(keyCode);
+            } else if(inRange(112, 123)) {
+                return "F" + (keyCode - 111);
+            }
+
+            // Punctuation and other keys: use the character the key produced when it was bound.
+            return keyLabel && keyLabel.length === 1 ? keyLabel.toUpperCase() : (keyLabel || "Key " + keyCode);
+        }
+
+        describeShortcutParts(binding) {
+            const parts = [];
+
+            if(binding.ctrlModifier) {
+                parts.push("Ctrl");
+            }
+            if(binding.shiftModifier) {
+                parts.push("Shift");
+            }
+
+            parts.push(UserInterface.keyName(binding.keyCode, binding.keyLabel));
+            return parts;
+        }
+
+        describeShortcut(binding) {
+            return this.describeShortcutParts(binding).join("+");
+        }
+
+        // Fill every <kbd data-shortcut="commandName"> with that command's current shortcut.
+        refreshShortcutLabels() {
+            document.querySelectorAll("[data-shortcut]").forEach(function(element) {
+                element.textContent = this.describeShortcut(this[element.dataset.shortcut]);
+            }.bind(this));
+        }
+
+        // Restore shortcuts saved in this browser. Saved shortcuts that collide are all discarded.
+        loadShortcuts() {
+            let saved;
+
+            try {
+                saved = JSON.parse(window.localStorage.getItem(SHORTCUT_STORAGE_KEY)) || {};
+            } catch(e) {
+                return;
+            }
+
+            const changes = this.editableCommands().filter(command => {
+                const binding = saved[command.id];
+                return binding && Number.isInteger(binding.keyCode);
+            }).map(command => [command, saved[command.id],]);
+
+            changes.forEach(change => Object.assign(change[0], bindingOf(change[1])));
+
+            const commands = this.editableCommands();
+            const collides = commands.some((command, index) => commands.slice(index + 1).some(other => sameBinding(command, other)));
+
+            if(collides) {
+                commands.forEach(command => Object.assign(command, command.defaultBinding));
+            }
+        }
+
+        // Save only the shortcuts that differ from their defaults.
+        saveShortcuts() {
+            const changed = {};
+
+            this.editableCommands().forEach(function(command) {
+                if(!this.isDefaultBinding(command)) {
+                    changed[command.id] = bindingOf(command);
+                }
+            }.bind(this));
+
+            try {
+                window.localStorage.setItem(SHORTCUT_STORAGE_KEY, JSON.stringify(changed));
+            } catch(e) {
+                // Storage can be unavailable (private browsing, blocked site data); shortcuts then last for this visit only.
             }
         }
 
@@ -3005,20 +3718,18 @@
                 // CTRL-Z
                 ctrlModifier: true,
                 keyCode:      90,
-                action:       function(e) {
-                    if(e.type.includes('down')) {
-                        this.diagramController.undo();
-                    }
+                phase:        "keydown",
+                action:       function() {
+                    this.diagramController.undo();
                 }.bind(this),
             };
             this.redoCommand = {
                 // CTRL-Y
                 ctrlModifier: true,
                 keyCode:      89,
-                action:       function(e) {
-                    if(e.type.includes('down')) {
-                        this.diagramController.redo();
-                    }
+                phase:        "keydown",
+                action:       function() {
+                    this.diagramController.redo();
                 }.bind(this),
             };
 
@@ -3030,6 +3741,7 @@
             this.exitMenuCommand = {
                 // ESC
                 keyCode: 27,
+                phase:   "keyup",
                 action:  function() {
                     this.closeTopMenu();
                 }.bind(this),
@@ -3037,6 +3749,7 @@
             this.evaluateCommand = {
                 // ENTER
                 keyCode: 13,
+                phase:   "keyup",
                 action:  function() {
                     this.refreshTruthTable();
                 }.bind(this),
@@ -3051,10 +3764,9 @@
             this.placeVddCommand = {
                 shiftModifier: true,
                 keyCode:       86,
+                phase:         "keydown",
                 action:        function(e) {
-                    if(e.type.includes('down')) {
-                        this.diagramController.placeTerminal(e, this.diagram.vddCell);
-                    }
+                    this.diagramController.placeTerminal(e, this.diagram.vddCell);
                 }.bind(this),
             };
 
@@ -3062,32 +3774,29 @@
             this.placeGndCommand = {
                 shiftModifier: true,
                 keyCode:       71,
+                phase:         "keydown",
                 action:        function(e) {
-                    if(e.type.includes('down')) {
-                        this.diagramController.placeTerminal(e, this.diagram.gndCell);
-                    }
+                    this.diagramController.placeTerminal(e, this.diagram.gndCell);
                 }.bind(this),
             };
 
             // I
             this.addInputCommand = {
                 keyCode: 73,
-                action:  function(e) {
-                    if(e.type.includes('up')) {
-                        this.diagramController.addTerminal(false);
-                        this.populateTermSelect();
-                    }
+                phase:   "keyup",
+                action:  function() {
+                    this.diagramController.addTerminal(false);
+                    this.populateTermSelect();
                 }.bind(this),
             };
 
             // O
             this.addOutputCommand = {
                 keyCode: 79,
-                action:  function(e) {
-                    if(e.type.includes('up')) {
-                        this.diagramController.addTerminal(true);
-                        this.populateTermSelect();
-                    }
+                phase:   "keyup",
+                action:  function() {
+                    this.diagramController.addTerminal(true);
+                    this.populateTermSelect();
                 }.bind(this),
             };
 
@@ -3095,11 +3804,10 @@
             this.removeInputCommand = {
                 shiftModifier: true,
                 keyCode: 73,
-                action:  function(e) {
-                    if(e.type.includes('up')) {
-                        this.diagramController.removeTerminal(false);
-                        this.populateTermSelect();
-                    }
+                phase:   "keyup",
+                action:  function() {
+                    this.diagramController.removeTerminal(false);
+                    this.populateTermSelect();
                 }.bind(this),
             };
 
@@ -3107,11 +3815,10 @@
             this.removeOutputCommand = {
                 shiftModifier: true,
                 keyCode: 79,
-                action:  function(e) {
-                    if(e.type.includes('up')) {
-                        this.diagramController.removeTerminal(true);
-                        this.populateTermSelect();
-                    }
+                phase:   "keyup",
+                action:  function() {
+                    this.diagramController.removeTerminal(true);
+                    this.populateTermSelect();
                 }.bind(this),
             };
 
@@ -3128,118 +3835,46 @@
             this.allCommands.push(this.removeOutputCommand);
         }
 
+        // Insert (positive) or delete a column (byRow false) or row (byRow true) at the cursor.
+        // Without a cell under the cursor, grow or shrink the grid at its edge instead.
+        insertRemoveAtCursor(byRow, positive) {
+            const coords = this.diagramController.getCellAtCursor();
+            const axis   = byRow ? "y" : "x";
+            const hasOwn = Object.hasOwn ? Object.hasOwn(coords, axis) : coords.hasOwnProperty(axis); // compatibility
+            const offset = positive ? 1 : -1;
+
+            if(hasOwn) {
+                this.diagramGrid.insertRemoveRowColAt(coords[axis], positive, byRow);
+            } else if(byRow) {
+                this.diagramGrid.resize(this.diagramGrid.width, this.diagramGrid.height + offset);
+            } else {
+                this.diagramGrid.resize(this.diagramGrid.width + offset, this.diagramGrid.height);
+            }
+        }
+
         initRowColCommands() {
-            // SHIFT + LEFT ARROW
-            this.shiftLeftCommand = {
-                shiftModifier: true,
-                keyCode: 37,
-                action:  function(e) {
-                    if(e.type.includes('up')) {
-                        this.diagramGrid.shift(0, false, -1);
-                    }
-                }.bind(this),
-            };
+            // Arrow keys: 37 left, 38 up, 39 right, 40 down.
+            // SHIFT + arrow shifts the grid; CTRL + arrow inserts (right/down)
+            // or deletes (left/up) at the cursor.
+            const shift = (byRow, offset) => () => this.diagramGrid.shift(0, byRow, offset);
+            const edit  = (byRow, positive) => () => this.insertRemoveAtCursor(byRow, positive);
+            const command = (keyCode, modifier, action) => ({
+                keyCode:       keyCode,
+                shiftModifier: modifier === "shift",
+                ctrlModifier:  modifier === "ctrl",
+                phase:         "keyup",
+                action:        action,
+            });
 
-            // SHIFT + UP ARROW
-            this.shiftUpCommand = {
-                shiftModifier: true,
-                keyCode: 38,
-                action:  function(e) {
-                    if(e.type.includes('up')) {
-                        this.diagramGrid.shift(0, true, -1);
-                    }
-                }.bind(this),
-            };
+            this.shiftLeftCommand  = command(37, "shift", shift(false, -1));
+            this.shiftUpCommand    = command(38, "shift", shift(true,  -1));
+            this.shiftRightCommand = command(39, "shift", shift(false,  1));
+            this.shiftDownCommand  = command(40, "shift", shift(true,   1));
 
-            // SHIFT + RIGHT ARROW
-            this.shiftRightCommand = {
-                shiftModifier: true,
-                keyCode: 39,
-                action:  function(e) {
-                    if(e.type.includes('up')) {
-                        this.diagramGrid.shift(0, false, 1);
-                    }
-                }.bind(this),
-            };
-
-            // SHIFT + DOWN ARROW
-            this.shiftDownCommand = {
-                shiftModifier: true,
-                keyCode: 40,
-                action:  function(e) {
-                    if(e.type.includes('up')) {
-                        this.diagramGrid.shift(0, true, 1);
-                    }
-                }.bind(this),
-            };
-
-            // CTRL + LEFT ARROW
-            this.deleteColCommand = {
-                ctrlModifier: true,
-                keyCode:      37,
-                action:       function(e) {
-                    if(e.type.includes('up')) {
-                        const coords = this.diagramController.getCellAtCursor();
-                        const hasOwn = Object.hasOwn ? Object.hasOwn(coords, "x") : coords.hasOwnProperty("x"); // compatibility
-                        if(hasOwn) {
-                            this.diagramGrid.insertRemoveRowColAt(coords.x, false, false);
-                        } else {
-                            this.diagramGrid.resize(this.diagramGrid.width - 1, this.diagramGrid.height);
-                        }
-                    }
-                }.bind(this),
-            };
-
-            // CTRL + UP ARROW
-            this.deleteRowCommand = {
-                ctrlModifier: true,
-                keyCode:       38,
-                action:        function(e) {
-                    if(e.type.includes('up')) {
-                        const coords = this.diagramController.getCellAtCursor();
-                        const hasOwn = Object.hasOwn ? Object.hasOwn(coords, "y") : coords.hasOwnProperty("y"); // compatibility
-                        if(hasOwn) {
-                            this.diagramGrid.insertRemoveRowColAt(coords.y, false, true);
-                        } else {
-                            this.diagramGrid.resize(this.diagramGrid.width, this.diagramGrid.height - 1);
-                        }
-                    }
-                }.bind(this),
-            };
-
-            // CTRL + RIGHT ARROW
-            this.insertColCommand = {
-                ctrlModifier: true,
-                keyCode:      39,
-                action:       function(e) {
-                    if(e.type.includes('up')) {
-                        const coords = this.diagramController.getCellAtCursor();
-                        const hasOwn = Object.hasOwn ? Object.hasOwn(coords, "x") : coords.hasOwnProperty("x"); // compatibility
-                        if(hasOwn) {
-                            this.diagramGrid.insertRemoveRowColAt(coords.x, true, false);
-                        } else {
-                            this.diagramGrid.resize(this.diagramGrid.width + 1, this.diagramGrid.height);
-                        }
-                    }
-                }.bind(this),
-            };
-
-            // CTRL + DOWN ARROW
-            this.insertRowCommand = {
-                ctrlModifier: true,
-                keyCode:      40,
-                action:       function(e) {
-                    if(e.type.includes('up')) {
-                        const coords = this.diagramController.getCellAtCursor();
-                        const hasOwn = Object.hasOwn ? Object.hasOwn(coords, "y") : coords.hasOwnProperty("y"); // compatibility
-                        if(hasOwn) {
-                            this.diagramGrid.insertRemoveRowColAt(coords.y, true, true);
-                        } else {
-                            this.diagramGrid.resize(this.diagramGrid.width, this.diagramGrid.height + 1);
-                        }
-                    }
-                }.bind(this),
-            };
+            this.deleteColCommand  = command(37, "ctrl", edit(false, false));
+            this.deleteRowCommand  = command(38, "ctrl", edit(true,  false));
+            this.insertColCommand  = command(39, "ctrl", edit(false, true));
+            this.insertRowCommand  = command(40, "ctrl", edit(true,  true));
 
             this.allCommands.push(this.shiftLeftCommand);
             this.allCommands.push(this.shiftUpCommand);
@@ -3257,10 +3892,9 @@
             this.darkModeCommand = {
                 shiftModifier: true,
                 keyCode: 68,
-                action:  function(e) {
-                    if(e.type.includes('up')) {
-                        this.toggleDarkMode();
-                    }
+                phase:   "keyup",
+                action:  function() {
+                    this.toggleDarkMode();
                 }.bind(this),
             };
 
@@ -3268,10 +3902,9 @@
             this.transparencyCommand = {
                 shiftModifier: true,
                 keyCode: 70,
-                action:  function(e) {
-                    if(e.type.includes('up')) {
-                        this.toggleTransparency();
-                    }
+                phase:   "keyup",
+                action:  function() {
+                    this.toggleTransparency();
                 }.bind(this),
             };
             
@@ -3279,10 +3912,9 @@
             this.themeCommand = {
                 shiftModifier: true,
                 keyCode: 84,
-                action:  function(e) {
-                    if(e.type.includes('up')) {
-                        this.changeTheme();
-                    }
+                phase:   "keyup",
+                action:  function() {
+                    this.changeTheme();
                 }.bind(this),
             };
 
@@ -3290,10 +3922,9 @@
             this.gridCommand = {
                 shiftModifier: true,
                 keyCode: 76,
-                action:  function(e) {
-                    if(e.type.includes('up')) {
-                        this.toggleGrid();
-                    }
+                phase:   "keyup",
+                action:  function() {
+                    this.toggleGrid();
                 }.bind(this),
             };
 
@@ -3305,17 +3936,58 @@
 
         toggleGrid() {
             this.diagramView.showGrid = !this.diagramView.showGrid;
+            this.refreshOptions();
         }
 
         changeTheme() {
-            this.diagramView.theme = this.diagramView.theme < DiagramView.themes.length - 1 ? this.diagramView.theme + 1 : 0;
-            document.getElementById('palette-setting').innerHTML = DiagramView.themes[this.diagramView.theme];
+            if(this.diagramView.theme < DiagramView.themes.length - 1) {
+                this.setTheme(this.diagramView.theme + 1);
+            } else {
+                this.setTheme(0);
+            }
+        }
+
+        setTheme(themeIndex) {
+            this.diagramView.theme = themeIndex;
             this.setUpLayerSelector();
+            this.refreshOptions();
         }
 
         toggleTransparency() {
             this.diagramView.useFlatColors = !this.diagramView.useFlatColors;
-            document.getElementById('transparency-setting').innerHTML = this.diagramView.useFlatColors ? "OFF" : "ON";
+            this.refreshOptions();
+        }
+
+        // Build the palette choices on the Options page, one per theme.
+        setUpOptions() {
+            const palette = document.getElementById("palette-options");
+
+            DiagramView.themes.forEach(function(name, index) {
+                const button = document.createElement("button");
+                button.type = "button";
+                button.setAttribute("role", "radio");
+                button.textContent = name;
+                button.onclick = this.setTheme.bind(this, index);
+                palette.appendChild(button);
+            }.bind(this));
+
+            document.getElementById("option-dark-mode").onclick    = this.toggleDarkMode.bind(this);
+            document.getElementById("option-transparency").onclick = this.toggleTransparency.bind(this);
+            document.getElementById("option-grid").onclick         = this.toggleGrid.bind(this);
+        }
+
+        // Show the current appearance settings on the Options page.
+        refreshOptions() {
+            Array.from(document.getElementById("palette-options").children).forEach(function(button, index) {
+                button.setAttribute("aria-checked", index === this.diagramView.theme);
+            }.bind(this));
+
+            document.getElementById("option-dark-mode")
+                .setAttribute("aria-checked", Boolean(this.diagramView.darkMode));
+            document.getElementById("option-transparency")
+                .setAttribute("aria-checked", !this.diagramView.useFlatColors);
+            document.getElementById("option-grid")
+                .setAttribute("aria-checked", Boolean(this.diagramView.showGrid));
         }
 
         cellClickHandler(event) {
@@ -3563,37 +4235,37 @@
             // Some of these pertain the the canvas, but we don't know whether
             // it will be selected.
             window.addEventListener("touchend", function(e) {
-                if(document.getElementById("main-menu").classList.contains("closed")) {
+                if(!this.menuPanel.isOpen()) {
                     this.mouseupHandler(e);
                 }
             }.bind(this));
 
             window.addEventListener("mouseup", function(e) {
-                if(document.getElementById("main-menu").classList.contains("closed")) {
+                if(!this.menuPanel.isOpen()) {
                     this.mouseupHandler(e);
                 }
             }.bind(this));
 
             window.addEventListener("touchstart", function(e) {
-                if(document.getElementById("main-menu").classList.contains("closed")) {
+                if(!this.menuPanel.isOpen()) {
                     this.mousedownHandler(e);
                 }
             }.bind(this));
 
             window.addEventListener("mousedown", function(e) {
-                if(document.getElementById("main-menu").classList.contains("closed")) {
+                if(!this.menuPanel.isOpen()) {
                     this.mousedownHandler(e);
                 }
             }.bind(this));
 
             window.addEventListener("touchmove", function(e) {
-                if(document.getElementById("main-menu").classList.contains("closed")) {
+                if(!this.menuPanel.isOpen()) {
                     this.mousemoveHandler(e);
                 }
             }.bind(this));
 
             window.addEventListener("mousemove", function(e) {
-                if(document.getElementById("main-menu").classList.contains("closed")) {
+                if(!this.menuPanel.isOpen()) {
                     this.mousemoveHandler(e);
                 }
             }.bind(this));
@@ -3607,11 +4279,11 @@
             }.bind(this));
             
             window.addEventListener("contextmenu", function(e) {
-                if (e.button === 2 && this.document.getElementById("main-menu").classList.contains("closed")) {
+                if (e.button === 2 && !this.menuPanel.isOpen()) {
                     // Don't show a context menu.
                     e.preventDefault();
                 }
-            });
+            }.bind(this));
 
             // Set up the evaluate button.
             this.button = document.getElementById("evaluate-btn");
@@ -3644,13 +4316,25 @@
                 document.getElementById("close-" + menuName + "-btn").onclick = this.getCloseMenuFunction(menuName);
             }.bind(this));
 
+            this.setUpMenuPanel();
+
             const copyLinkBtn = document.getElementById("copy-link-btn");
             copyLinkBtn.onclick = function() {
                 const url = window.location.href.split('?')[0] + "?d=" + this.diagram.encode();
-                const oldText = copyLinkBtn.innerText;
-                navigator.clipboard.writeText(url);
-                copyLinkBtn.innerText = "Copied to clipboard!";
-                setTimeout(() => { copyLinkBtn.innerText = oldText; }, 1000);
+                const label = copyLinkBtn.querySelector(".menu-row-label");
+                const showResult = function(text, copied) {
+                    label.textContent = text;
+                    copyLinkBtn.classList.toggle("menu-row-done", copied);
+                    setTimeout(() => {
+                        label.textContent = "Copy sharable link";
+                        copyLinkBtn.classList.remove("menu-row-done");
+                    }, 1500);
+                };
+
+                navigator.clipboard.writeText(url).then(
+                    () => showResult("Copied to clipboard!", true),
+                    () => showResult("Couldn't copy the link", false)
+                );
             }.bind(this);
 
             document.getElementById("download-verilog-btn").onclick = function() {
@@ -3720,8 +4404,6 @@
             document.getElementById("dark-mode-btn").onclick = this.toggleDarkMode.bind(this);
             document.getElementById("undo-btn").onclick = this.diagramController.undo.bind(this.diagramController);
             document.getElementById("redo-btn").onclick = this.diagramController.redo.bind(this.diagramController);
-            document.getElementById('select-palette-btn').onclick = this.changeTheme.bind(this);
-            document.getElementById('toggle-transparency-btn').onclick = this.toggleTransparency.bind(this);
 
             document.getElementById("place-term-btn").onclick = function() {
                 let placeTermButton = document.getElementById("place-term-btn");
@@ -3779,10 +4461,6 @@
                 if(menu.classList.contains("closed")) {
                     menu.classList.remove("closed");
                 }
-
-                if(menuName === "main-menu") {
-                    document.getElementById("main-container").style.display = "none";
-                }
             };
         }
 
@@ -3792,31 +4470,37 @@
 
                 if(!menu.classList.contains("closed")) {
                     menu.classList.add("closed");
-
-                    if(menuName === "main-menu") {
-                        document.getElementById("main-container").style.display = "block";
-                    }
                     return true;
                 }
             };
         }
 
+        // Wire the slide-in main menu: its open button, and pages that render when shown.
+        setUpMenuPanel() {
+            document.getElementById("open-main-menu-btn").onclick = function() {
+                this.menuPanel.open();
+            }.bind(this);
+
+            this.setUpOptions();
+            this.refreshShortcutLabels();
+            this.menuPanel.onShow("options", this.refreshOptions.bind(this));
+            this.menuPanel.onShow("shortcuts", this.shortcutEditor.render.bind(this.shortcutEditor));
+            this.menuPanel.onClose(this.shortcutEditor.cancel.bind(this.shortcutEditor));
+        }
+
         closeTopMenu() {
+            if(this.menuPanel.isOpen()) {
+                this.menuPanel.back();
+                return;
+            }
+
             this.menus.some(function(menuName) {
                 return document.getElementById("close-" + menuName + "-btn").onclick();
             });
         }
 
-        /*
-        // Not needed now but maybe someday
-        menuIsOpen() {
-            return this.menus.some(function(menuName) {
-                return !document.getElementById(menuName).classList.contains("closed");
-            });
-        }
-        */
-
         closeAllMenus() {
+            this.menuPanel.close();
             this.menus.forEach(function(menuName) {
                 document.getElementById("close-" + menuName + "-btn").onclick();
             });
@@ -3969,6 +4653,8 @@
                 document.getElementById('dark-mode-btn').classList.remove('fa-sun');
                 document.getElementById('dark-mode-btn').classList.add('fa-cloud-moon');
             }
+
+            this.refreshOptions();
         }
 
         setUpLayerSelector() {
@@ -4070,8 +4756,17 @@
     }
 
     window.onload = function () {
-        // Clear local storage
-        localStorage.clear();
+        // Clear local storage, except for saved keyboard shortcuts.
+        try {
+            Object.keys(localStorage).forEach(function(key) {
+                if(key !== SHORTCUT_STORAGE_KEY) {
+                    localStorage.removeItem(key);
+                }
+            });
+        } catch(e) {
+            // Storage may be unavailable; there is nothing to clear.
+        }
+
         let diagram = new Diagram(document.getElementById("canvas"), document.getElementById("grid-canvas"));
         
         // Set up the UI object.
