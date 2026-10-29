@@ -162,177 +162,172 @@
         </section>
     </div>
 
-    <!-- Main-Menu -->
-    <section class="menu scrollable closed" id="main-menu">
-        <i class="fas fa-times clickable" id="close-main-menu-btn"></i>
+    <!-- Menu drawer -->
+    <div id="menu-backdrop" class="menu-backdrop"></div>
+    <aside id="menu-drawer" class="menu-drawer" role="dialog" aria-modal="true" aria-labelledby="menu-title">
+        <header class="menu-header">
+            <button type="button" class="menu-icon-btn" id="menu-back-btn" aria-label="Back">
+                <i class="fas fa-arrow-left" aria-hidden="true"></i>
+            </button>
+            <h2 class="menu-title" id="menu-title">Menu</h2>
+            <button type="button" class="menu-icon-btn" id="menu-close-btn" aria-label="Close menu">
+                <i class="fas fa-xmark" aria-hidden="true"></i>
+            </button>
+        </header>
 
+        <div class="menu-pages">
+            <!-- Main page -->
+            <section class="menu-page" data-page="main" data-title="Menu">
+                <h3 class="menu-group-title">Learn</h3>
+                <ul class="menu-list">
+                    <li><button type="button" class="menu-row" data-goto="tutorials"><i class="fas fa-graduation-cap" aria-hidden="true"></i><span class="menu-row-label">Tutorials</span><i class="fas fa-chevron-right menu-row-end" aria-hidden="true"></i></button></li>
+                    <li><button type="button" class="menu-row" data-goto="instructions"><i class="fas fa-book" aria-hidden="true"></i><span class="menu-row-label">Instructions</span><i class="fas fa-chevron-right menu-row-end" aria-hidden="true"></i></button></li>
+                </ul>
 
-        <div class="menu-content">
-            <div class="menu-btn-content">
-                <h1>Support this project!</h1>
-                <div class="box-btn clickable">
-                    <a href="https://patreon.com/twentynine" target="_blank">
-                        <i class="fab fa-patreon menu-text">
-                            <span>&nbsp;Patreon</span>
-                        </i>
-                    </a>
-                </div>
+                <h3 class="menu-group-title">Share and export</h3>
+                <ul class="menu-list">
+                    <li><button type="button" class="menu-row" id="copy-link-btn"><i class="fas fa-link" aria-hidden="true"></i><span class="menu-row-label">Copy sharable link</span></button></li>
+                    <li><button type="button" class="menu-row" id="download-verilog-btn"><i class="fas fa-file-code" aria-hidden="true"></i><span class="menu-row-label">Download Verilog</span><span class="menu-row-hint">.v</span></button></li>
+                    <li><button type="button" class="menu-row" id="download-irsim-btn"><i class="fas fa-download" aria-hidden="true"></i><span class="menu-row-label">Download IRSIM</span><span class="menu-row-hint">.sim, .cmd</span></button></li>
+                </ul>
 
-                <div class="box-btn clickable">
-                    <a href="https://ko-fi.com/twentynine" target="_blank">
-                        <i class="fas fa-coffee menu-text">
-                            <span>&nbsp;Ko-Fi</span>
-                        </i>
-                    </a>
-                </div>
-                <!--<div class="teacher-btn clickable"><i class="fas fa-glasses menu-text"><span>&nbsp;Teacher Mode</span></i></div>-->
-            </div>
+                <h3 class="menu-group-title">Settings</h3>
+                <ul class="menu-list">
+                    <li><button type="button" class="menu-row" data-goto="options"><i class="fas fa-sliders" aria-hidden="true"></i><span class="menu-row-label">Options</span><i class="fas fa-chevron-right menu-row-end" aria-hidden="true"></i></button></li>
+                    <li><button type="button" class="menu-row" data-goto="shortcuts"><i class="fas fa-keyboard" aria-hidden="true"></i><span class="menu-row-label">Keyboard shortcuts</span><i class="fas fa-chevron-right menu-row-end" aria-hidden="true"></i></button></li>
+                </ul>
 
-            <ul>
-                <li class="clickable" id="open-tutorials-btn">Tutorials</li>
-                <li class="clickable" id="open-instructions-btn">Instructions</li>
-                <li class="clickable" id="open-about-page-btn">About</li>
-                <li class="clickable"><a href="mailto:nick.overacker@okstate.edu">Bug Report</a></li>
-                <li class="clickable"><a href="mailto:nick.overacker@okstate.edu">Contact</a></li>
-                <li class="clickable" id="open-licenses-menu-btn">Source Licenses</span>
-                <!--li class="clickable" id="open-qrcode-menu-btn">Generate QR Code</span-->
-                <li class="clickable" id="copy-link-btn">Copy Sharable Link</span>
-                <li class="clickable" id="download-verilog-btn">Download Verilog</li>
-                <li class="clickable" id="download-irsim-btn">Download IRSIM</li>
-            </ul>
+                <h3 class="menu-group-title">About</h3>
+                <ul class="menu-list">
+                    <li><button type="button" class="menu-row" data-goto="about"><i class="fas fa-circle-info" aria-hidden="true"></i><span class="menu-row-label">About Stixu</span><i class="fas fa-chevron-right menu-row-end" aria-hidden="true"></i></button></li>
+                    <li><button type="button" class="menu-row" data-goto="licenses"><i class="fas fa-scale-balanced" aria-hidden="true"></i><span class="menu-row-label">Source licenses</span><i class="fas fa-chevron-right menu-row-end" aria-hidden="true"></i></button></li>
+                    <li><a class="menu-row" href="mailto:nick.overacker@okstate.edu"><i class="fas fa-bug" aria-hidden="true"></i><span class="menu-row-label">Report a bug</span></a></li>
+                    <li><a class="menu-row" href="mailto:nick.overacker@okstate.edu"><i class="fas fa-envelope" aria-hidden="true"></i><span class="menu-row-label">Contact</span></a></li>
+                </ul>
 
-            <div class="menu-btn-content">
-                <div class="box-btn clickable options-btn" id="open-options-menu-btn">
-                    <i class="fas fa-cogs menu-text">
-                        <span>&nbsp;Options</span>
-                    </i>
-                </div>
-            </div>
-        </div>
-    </section>
-    <!-- Main-menu-end -->
+                <h3 class="menu-group-title">Support this project</h3>
+                <ul class="menu-list">
+                    <li><a class="menu-row" href="https://patreon.com/twentynine" target="_blank" rel="noopener"><i class="fas fa-heart" aria-hidden="true"></i><span class="menu-row-label">Patreon</span><i class="fas fa-up-right-from-square menu-row-end" aria-hidden="true"></i></a></li>
+                    <li><a class="menu-row" href="https://ko-fi.com/twentynine" target="_blank" rel="noopener"><i class="fas fa-mug-hot" aria-hidden="true"></i><span class="menu-row-label">Ko-fi</span><i class="fas fa-up-right-from-square menu-row-end" aria-hidden="true"></i></a></li>
+                </ul>
+            </section>
 
-    <section class="menu scrollable closed" id="tutorials">
-        <i class="fas fa-times clickable" id="close-tutorials-btn"></i>
-        <div class="menu-content">
-            <ul>
-                <li class="clickable" id="tutorial-btn-0">The Basics</li>
-            </ul>
-        </div>
-    </section>
+            <!-- Tutorials -->
+            <section class="menu-page" data-page="tutorials" data-title="Tutorials">
+                <ul class="menu-list">
+                    <li><button type="button" class="menu-row menu-row-tall" id="tutorial-btn-0"><i class="fas fa-graduation-cap" aria-hidden="true"></i><span class="menu-row-label">The Basics<span class="menu-row-sub">Painting layers, resizing the grid and placing terminals</span></span><i class="fas fa-chevron-right menu-row-end" aria-hidden="true"></i></button></li>
+                </ul>
+            </section>
 
-    <section class="menu scrollable closed column-flex" id="instructions">
-        <i class="fas fa-times clickable" id="close-instructions-btn"></i>
+            <!-- Instructions -->
+            <section class="menu-page" data-page="instructions" data-title="Instructions">
+                <div class="menu-prose">
+                    <p>Paint layers on the grid, place the terminals, then evaluate to get the circuit's truth table.</p>
 
-        <section class="menu-long-text desktop">
-            <h1>Basic Mouse/Keyboard Controls</h1>
-            <ul>
-                <li>Left-click to paint a cell with the selected layer.
-                    <ul><li>Left-click and drag to paint a line.</li></ul>
-                </li>
-
-                <li>Right-click to clear all layers on the selected cell.
-                    <ul><li>Right-click and drag to clear all cells in the selected area.</li></ul>
-                </li>
-
-                <li>Right-click in an unpainted area to change layers.
-                    <ul><li>The layer name is displayed at the top of the canvas.</li></ul>
-                </li>
-
-                <li>Point at a cell and type SHIFT + V to move the VDD contact to that cell.</li>
-                <li>Point at a cell and type SHIFT + G to move the GND contact to that cell.</li>
-                <li>Point at a cell and type the name of that terminal (A, B, C, ...) to move the chosen contact to that cell.</li>
-                <li>Press Enter or click "Evaluate" to generate a truth table for the painted diagram.
-                    <ul><li>Not all paths are evaluated for overdriven (simultaneously high and low) outputs.</li></ul>
-                </li>
-                <!--<li>See additional keyboard shortcuts in the Options menu.</li>-->
-            </ul>
-        </section>
-
-        <section class="menu-long-text">
-            <h1>Basic Touch-Friendly Controls</h1>
-            <ul>
-                <li>Tap the Paint <i class="fas fa-paint-brush inline"></i>
-                    or Erase <i class="fas fa-eraser inline"></i>
-                    icon to switch between paint and erase mode.</li>
-                <li>Tap to paint or clear a cell with the selected layer.
-                    <ul><li>Touch and drag to paint a line or clear an area.</li></ul>
-                </li>
-
-                <li>Tap one of the colored circles to change paint layers.
-                    <ul><li>The layer name is displayed at the top of the canvas.</li></ul>
-                </li>
-
-                <li>Tap the Terminal menu button <i class="fas fa-edit inline"></i> to edit I/O terminals.
+                    <h3>Drawing</h3>
                     <ul>
-                        <li>Use the <i class="fas fa-minus inline"></i> and <i class="fas fa-plus inline"></i> buttons to remove and add terminals.
-                            <ul>
-                                <li>The buttons on the left control input terminals.</li>
-                                <li>The buttons on the right control output terminals.</li>
-                            </ul>
-                        </li>
-                        <li>Select a terminal from the list and tap the <i class="fas fa-map-pin inline"></i> button to enter terminal placement mode.
-                            <ul>
-                                <li>Tap any cell in the canvas to place the terminal.</li>
-                            </ul>
-                        </li>
+                        <li>Choose a layer with the colored circles: pdiff, ndiff, poly, metal1, metal2 or contact. Its name shows above the canvas.</li>
+                        <li>Click or tap a cell to paint it. Drag to paint a straight line, horizontal or vertical.</li>
+                        <li>With the contact layer selected, dragging moves a single contact instead of drawing a line.</li>
+                        <li><strong>Mouse:</strong> right-click a cell to clear every layer in it, or right-drag to clear a rectangle. Right-click an empty cell to switch to the next layer.</li>
+                        <li><strong>Touch:</strong> tap Paint/Erase <i class="fas fa-paint-brush" aria-label="paint"></i> to switch to erasing, then tap or drag to clear cells. Choosing a layer switches back to painting.</li>
+                        <li>Undo <i class="fas fa-undo" aria-label="undo"></i> and redo <i class="fas fa-redo" aria-label="redo"></i> sit beside the Paint/Erase button, or use <kbd data-shortcut="undoCommand"></kbd> and <kbd data-shortcut="redoCommand"></kbd>.</li>
                     </ul>
-                </li>
-                <li>Scroll down and tap "Evaluate" to generate a truth table for the painted diagram.</li>
-                <li>Tap any output value in the truth table to highlight the evaluated path to the output.
-                    <ul><li>Not all paths are evaluated for overdriven (simultaneously high and low) outputs.</li></ul>
-                </li>
-            </ul>
-        </section>
-    </section>
 
-    <section class="menu scrollable closed" id="about-page">
-        <i class="fas fa-times clickable" id="close-about-page-btn"></i>
-        <div class="menu-long-text">
-            <h1>About Stixu</h1>
-            <span>Stixu is a tool for designing and validating CMOS logic circuits.
-            <br><br>
-            The tool was conceived and developed by Nick Overacker, an Oklahoma State University Computer Engineering graduate currently living in Japan.
-            <br><br>
-            The user interface was designed and implemented with the help of Miho Kobayashi, a Kansai Gaidai University graduate, former OSU exchange student, and freelance web designer.
-            <br><br>
-            The STIXU logo was designed by <a href="https://samthedesigner.com/" target="_blank"><u>Sam the Designer</u></a>, a freelance graphic designer based in Japan.
-            <br><br>
-            The default canvas palette was borrowed from <a href="https://personal.sron.nl/~pault/" target="_blank">Paul Tol's</a> work.
-            <br><br>
-            The alternate "Sorcery" palette was inspired by the <a href="http://opencircuitdesign.com/magic/" target="_blank">Magic</a> VLSI layout tool.
-            </span>
-        
-        </div>
-    </section>
+                    <h3>How layers connect</h3>
+                    <ul>
+                        <li>Cells on the same layer connect to the cells above, below, left and right of them. Diagonal neighbors don't connect.</li>
+                        <li>Different layers only connect through a contact, which joins every layer painted in its cell.</li>
+                        <li>Poly crossing ndiff makes an NMOS transistor; poly crossing pdiff makes a PMOS. The diffusion must extend past the poly on at least two sides, and the crossing cell must not have a contact.</li>
+                        <li>A cell can hold ndiff or pdiff, not both.</li>
+                        <li>Stixu follows the stick-diagram abstraction: an NMOS only conducts low (logic 0) and a PMOS only conducts high (logic 1). An NMOS pull-up or PMOS pull-down never conducts, and evaluating shows a warning above the canvas.</li>
+                    </ul>
 
-    <section class="menu scrollable closed" id="options-menu">
-        <i class="fas fa-times clickable" id="close-options-menu-btn"></i>
-        <div class="menu-content">
-            <ul>
-                <li class="clickable" id="select-palette-btn">Palette: <span id="palette-setting">Tol</span></li>
-                <li class="clickable" id="toggle-transparency-btn">Layer transparency: <span id="transparency-setting">ON</span></li>
-            </ul>
-        </div>
-    </section>
+                    <h3>Terminals</h3>
+                    <ul>
+                        <li>The terminals are VDD, GND, inputs (A, B, C, …) and outputs (Y, X, W, …). You can have up to eight inputs and outputs in total.</li>
+                        <li><strong>Keyboard:</strong> point at a cell and press <kbd data-shortcut="placeVddCommand"></kbd> to move VDD there, <kbd data-shortcut="placeGndCommand"></kbd> to move GND, or a terminal's letter, such as <kbd>A</kbd> or <kbd>Y</kbd>, to move that terminal.</li>
+                        <li><strong>Keyboard:</strong> <kbd data-shortcut="addInputCommand"></kbd> and <kbd data-shortcut="removeInputCommand"></kbd> add and remove an input; <kbd data-shortcut="addOutputCommand"></kbd> and <kbd data-shortcut="removeOutputCommand"></kbd> do the same for outputs.</li>
+                        <li><strong>Touch:</strong> tap Terminals <i class="fas fa-edit" aria-label="terminals"></i>. Use <i class="fas fa-minus" aria-label="minus"></i> and <i class="fas fa-plus" aria-label="plus"></i> on the left for inputs and on the right for outputs. To move a terminal, pick it from the list, tap <i class="fas fa-map-pin" aria-label="pin"></i>, then tap a cell.</li>
+                        <li>Erasing never removes a terminal's contact; move the terminal instead.</li>
+                    </ul>
 
-    <section class="menu scrollable closed" id="licenses-menu">
-        <i class="fas fa-times clickable" id="close-licenses-menu-btn"></i>
-        <div class="menu-content">
-            <ul class="sparse">
-                <li><span class="package-name">Stixu.io</span><a class="package-link clickable" href="https://github.com/NickOveracker/StickDiagrammer/">Source</a> | <a class="package-link clickable" href="./licenses/LICENSE.txt">Polyform Strict License 1.0.0</a></li>
-                <li><span class="package-name">lzutf8.js</span><a class="package-link clickable" href="https://github.com/rotemdan/lzutf8.js/">Source</a> | <a class="package-link clickable" href="./licenses/lzutf8_js_LICENSE.txt">MIT License</a></li>
-                <!--li><span class="package-name">qrcodejs</span><a class="package-link clickable" href="https://github.com/KeeeX/qrcodejs">Source</a> | <a class="package-link clickable" href="./licenses/qrcodejs_LICENSE.txt">MIT License</a></li-->
-            </u>
-        </div>
-    </section>
+                    <h3>The grid</h3>
+                    <ul>
+                        <li>Use the Rows and Cols <i class="fas fa-plus" aria-label="plus"></i> and <i class="fas fa-minus" aria-label="minus"></i> buttons to grow or shrink the grid at its edge.</li>
+                        <li>The Shift grid arrows move the whole drawing one cell, or use <kbd data-shortcut="shiftLeftCommand"></kbd>, <kbd data-shortcut="shiftRightCommand"></kbd>, <kbd data-shortcut="shiftUpCommand"></kbd> and <kbd data-shortcut="shiftDownCommand"></kbd>.</li>
+                        <li>Point at a cell and press <kbd data-shortcut="insertColCommand"></kbd> or <kbd data-shortcut="deleteColCommand"></kbd> to insert or delete a column there, and <kbd data-shortcut="insertRowCommand"></kbd> or <kbd data-shortcut="deleteRowCommand"></kbd> for a row.</li>
+                    </ul>
 
-    <!--section class="menu scrollable closed" id="qrcode-menu">
-        <i class="fas fa-times clickable" id="close-qrcode-menu-btn"></i>
-        <div class="menu-long-text">
-            <h1><a class="clickable" id="share-url">Share this Diagram</a></h1>
-            <div id="qrcode"></div>
+                    <h3>Evaluating</h3>
+                    <ul>
+                        <li>Press <kbd data-shortcut="evaluateCommand"></kbd> or select Evaluate. On a phone, scroll down to find it.</li>
+                        <li>The truth table has one row per input combination, with input A as the most significant bit.</li>
+                        <li>Click or tap an output value to highlight the cells connected to that output for that row. For a conflict (X), the highlight may not show every conflicting path.</li>
+                    </ul>
+                    <dl class="menu-symbols">
+                        <dt>1</dt><dd>Driven high, by VDD or an input at 1</dd>
+                        <dt>0</dt><dd>Driven low, by GND or an input at 0</dd>
+                        <dt>Z</dt><dd>Not driven (floating)</dd>
+                        <dt>X</dt><dd>Conflict: logic 1 and 0 are shorted together somewhere in the circuit</dd>
+                        <dt>H</dt><dd>Possibly high: only a transistor with a floating gate could drive it, and only high</dd>
+                        <dt>L</dt><dd>Possibly low: the same, but low</dd>
+                        <dt>U</dt><dd>Unknown: floating gates could drive it high or low</dd>
+                        <dt>?</dt><dd>Unstable: no stable logic value; occurs in circuits such as oscillators</dd>
+                    </dl>
+
+                    <h3>Sharing and export</h3>
+                    <ul>
+                        <li>From the menu, copy a link that opens your drawing, or download it as Verilog or as IRSIM files.</li>
+                    </ul>
+                </div>
+                <ul class="menu-list">
+                    <li><button type="button" class="menu-row" data-goto="shortcuts"><i class="fas fa-keyboard" aria-hidden="true"></i><span class="menu-row-label">All keyboard shortcuts</span><i class="fas fa-chevron-right menu-row-end" aria-hidden="true"></i></button></li>
+                </ul>
+            </section>
+
+            <!-- Options -->
+            <section class="menu-page" data-page="options" data-title="Options">
+                <div class="menu-setting">
+                    <span class="menu-setting-label" id="palette-label">Layer palette</span>
+                    <div class="menu-segmented" role="radiogroup" aria-labelledby="palette-label" id="palette-options"></div>
+                </div>
+                <ul class="menu-list">
+                    <li><button type="button" class="menu-row" role="switch" aria-checked="false" id="option-dark-mode"><i class="fas fa-moon" aria-hidden="true"></i><span class="menu-row-label">Dark mode</span><span class="menu-switch" aria-hidden="true"></span></button></li>
+                    <li><button type="button" class="menu-row" role="switch" aria-checked="false" id="option-transparency"><i class="fas fa-layer-group" aria-hidden="true"></i><span class="menu-row-label">Layer transparency</span><span class="menu-switch" aria-hidden="true"></span></button></li>
+                    <li><button type="button" class="menu-row" role="switch" aria-checked="false" id="option-grid"><i class="fas fa-border-all" aria-hidden="true"></i><span class="menu-row-label">Grid lines</span><span class="menu-switch" aria-hidden="true"></span></button></li>
+                </ul>
+            </section>
+
+            <!-- Keyboard shortcuts -->
+            <section class="menu-page" data-page="shortcuts" data-title="Keyboard shortcuts">
+                <p class="menu-intro">Select a shortcut, then press the new key combination. Changes are saved in this browser.</p>
+                <div id="shortcut-list"></div>
+                <div class="menu-footer">
+                    <button type="button" class="menu-button" id="reset-shortcuts-btn"><i class="fas fa-rotate-left" aria-hidden="true"></i> Reset all to defaults</button>
+                </div>
+            </section>
+
+            <!-- About -->
+            <section class="menu-page" data-page="about" data-title="About Stixu">
+                <div class="menu-prose">
+                    <p>Stixu is a tool for designing and validating CMOS logic circuits.</p>
+                    <p>The tool was conceived and developed by Nick Overacker, an Oklahoma State University Computer Engineering graduate currently living in Japan.</p>
+                    <p>The user interface was designed and implemented with the help of Miho Kobayashi, a Kansai Gaidai University graduate, former OSU exchange student, and freelance web designer.</p>
+                    <p>The STIXU logo was designed by <a href="https://samthedesigner.com/" target="_blank" rel="noopener">Sam the Designer</a>, a freelance graphic designer based in Japan.</p>
+                    <p>The default canvas palette was borrowed from <a href="https://personal.sron.nl/~pault/" target="_blank" rel="noopener">Paul Tol's</a> work.</p>
+                    <p>The alternate "Sorcery" palette was inspired by the <a href="http://opencircuitdesign.com/magic/" target="_blank" rel="noopener">Magic</a> VLSI layout tool.</p>
+                </div>
+            </section>
+
+            <!-- Source licenses -->
+            <section class="menu-page" data-page="licenses" data-title="Source licenses">
+                <ul class="menu-list">
+                    <li class="menu-license"><span class="menu-license-name">Stixu</span><span class="menu-license-links"><a href="https://github.com/NickOveracker/StickDiagrammer/" target="_blank" rel="noopener">Source</a><a href="./LICENSE" target="_blank" rel="noopener">PolyForm Strict License 1.0.0</a></span></li>
+                    <li class="menu-license"><span class="menu-license-name">lzutf8.js</span><span class="menu-license-links"><a href="https://github.com/rotemdan/lzutf8.js/" target="_blank" rel="noopener">Source</a><a href="./thirdparty_licenses/lzutf8_js_LICENSE.txt" target="_blank" rel="noopener">MIT License</a></span></li>
+                </ul>
+            </section>
         </div>
-    </section-->
+    </aside>
 </body>
 </html>

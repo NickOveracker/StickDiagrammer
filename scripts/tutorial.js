@@ -141,8 +141,8 @@
         let tutStep = new TutorialStep(UI);
 
         tutStep.instructions = {
-            en_us: function() { return `Toggle dark mode by pressing the on-screen toggle button or by pressing ${UI.darkModeCommand.ctrlModifier ? "CTRL-" : UI.darkModeCommand.shiftModifier ? "SHIFT-" : ""}${String.fromCharCode(UI.darkModeCommand.keyCode)}.`; },
-            ja_jp: function() { return `ダークモードのトグルボタンを押すか、${UI.darkModeCommand.ctrlModifier ? "CTRL-" : UI.darkModeCommand.shiftModifier ? "SHIFT-" : ""}${String.fromCharCode(UI.darkModeCommand.keyCode)}を押して下さい。`; },
+            en_us: function() { return `Toggle dark mode by pressing the on-screen toggle button or by pressing ${UI.describeShortcut(UI.darkModeCommand)}.`; },
+            ja_jp: function() { return `ダークモードのトグルボタンを押すか、${UI.describeShortcut(UI.darkModeCommand)}を押して下さい。`; },
         };
 
         tutStep.completed = (function(darkModeSet) {
