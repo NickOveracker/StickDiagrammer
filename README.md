@@ -5,9 +5,9 @@
 
 ## Legal Stuff
 * This project is dual-licensed. The public release is under GPLv3. Non-GPLv3 licenses are available upon request.
-    * Copyright 2021-2025: Nicholas Overacker & Miho Kobayashi.
+    * Copyright 2021-2026: Nicholas Overacker & Miho Kobayashi.
     * No code contributed by third-party developers will be covered by non-GPLv3 licensed releases.
-        * At present (May 21, 2025), Nicholas and Miho are the sole developers, and all code can be included under non-GPLv3 license.
+        * At present (October 29, 2026), Nicholas and Miho are the sole developers, and all code can be included under non-GPLv3 license.
         * If third-party developers contribute code, then the non-GPLv3 code and public code will diverge. The GPLv3 code will be _full-featured_, and non-GPLv3 code may lack future functionality.
 * For a non-GPLv3 license, please contact: [nick.overacker@okstate.edu](mailto:nick.overacker@okstate.edu).
 
@@ -39,12 +39,12 @@
 * Sequenced output for state-dependent circuits like DFFs. UPDATE: Instead, produce test vectors for external tools.
 * Allow user to define custom color scheme.
 * Allow user to selectively hide layers (to verify connections).
-* Allow custom command mappings.
 * Allow custom terminal labels.
 * Student/Teacher modes with generating/grading homework, practice problems, etc.
 * Draw CMOS circuit schematic corresponding to the painted topology.
 * Logical effort calculations (allow user to set constants)
 * Export netlist for use in electronics design software.
+* ~~Allow custom command mappings.~~ *Implemented 2026/10/29*
 * ~~HDL generation.~~ *Implemented 2025/5/7*
 * ~~Share small diagrams by URL arguments and QR codes.~~ *Implemented 2023/2/8*
 * ~~Interactive tutorial.~~ *Implemented 2023/2/4*
